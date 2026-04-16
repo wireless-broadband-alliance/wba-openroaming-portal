@@ -3,67 +3,71 @@
 {% block title %}{{ 'adminPageWBA'|trans({}, '_header_admin') }}{% endblock %}
 
 {% block container %}
-    {# Freeradius Statistics #}
-    <div class="flex flex-col lg:flex-row space-y-4 lg:space-y-0 justify-end items-center mb-10">
-        {% if exportFreeradiusStatistics == constant('App\\Enum\\OperationMode::ON').value %}
-            <div class="mr-auto flex items-center space-x-6">
-                <a href="{{ path('admin_dashboard_statistics_freeradius_export', {startDate: selectedStartDate, endDate: selectedEndDate}) }}"
-                   onclick="return confirm('Are you sure you want to export data' +
-                   {% if selectedStartDate and selectedEndDate %}
-                       ' {{ 'from'|trans({}, 'freeradius_statistics') }} {{ selectedStartDate }} {{ 'to'|trans({}, 'statistics') }} {{ selectedEndDate }}?'
-                   {% else %}
-                       '?'
-                   {% endif %}
-                           )"
-                   class="btn-primary">
-                    {{ 'exportStatistics'|trans({}, 'freeradius_statistics') }}
-                </a>
-            </div>
-        {% endif %}
 
-        {# Date Submition Form #}
-        {{ include('dashboard/shared/_date_filter_form.html.twig', {
-            routeName: 'admin_dashboard_statistics_freeradius',
-        }) }}
+    {# Freeradius Statistics #}
+    <div class="mb-10">
+        <div class="flex flex-col lg:flex-row space-y-4 lg:space-y-0 justify-end items-center">
+            {% if exportFreeradiusStatistics == constant('App\\Enum\\OperationMode::ON').value %}
+                <div class="mr-auto flex items-center space-x-6">
+                    <a href="{{ path('admin_dashboard_statistics_freeradius_export', {startDate: selectedStartDate, endDate: selectedEndDate}) }}"
+                       onclick="return confirm('Are you sure you want to export data' +
+                       {% if selectedStartDate and selectedEndDate %}
+                           ' {{ 'from'|trans({}, 'freeradius_statistics') }} {{ selectedStartDate }} {{ 'to'|trans({}, 'statistics') }} {{ selectedEndDate }}?'
+                       {% else %}
+                           '?'
+                       {% endif %}
+                               )"
+                       class="btn-primary">
+                        {{ 'exportStatistics'|trans({}, 'freeradius_statistics') }}
+                    </a>
+                </div>
+            {% endif %}
+
+            {# Date Submition Form #}
+            {{ include('dashboard/shared/_date_filter_form.html.twig', {
+                routeName: 'admin_dashboard_statistics_freeradius',
+            }) }}
+        </div>
     </div>
 
     {# Authentications Attempts #}
-    <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
-        <h1 class="text-lg font-medium text-left sm:pt-2">{{ 'authenticationAttempts'|trans({}, 'freeradius_statistics') }}</h1>
-        <div class="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-4">
-            <a class="cursor-default flex flex-row group hover:text-[#7DB928] hover:border-b-2 hover:border-y-[#7DB928]/50 transition-all duration-100">
-                <h1 class="px-2 text-lg sm:text-base">
-                    {{ 'accepted'|trans({}, 'freeradius_statistics') }}
-                </h1>
-                <div class="mb-1 bg-veryLightGreen group-hover:bg-[#7DB928] rounded-md group-hover:text-white text-center transition-all duration-100">
-                    <span class="w-auto h-6 mb-1 px-2">{{ authCounts['Accepted'] }}</span>
+    <div class="mb-10">
+        <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
+            <h1 class="text-lg font-medium text-left sm:pt-2">{{ 'authenticationAttempts'|trans({}, 'freeradius_statistics') }}</h1>
+            <div class="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-4">
+                <a class="cursor-default flex flex-row group hover:text-[#7DB928] hover:border-b-2 hover:border-y-[#7DB928]/50 transition-all duration-100">
+                    <h1 class="px-2 text-lg sm:text-base">
+                        {{ 'accepted'|trans({}, 'freeradius_statistics') }}
+                    </h1>
+                    <div class="mb-1 bg-veryLightGreen group-hover:bg-[#7DB928] rounded-md group-hover:text-white text-center transition-all duration-100">
+                        <span class="w-auto h-6 mb-1 px-2">{{ authCounts['Accepted'] }}</span>
+                    </div>
+                </a>
+                <a class="cursor-default flex flex-row group hover:text-[#FE4068] hover:border-b-2 hover:border-y-[#FE4068]/50 transition-all duration-100">
+                    <h1 class="px-2 text-lg sm:text-base">
+                        {{ 'rejected'|trans({}, 'freeradius_statistics') }}
+                    </h1>
+                    <div class="mb-1 bg-veryLightGreen group-hover:bg-[#FE4068] rounded-md group-hover:text-white text-center transition-all duration-100">
+                        <span class="w-auto h-6 mb-1 px-2">{{ authCounts['Rejected'] }}</span>
+                    </div>
+                </a>
+            </div>
+            <div class="flex flex-col gap-6 animate-fadeIn">
+                <div class="w-full h-64 relative">
+                    {# data-freeradius-statistics-action="freeradius-statistics#authAttemptsAction@load" #}
+                    <canvas id="authAttemptsChart"
+                            class="w-full h-full"
+                            data-controller="freeradius-statistics"
+                            data-chart-type="auth"
+                            data-freeradius-statistics-target="chart"
+                            data-chart-data="{{ authAttemptsJson }}"></canvas>
                 </div>
-            </a>
-            <a class="cursor-default flex flex-row group hover:text-[#FE4068] hover:border-b-2 hover:border-y-[#FE4068]/50 transition-all duration-100">
-                <h1 class="px-2 text-lg sm:text-base">
-                    {{ 'rejected'|trans({}, 'freeradius_statistics') }}
-                </h1>
-                <div class="mb-1 bg-veryLightGreen group-hover:bg-[#FE4068] rounded-md group-hover:text-white text-center transition-all duration-100">
-                    <span class="w-auto h-6 mb-1 px-2">{{ authCounts['Rejected'] }}</span>
-                </div>
-            </a>
-        </div>
-        <div class="flex flex-col gap-6 animate-fadeIn">
-            <div class="w-full h-64 relative">
-                {# data-freeradius-statistics-action="freeradius-statistics#authAttemptsAction@load" #}
-                <canvas id="authAttemptsChart"
-                        class="w-full h-full"
-                        data-controller="freeradius-statistics"
-                        data-chart-type="auth"
-                        data-freeradius-statistics-target="chart"
-                        data-chart-data="{{ authAttemptsJson }}"></canvas>
             </div>
         </div>
     </div>
 
-    {# TODO: Update JS to use stimulus instead of native JS (file: statistics_controller.js) #}
-    <div class="mt-10 grid xl:gap-8 gap-y-8 xl:grid-cols-2 md:grid-cols-1">
-        {# Average Session Time #}
+    {# Average Session Time #}
+    <div class="mb-10">
         <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-5 py-3 shadow">
             <div class="flex flex-row justify-between sm:pt-2 pb-6 font-medium text-lg text-left">
                 <h1 class="text-lg font-medium">{{ 'averageSessionTime'|trans({}, 'freeradius_statistics') }}</h1>
@@ -80,7 +84,6 @@
                 </a>
             </div>
             <div class="w-full h-64 relative">
-                {#                data-freeradius-statistics-action="freeradius-statistics#sessionTimeAction@load" #}
                 <canvas
                         id="sessionTimeChart"
                         data-controller="freeradius-statistics"
@@ -91,8 +94,10 @@
                 ></canvas>
             </div>
         </div>
+    </div>
 
-        {# Total Session Time #}
+    {# Total Session Time #}
+    <div class="mb-10">
         <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-5 py-3 shadow">
             <div class="flex flex-row justify-between sm:pt-2 pb-6 font-medium text-lg text-left">
                 <h1 class="text-lg font-medium">{{ 'sessionTime'|trans({}, 'freeradius_statistics') }}</h1>
@@ -108,12 +113,15 @@
                     </div>
                 </a>
             </div>
-            <div class="pt-4 flex flex-col gap-6 animate-fadeIn">
-                <canvas class="max-w-full" id="totalTimeChart"
+            <div class="w-full h-64 relative">
+                <canvas
+                        id="totalTimeChart"
                         data-controller="freeradius-statistics"
                         data-freeradius-statistics-target="chart"
-                        data-freeradius-statistics-action="freeradius-statistics#totalTimeAction@load"
-                        data-chart-data="{{ totalTimeJson }}"></canvas>
+                        data-chart-type="sessionTotal"
+                        data-chart-data="{{ totalTimeJson }}"
+                        class="w-full h-full"
+                ></canvas>
             </div>
         </div>
     </div>
