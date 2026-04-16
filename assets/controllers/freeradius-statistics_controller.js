@@ -14,7 +14,6 @@ export default class extends Controller {
         success: '#10B981',
     };
 
-    // automatic soft fills (important part)
     soft = {
         primary: 'rgba(125,185,40,0.12)',
         danger: 'rgba(254,64,104,0.12)',
@@ -39,7 +38,7 @@ export default class extends Controller {
     }
 
     // =========================
-    // AUTH (FILLED LINE)
+    // AUTH
     // =========================
     renderAuthChart(target) {
         const raw = this.parseData(target);
@@ -51,15 +50,15 @@ export default class extends Controller {
         const data = {
             labels,
             datasets: [
-                this.lineDataset('Accepted', accepted, 'primary'),
-                this.lineDataset('Rejected', rejected, 'danger'),
+                this.lineDataset('Accepted', accepted, 'primary', false),
+                this.lineDataset('Rejected', rejected, 'danger', false),
             ],
         };
 
         this.createChart(target, {
             type: 'line',
             data,
-            options: this.baseOptions({ tension: 0.3 }),
+            options: this.baseOptions({ tension: 0.3, isDuration: false }),
         });
     }
 
@@ -74,18 +73,18 @@ export default class extends Controller {
 
         const data = {
             labels,
-            datasets: [this.lineDataset('Average Session Time', values, 'info')],
+            datasets: [this.lineDataset('Average Session Time', values, 'info', true)],
         };
 
         this.createChart(target, {
             type: 'line',
             data,
-            options: this.baseOptions({ tension: 0.35, formatY: true }),
+            options: this.baseOptions({ tension: 0.35, isDuration: true }),
         });
     }
 
     // =========================
-    // SESSION TOTAL (BAR)
+    // SESSION TOTAL
     // =========================
     renderSessionTotalChart(target) {
         const raw = this.parseData(target);
@@ -95,13 +94,13 @@ export default class extends Controller {
 
         const data = {
             labels,
-            datasets: [this.barDataset('Total Session Time', values, 'success')],
+            datasets: [this.barDataset('Total Session Time', values, 'success', true)],
         };
 
         this.createChart(target, {
             type: 'bar',
             data,
-            options: this.baseOptions({ formatY: true }),
+            options: this.baseOptions({ isDuration: true }),
         });
     }
 
@@ -116,42 +115,40 @@ export default class extends Controller {
 
         const data = {
             labels,
-            datasets: [this.barDataset('Data', values, 'primary')],
+            datasets: [this.barDataset('Data', values, 'primary', false)],
         };
 
         this.createChart(target, {
             type: 'bar',
             data,
-            options: this.baseOptions(),
+            options: this.baseOptions({ isDuration: false }),
         });
     }
 
     // =========================
-    // LINE DATASET (AUTO-FILL)
+    // DATASETS
     // =========================
-    lineDataset(label, data, colorKey) {
+    lineDataset(label, data, colorKey, isDuration = false) {
         return {
             label,
             data,
             borderColor: this.colors[colorKey],
-            backgroundColor: this.soft[colorKey], // 🔥 THIS is what gives the fill
+            backgroundColor: this.soft[colorKey],
             fill: true,
-
             borderWidth: 2,
             pointRadius: 2,
             pointHoverRadius: 5,
+            meta: { isDuration },
         };
     }
 
-    // =========================
-    // BAR DATASET
-    // =========================
-    barDataset(label, data, colorKey) {
+    barDataset(label, data, colorKey, isDuration = false) {
         return {
             label,
             data,
             backgroundColor: this.soft[colorKey],
             hoverBackgroundColor: this.colors[colorKey],
+            meta: { isDuration },
         };
     }
 
@@ -184,7 +181,7 @@ export default class extends Controller {
     // =========================
     // BASE OPTIONS
     // =========================
-    baseOptions({ tension = 0, formatY = false } = {}) {
+    baseOptions({ tension = 0, isDuration = false } = {}) {
         return {
             maintainAspectRatio: false,
             responsive: true,
@@ -198,13 +195,21 @@ export default class extends Controller {
                 legend: {
                     display: true,
                 },
+
                 tooltip: {
                     callbacks: {
                         label: (context) => {
                             const value = context.raw;
+                            const datasetIsDuration =
+                                context.dataset.meta?.isDuration ?? isDuration;
+
                             if (typeof value !== 'number') return value;
 
-                            return `${context.dataset.label}: ${this.formatDuration(value)}`;
+                            if (datasetIsDuration) {
+                                return `${context.dataset.label}: ${this.formatDuration(value)}`;
+                            }
+
+                            return `${context.dataset.label}: ${value}`;
                         },
                     },
                 },
@@ -236,7 +241,6 @@ export default class extends Controller {
                     beginAtZero: true,
                     ticks: {
                         precision: 0,
-                        callback: formatY ? (v) => this.formatDuration(v) : undefined,
                     },
                     grid: {
                         color: 'rgba(0,0,0,0.05)',
