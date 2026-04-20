@@ -7,12 +7,17 @@ use App\Repository\SettingRepository;
 use InvalidArgumentException;
 use OTPHP\TOTP;
 use Psr\Cache\CacheItemPoolInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
-readonly class TOTPService
+class TOTPService
 {
+
+    private ?string $lastError = null;
+
     public function __construct(
-        private SettingRepository $settingRepository,
-        private CacheItemPoolInterface $cache,
+        private readonly SettingRepository $settingRepository,
+        private readonly CacheItemPoolInterface $cache,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -61,6 +66,8 @@ readonly class TOTPService
      */
     public function verifyTOTP(string $secret, string $code): bool
     {
+        $this->lastError = null;
+
         if ($secret === '' || $secret === '0') {
             throw new InvalidArgumentException('TOTP secret cannot be empty.');
         }
@@ -69,20 +76,47 @@ readonly class TOTPService
             throw new InvalidArgumentException('TOTP code cannot be empty.');
         }
 
-        // communication with the app using the user secret code to verify the code introduced
-        if (TOTP::create($secret)->verify($code)) {
-            $item = $this->cache->getItem('totp_code');
-            if (!$item->isHit()) {
-                // no code found
-                $item->set($code);
-                $item->expiresAfter(30);
+        $totp = TOTP::create($secret);
 
-                $this->cache->save($item);
-                return true;
-            }
-            $lastCode = $item->get();
-            return !(hash_equals($lastCode, $code));
+        if (!$totp->verify($code)) {
+            $this->lastError =  $this->translator->trans('invalidCodeTOTP', [], 'controllers');
+            return false;
         }
-        return false;
+
+        $item = $this->cache->getItem('totp_code');
+
+        if ($item->isHit()) {
+            $data = $item->get();
+
+            if (hash_equals($data['code'], $code)) {
+                $remainingTime = max(0, $data['expires_at'] - time());
+
+                $this->lastError =  $this->translator->trans(
+                    'replyCodeTotp',
+                    [
+                        '%remainingTime%' => $remainingTime,
+                    ],
+                    'controllers');
+                return false;
+            }
+        }
+
+        $expiresAt = time() + 30;
+
+        $item->set([
+            'code' => $code,
+            'expires_at' => $expiresAt
+        ]);
+        $item->expiresAfter(30);
+
+        $this->cache->save($item);
+
+        return true;
     }
+
+    public function getLastError(): ?string
+    {
+        return $this->lastError;
+    }
+
 }
