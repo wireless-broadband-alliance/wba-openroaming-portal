@@ -11,7 +11,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class TOTPService
 {
-
     private ?string $lastError = null;
 
     public function __construct(
@@ -96,7 +95,8 @@ class TOTPService
                     [
                         '%remainingTime%' => $remainingTime,
                     ],
-                    'controllers');
+                    'controllers'
+                );
                 return false;
             }
         }
@@ -118,5 +118,4 @@ class TOTPService
     {
         return $this->lastError;
     }
-
 }
