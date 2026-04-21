@@ -86,11 +86,8 @@ class ValidWbaChainValidator extends ConstraintValidator
             return;
         }
 
-        $issuerJson = json_encode($certInfo['issuer'] ?? [], JSON_THROW_ON_ERROR);
-        $subjectJson = json_encode($certInfo['subject'] ?? [], JSON_THROW_ON_ERROR);
-
-        $issuer = strtoupper($issuerJson !== false ? $issuerJson : '');
-        $subject = strtoupper($subjectJson !== false ? $subjectJson : '');
+        $issuer = strtoupper(json_encode($certInfo['issuer'] ?? [], JSON_THROW_ON_ERROR));
+        $subject = strtoupper(json_encode($certInfo['subject'] ?? [], JSON_THROW_ON_ERROR));
 
         $isValid = array_any(
             self::POSSIBLE_INDICATORS,
