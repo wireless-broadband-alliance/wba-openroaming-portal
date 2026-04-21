@@ -25,8 +25,6 @@ This behavior can unintentionally expose information about internal infrastructu
 #### Recommendations
 
 - Restrict access to this feature to **trusted administrative users only**
-- Do **not expose** this endpoint in publicly accessible or untrusted environments
 - Apply **outbound firewall rules** to limit which destinations the server can contact
-- Regularly audit access logs for unusual usage patterns
 
 > This feature can be abused in a way similar to **Server-Side Request Forgery (SSRF)** if not properly secured.
