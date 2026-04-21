@@ -142,7 +142,7 @@
   },
   "require-dev": {
     "doctrine/doctrine-fixtures-bundle": "^4.0",
-    "phpunit/phpunit": "^9.6",
+    "phpunit/phpunit": "^13.1",
     "roave/security-advisories": "dev-latest",
     "squizlabs/php_codesniffer": "^3.13",
     "symfony/browser-kit": "7.4.*",
