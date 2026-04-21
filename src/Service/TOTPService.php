@@ -6,11 +6,17 @@ use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use InvalidArgumentException;
 use OTPHP\TOTP;
+use Psr\Cache\CacheItemPoolInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
-readonly class TOTPService
+class TOTPService
 {
+    private ?string $lastError = null;
+
     public function __construct(
-        private SettingRepository $settingRepository,
+        private readonly SettingRepository $settingRepository,
+        private readonly CacheItemPoolInterface $cache,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -54,8 +60,13 @@ readonly class TOTPService
         return $totp->getProvisioningUri(); // URI for QR Code
     }
 
+    /**
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
     public function verifyTOTP(string $secret, string $code): bool
     {
+        $this->lastError = null;
+
         if ($secret === '' || $secret === '0') {
             throw new InvalidArgumentException('TOTP secret cannot be empty.');
         }
@@ -64,7 +75,47 @@ readonly class TOTPService
             throw new InvalidArgumentException('TOTP code cannot be empty.');
         }
 
-        // communication with the app using the user secret code to verify the code introduced
-        return TOTP::create($secret)->verify($code);
+        $totp = TOTP::create($secret);
+
+        if (!$totp->verify($code)) {
+            $this->lastError =  $this->translator->trans('invalidCodeTOTP', [], 'controllers');
+            return false;
+        }
+
+        $item = $this->cache->getItem('totp_code');
+
+        if ($item->isHit()) {
+            $data = $item->get();
+
+            if (hash_equals($data['code'], $code)) {
+                $remainingTime = max(0, $data['expires_at'] - time());
+
+                $this->lastError =  $this->translator->trans(
+                    'replyCodeTotp',
+                    [
+                        '%remainingTime%' => $remainingTime,
+                    ],
+                    'controllers'
+                );
+                return false;
+            }
+        }
+
+        $expiresAt = time() + 30;
+
+        $item->set([
+            'code' => $code,
+            'expires_at' => $expiresAt
+        ]);
+        $item->expiresAfter(30);
+
+        $this->cache->save($item);
+
+        return true;
+    }
+
+    public function getLastError(): ?string
+    {
+        return $this->lastError;
     }
 }

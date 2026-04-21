@@ -262,7 +262,7 @@
 }
 
 .instructions-tabs {
-    @apply flex border-b border-gray-200 mb-6 w-full pb-8;
+    @apply grid grid-cols-2 sm:grid-cols-4 gap-2 border-b border-gray-200 mb-6 w-full pb-8;
 }
 
 .instructions-tab {

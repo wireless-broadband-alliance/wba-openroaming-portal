@@ -22,6 +22,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use libphonenumber\PhoneNumber;
+use Psr\Cache\InvalidArgumentException;
 use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -86,6 +87,9 @@ class TwoFAController extends AbstractController
         ]);
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     #[Route(
         '/{context}/enable2FA/TOTP',
         name: 'app_enable2FA_TOTP',
@@ -150,7 +154,8 @@ class TwoFAController extends AbstractController
             }
             $this->addFlash(
                 'error',
-                $this->translator->trans('invalidCodeTOTP', [], 'controllers')
+                $this->totpService->getLastError() ??
+                    $this->translator->trans('invalidCodeTOTP', [], 'controllers')
             );
         }
         $secret = $user->getTwoFAsecret() ?: $this->totpService->generateSecret();
@@ -187,6 +192,9 @@ class TwoFAController extends AbstractController
         ]);
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     #[Route(
         '/{context}/verify2FA/TOTP',
         name: 'app_verify2FA_TOTP',
@@ -261,6 +269,7 @@ class TwoFAController extends AbstractController
             }
             $this->addFlash(
                 'error',
+                $this->totpService->getLastError() ??
                 $this->translator->trans('invalidCodeTOTP', [], 'controllers')
             );
         }
@@ -514,6 +523,9 @@ class TwoFAController extends AbstractController
         ]);
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     #[Route(
         '/{context}/disable2FA/TOTP',
         name: 'app_disable2FA_TOTP',
@@ -572,6 +584,11 @@ class TwoFAController extends AbstractController
                 }
                 return $this->redirectToRoute('app_landing');
             }
+            $this->addFlash(
+                'error',
+                $this->totpService->getLastError() ??
+                $this->translator->trans('invalidCodeTOTP', [], 'controllers')
+            );
         }
         return $this->render('landing/twoFAAuthentication/actions/disable2FA.html.twig', [
             'data' => $data,
@@ -1371,7 +1388,8 @@ class TwoFAController extends AbstractController
             }
             $this->addFlash(
                 'error',
-                $this->translator->trans('invalidCode', [], 'controllers')
+                $this->totpService->getLastError() ??
+                $this->translator->trans('invalidCodeTOTP', [], 'controllers')
             );
         }
         return $this->render('landing/twoFAAuthentication/actions/disable2FA.html.twig', [

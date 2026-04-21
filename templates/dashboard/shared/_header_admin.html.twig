@@ -54,18 +54,17 @@
         </li>
         {# Language Dropdown #}
         <div {{ stimulus_controller('nav-dropdown') }}>
-          <div class="px-4 py-2 mx-2 cursor-pointer hover:shadow hover:text-lightGreen duration-100 rounded">
-            <button
-                    type="button"
-                    {{ stimulus_target('nav-dropdown', 'button') }}
-                    {{ stimulus_action('nav-dropdown', 'toggleHeader')|stimulus_action('nav-dropdown', 'lost_focusHeader', 'focusout') }}>
+            <div class="px-2 mx-2">
+                <button
+                        type="button"
+                        {{ stimulus_target('nav-dropdown', 'button') }}
+                        {{ stimulus_action('nav-dropdown', 'toggleHeader')|stimulus_action('nav-dropdown', 'lost_focusHeader', 'focusout') }}
+                        class="w-full flex items-center space-x-2 px-2 py-2 rounded cursor-pointer hover:shadow hover:bg-gray-100 hover:text-lightGreen duration-100">
 
-              <div class="flex flex-row items-center space-x-2">
-                <twig:ux:icon name="wba:globe" class="w-6 pr-1 mr-2 fill-none stroke-current"/>
-                <span class="truncate">{{ 'language'|trans({}, 'landing') }}</span>
-              </div>
-            </button>
-          </div>
+                    <twig:ux:icon name="wba:globe" class="w-6 pr-1 mr-2 fill-none stroke-current"/>
+                    <span class="truncate">{{ 'language'|trans({}, 'landing') }}</span>
+                </button>
+            </div>
           {# Country Dropdown Options #}
           <ul {{ stimulus_target('nav-dropdown', 'container') }}
                   class="px-6 hidden mt-2 divide-y divide-gray-100 text-sm rounded-lg bg-white">
