@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\RadiusDb\Repository;
 
 use App\RadiusDb\Entity\RadiusUser;
