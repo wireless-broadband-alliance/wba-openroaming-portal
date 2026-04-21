@@ -74,7 +74,6 @@ class ProfileController extends AbstractController
             return new BaseResponse(403, null, 'Unauthorized access!')->toResponse();
         }
 
-        /** @var User $currentUser */
         $currentUser = $token->getUser();
         /** @phpstan-ignore-next-line */
         $jwtTokenString = $token->getCredentials();
@@ -213,7 +212,6 @@ class ProfileController extends AbstractController
             return new BaseResponse(403, null, 'Unauthorized access!')->toResponse();
         }
 
-        /** @var User $currentUser */
         $currentUser = $token->getUser();
         /** @phpstan-ignore-next-line */
         $jwtTokenString = $token->getCredentials();
