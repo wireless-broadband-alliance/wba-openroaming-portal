@@ -39,6 +39,9 @@ class ValidWbaChainValidator extends ConstraintValidator
         'WRIX',
     ];
 
+    /**
+     * @throws \JsonException
+     */
     public function validate(mixed $value, Constraint $constraint): void
     {
         if (!$constraint instanceof ValidWbaChain) {
@@ -83,8 +86,8 @@ class ValidWbaChainValidator extends ConstraintValidator
             return;
         }
 
-        $issuerJson = json_encode($certInfo['issuer'] ?? []);
-        $subjectJson = json_encode($certInfo['subject'] ?? []);
+        $issuerJson = json_encode($certInfo['issuer'] ?? [], JSON_THROW_ON_ERROR);
+        $subjectJson = json_encode($certInfo['subject'] ?? [], JSON_THROW_ON_ERROR);
 
         $issuer = strtoupper($issuerJson !== false ? $issuerJson : '');
         $subject = strtoupper($subjectJson !== false ? $subjectJson : '');
@@ -98,7 +101,6 @@ class ValidWbaChainValidator extends ConstraintValidator
         if (!$isValid) {
             $this->context->buildViolation(
                 $constraint->message
-                ?? 'This certificate does not belong to the trusted WBA PKI chain.'
             )->addViolation();
         }
     }
