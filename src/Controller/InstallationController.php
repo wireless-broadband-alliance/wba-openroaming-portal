@@ -59,6 +59,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 use function Symfony\Component\Translation\t;
 
+#[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
 class InstallationController extends AbstractController
 {
     public function __construct(
@@ -76,7 +77,6 @@ class InstallationController extends AbstractController
         private readonly CaptchaValidator $captchaValidator,
         private readonly KernelInterface $kernel,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
-        private readonly UserPasswordHasherInterface $passwordHasher,
     ) {
     }
 
@@ -84,7 +84,6 @@ class InstallationController extends AbstractController
         '/dashboard/settings/certificatesManagement/installation',
         name: 'admin_dashboard_settings_certs_installation'
     )]
-    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function settingsCertificatesManagementInstallation(
         Request $request,
     ): Response {
@@ -239,7 +238,6 @@ class InstallationController extends AbstractController
         '/dashboard/settings/certificatesManagement/installation/commands',
         name: 'admin_dashboard_settings_certs_installation_command',
     )]
-    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function settingsCertificatesManagementInstallationDatabaseCommand(
         Request $request,
     ): Response {
@@ -363,7 +361,6 @@ class InstallationController extends AbstractController
         '/dashboard/settings/certificatesManagement/installation/settings',
         name: 'admin_dashboard_settings_certs_installation_settings'
     )]
-    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function settingsCertificatesManagementInstallationSettings(
         Request $request
     ): Response {
@@ -541,7 +538,6 @@ class InstallationController extends AbstractController
         '/dashboard/settings/certificatesManagement/installation/admin',
         name: 'admin_dashboard_settings_certs_installation_admin'
     )]
-    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function settingsCertificatesManagementInstallationAdmin(
         Request $request,
     ): Response {
@@ -606,7 +602,6 @@ class InstallationController extends AbstractController
         '/dashboard/settings/certificatesManagement/installation/admin/sendCode',
         name: 'admin_dashboard_settings_certs_installation_admin_sendCode'
     )]
-    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function sendCode(
         Request $request,
     ): RedirectResponse {
@@ -674,7 +669,6 @@ class InstallationController extends AbstractController
         '/dashboard/settings/certificatesManagement/installation/admin/confirmation',
         name: 'admin_dashboard_settings_certs_installation_admin_confirmation'
     )]
-    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function settingsCertificatesManagementInstallationAdminConfirmation(
         Request $request,
     ): RedirectResponse|Response {
@@ -761,7 +755,6 @@ class InstallationController extends AbstractController
         '/dashboard/settings/certificatesManagement/installation/summary',
         name: 'admin_dashboard_settings_certs_installation_summary'
     )]
-    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function installationSummary(): RedirectResponse|Response
     {
         $lastInstallation = $this->installationProgressRepository->getLast();
@@ -802,7 +795,6 @@ class InstallationController extends AbstractController
         name: 'admin_dashboard_settings_certs_installation_abortProcess',
         methods: ['POST']
     )]
-    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function abortProcess(Request $request): RedirectResponse
     {
         $lastInstallation = $this->installationService->lastInstallation();
@@ -879,7 +871,6 @@ class InstallationController extends AbstractController
         '/dashboard/settings/certificatesManagement/installation/admin/confirmation/resend',
         name: 'admin_dashboard_settings_certs_installation_admin_confirmation_resend',
     )]
-    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function resendCode(Request $request): RedirectResponse
     {
         /** @var User $user */
@@ -993,86 +984,5 @@ class InstallationController extends AbstractController
             }
         }
         return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin_confirmation');
-    }
-
-    #[Route(
-        '/dashboard/settings/certificatesManagement/verifyIdentity/{type}',
-        name: 'admin_dashboard_settings_certs_installation_verify',
-        requirements: [
-            'type' => 'installation|certificates'
-        ],
-        defaults: [
-            'type' => InstallationType::INSTALLATION->value,
-        ]
-    )]
-    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
-    public function settingsCertificatesManagementInstallationVerifyIdentity(
-        Request $request,
-        string $type
-    ): RedirectResponse|Response {
-        /** @var User $user */
-        $user = $this->getUser();
-
-        if ($type === InstallationType::INSTALLATION->value) {
-            $eventType = AnalyticalEventType::INSTALLATION_IDENTITY_VERIFIED_CODE->value;
-        } else {
-            $eventType = AnalyticalEventType::CERTIFICATES_IDENTITY_VERIFIED_CODE->value;
-        }
-
-        $form = $this->createForm(VerifyPasswordType::class);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $password = $form->get('password')->getData();
-
-
-            if ($this->passwordHasher->isPasswordValid($user, $password)) {
-                $session = $request->getSession();
-                if ($type === InstallationType::INSTALLATION->value) {
-                    $session->set(SessionStatus::INSTALLATION_VERIFICATION->value, true);
-                } else {
-                    $session->set(SessionStatus::CERTIFICATE_VERIFICATION->value, true);
-                }
-                $eventMetaData = [
-                    'platform' => PlatformMode::LIVE->value,
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $user->getUuid(),
-                    'ip' => $request->getClientIp(),
-                ];
-                $this->eventActions->saveEvent(
-                    $user,
-                    $eventType,
-                    new DateTime(),
-                    $eventMetaData
-                );
-                $this->addFlash(
-                    'success',
-                    $this->translator->trans(
-                        'installationStartedSuccessfully',
-                        [],
-                        'controllers'
-                    )
-                );
-
-                if ($type === InstallationType::INSTALLATION->value) {
-                    return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
-                }
-                return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
-            }
-            $this->addFlash(
-                'error',
-                $this->translator->trans('invalidPassword', [], 'controllers')
-            );
-        }
-
-        $data = $this->getSettings->getSettings();
-        return $this->render(
-            'dashboard/shared/settings_actions/certificatesManagement/partials/confirm_identity.html.twig',
-            [
-                'data' => $data,
-                'form' => $form->createView(),
-                'type' => $type,
-            ]
-        );
     }
 }

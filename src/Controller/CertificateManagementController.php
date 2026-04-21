@@ -10,10 +10,13 @@ use App\Entity\InstallationProgress;
 use App\Entity\User;
 use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
+use App\Enum\InstallationType;
+use App\Enum\PlatformMode;
 use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
 use App\Enum\SettingName;
 use App\Form\CertificateFreeradiusDomainType;
+use App\Form\VerifyPasswordType;
 use App\Repository\CertificateSetupProcessRepository;
 use App\Repository\InstallationProgressRepository;
 use App\Security\Voter\UserAuthenticationVoter;
@@ -28,8 +31,10 @@ use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -48,6 +53,7 @@ class CertificateManagementController extends AbstractController
         private readonly CertificateFreeradiusInfoService $certificateFreeradiusInfoService,
         private readonly CertificateRadsecproxyInfoService $certificateRadsecproxyInfoService,
         private readonly SettingsService $settingsService,
+        private readonly UserPasswordHasherInterface $userPasswordHasher,
     ) {
     }
 
@@ -291,5 +297,85 @@ class CertificateManagementController extends AbstractController
         );
 
         return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
+    }
+
+    #[Route(
+        '/dashboard/settings/certificatesManagement/verifyIdentity/{type}',
+        name: 'admin_dashboard_settings_certs_installation_verify',
+        requirements: [
+            'type' => 'installation|certificates'
+        ],
+        defaults: [
+            'type' => InstallationType::CERTIFICATES->value,
+        ]
+    )]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
+    public function settingsCertificatesManagementInstallationVerifyIdentity(
+        Request $request,
+        string $type
+    ): RedirectResponse|Response {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($type === InstallationType::INSTALLATION->value) {
+            $eventType = AnalyticalEventType::INSTALLATION_IDENTITY_VERIFIED_CODE->value;
+        } else {
+            $eventType = AnalyticalEventType::CERTIFICATES_IDENTITY_VERIFIED_CODE->value;
+        }
+
+        $form = $this->createForm(VerifyPasswordType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $password = $form->get('password')->getData();
+
+            if ($this->userPasswordHasher->isPasswordValid($user, $password)) {
+                $session = $request->getSession();
+                if ($type === InstallationType::INSTALLATION->value) {
+                    $session->set(SessionStatus::INSTALLATION_VERIFICATION->value, true);
+                } else {
+                    $session->set(SessionStatus::CERTIFICATE_VERIFICATION->value, true);
+                }
+                $eventMetaData = [
+                    'platform' => PlatformMode::LIVE->value,
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'uuid' => $user->getUuid(),
+                    'ip' => $request->getClientIp(),
+                ];
+                $this->eventActions->saveEvent(
+                    $user,
+                    $eventType,
+                    new DateTime(),
+                    $eventMetaData
+                );
+                $this->addFlash(
+                    'success',
+                    $this->translator->trans(
+                        'installationStartedSuccessfully',
+                        [],
+                        'controllers'
+                    )
+                );
+
+                if ($type === InstallationType::INSTALLATION->value) {
+                    return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
+                }
+                return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
+            }
+            $this->addFlash(
+                'error',
+                $this->translator->trans('invalidPassword', [], 'controllers')
+            );
+        }
+
+        $data = $this->getSettings->getSettings();
+        return $this->render(
+            'dashboard/shared/settings_actions/certificatesManagement/partials/confirm_identity.html.twig',
+            [
+                'data' => $data,
+                'form' => $form->createView(),
+                'type' => $type,
+            ]
+        );
     }
 }
