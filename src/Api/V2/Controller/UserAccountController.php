@@ -56,7 +56,6 @@ class UserAccountController extends AbstractController
         $token = $this->tokenStorage->getToken();
 
         if ($token instanceof TokenInterface && $token->getUser() instanceof User) {
-            /** @var User $currentUser */
             $currentUser = $token->getUser();
             /** @phpstan-ignore-next-line */
             $jwtTokenString = $token->getCredentials();

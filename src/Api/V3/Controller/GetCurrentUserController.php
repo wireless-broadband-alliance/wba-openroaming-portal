@@ -42,7 +42,6 @@ class GetCurrentUserController extends AbstractController
         $token = $this->tokenStorage->getToken();
 
         if ($token instanceof TokenInterface && $token->getUser() instanceof User) {
-            /** @var User $currentUser */
             $currentUser = $token->getUser();
             // This line is begin ignore because the getCredentials belongs to another service
             /** @phpstan-ignore-next-line */

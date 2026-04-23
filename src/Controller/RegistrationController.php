@@ -30,6 +30,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
@@ -41,6 +43,7 @@ use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 
 class RegistrationController extends AbstractController
 {
@@ -67,7 +70,8 @@ class RegistrationController extends AbstractController
         private readonly UserPasswordHasherInterface $userPasswordHasher,
         private readonly RequestStack $requestStack,
         private readonly EventDispatcherInterface $eventDispatcher,
-        private readonly PhoneNumberUtil $phoneNumberUtil
+        private readonly PhoneNumberUtil $phoneNumberUtil,
+        private readonly RateLimiterFactory $verifyAccountLimiter,
     ) {
     }
 
@@ -316,8 +320,26 @@ class RegistrationController extends AbstractController
     public function confirmAccount(
         Request $request,
     ): Response {
-        // Get the email and verification code from the URL query parameters
         $uuid = $request->query->get('uuid');
+        $key = $request->getClientIp() . '_' . $uuid;
+
+        $limiter = $this->verifyAccountLimiter->create($key);
+        $limit = $limiter->consume();
+
+        if (!$limit->isAccepted()) {
+            $retryAfter = $limit->getRetryAfter();
+            $seconds = $retryAfter->getTimestamp() - time();
+
+            throw new TooManyRequestsHttpException(
+                $seconds,
+                $this->translator->trans(
+                    'tooManyAttempts',
+                    ['%seconds%' => $seconds],
+                    'controllers'
+                )
+            );
+        }
+        // Get the email and verification code from the URL query parameters
         $verificationCode = $request->query->get('twoFaCode');
         $source = $request->query->get('source', 'portal');
         $isApiSource = $source === 'api';
@@ -335,7 +357,7 @@ class RegistrationController extends AbstractController
         }
 
         if (
-            $user->getUuid() === $uuid && $user->getTwoFAcode() === $verificationCode &&
+            $user && $user->getUuid() === $uuid && $user->getTwoFAcode() === $verificationCode &&
             $this->magicLinkService->linkCanBeUsed($user, AnalyticalEventType::USER_CREATION->value)
         ) {
             $this->addFlash(
@@ -349,7 +371,7 @@ class RegistrationController extends AbstractController
 
             return $this->redirectToRoute('app_landing');
         }
-        if ($user->getTwoFAcode() === $verificationCode) {
+        if ($user && $user->getTwoFAcode() === $verificationCode) {
             try {
                 // Create a token manually for the user
                 $token = new UsernamePasswordToken($user, 'main', $user->getRoles());

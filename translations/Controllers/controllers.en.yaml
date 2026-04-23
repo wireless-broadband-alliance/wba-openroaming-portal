@@ -198,3 +198,5 @@ access_denied_feature_disabled: "This feature is currently disabled."
 access_denied_session_expired: "Your session has expired. Please log in again."
 invalidPhoneNumber: 'Invalid phone number. Please enter a valid phone number.'
 phoneNumberRequired: 'Phone number cannot be empty.'
+replyCodeTotp: 'Please wait %remainingTime% seconds before trying again.'
+tooManyAttempts: "Too many requests. Please try again in %seconds% seconds."
