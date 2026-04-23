@@ -15,6 +15,13 @@
   sAMAccountName, email, uid, or username).
 - Added `SAML_ATTRIBUTE_MAPPING` configuration to allow fully customizable SAML attribute mappings (uuid, email,
   first_name, last_name) per Identity Provider.
+- It's required to run the new migrations this will set up the new entities for the new domains, sources page (
+    `DomainsBlacklist`, `DomainsSource`), installation widget with the certificates management (`InstalationWidget`,
+    `Certificate` & `CertificateSetupProcess`) & the Fingerprints for apps associations with the portal
+  - Run the migrations with:
+    ```bash
+    php bin/console doctrine:migrations:migrate
+    ```
 - **Required one-time action:** After upgrading, run
   the [PrepareReleaseV1100Command.php](src/Command/PrepareReleaseV1100Command.php) to migrate
   existing administrator permissions to the new **Super Admin** role hierarchy.
@@ -23,13 +30,6 @@
     - Run the command with:
       ```bash
       php bin/console prepare-release:v1100
-      ```
-- It's required to run the new migrations this will set up the new entities for the new domains, sources page (
-  `DomainsBlacklist`, `DomainsSource`), installation widget with the certificates management (`InstalationWidget`,
-  `Certificate` & `CertificateSetupProcess`) & the Fingerprints for apps associations with the portal
-    - Run the migrations with:
-      ```bash
-      php bin/console doctrine:migrations:migrate
       ```
 
 # Release V1.9.1
