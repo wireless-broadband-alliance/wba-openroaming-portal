@@ -13,13 +13,28 @@
 
 
 /* toasts and pills */
-
 .toast-success {
     @apply text-[#0A115C] text-sm font-medium bg-[#0A115C0A] border border-[#9B9EBD] rounded-[5px] px-[25px] py-[15px] flex flex-row justify-start items-center;
 }
 
 .toast-warning {
+    @apply text-white text-sm font-medium bg-yellow-200 text-yellow-700 border border-yellow-300 rounded-[5px] px-[25px] py-[15px] flex flex-row justify-start items-center;
+}
+
+.toast-error {
     @apply text-white text-sm font-medium bg-[#F82600CE] border border-[#A83622] rounded-[5px] px-[25px] py-[15px] flex flex-row justify-start items-center;
+}
+
+.toast-success-dashboard {
+    @apply flex items-center rounded-lg p-4 mb-4 text-sm shadow-sm bg-infoBgColor text-infoTextColor border border-infoTextColor/20;
+}
+
+.toast-warning-dashboard {
+    @apply flex items-center rounded-lg p-4 mb-4 text-sm shadow-sm bg-yellow-100 bg-opacity-50 text-yellow-700 border border-yellow-300;
+}
+
+.toast-error-dashboard {
+    @apply flex items-center rounded-lg p-4 mb-4 text-sm shadow-sm bg-red-100 bg-opacity-50 text-red-700 border border-red-300;
 }
 
 .pill-success {
@@ -30,13 +45,22 @@
     @apply px-2 py-1 text-red-400 bg-red-100/50 rounded-lg;
 }
 
+.pill-warning {
+    @apply px-2 py-1 text-yellow-600 bg-yellow-100/60 rounded-lg;
+}
+
+
 /* Form */
 .form-label {
     @apply absolute left-[10px] -top-[13px] z-10 pl-[7px] pr-[12px] font-bold bg-white;
 }
 
 .form-widget {
-    @apply w-full border px-5 py-2.5 text-[#656565] placeholder-opacity-40 bg-transparent rounded-[5px] border-[#CECECE] appearance-none focus:outline-none focus:ring-0 focus:border-primary pr-10;
+    @apply w-full border px-5 py-2.5 text-[#656565] placeholder-opacity-40 bg-transparent rounded-[5px] border-[#CECECE] appearance-none focus:outline-none focus:ring-0 focus:border-primary pr-10 hover:border-gray-400;
+}
+
+.form-widget-upload {
+  @apply w-full border px-5 py-2.5 text-[#656565] placeholder-opacity-40 bg-transparent rounded-[5px] border-[#CECECE] appearance-none pr-10 cursor-pointer hover:border-primary;
 }
 
 .form-widget-text-area {
@@ -165,7 +189,7 @@
 /* password reveal toggle */
 .toggle-password-button {
     @apply items-center bg-transparent border-none flex justify-center absolute top-1/2 -translate-y-1/2;
-    right: 0.75rem;   /* keep it tucked inside the input, not too far */
+    right: 0.75rem; /* keep it tucked inside the input, not too far */
     height: 1.25rem;
     width: 1.25rem;
 }
@@ -238,7 +262,7 @@
 }
 
 .instructions-tabs {
-    @apply flex border-b border-gray-200 mb-6 w-full pb-8;
+    @apply grid grid-cols-2 sm:grid-cols-4 gap-2 border-b border-gray-200 mb-6 w-full pb-8;
 }
 
 .instructions-tab {
@@ -319,4 +343,100 @@
 
 .no-scrollbar::-webkit-scrollbar {
     display: none;
+}
+
+/* Code Block Copy */
+.code-block-copy {
+    @apply absolute top-2 right-2 bg-indigo-600/90 hover:bg-indigo-700/95 text-white p-2.5 rounded-lg shadow-md transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 flex items-center justify-center w-9 h-9 z-10;
+}
+
+/* Certificate Upload */
+
+/* Form Card */
+.cert-upload-card {
+    @apply bg-white rounded-lg shadow-lg p-6 sm:p-8 lg:p-10 border border-gray-200;
+}
+
+/* Form Header */
+.cert-upload-header {
+    @apply text-xl sm:text-2xl font-semibold mb-6 text-gray-700;
+}
+
+/* Form Group */
+.cert-upload-group {
+    @apply space-y-2 my-2;
+}
+
+/* File name pill for uploaded files */
+.cert-upload-filename {
+    @apply inline-block px-3 py-1 text-sm font-medium text-white bg-primary rounded-lg mt-1;
+}
+
+/* Submit button for certificate upload */
+.cert-upload-btn {
+    @apply btn-primary w-full sm:w-auto mt-4;
+}
+
+/* Flash messages container inside certificate upload form */
+.cert-upload-flash {
+    @apply mt-6 space-y-3;
+}
+
+/* Certificate Stepper */
+@layer components {
+    /* Step connector line (vertical for small screens, horizontal for large) */
+    .step-connector::before {
+        @apply bg-gray-200;
+        content: "";
+        position: absolute;
+        transition: background 0.3s ease;
+    }
+
+    .step-connector.active::before,
+    .step-connector.completed::before {
+        @apply bg-primary;
+    }
+
+    /* Active step animation */
+    @keyframes pulse-active {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.5); }
+        50% { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0); }
+    }
+
+    .step-active {
+        @apply animate-[pulse-active_1.5s_infinite];
+    }
+
+    /* Ensure text wraps properly */
+    .certificate-step {
+        @apply break-words;
+    }
+
+    /* Horizontal progress bar (for desktop) */
+    .stepper-progress-bar {
+        @apply transition-all duration-500 ease-in-out;
+    }
+}
+
+/* Smooth Animations */
+@keyframes fade-in-test-run {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in-test-run {
+    animation: fade-in-test-run 0.4s ease-out;
+}
+
+.transition-transform {
+    transition: transform 0.2s ease;
+}
+.rotate-180 {
+    transform: rotate(180deg);
 }

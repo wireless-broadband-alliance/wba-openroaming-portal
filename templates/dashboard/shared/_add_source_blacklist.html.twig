@@ -1,0 +1,56 @@
+<twig:SourceBlacklistForm :dto="sourceDTO" :form="sourceForm">
+    {# Warning about type of supported import #}
+
+    <div class="my-2 mr-2 p-2 text-base font-semibold w-full">
+        <div class="flex bg-infoBgColor/50 rounded-lg p-4 text-xs md:text-sm text-infoTextColor" role="alert">
+            <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3 fill-current"/>
+
+            <span class="font-medium">{{ 'domainsSourceWarningType'|trans({}, '_blacklist')|raw }}</span>
+        </div>
+    </div>
+
+    {# Add Domain Blacklist Card #}
+    <div class="bg-white rounded-lg shadow p-4 sm:p-6 mb-6 transition hover:-translate-y-1 hover:shadow rounded-md p-6">
+
+        {# Header #}
+        <div class="mb-4">
+            <h2 class="text-base sm:text-lg font-semibold text-gray-800">
+                {{ 'addSourceManually'|trans({}, '_blacklist') }}
+            </h2>
+        </div>
+
+        {{ form_start(form, {attr: {class: 'w-full'}}) }}
+
+        {# Content #}
+        <div class="flex flex-col gap-3">
+
+            {# Input + Select + Button #}
+            <div class="flex flex-col sm:flex-row gap-2">
+
+                {{ form_widget(form.input, {
+                    attr: {
+                        class: 'form-widget w-full',
+                        placeholder: 'www.example.com',
+                    },
+                }) }}
+
+                <button type="submit"
+                        class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-md
+                               hover:bg-blue-700 transition whitespace-nowrap">
+                    {{ 'addSource'|trans({}, '_blacklist') }}
+                </button>
+            </div>
+
+            {{ form_help(form.input) }}
+
+            {% if form_errors(form.input) %}
+                <div class="text-red-500 text-sm">
+                    {{ form_errors(form.input) }}
+                </div>
+            {% endif %}
+
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</twig:SourceBlacklistForm>

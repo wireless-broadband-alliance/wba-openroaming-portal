@@ -1,0 +1,38 @@
+test_and_proceed: "Testar e Prosseguir"
+configuration_complete: "Configuração Concluída"
+instructions: "Execute o teste do servidor para confirmar que os certificados Freeradius foram instalados corretamente. Depois de concluído o teste, a configuração dos certificados será concluída."
+test_certificates: "Testar Certificados Freeradius"
+finish_configuration: "Terminar Configuração"
+in_progress_title: "Teste em progresso..."
+in_progress_description: "A verificar a configuração dos certificados Freeradius no servidor. Por favor, aguarde."
+start_test_connection: "Tem a certeza de que deseja iniciar o teste de ligação?"
+host: 'Servidor'
+port: 'Porta'
+user: 'Utilizador'
+password: 'Palavra-passe'
+timeOut: 'Tempo limite (segundos)'
+test_not_done: 'Nenhum teste realizado no momento'
+test_passed: 'Último Test Aprovado'
+test_failed: 'Último Teste Reprovado'
+test_failed_warning: "O último teste falhou, mas ainda pode prosseguir com a configuração atual se desejar."
+manual_test_warning: >
+    O teste automático não é possível nesta etapa.
+    Por motivos de segurança, a máquina onde o FreeRADIUS está instalado é uma máquina isolada e sem acesso à Internet.
+    Por essa razão, este passo deve ser realizado manualmente, através da cópia do conteúdo dos certificados.
+
+manual_command_title: "Execute este comando no servidor FreeRADIUS"
+
+manual_command_hint: >
+    Este comando apresenta todos os certificados e a chave privada necessários.
+    Copia todo o resultado e cola-o na caixa de texto.
+
+paste_certificates_label: "Colar conteúdo dos certificados"
+paste_certificates_placeholder: |
+    Cola aqui o resultado completo do comando.
+    O conteúdo deve incluir:
+    - Certificado da CA (ca.pem)
+    - Certificado do servidor (cert.pem)
+    - Cadeia de certificados (chain.pem / fullchain.pem)
+    - Chave privada (privkey.pem)
+    Certifique-se de que o conteúdo começa com:
+    -----BEGIN CERTIFICATE-----

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Form;
 
 use App\Entity\User;
@@ -15,10 +17,10 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  */
 class ResetPasswordType extends AbstractType
 {
-    public function __construct(
-        private readonly TranslatorInterface $translator
-    ) {
+    public function __construct(private readonly TranslatorInterface $translator)
+    {
     }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -32,12 +34,12 @@ class ResetPasswordType extends AbstractType
                     'placeholder' => $this->translator->trans('enterNewPassword', [], 'ResetPasswordType'),
                 ],
                 'constraints' => [
-                    new Length([
-                        'min' => 7,
-                        'max' => 128,
-                        'minMessage' => $this->translator->trans('fieldCannotBeShorterThan', [], 'ResetPasswordType'),
-                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'ResetPasswordType'),
-                    ]),
+                    new Length(
+                        min: 8,
+                        max: 255,
+                        minMessage: $this->translator->trans('fieldCannotBeShorterThan', [], 'ResetPasswordType'),
+                        maxMessage: $this->translator->trans('fieldCannotBeLongerThan', [], 'ResetPasswordType')
+                    ),
                 ],
             ])
             ->add('confirmPassword', PasswordType::class, [

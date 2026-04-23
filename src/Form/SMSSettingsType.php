@@ -16,8 +16,11 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class SMSSettingsType extends AbstractType
 {
+    private bool $disabled = true;
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $this->disabled = $options['disabled'];
+
         // Use libphonenumber to fetch all supported regions
         $phoneUtil = PhoneNumberUtil::getInstance();
         $regions = $phoneUtil->getSupportedRegions();
@@ -32,25 +35,31 @@ class SMSSettingsType extends AbstractType
         $builder
             ->add('smsUsername', TextType::class, [
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('smsUserId', TextType::class, [
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('smsHandle', TextType::class, [
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('smsFrom', TextType::class, [
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('smsTimerResend', IntegerType::class, [
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('defaultRegionPhoneInputs', ChoiceType::class, [
                 'choices' => $choices,
                 'multiple' => true,
                 'expanded' => false,
                 'required' => false,
-                'autocomplete' => true
+                'autocomplete' => true,
+                'disabled' => $this->disabled,
             ]);
     }
 
@@ -58,6 +67,7 @@ class SMSSettingsType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => SMSSettingsDTO::class,
+            'disabled' => true,
         ]);
     }
 }

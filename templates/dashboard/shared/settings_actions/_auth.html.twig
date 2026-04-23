@@ -8,6 +8,7 @@
         :authSettingsTypeDTO="authSettingsTypeDTO"
         :profileLimitDate="profileLimitDate"
         :data="data"
+        :user="user"
         :form="form">
 
     {{ form_start(form) }}
@@ -45,18 +46,21 @@
 
     <div class="mt-8 divider-solid"></div>
 
+    {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::AUTHENTICATION_METHODS_WRITE')) %}
     <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
         <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingAUTH'}) }}"
-           onclick="return confirm('{{ 'resetMessage'|trans({}, 'settings_actions_general') }}')"
+           data-confirm="{{ 'resetMessage'|trans({}, 'settings_actions_general')|e('html_attr') }}"
            class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
             {{ 'reset'|trans({}, 'settings_actions_general') }}
         </a>
 
-        <button class="btn-primary"
-                onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general') }}')"
-                type="submit">{{ 'saveChanges'|trans({}, 'settings_actions_general') }}
-        </button>
-    </div>
-    {{ form_end(form, {render_rest: false}) }}
+            <button class="btn-primary"
+                    onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general') }}')"
+                    type="submit">{{ 'saveChanges'|trans({}, 'settings_actions_general') }}
+            </button>
+        </div>
+    {% endif %}
 
+    {{ form_rest(form) }}
+    {{ form_end(form) }}
 </twig:AuthSettingsTypeForm>

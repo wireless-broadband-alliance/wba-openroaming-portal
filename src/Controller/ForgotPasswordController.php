@@ -34,10 +34,13 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -61,7 +64,8 @@ class ForgotPasswordController extends AbstractController
         private readonly EmailGenerator $emailGenerator,
         private readonly EntityManagerInterface $entityManager,
         private readonly MagicLinkService $magicLinkService,
-        private readonly UserPasswordHasherInterface $userPasswordHasher
+        private readonly UserPasswordHasherInterface $userPasswordHasher,
+        private readonly RateLimiterFactory $verifyAccountLimiter,
     ) {
     }
 
@@ -355,12 +359,30 @@ class ForgotPasswordController extends AbstractController
      * @throws RandomException
      */
     #[Route('/forgot-password/link', name: 'app_site_forgot_password_link')]
-    public function forgotPasswordLink(
-        Request $request,
-    ): Response {
+    public function forgotPasswordLink(Request $request): Response
+    {
         // Get the uuid and verification code from the URL query parameters
         $uuid = $request->query->get('uuid');
         $twoFaCode = $request->query->get('twoFaCode');
+
+        $key = $request->getClientIp() . '_' . $uuid;
+
+        $limiter = $this->verifyAccountLimiter->create($key);
+        $limit = $limiter->consume();
+
+        if (!$limit->isAccepted()) {
+            $retryAfter = $limit->getRetryAfter();
+            $seconds = $retryAfter->getTimestamp() - time();
+
+            throw new TooManyRequestsHttpException(
+                $seconds,
+                $this->translator->trans(
+                    'tooManyAttempts',
+                    ['%seconds%' => $seconds],
+                    'controllers'
+                )
+            );
+        }
 
 
         // Get the user with the matching email, excluding admin users
@@ -368,11 +390,7 @@ class ForgotPasswordController extends AbstractController
         if (!$user instanceof User) {
             $this->addFlash(
                 'error',
-                $this->translator->trans(
-                    'cannotAccessThisPageWithoutValidRequest',
-                    [],
-                    'controllers'
-                )
+                $this->translator->trans('cannotAccessThisPageWithoutValidRequest', [], 'controllers')
             );
 
             return $this->redirectToRoute('app_landing');
@@ -383,14 +401,8 @@ class ForgotPasswordController extends AbstractController
                 ['name' => SettingName::PLATFORM_MODE->value]
             )->getValue() !== PlatformMode::LIVE->value
         ) {
-            $this->addFlash(
-                'error',
-                $this->translator->trans(
-                    'portalInDemoMode',
-                    [],
-                    'controllers'
-                )
-            );
+            $this->addFlash('error', $this->translator->trans('portalInDemoMode', [], 'controllers'));
+
             return $this->redirectToRoute('app_landing');
         }
 
@@ -401,42 +413,25 @@ class ForgotPasswordController extends AbstractController
                     AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value
                 )
             ) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans(
-                        'invalidVerificationCodeLink',
-                        [],
-                        'controllers'
-                    )
-                );
+                $this->addFlash('error', $this->translator->trans('invalidVerificationCodeLink', [], 'controllers'));
+
                 return $this->redirectToRoute('app_landing');
             }
             // Create a token manually for the user
             $this->passwordResetRequestHandler->handle($user);
 
-            $this->addFlash(
-                'success',
-                $this->translator->trans(
-                    'passwordRequestAccepted',
-                    [],
-                    'controllers'
-                )
-            );
+            $this->addFlash('success', $this->translator->trans('passwordRequestAccepted', [], 'controllers'));
+
             if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
                 $session = $request->getSession();
                 $session->remove('_security_dashboard');
             }
+
             return $this->redirectToRoute('app_site_forgot_password_checker');
         }
 
-        $this->addFlash(
-            'error',
-            $this->translator->trans(
-                'invalidVerificationCodeLink',
-                [],
-                'controllers'
-            )
-        );
+        $this->addFlash('error', $this->translator->trans('invalidVerificationCodeLink', [], 'controllers'));
+
         return $this->redirectToRoute('app_landing');
     }
 
@@ -444,14 +439,33 @@ class ForgotPasswordController extends AbstractController
      * @throws RandomException
      */
     #[Route('/forgot-password/code', name: 'app_site_forgot_password_code')]
-    public function forgotPasswordCode(
-        Request $request,
-    ): Response {
+    public function forgotPasswordCode(Request $request): Response
+    {
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         // Get the uuid and verification code from the URL query parameters
         $uuid = $request->getSession()->get('forgot_password_uuid');
+
+        $key = $request->getClientIp() . '_' . $uuid;
+
+        $limiter = $this->verifyAccountLimiter->create($key);
+        $limit = $limiter->consume();
+
+        if (!$limit->isAccepted()) {
+            $retryAfter = $limit->getRetryAfter();
+            $seconds = $retryAfter->getTimestamp() - time();
+
+            throw new TooManyRequestsHttpException(
+                $seconds,
+                $this->translator->trans(
+                    'tooManyAttempts',
+                    ['%seconds%' => $seconds],
+                    'controllers'
+                )
+            );
+        }
+
         if (!$uuid) {
             $this->addFlash(
                 'error',

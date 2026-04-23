@@ -1,0 +1,5 @@
+invalidPEMCertificate: 'Certificado PEM inválido.'
+unableParse: 'Não é possible analisar o Certificado PEM'
+failedToReadFile: "Falha ao ler o ficheiro carregado: %file%"
+uploadedFileNotFound: "Ficheiro carregado não encontrado: %file%"
+unableFingerprint: "Falha ao calcular a impressão digital (SHA-1) do certificado."

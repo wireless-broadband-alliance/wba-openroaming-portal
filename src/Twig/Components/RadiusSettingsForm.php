@@ -5,6 +5,7 @@ namespace App\Twig\Components;
 use App\DTO\RadiusSettingsDTO;
 use App\Enum\SettingName;
 use App\Form\RadiusSettingsType;
+use App\Security\Voter\UserAuthenticationVoter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -34,7 +35,9 @@ final class RadiusSettingsForm extends AbstractController
     #[\Override]
     protected function instantiateForm(): FormInterface
     {
-        return $this->createForm(RadiusSettingsType::class, $this->radiusSettingsDTO);
+        $canWrite = $this->isGranted(UserAuthenticationVoter::RADIUS_PROFILE_CONFIG_WRITE);
+
+        return $this->createForm(RadiusSettingsType::class, $this->radiusSettingsDTO, ['disabled' => !$canWrite]);
     }
 
     #[LiveAction]

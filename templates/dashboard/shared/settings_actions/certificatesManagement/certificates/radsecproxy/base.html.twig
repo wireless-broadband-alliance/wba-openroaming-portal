@@ -1,0 +1,7 @@
+{% extends 'dashboard/shared/settings_actions/certificatesManagement/certificates/base.html.twig' %}
+
+{% block certificates_content %}
+    {{ include('dashboard/shared/settings_actions/certificatesManagement/partials/_certificate_radsecproxy_stepper.html.twig') }}
+    {% block radsecproxy_content %}
+    {% endblock %}
+{% endblock %}

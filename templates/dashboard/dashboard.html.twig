@@ -5,31 +5,47 @@
 {% import 'dashboard/shared/_sort_arrow.html.twig' as sharedSort %}
 
 {% block container %}
-    <div class="p-5">
-        {% set eeaStatus = isEEAUser() %}
-        {% set message = '' %}
-        {% if eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::LOCATION_ERROR').value %}
-            {% set message = 'Unable to determine user location due to a location error with the GeoLite2 database.
-             Please check the docs/geoLiteDB/GEOLITEGUI.md file in for troubleshooting steps.' %}
-        {% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::MISSING_FILE').value %}
-            {% set message = 'The required GeoLite2-City.mmdb file is missing.
-             Please ensure this file is included. Refer to the docs/geoLiteDB/GEOLITEGUI.md file for more details.' %}
-        {% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::INVALID_DB').value %}
-            {% set message = 'The GeoLite2-City.mmdb file is invalid.
-             Please verify the integrity of this file. Consult the docs/geoLiteDB/GEOLITEGUI.md file for further guidance.' %}
-        {% endif %}
+    {% set eeaStatus = isEEAUser() %}
+    {% set message = '' %}
+    {% if eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::LOCATION_ERROR').value %}
+        {% set message = 'locationError'|trans({}, 'dashboard') %}
+    {% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::MISSING_FILE').value %}
+        {% set message = 'missingFile'|trans({}, 'dashboard') %}
+    {% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::INVALID_DB').value %}
+        {% set message = 'invalidDb'|trans({}, 'dashboard') %}
+    {% endif %}
 
-        {% if message != '' %}
-            <div class="toast-warning">{{ message }}</div>
-        {% endif %}
-    </div>
+    {# Certificate Process Status - Checks if the certificates are applied correctly #}
+    {% if isCertificateAborted() %}
+        {% set isDashboard = app.request.pathinfo starts with '/dashboard' %}
+        {% set toastType = isDashboard ? 'toast-error-dashboard' : 'toast-error' %}
+
+        {{ include('shared/_toast.html.twig', {
+            message: 'abortedCertificatesWarning'|trans({}, 'dashboard'),
+            toast_type: toastType,
+        }) }}
+    {% endif %}
+
+    {% if message != '' %}
+        {{ include('shared/_toast.html.twig', {
+            message: message,
+            toast_type: 'toast-warning-dashboard',
+        }) }}
+    {% endif %}
+
+    {% if not isFreeradiusCertEV() %}
+        {{ include('shared/_toast.html.twig', {
+            message: 'freeradius_is_not_ev_cert_warning'|trans({}, 'dashboard'),
+            toast_type: 'toast-warning-dashboard',
+        }) }}
+    {% endif %}
     <div class="pt-5 pb-1 text-left space-y-3 rounded-xl bg-white">
         <div class="w-full">
             <div class="sm:w-auto px-5 py-4">
-                <div class="flex flex-col sm:flex-row justify-between items-center space-y-6 sm:space-y-0 sm:space-x-4">
+                <div class="flex flex-col lg:flex-row justify-between items-center space-y-6 lg:space-y-0 sm:space-x-4">
 
                     {# Left Search Filters #}
-                    <div class="flex items-center space-x-6">
+                    <div class="flex flex-col md:flex-row sm:items-center gap-4 sm:gap-6">
                         <a href="{{ path('admin_page', {filter: 'all', u: app.request.query.get('u')}) }}"
                            class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'all' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
                             <h1 class="px-2">
@@ -88,7 +104,7 @@
 
                     {% if export_users == constant('App\\Enum\\OperationMode::ON').value %}
                         <div class="flex items-center space-x-6">
-                            <a href="{{ path('admin_user_export') }}" class="btn-primary">
+                            <a href="{{ path('admin_user_export') }}" class="btn-primary px-4 min-w-[150px]">
                                 {{ 'exportEverything'|trans({}, 'dashboard') }}
                             </a>
                         </div>
@@ -173,7 +189,7 @@
             {# Users Table Pagination #}
             <div class="m-8">
                 <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
-                {{ include('dashboard/shared/pagination/_pagination_users.html.twig', {label: 'usersPerPage'|trans({}, 'dashboard'), route: 'admin_page', occurrencies: allUsersCount}) }}
+                {{ include('dashboard/shared/pagination/_pagination_tables.html.twig', {label: 'usersPerPage'|trans({}, 'dashboard'), route: 'admin_page', occurrencies: allUsersCount}) }}
             </div>
         </div>
     </div>

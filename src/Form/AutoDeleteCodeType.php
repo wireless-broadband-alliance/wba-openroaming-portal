@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
@@ -38,9 +40,9 @@ class AutoDeleteCodeType extends AbstractType
                 'required' => true,
                 'mapped' => false,
                 'constraints' => [
-                    new IsTrue([
-                        'message' => $this->translator->trans('confirmDeletingYourAccount', [], 'AutoDeleteType'),
-                    ]),
+                    new IsTrue(
+                        message: $this->translator->trans('confirmDeletingYourAccount', [], 'AutoDeleteType'),
+                    ),
                 ],
             ]);
     }

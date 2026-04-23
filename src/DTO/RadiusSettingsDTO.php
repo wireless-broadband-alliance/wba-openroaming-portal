@@ -20,7 +20,6 @@ class RadiusSettingsDTO
     public ?string $domainName = null;
 
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
-    #[CustomAssert\ValidDomain]
     public ?string $operatorName = null;
 
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]

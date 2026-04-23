@@ -50,7 +50,7 @@ class AuthController extends AbstractController
     public function __construct(
         private readonly UserRepository $userRepository,
         private readonly UserPasswordHasherInterface $passwordHasher,
-        private readonly jwtTokenGenerator $tokenGenerator,
+        private readonly JWTTokenGenerator $JWTTokenGenerator,
         private readonly CaptchaValidator $captchaValidator,
         private readonly EntityManagerInterface $entityManager,
         private readonly GoogleController $googleController,
@@ -147,6 +147,19 @@ class AuthController extends AbstractController
             return new BaseResponse(401, null, 'Invalid credentials')->toResponse(); # Unauthorized Request Response
         }
 
+        $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
+        if ($statusCheckerResponse instanceof BaseResponse) {
+            return $statusCheckerResponse->toResponse();
+        }
+
+        // Check if the email is valid
+        if (!$this->userStatusChecker->isValidEmail($user->getEmail())) {
+            return new BaseResponse(
+                403,
+                null,
+                'Your email domain is not allowed to use this platform.'
+            )->toResponse();
+        }
 
         $twoFAEnforcementResult = $this->twoFAAPIService->twoFAEnforcementChecker(
             $user,
@@ -215,7 +228,7 @@ class AuthController extends AbstractController
 
         if ($isLoginWithUUIDOnly === OperationMode::OFF->value) {
             // If the login with uuid is disabled generate JWT Token
-            $token = $this->tokenGenerator->generateToken($user);
+            $token = $this->JWTTokenGenerator->generateToken($user);
             if (is_array($token) && $token['success'] === false) {
                 $errorMessage = $token['error'] ?? 'Token generation failed.';
                 $statusCode = $errorMessage === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
@@ -395,6 +408,10 @@ class AuthController extends AbstractController
                 $this->entityManager->flush();
             }
 
+            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
+            if ($statusCheckerResponse instanceof BaseResponse) {
+                return $statusCheckerResponse->toResponse();
+            }
 
             $twoFAEnforcementResult = $this->twoFAAPIService->twoFAEnforcementChecker(
                 $user,
@@ -484,6 +501,11 @@ class AuthController extends AbstractController
                     null,
                     'This code is not associated with a google account.'
                 )->toResponse();
+            }
+
+            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
+            if ($statusCheckerResponse instanceof BaseResponse) {
+                return $statusCheckerResponse->toResponse();
             }
 
             // Check if the email is valid

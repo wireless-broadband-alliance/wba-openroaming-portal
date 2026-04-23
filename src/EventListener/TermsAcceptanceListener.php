@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\EventListener;
 
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
@@ -30,7 +32,7 @@ readonly class TermsAcceptanceListener
 
         /** @var Session $session */
         $session = $request->getSession();
-        $termsAccepted = $session->get('termsAccepted', false);
+        $termsAccepted = $session->get('terms_accepted', false);
 
         // Skip if the current route is app_landing
         $currentRoute = $request->attributes->get('_route');
@@ -59,7 +61,14 @@ readonly class TermsAcceptanceListener
             '/profile/windows',
             '/login/magic',
             '/login/link',
-            '/forgot-password/link'
+            '/forgot-password/link',
+            '/saml/login',
+            '/app',
+            '/.well-known/assetlinks.json',
+            '/login/confirmation',
+            '/app/continue',
+            '/.well-known/assetlinks.json',
+            '/.well-known/apple-app-site-association'
         ];
 
         if (array_any($excludedPrefixes, fn($prefix) => str_starts_with($path, (string)$prefix))) {

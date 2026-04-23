@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use InvalidArgumentException;
 use libphonenumber\PhoneNumber;
 use LogicException;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -34,6 +35,12 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
      */
     #[ORM\Column]
     private array $roles = [];
+
+    /**
+     * @var string[]
+     */
+    #[ORM\Column(type: 'json')]
+    private array $permissions = [];
 
     #[ORM\Column]
     private ?string $password = null;
@@ -255,6 +262,22 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         $this->roles = $roles;
 
         return $this;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getPermissions(): array
+    {
+        return $this->permissions;
+    }
+
+    /**
+     * @param string[] $permissions
+     */
+    public function setPermissions(array $permissions): void
+    {
+        $this->permissions = $permissions;
     }
 
     /**
@@ -510,8 +533,17 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         return $this->phoneNumber;
     }
 
-    public function setPhoneNumber(?PhoneNumber $phoneNumber): static
+    public function setPhoneNumber(null|PhoneNumber|string $phoneNumber): static
     {
+        if ($phoneNumber === '' || $phoneNumber === null) {
+            $this->phoneNumber = null;
+            return $this;
+        }
+
+        if (!$phoneNumber instanceof PhoneNumber) {
+            throw new InvalidArgumentException('Invalid phone number type');
+        }
+
         $this->phoneNumber = $phoneNumber;
         return $this;
     }

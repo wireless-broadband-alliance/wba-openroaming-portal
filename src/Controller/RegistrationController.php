@@ -21,12 +21,17 @@ use App\Service\UserCreationService;
 use DateTime;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
+use libphonenumber\PhoneNumber;
+use libphonenumber\PhoneNumberFormat;
+use libphonenumber\PhoneNumberUtil;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
@@ -38,6 +43,7 @@ use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 
 class RegistrationController extends AbstractController
 {
@@ -63,7 +69,9 @@ class RegistrationController extends AbstractController
         private readonly MagicLinkService $magicLinkService,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
         private readonly RequestStack $requestStack,
-        private readonly EventDispatcherInterface $eventDispatcher
+        private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly PhoneNumberUtil $phoneNumberUtil,
+        private readonly RateLimiterFactory $verifyAccountLimiter,
     ) {
     }
 
@@ -229,54 +237,71 @@ class RegistrationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($this->userRepository->findOneBy(['phoneNumber' => $user->getPhoneNumber()])) {
+            $phoneNumber = $user->getPhoneNumber();
+
+            if (!$phoneNumber instanceof PhoneNumber) {
+                $this->addFlash('error', $this->translator->trans('invalidPhoneNumber', [], 'controllers'));
+                return $this->redirectToRoute('app_register_sms');
+            }
+
+            $formattedPhone = $this->phoneNumberUtil->format($phoneNumber, PhoneNumberFormat::E164);
+
+            // Check by UUID
+            $userByUuid = $this->userRepository->findOneBy([
+                'uuid' => $formattedPhone
+            ]);
+
+            // Check by PhoneNumber
+            $userByPhone = $this->userRepository->findOneBy([
+                'phoneNumber' => $phoneNumber
+            ]);
+
+            if ($userByUuid || $userByPhone) {
                 $this->addFlash(
                     'error',
-                    $this->translator->trans(
-                        'userWithSamePhoneNumber',
-                        [],
-                        'controllers'
-                    )
-                );
-            } else {
-                // Generate a random password
-                $randomPassword = bin2hex(random_bytes(4));
-
-                // Hash the password
-                $hashedPassword = $this->userPasswordHasher->hashPassword($user, $randomPassword);
-
-                $user = $this->userCreationService->setPhoneNumber($user);
-                $user = $this->userCreationService->createUser(
-                    $user,
-                    $hashedPassword,
-                    UserProvider::PHONE_NUMBER->value,
-                    $request
+                    $this->translator->trans('userWithSamePhoneNumber', [], 'controllers')
                 );
 
-
-                // Send SMS
-                $message = $this->translator->trans('yourAccountPasswordIs', [], 'controllers')
-                    . $randomPassword
-                    . "%0A"
-                    . $this->translator->trans('verificationCodeIs', [], 'controllers')
-                    . $user->getTwoFAcode();
-                $this->sendSMS->sendSmsNoValidation($user, $message);
-                $this->addFlash(
-                    'success',
-                    $this->translator->trans('messageSentWithPasswordAndVerificationCode', [], 'controllers')
-                );
-
-                // Authenticate the user
-                $token = new UsernamePasswordToken($user, FirewallType::LANDING->value, $user->getRoles());
-                $this->tokenStorage->setToken($token);
-
-                // Store the authentication token in the session
-                $session = $this->requestStack->getSession();
-                $session->set('_security_main', serialize($token));
-
-                // Redirect the user after successful registration
-                return $this->redirectToRoute('app_landing');
+                return $this->redirectToRoute('app_register_sms');
             }
+
+            // Generate a random password
+            $randomPassword = bin2hex(random_bytes(4));
+
+            // Hash the password
+            $hashedPassword = $this->userPasswordHasher->hashPassword($user, $randomPassword);
+
+            $user = $this->userCreationService->setPhoneNumber($user);
+            $user = $this->userCreationService->createUser(
+                $user,
+                $hashedPassword,
+                UserProvider::PHONE_NUMBER->value,
+                $request
+            );
+
+
+            // Send SMS
+            $message = $this->translator->trans('yourAccountPasswordIs', [], 'controllers')
+                . $randomPassword
+                . "%0A"
+                . $this->translator->trans('verificationCodeIs', [], 'controllers')
+                . $user->getTwoFAcode();
+            $this->sendSMS->sendSmsNoValidation($user, $message);
+            $this->addFlash(
+                'success',
+                $this->translator->trans('messageSentWithPasswordAndVerificationCode', [], 'controllers')
+            );
+
+            // Authenticate the user
+            $token = new UsernamePasswordToken($user, FirewallType::LANDING->value, $user->getRoles());
+            $this->tokenStorage->setToken($token);
+
+            // Store the authentication token in the session
+            $session = $this->requestStack->getSession();
+            $session->set('_security_main', serialize($token));
+
+            // Redirect the user after successful registration
+            return $this->redirectToRoute('app_landing');
         }
 
         return $this->render('landing/register/register_landing_sms.html.twig', [
@@ -295,9 +320,29 @@ class RegistrationController extends AbstractController
     public function confirmAccount(
         Request $request,
     ): Response {
-        // Get the email and verification code from the URL query parameters
         $uuid = $request->query->get('uuid');
+        $key = $request->getClientIp() . '_' . $uuid;
+
+        $limiter = $this->verifyAccountLimiter->create($key);
+        $limit = $limiter->consume();
+
+        if (!$limit->isAccepted()) {
+            $retryAfter = $limit->getRetryAfter();
+            $seconds = $retryAfter->getTimestamp() - time();
+
+            throw new TooManyRequestsHttpException(
+                $seconds,
+                $this->translator->trans(
+                    'tooManyAttempts',
+                    ['%seconds%' => $seconds],
+                    'controllers'
+                )
+            );
+        }
+        // Get the email and verification code from the URL query parameters
         $verificationCode = $request->query->get('twoFaCode');
+        $source = $request->query->get('source', 'portal');
+        $isApiSource = $source === 'api';
 
         // Get the user with the matching email, excluding admin users
         $user = $this->userRepository->findOneByUUIDExcludingAdmin($uuid);
@@ -312,21 +357,21 @@ class RegistrationController extends AbstractController
         }
 
         if (
-            $user->getUuid() === $uuid && $user->getTwoFAcode() === $verificationCode &&
+            $user && $user->getUuid() === $uuid && $user->getTwoFAcode() === $verificationCode &&
             $this->magicLinkService->linkCanBeUsed($user, AnalyticalEventType::USER_CREATION->value)
         ) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans(
-                        'invalidVerificationCodeLink',
-                        [],
-                        'controllers'
-                    )
-                );
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'invalidVerificationCodeLink',
+                    [],
+                    'controllers'
+                )
+            );
 
-                return $this->redirectToRoute('app_landing');
+            return $this->redirectToRoute('app_landing');
         }
-        if ($user->getTwoFAcode() === $verificationCode) {
+        if ($user && $user->getTwoFAcode() === $verificationCode) {
             try {
                 // Create a token manually for the user
                 $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
@@ -363,7 +408,7 @@ class RegistrationController extends AbstractController
                     $this->translator->trans('accountVerified', [], 'controllers')
                 );
 
-                return $this->redirectToRoute('app_landing');
+                return $this->redirectAfterConfirmation($isApiSource, $request);
             } catch (CustomUserMessageAuthenticationException) {
                 $this->addFlash(
                     'error',
@@ -379,5 +424,23 @@ class RegistrationController extends AbstractController
         }
 
         return $this->redirectToRoute('app_login');
+    }
+
+    private function redirectAfterConfirmation(bool $isApiSource, Request $request): Response
+    {
+        if ($isApiSource) {
+            // Example at the end of registration success
+            if ($request->query->get('source') === 'api') {
+                $session = $request->getSession();
+                $session->set('app_return', [
+                    'timestamp' => time(),
+                    'ttl' => 300, // 5 minutes
+                ]);
+            }
+
+            return $this->redirectToRoute('app_api_landing');
+        }
+
+        return $this->redirectToRoute('app_landing');
     }
 }

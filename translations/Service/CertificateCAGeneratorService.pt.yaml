@@ -1,0 +1,2 @@
+invalidLeafCertificate: 'Certificado leaf inválido'
+unableToResolveTrustedRoot: 'Não foi possível resolver a trusted root dos certificados'

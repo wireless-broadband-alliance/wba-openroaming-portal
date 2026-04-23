@@ -1,16 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\DataFixtures;
 
 use App\Entity\Setting;
 use App\Enum\SettingName;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class SettingFixture extends Fixture
 {
+    public function __construct(
+        private readonly ParameterBagInterface $parameterBag
+    ) {
+    }
+
     public function load(ObjectManager $manager): void
     {
+        $filter = $this->parameterBag->get('app.saml_identifier_attribute');
         $settings = [
             ['name' => SettingName::RADIUS_REALM_NAME->value, 'value' => 'EditMe'],
             ['name' => SettingName::DISPLAY_NAME->value, 'value' => 'EditMe'],
@@ -115,7 +124,10 @@ class SettingFixture extends Fixture
             ['name' => SettingName::SYNC_LDAP_BIND_USER_DN->value, 'value' => ''],
             ['name' => SettingName::SYNC_LDAP_BIND_USER_PASSWORD->value, 'value' => ''],
             ['name' => SettingName::SYNC_LDAP_SEARCH_BASE_DN->value, 'value' => ''],
-            ['name' => SettingName::SYNC_LDAP_SEARCH_FILTER->value, 'value' => '(sAMAccountName=$identifier)'],
+            [
+                'name' => SettingName::SYNC_LDAP_SEARCH_FILTER->value,
+                'value' => sprintf('(%s=$identifier)', $filter)
+            ],
 
             ['name' => SettingName::CAPPORT_ENABLED->value, 'value' => 'false'],
             ['name' => SettingName::CAPPORT_PORTAL_URL->value, 'value' => 'https://example.com/'],
@@ -135,11 +147,17 @@ class SettingFixture extends Fixture
             ['name' => SettingName::PROFILE_LIMIT_DATE_EMAIL->value, 'value' => '5'],
             ['name' => SettingName::PROFILE_LIMIT_DATE_SMS->value, 'value' => '5'],
             ['name' => SettingName::TIME_STAMP_FREERADIUS_CRON->value, 'value' => '0'],
+            ['name' => SettingName::DOMAIN_BLACKLIST_IMPORT_CRON->value, 'value' => '0 4 * * *'],
             ['name' => SettingName::FREERADIUS_LAST_CONNECTION_CRON->value, 'value' => '0 3 * * *'],
             ['name' => SettingName::DELETE_UNCONFIRMED_USERS_CRON->value, 'value' => '0 0 * * *'],
             ['name' => SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON->value, 'value' => '0 1 * * *'],
             ['name' => SettingName::LDAP_SYNC_CRON->value, 'value' => '0 2 * * *'],
             ['name' => SettingName::CRON_ADVANCED_STATUS->value, 'value' => 'OFF'],
+            ['name' => SettingName::CLOUDFLARE_TOKEN->value, 'value' => ''],
+            ['name' => SettingName::ENABLE_RADIUS_TLS_RESET->value, 'value' => 'true'],
+            ['name' => SettingName::RETURN_APPS_ENABLED->value, 'value' => 'OFF'],
+            ['name' => SettingName::RETURN_APPS_PACKAGE_NAME_ANDROID->value, 'value' => 'EditMe'],
+            ['name' => SettingName::RETURN_APPS_ID_IOS->value, 'value' => 'EditMe.EditMe'],
         ];
 
         foreach ($settings as $settingData) {

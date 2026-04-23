@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\User;
+use App\Enum\AdminRoleType;
 use App\Enum\UserProvider;
 use App\Enum\UserVerificationStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -88,7 +89,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     /**
      * @return User[]
      */
-    public function findLDAPEnabledUsers()
+    public function findLDAPEnabledUsers(): array
     {
         return $this->createQueryBuilder('u')
             ->join('u.userExternalAuths', 'uea')
@@ -99,50 +100,29 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getResult();
     }
 
-    /* This data is to call and be used on the admin Users Page */
     /**
-     * @return User[]
-     */
-    public function findExcludingAdmin(?string $filter = null): array
-    {
-        $qb = $this->createQueryBuilder('u');
-        $qb->where('u.roles NOT LIKE :role')
-            ->andWhere($qb->expr()->isNull('u.deletedAt'))
-            ->orderBy('u.createdAt', 'DESC')
-            ->setParameter('role', '%ROLE_ADMIN%');
-
-        if ($filter === UserVerificationStatus::VERIFIED->value) {
-            $qb->andWhere('u.isVerified = :isVerified')
-                ->setParameter('isVerified', true);
-        } elseif ($filter === UserVerificationStatus::BANNED->value) {
-            $qb->andWhere($qb->expr()->isNotNull('u.bannedAt'));
-        }
-
-        return $qb->getQuery()->getResult();
-    }
-
-    /**
-     * @method array searchWithFilter(string $filter, ?string $searchTerm = null)
-     *
      * Searches for users based on provided filter and optional search term.
      *
-     * Filters out users with roles matching 'ROLE_ADMIN'.
-     * Applies additional filtering based on verification status.
-     * Filters out users who have a non-null deletedAt value.
-     * Joins the SAML provider data if applicable.
-     * Supports partial matching for UUID, email, first name, last name, or SAML provider name using a search term.
+     * Filters out admin/super admin roles.
+     * Applies verification / banned filters.
+     * Excludes soft-deleted users.
      *
-     * @param string $filter The filter criterion (e.g., verified, banned).
-     * @param string|null $searchTerm An optional partial search term to match user attributes or SAML provider name.
      *
-     * @return User[] A list of matched users, ordered by creation date in descending order.
+     * @return User[]
      */
-    public function searchWithFilter(string $filter, ?string $sort, ?string $order, ?string $searchTerm = null): array
-    {
+    public function searchWithFilter(
+        string $filter,
+        ?string $sort,
+        ?string $order,
+        ?string $searchTerm = null
+    ): array {
         $qb = $this->createQueryBuilder('u');
 
-        $qb->where('u.roles NOT LIKE :role')
-            ->setParameter('role', '%ROLE_ADMIN%');
+        $qb->where('u.roles NOT LIKE :admin')
+            ->andWhere('u.roles NOT LIKE :superAdmin')
+            ->setParameter('admin', '%ROLE_ADMIN%')
+            ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%');
+
 
         // Add filters based on verification status
         if ($filter === UserVerificationStatus::VERIFIED->value) {
@@ -176,6 +156,57 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getResult();
     }
 
+    /**
+     * @return array<int, User>
+     */
+    public function searchAdminUsers(
+        string $filter,
+        ?string $sort,
+        ?string $order,
+        ?string $searchTerm = null
+    ): array {
+        $qb = $this->createQueryBuilder('u');
+
+        $qb->andWhere(
+            $qb->expr()->orX(
+                'u.roles LIKE :admin',
+                'u.roles LIKE :superAdmin'
+            )
+        )
+            ->setParameter('admin', '%ROLE_ADMIN%')
+            ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%');
+
+        // Add filters based on verification status
+        if ($filter === UserVerificationStatus::VERIFIED->value) {
+            $qb->andWhere('u.isVerified = :Verified')
+                ->setParameter(UserVerificationStatus::VERIFIED->value, true);
+        } elseif ($filter === UserVerificationStatus::BANNED->value) {
+            $qb->andWhere('u.bannedAt IS NOT NULL');
+        }
+
+        // Exclude deleted users
+        $qb->andWhere($qb->expr()->isNull('u.deletedAt'));
+
+        $qb->leftJoin('u.userExternalAuths', 'ua');
+
+        // Apply the search term, if provided
+        if ($searchTerm) {
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    'u.uuid LIKE :searchTerm',
+                    'u.email LIKE :searchTerm',
+                    'u.first_name LIKE :searchTerm',
+                    'u.last_name LIKE :searchTerm',
+                )
+            )->setParameter('searchTerm', '%' . $searchTerm . '%');
+        }
+
+        $field = $sort === 'uuid' ? 'u.uuid' : 'u.createdAt';
+        // Order by creation date (newest first)
+        return $qb->orderBy($field, $order)
+            ->getQuery()
+            ->getResult();
+    }
 
     /**
      * @throws NonUniqueResultException
@@ -196,138 +227,166 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
     /**
-     * @throws NonUniqueResultException
-     */
-    public function findOneByUUIDAdmin(string $uuid): ?User
-    {
-        $qb = $this->createQueryBuilder('u');
-
-        $qb->where('u.roles LIKE :role')
-        ->setParameter('role', '%ROLE_ADMIN%')
-            ->andWhere('u.uuid = :uuid')
-            ->setParameter('uuid', $uuid)
-            ->andWhere('u.bannedAt IS NULL')
-            ->andWhere('u.deletedAt IS NULL')
-            ->andWhere('u.isDisabled = false');
-
-        // Execute the query and return the result
-        return $qb->getQuery()->getOneOrNullResult();
-    }
-
-    /**
+     * Count users, optionally filtering only admins.
+     *
      * @throws NonUniqueResultException
      * @throws NoResultException
      */
-    public function countAllUsersExcludingAdmin(?string $searchTerm = null, ?string $filter = null): int
-    {
+    public function countUsers(
+        ?string $searchTerm = null,
+        ?string $filter = null,
+        bool $onlyAdmins = false // default false → counts all users
+    ): int {
         $qb = $this->createQueryBuilder('u');
         $qb->select('COUNT(u.id)')
-            ->where('u.roles NOT LIKE :adminRole')
-            ->andWhere($qb->expr()->isNull('u.deletedAt'))
-            ->setParameter('adminRole', '%ROLE_ADMIN%');
+            ->andWhere($qb->expr()->isNull('u.deletedAt')); // exclude deleted users
 
-        if ($searchTerm !== null) {
+        // Filter by role if counting only admins (including super admins)
+        if ($onlyAdmins) {
             $qb->andWhere(
-                '(' .
-                'u.uuid LIKE :searchTerm OR ' .
-                'u.email LIKE :searchTerm OR ' .
-                'u.first_name LIKE :searchTerm OR ' .
-                'u.last_name LIKE :searchTerm' .
-                ')'
+                $qb->expr()->orX(
+                    'u.roles LIKE :adminRole'
+                )
             )
-                ->setParameter('searchTerm', '%' . $searchTerm . '%');
+                ->setParameter('adminRole', '%ROLE_ADMIN%');
+        } else {
+            // Exclude admin & super admin when counting all other users
+            $qb->andWhere('u.roles NOT LIKE :adminRole')
+                ->andWhere('u.roles NOT LIKE :superAdminRole')
+                ->setParameter('adminRole', '%ROLE_ADMIN%')
+                ->setParameter('superAdminRole', '%ROLE_SUPER_ADMIN%');
         }
 
+        // Apply search term if provided
+        if ($searchTerm !== null) {
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    'u.uuid LIKE :searchTerm',
+                    'u.email LIKE :searchTerm',
+                    'u.first_name LIKE :searchTerm',
+                    'u.last_name LIKE :searchTerm'
+                )
+            )->setParameter('searchTerm', '%' . $searchTerm . '%');
+        }
+
+        // Apply verification/banned filter
         if ($filter === UserVerificationStatus::VERIFIED->value) {
-            $qb->andWhere('u.isVerified = :Verified')
-                ->setParameter('Verified', true);
+            $qb->andWhere('u.isVerified = :verified')
+                ->setParameter('verified', true);
         } elseif ($filter === UserVerificationStatus::BANNED->value) {
             $qb->andWhere('u.bannedAt IS NOT NULL');
         }
 
-        return (int) $qb->getQuery()->getSingleScalarResult();
+        return (int)$qb->getQuery()->getSingleScalarResult();
     }
 
     /**
+     * Count verified users, optionally including only admins.
+     *
      * @throws NonUniqueResultException
      * @throws NoResultException
      */
-    public function countVerifiedUsers(?string $searchTerm = null): int
-    {
+    public function countVerifiedUsers(
+        ?string $searchTerm = null,
+        bool $onlyAdmins = false // default false → counts normal verified users
+    ): int {
         $qb = $this->createQueryBuilder('u');
         $qb->select('COUNT(u.id)')
-            ->where('u.isVerified = :Verified')
-            ->andWhere('u.roles NOT LIKE :adminRole')
+            ->andWhere('u.isVerified = :verified')
             ->andWhere($qb->expr()->isNull('u.deletedAt'))
-            ->setParameter('Verified', true)
-            ->setParameter('adminRole', '%ROLE_ADMIN%');
+            ->setParameter('verified', true);
+
+        // Filter by role if counting only admins (including super admins)
+        if ($onlyAdmins) {
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    'u.roles LIKE :adminRole',
+                )
+            )
+                ->setParameter('adminRole', '%ROLE_ADMIN%');
+        } else {
+            // Exclude admin & super admin when counting all other users
+            $qb->andWhere('u.roles NOT LIKE :adminRole')
+                ->andWhere('u.roles NOT LIKE :superAdminRole')
+                ->setParameter('adminRole', '%ROLE_ADMIN%')
+                ->setParameter('superAdminRole', '%ROLE_SUPER_ADMIN%');
+        }
 
         if ($searchTerm !== null) {
             $qb->andWhere(
-                '(' .
-                'u.uuid LIKE :searchTerm OR ' .
-                'u.email LIKE :searchTerm OR ' .
-                'u.first_name LIKE :searchTerm OR ' .
-                'u.last_name LIKE :searchTerm' .
-                ')'
-            )
-                ->setParameter('searchTerm', '%' . $searchTerm . '%');
+                $qb->expr()->orX(
+                    'u.uuid LIKE :searchTerm',
+                    'u.email LIKE :searchTerm',
+                    'u.first_name LIKE :searchTerm',
+                    'u.last_name LIKE :searchTerm'
+                )
+            )->setParameter('searchTerm', '%' . $searchTerm . '%');
         }
 
-        return (int) $qb->getQuery()->getSingleScalarResult();
+        return (int)$qb->getQuery()->getSingleScalarResult();
     }
 
     /**
+     * Count banned users, optionally including only admins.
+     *
      * @throws NonUniqueResultException
      * @throws NoResultException
      */
-    public function countBannedUsers(?string $searchTerm = null): int
-    {
+    public function countBannedUsers(
+        ?string $searchTerm = null,
+        bool $onlyAdmins = false // default false → counts normal banned users
+    ): int {
         $qb = $this->createQueryBuilder('u');
         $qb->select('COUNT(u.id)')
-            ->where('u.bannedAt IS NOT NULL')
+            ->andWhere('u.bannedAt IS NOT NULL')
             ->andWhere($qb->expr()->isNull('u.deletedAt'));
 
-        if ($searchTerm !== null) {
+        // Filter by role if counting only admins (including super admins)
+        if ($onlyAdmins) {
             $qb->andWhere(
-                '(' .
-                'u.uuid LIKE :searchTerm OR ' .
-                'u.email LIKE :searchTerm OR ' .
-                'u.first_name LIKE :searchTerm OR ' .
-                'u.last_name LIKE :searchTerm' .
-                ')'
+                $qb->expr()->orX(
+                    'u.roles LIKE :adminRole',
+                )
             )
-                ->setParameter('searchTerm', '%' . $searchTerm . '%');
+                ->setParameter('adminRole', '%ROLE_ADMIN%');
+        } else {
+            // Exclude admin & super admin when counting all other users
+            $qb->andWhere('u.roles NOT LIKE :adminRole')
+                ->andWhere('u.roles NOT LIKE :superAdminRole')
+                ->setParameter('adminRole', '%ROLE_ADMIN%')
+                ->setParameter('superAdminRole', '%ROLE_SUPER_ADMIN%');
         }
 
-        return (int) $qb->getQuery()->getSingleScalarResult();
+        if ($searchTerm !== null) {
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    'u.uuid LIKE :searchTerm',
+                    'u.email LIKE :searchTerm',
+                    'u.first_name LIKE :searchTerm',
+                    'u.last_name LIKE :searchTerm'
+                )
+            )->setParameter('searchTerm', '%' . $searchTerm . '%');
+        }
+
+        return (int)$qb->getQuery()->getSingleScalarResult();
     }
 
-    public function findAdmin(): ?User
-    {
-        $qb = $this->createQueryBuilder('u');
-        $qb->andWhere('u.roles LIKE :role')
-            ->setParameter(
-                'role',
-                '%ROLE_ADMIN%'
-            ) // TODO Change this later for "SUPER_ADMIN" to make multiple admins on the platform
-            ->setMaxResults(1);
-
-        return $qb->getQuery()->getOneOrNullResult();
-    }
-
-    /**
-     * @return User[]
-     */
-    public function findAllPortalAccountsExcludingAdmin(): array
+    public function findSuperAdmin(): ?User
     {
         return $this->createQueryBuilder('u')
-            ->join('u.userExternalAuths', 'a')
-            ->where('a.provider = :provider')
-            ->andWhere('u.roles NOT LIKE :role')
-            ->setParameter('provider', UserProvider::PORTAL_ACCOUNT->value)
-            ->setParameter('role', '%ROLE_ADMIN%')
+            ->where('u.roles LIKE :role')
+            ->setParameter('role', '%"' . AdminRoleType::ROLE_SUPER_ADMIN->value . '"%')
+            ->setMaxResults(1)
             ->getQuery()
-            ->getResult();
+            ->getOneOrNullResult();
+    }
+
+    public function findFirstUser(): ?User
+    {
+        return $this->createQueryBuilder('u')
+            ->orderBy('u.id', 'ASC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 }

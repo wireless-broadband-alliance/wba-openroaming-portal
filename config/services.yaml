@@ -1,5 +1,8 @@
+# yaml-language-server: $schema=../vendor/symfony/dependency-injection/Loader/schema/services.schema.json
+
 # This file is the entry point to configure your own services.
 # Files in the packages/ subdirectory configure your dependencies.
+# See also https://symfony.com/doc/current/service_container/import.html
 
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
@@ -20,6 +23,8 @@ parameters:
     app.saml_idp_x509_cert: '%env(SAML_IDP_X509_CERT)%'
     app.saml_sp_entity_id: '%env(SAML_SP_ENTITY_ID)%'
     app.saml_sp_acs_url: '%env(SAML_SP_ACS_URL)%'
+    app.saml_identifier_attribute: '%env(string:SAML_IDENTIFIER_ATTRIBUTE)%'
+    app.saml_attribute_mapping: '%env(json:SAML_ATTRIBUTE_MAPPING)%'
     # JWT Configuration
     app.jwt_secret_key: '%env(JWT_SECRET_KEY)%'
     app.jwt_public_key: '%env(JWT_PUBLIC_KEY)%'
@@ -27,7 +32,17 @@ parameters:
     # Metrics configuration
     app.metrics_enabled: '%env(bool:METRICS_ENABLED)%'
     app.metrics_allowed_ips: '%env(string:METRICS_ALLOWED_IPS)%'
+    # DATABASES & other config details
+    app.database_url: '%env(resolve:DATABASE_URL)%'
+    app.database_freeradius_url: '%env(resolve:DATABASE_FREERADIUS_URL)%'
+    app.trusted_proxies: '%env(TRUSTED_PROXIES)%'
+    app.jwt_passphrase: '%env(JWT_PASSPHRASE)%'
+    # Default Project URI
+    app.default_uri: '%env(string:DEFAULT_URI)%'
 services:
+    App\EventListener\CheckDefaultUriListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.request, priority: 10 }
     App\EventListener\LocaleListener:
         tags:
             - { name: kernel.event_listener, event: kernel.request, priority: 20 }
@@ -76,3 +91,7 @@ services:
 
 
     App\Service\PrometheusStorageService: ~
+
+    # Bind SessionInterface globally to the session from RequestStack
+    Symfony\Component\HttpFoundation\Session\SessionInterface:
+        factory: [ '@request_stack', 'getSession' ]

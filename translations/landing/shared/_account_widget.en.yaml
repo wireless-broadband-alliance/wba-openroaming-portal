@@ -25,4 +25,4 @@ dangerZone:
     title: 'Danger Zone'
     deleteAccount: 'Delete Account'
     deleteAccountWarningMessage: 'Warning: You are about to delete your own account. This action is irreversible. Are you sure you want to proceed?'
-    deleteAccountWarningMessageLocal: 'Warning: You are about to delete your own account. This action is irreversible. We will send you a code to confirm this action. Are you sure you want to proceed?'
+    deleteAccountWarningMessageLocal: "Warning: You are about to delete your own account. This action is irreversible. It's necessary to confirm a action for this step. Are you sure you want to proceed?"

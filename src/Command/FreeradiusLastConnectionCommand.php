@@ -48,7 +48,7 @@ class FreeradiusLastConnectionCommand extends Command
         $output->writeln('<comment>Starting Freeradius backup at ' . date('Y-m-d H:i:s') . '</comment>');
 
         // Check FreeRadius DB connection
-        $result = $this->freeradiusConnectionService->checkConnection();
+        $result = $this->freeradiusConnectionService->checkDBConnection();
         if ($result['success'] === false) {
             $output->writeln('<error>' . $result['message'] . '</error>');
 
@@ -105,9 +105,9 @@ class FreeradiusLastConnectionCommand extends Command
                 }
 
                 foreach ($radAcct as $row) {
-                    $username = $row->getUsername() ?? null;
-                    $startTime = $row->getAcctStartTime() ?? null;
-                    $stopTime = $row->getAcctStopTime() ?? null;
+                    $username = $row->getUsername();
+                    $startTime = $row->getAcctStartTime();
+                    $stopTime = $row->getAcctStopTime();
 
                     if (!$username || !$startTime || !$stopTime) {
                         continue;

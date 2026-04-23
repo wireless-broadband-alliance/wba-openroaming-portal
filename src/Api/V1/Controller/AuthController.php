@@ -43,7 +43,7 @@ class AuthController extends AbstractController
     public function __construct(
         private readonly UserRepository $userRepository,
         private readonly UserPasswordHasherInterface $passwordHasher,
-        private readonly jwtTokenGenerator $tokenGenerator,
+        private readonly JWTTokenGenerator $JWTTokenGenerator,
         private readonly CaptchaValidator $captchaValidator,
         private readonly EntityManagerInterface $entityManager,
         private readonly GoogleController $googleController,
@@ -134,6 +134,15 @@ class AuthController extends AbstractController
             return $statusCheckerResponse->toResponse();
         }
 
+        // Check if the email is valid
+        if (!$this->userStatusChecker->isValidEmail($user->getEmail())) {
+            return new BaseResponse(
+                403,
+                null,
+                'Your email domain is not allowed to use this platform.'
+            )->toResponse();
+        }
+
         $twoFAEnforcementResult = $this->twoFAAPIService->twoFAEnforcementChecker(
             $user,
             $request->attributes->get('_route')
@@ -189,7 +198,7 @@ class AuthController extends AbstractController
         }
 
         // Generate JWT Token
-        $token = $this->tokenGenerator->generateToken($user);
+        $token = $this->JWTTokenGenerator->generateToken($user);
 
         if (is_array($token) && $token['success'] === false) {
             $errorMessage = $token['error'] ?? 'Unknown error generating token';

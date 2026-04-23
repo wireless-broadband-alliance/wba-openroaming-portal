@@ -1,0 +1,32 @@
+{# Certificate Expiration Warnings #}
+<div>
+    {% set certTag = certStatusTag() %}
+
+    {% if certTag is not null %}
+        {% if certTag == 0 %}
+            {{ include('shared/_toast.html.twig', {
+                message: 'expiration.warning'|trans({}, '_certificates'),
+                toast_type: 'toast-warning-dashboard',
+            }) }}
+        {% elseif certTag == 1 %}
+            {{ include('shared/_toast.html.twig', {
+                message: 'expiration.expired'|trans({}, '_certificates'),
+                toast_type: 'toast-error-dashboard',
+            }) }}
+        {% endif %}
+    {% endif %}
+</div>
+
+{% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE')) %}
+<div class="w-full px-4 py-8 space-y-12">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+        {# CERTIFICATES #}
+        {{ include('dashboard/shared/settings_actions/certificatesManagement/partials/_certificates.html.twig') }}
+    </div>
+</div>
+{% endif %}
+
+<div data-controller="certificates-content" class="w-full px-4 py-8 space-y-6">
+    {# Certificates Content #}
+    {{ include('dashboard/shared/settings_actions/certificatesManagement/partials/_certificates_content_info.html.twig') }}
+</div>

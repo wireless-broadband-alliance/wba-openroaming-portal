@@ -29,6 +29,8 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use libphonenumber\NumberParseException;
+use libphonenumber\PhoneNumber;
+use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Random\RandomException;
@@ -150,10 +152,8 @@ class SecurityController extends AbstractController
         }
 
         $dto->requirePassword = true;
-
         $session = $this->requestStack->getSession();
         $lastMethod = $session->get('last_login_method');
-
         if ($lastMethod) {
             $dto->loginMethod = $lastMethod;
         }
@@ -285,8 +285,25 @@ class SecurityController extends AbstractController
                     );
                 }
             } else {
-                $phoneNumber = '+' . $loginChoiceDTO->phoneNumber->getCountryCode() .
-                    $loginChoiceDTO->phoneNumber->getNationalNumber();
+                if (!$loginChoiceDTO->phoneNumber instanceof PhoneNumber) {
+                    $this->addFlash(
+                        'error',
+                        $this->translator->trans('invalidPhoneNumber', [], 'controllers')
+                    );
+                    return $this->redirectToRoute('app_login_magic');
+                }
+
+                $countryCode = $loginChoiceDTO->phoneNumber->getCountryCode();
+                $nationalNumber = $loginChoiceDTO->phoneNumber->getNationalNumber();
+                if (!$countryCode || !$nationalNumber) {
+                    $this->addFlash(
+                        'error',
+                        $this->translator->trans('phoneNumberRequired', [], 'controllers')
+                    );
+                    return $this->redirectToRoute('app_login_magic');
+                }
+
+                $phoneNumber = sprintf('+%s%s', $countryCode, $nationalNumber);
                 $loginUser = $this->userRepository->findOneBy(['uuid' => $phoneNumber]);
                 if ($loginUser instanceof User) {
                     if ($loginUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value) {
@@ -460,22 +477,67 @@ class SecurityController extends AbstractController
         $data = $this->getSettings->getSettings();
 
         // Last username entered by the user (this will be empty if the user clicked the verification link)
-        $email = $request->request->get('email') ?? $request->query->get('email');
+        $uuid = (string)$request->request->get('uuid');
+        $email = (string)$request->request->get('email');
         $phoneNumber = $request->request->get('phoneNumber') ?? $request->query->get('phoneNumber');
-        if (!empty($email)) {
-            $lastUsername = $email;
-        } elseif (!empty($phoneNumber)) {
-            $lastUsername = $phoneNumber;
-        } else {
-            // Fallback to Symfony's AuthenticationUtils
-            $lastUsername = $this->authenticationUtils->getLastUsername();
+
+        $resolved = null;
+        if ($uuid !== '' && $uuid !== '0') {
+            $resolved = $this->userProviderDetectorResolverService->resolve($uuid);
         }
 
         // Create the DTO with injected default regions and required password for this login method
         $dto = new LoginChoiceDTO();
+        $phoneUtil = PhoneNumberUtil::getInstance();
+        $defaultRegion = $data[SettingName::DEFAULT_REGION_PHONE_INPUTS->value]['value'];
+
+        if ($email !== '' && $email !== '0') {
+            $dto->email = $email;
+        } elseif (!empty($phoneNumber)) {
+            try {
+                $dto->phoneNumber = $phoneUtil->parse((string)$phoneNumber, $defaultRegion);
+            } catch (NumberParseException) {
+                $dto->phoneNumber = null;
+            }
+        } elseif ($resolved && $resolved['uuidType'] === UserProvider::EMAIL->value) {
+            $dto->email = $uuid;
+        } elseif ($resolved && $resolved['uuidType'] === UserProvider::PHONE_NUMBER->value) {
+            try {
+                $dto->phoneNumber = $phoneUtil->parse($uuid, $defaultRegion);
+            } catch (NumberParseException) {
+                $dto->phoneNumber = null;
+            }
+        }
+
+        $emailMethod = $data[SettingName::AUTH_METHOD_REGISTER_ENABLED->value]['value'];
+        $phoneNumberMethod = $data[SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value]['value'];
+        if ($emailMethod === 'false' && $phoneNumberMethod) {
+            $dto->loginMethod = UserProvider::PHONE_NUMBER->value;
+            $dto->requireLoginMethod = false;
+        } elseif ($emailMethod === 'true' && !$phoneNumberMethod) {
+            $dto->loginMethod = UserProvider::EMAIL->value;
+            $dto->requireLoginMethod = false;
+        } else {
+            $dto->loginMethod = UserProvider::EMAIL->value;
+            $dto->requireLoginMethod = true;
+        }
+
+        $lastUsername = '';
+        if (!in_array($dto->email, [null, '', '0'], true)) {
+            $lastUsername = $dto->email;
+        } elseif ($dto->phoneNumber instanceof PhoneNumber) {
+            $lastUsername = $phoneUtil->format(
+                $dto->phoneNumber,
+                PhoneNumberFormat::INTERNATIONAL
+            );
+        }
+
         $dto->requirePassword = true;
-        $dto->requireLoginMethod = false;
-        $dto->loginMethod = UserProvider::EMAIL->value;
+        $session = $this->requestStack->getSession();
+        $lastMethod = $session->get('last_login_method');
+        if ($lastMethod) {
+            $dto->loginMethod = $lastMethod;
+        }
 
         // Create the form bound to the DTO
         $form = $this->createForm(LoginType::class, $dto);

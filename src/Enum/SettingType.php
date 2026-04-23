@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Enum;
 
 enum SettingType: string
@@ -14,6 +16,7 @@ enum SettingType: string
     case SettingTwoFA = 'settingTwoFA';
     case SettingSMS = 'settingSMS';
     case SettingSchedule = 'settingSchedule';
+    case SettingsReturnApps = 'settingReturnApps';
 
     public function getTranslationKey(): string
     {

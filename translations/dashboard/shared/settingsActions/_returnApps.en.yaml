@@ -1,0 +1,16 @@
+enableTitle: 'Return to App'
+packageName: 'Android Package Name'
+fingerprints: 'Fingerprints'
+fingerprintsDescription: 'Unique identifiers used to recognize devices in the Return to Apps'
+addFingerprint: 'Add Fingerprint'
+idIos: 'IOS Team & Bundle ID'
+fingerprintDescription: 'Unique identifiers used to recognize devices in the Return to Apps'
+info_details:
+  title: 'Return Apps Endpoints'
+  description: 'To verify your Return Apps configuration, make sure these endpoints are accessible:'
+  android_label: 'Android'
+  android_info: 'Returns the SHA256 fingerprints and package name for app verification.'
+  ios_label: 'iOS'
+  ios_info: 'Returns the App Site Association file for iOS app verification.'
+  success_message: 'If these endpoints return the expected JSON, your app linking configuration is correct.'
+  email_generation_message: "This setup will also generate a new email designed for the app registration flow via the registration APIs."

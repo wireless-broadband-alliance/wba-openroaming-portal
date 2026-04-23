@@ -1,0 +1,169 @@
+{% import 'dashboard/shared/_sort_arrow.html.twig' as sharedSort %}
+
+{{ include('dashboard/shared/_add_domain_blacklist.html.twig') }}
+
+{# Domains Blacklist table #}
+<div class="pt-5 pb-1 text-left space-y-3 rounded-xl bg-white">
+    <div class="w-full"
+         data-controller="domain-blacklist"
+    >
+        <div class="sm:w-auto px-5 py-4">
+            <div class="flex flex-col lg:flex-row justify-between items-center space-y-6 lg:space-y-0 sm:space-x-4">
+
+                {# Left Search Filters #}
+                <div class="flex flex-col md:flex-row sm:items-center gap-4 sm:gap-6">
+                    <a href="{{ path('admin_dashboard_settings_domains', {filter: 'all', u: app.request.query.get('d')}) }}"
+                       class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'all' or app.request.query.get('filter') == constant('App\\Enum\\DomainSourceStatus::ALL').value %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
+                        <h1 class="px-2">
+                            {{ 'all'|trans({}, '_blacklist') }}
+                        </h1>
+                        <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-veryDarkButton rounded-md group-hover:text-white text-center transition-all duration-100">
+                            {{ allDomainsCount }}
+                        </div>
+                    </a>
+                    <a href="{{ path('admin_dashboard_settings_domains', {filter: 'exact', u: app.request.query.get('d')}) }}"
+                       class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == 'exact' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
+                        <h1 class="px-2">
+                            {{ 'exact'|trans({}, '_blacklist') }}
+                        </h1>
+                        <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-veryDarkButton rounded-md group-hover:text-white text-center transition-all duration-100">
+                            {{ exactDomainsCount }}
+                        </div>
+                    </a>
+                    <a href="{{ path('admin_dashboard_settings_domains', {filter: 'subdomain', u: app.request.query.get('d')}) }}"
+                       class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == 'subdomain' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
+                        <h1 class="px-2">
+                            {{ 'subdomain'|trans({}, '_blacklist') }}
+                        </h1>
+                        <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-veryDarkButton rounded-md group-hover:text-white text-center transition-all duration-100">
+                            {{ subdomainDomainsCount }}
+                        </div>
+                    </a>
+                </div>
+
+                {# Midle Search Bar #}
+                <div class="w-full md:w-3/6">
+                    <form action="{{ path('admin_dashboard_settings_domains') }}" method="GET">
+
+                        <div class="flex flex-row items-center border rounded-md">
+                            {# Search Icon #}
+                            <button type="submit">
+                                <svg class="w-5 mx-3 text-gray-400" fill="none" stroke="currentColor"
+                                     stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                                     aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
+                                </svg>
+                            </button>
+                            {# Search Input #}
+                            <label class="w-full">
+                                <input type="text"
+                                       class="form-widget w-full p-2 bg-transparent border-none outline-none"
+                                       placeholder= {{ 'searchDomains'|trans({}, '_blacklist') }} name="u"
+                                       value="{{ app.request.query.get('u', '') }}">
+                            </label>
+                            {# Hidden Filter Input #}
+                            <input type="hidden" name="filter" value="{{ app.request.query.get('filter', 'all') }}">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto max-w-full mt-3">
+            <div class="w-full items-start md:mx-auto space-y-4 sm:space-y-0">
+                {# Table Content #}
+                <table class="w-full items-start">
+                    <thead class="text-sm text-gray-700 bg-veryLightGreen">
+                    <tr>
+                        <th scope="col" class="p-4 pl-8">
+                            <div class="flex items-center gap-2">
+                                        <span class="font-semibold whitespace-nowrap">
+                                            {{ 'pattern'|trans({}, '_blacklist') }}
+                                        </span>
+                                <a href="{{ path('admin_dashboard_settings_domains', {...app.request.query.all, sortDomainsBlacklist: 'pattern', orderDomainsBlacklist: activeSortDomainsBlacklist == 'pattern' and activeOrderDomainsBlacklist == 'asc' ? 'desc' : 'asc'}) }}"
+                                   class="p-1 hover:shadow-md rounded-lg cursor-pointer">
+                                    {{ sharedSort.sortArrow('pattern', activeSortDomainsBlacklist, activeOrderDomainsBlacklist) }}
+                                </a>
+                            </div>
+                        </th>
+
+                        <th scope="col" class="p-4 pl-8">
+                            <div class="flex items-center gap-2">
+                                        <span class="font-semibold whitespace-nowrap">
+                                            {{ 'type'|trans({}, '_blacklist') }}
+                                        </span>
+                                <a href="{{ path('admin_dashboard_settings_domains', {...app.request.query.all, sortDomainsBlacklist: 'type', orderDomainsBlacklist: activeSortDomainsBlacklist == 'type' and activeOrderDomainsBlacklist == 'asc' ? 'desc' : 'asc'}) }}"
+                                   class="p-1 hover:shadow-md rounded-lg cursor-pointer">
+                                    {{ sharedSort.sortArrow('type', activeSortDomainsBlacklist, activeOrderDomainsBlacklist) }}
+                                </a>
+                            </div>
+                        </th>
+
+                        <th scope="col" class="p-4 pl-8">
+                            <div class="flex items-center gap-2">
+                                        <span class="font-semibold whitespace-nowrap">
+                                            {{ 'createdAt'|trans({}, '_blacklist') }}
+                                        </span>
+                                <a href="{{ path('admin_dashboard_settings_domains', {...app.request.query.all, sortDomainsBlacklist: 'createdAt', orderDomainsBlacklist: activeSortDomainsBlacklist == 'createdAt' and activeOrderDomainsBlacklist == 'asc' ? 'desc' : 'asc'}) }}"
+                                   class="p-1 hover:shadow-md rounded-lg cursor-pointer">
+                                    {{ sharedSort.sortArrow('createdAt', activeSortDomainsBlacklist, activeOrderDomainsBlacklist) }}
+                                </a>
+                            </div>
+                        </th>
+
+                        <th scope="col" class="p-4 pl-8">
+                            <div class="flex items-center gap-2">
+                                        <span class="font-semibold whitespace-nowrap">
+                                            {{ 'lastSeenAt'|trans({}, '_blacklist') }}
+                                        </span>
+                                <a href="{{ path('admin_dashboard_settings_domains', {...app.request.query.all, sortDomainsBlacklist: 'lastSeenAt', orderDomainsBlacklist: activeSortDomainsBlacklist == 'lastSeenAt' and activeOrderDomainsBlacklist == 'asc' ? 'desc' : 'asc'}) }}"
+                                   class="p-1 hover:shadow-md rounded-lg cursor-pointer">
+                                    {{ sharedSort.sortArrow('lastSeenAt', activeSortDomainsBlacklist, activeOrderDomainsBlacklist) }}
+                                </a>
+                            </div>
+                        </th>
+
+                        <th scope="col" class="px-6 py-3"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for domain in domains %}
+                        {{ include('dashboard/shared/_domains_blacklist.html.twig', {domain: domain}) }}
+                    {% else %}
+                        <tr>
+                            <td colspan="7">
+                                <div class="flex flex-row justify-center items-start mt-2">
+                                    <div class="pill-error">
+                                        {% if searchTerm %}
+                                            {{ 'noDomainsFoundWith'|trans({}, '_blacklist') }} "{{ searchTerm }}"
+                                        {% else %}
+                                            {{ 'noDomainsFound'|trans({}, '_blacklist') }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {# Domains Table Pagination #}
+        <div class="m-8">
+            <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
+            {{ include('dashboard/shared/pagination/_pagination_tables.html.twig', {
+                label: 'domainsPerPage'|trans({}, '_blacklist'),
+                route: 'admin_dashboard_settings_domains',
+                occurrencies: allDomainsCount,
+                totalPages: totalBlacklistPages},
+            ) }}
+        </div>
+
+        {# Edit Domains Modal #}
+        <div>
+            {{ include('dashboard/shared/_modal_edit_domain_blacklist.html.twig') }}
+        </div>
+    </div>
+</div>

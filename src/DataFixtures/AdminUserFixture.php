@@ -2,11 +2,14 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\OTPcode;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\DefaultUser;
+use App\Enum\TwoFAType;
 use App\Enum\UserProvider;
+use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Service\EventActions;
 use DateTime;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -27,10 +30,20 @@ class AdminUserFixture extends Fixture
         $admin->setUuid(DefaultUser::ADMIN->value);
         $admin->setEmail(DefaultUser::ADMIN->value);
         $admin->setPassword($this->userPasswordHashed->hashPassword($admin, 'gnimaornepo'));
-        $admin->setRoles(['ROLE_ADMIN']);
+        $admin->setRoles(['ROLE_SUPER_ADMIN']);
+        $admin->setPermissions([]);
         $admin->setIsVerified(true);
         $admin->setCreatedAt(new DateTime());
+        $admin->setTwoFAtype(UserTwoFactorAuthenticationStatus::EMAIL->value);
         $manager->persist($admin);
+
+        //Create OTP Code
+        $otpCode = new OTPcode();
+        $otpCode->setCode("123456");
+        $otpCode->setCreatedAt(new DateTime());
+        $otpCode->setUser($admin);
+        $otpCode->setActive(true);
+        $manager->persist($otpCode);
 
         // Create and set up the UserExternalAuth entity
         $userExternalAuth = new UserExternalAuth();

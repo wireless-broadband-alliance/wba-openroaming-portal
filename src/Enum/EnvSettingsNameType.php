@@ -1,0 +1,15 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Enum;
+
+enum EnvSettingsNameType: string
+{
+    case DATABASE_URL = 'DATABASE_URL';
+    case DATABASE_FREERADIUS_URL = 'DATABASE_FREERADIUS_URL';
+    case TRUSTED_PROXIES = 'TRUSTED_PROXIES';
+    case TURNSTILE_KEY  = 'TURNSTILE_KEY';
+    case TURNSTILE_SECRET = 'TURNSTILE_SECRET';
+    case JWT_PASSPHRASE = 'JWT_PASSPHRASE';
+}

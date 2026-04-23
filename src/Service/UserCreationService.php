@@ -2,8 +2,11 @@
 
 namespace App\Service;
 
+use App\DTO\UserAddDTO;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
+use App\Enum\AdminPermissionsType;
+use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
@@ -18,6 +21,7 @@ readonly class UserCreationService
     public function __construct(
         private EntityManagerInterface $entityManager,
         private EventActions $eventActions,
+        private UserPasswordHasherInterface $userPasswordHasher,
     ) {
     }
 
@@ -30,7 +34,7 @@ readonly class UserCreationService
 
         // Set the hashed password for the user
         $user->setPassword($password);
-        $user->setTwoFAcode((string) random_int(100000, 999999));
+        $user->setTwoFAcode((string)random_int(100000, 999999));
         $user->setTwoFAcodeGeneratedAt(new DateTime());
         $user->setTwoFAcodeIsActive(true);
         $user->setCreatedAt(new DateTime());
@@ -74,6 +78,62 @@ readonly class UserCreationService
                 "+" . $user->getPhoneNumber()->getCountryCode() . $user->getPhoneNumber()->getNationalNumber()
             );
         }
+        return $user;
+    }
+
+    /**
+     * Maps the DTO data back to the User entity
+     * @throws RandomException
+     */
+    public function createAdminUser(UserAddDTO $userAddDTO): User
+    {
+        $user = new User();
+        $userAuths = new UserExternalAuth();
+
+        if ($userAddDTO->accountType === UserProvider::EMAIL->value && $userAddDTO->email) {
+            $user->setEmail($userAddDTO->email);
+            $user->setUuid($userAddDTO->email);
+            $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
+            $userAuths->setProviderId(UserProvider::EMAIL->value);
+            $userAuths->setUser($user);
+        } elseif ($userAddDTO->accountType === UserProvider::PHONE_NUMBER->value && $userAddDTO->phoneNumber) {
+            $user->setPhoneNumber($userAddDTO->phoneNumber);
+            $user->setUuid(
+                '+' .
+                $userAddDTO->phoneNumber->getCountryCode() .
+                $userAddDTO->phoneNumber->getNationalNumber()
+            );
+            $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
+            $userAuths->setProviderId(UserProvider::PHONE_NUMBER->value);
+            $userAuths->setUser($user);
+        }
+
+        $user->setRoles([AdminRoleType::ROLE_ADMIN->value]);
+        $user->setIsVerified(true);
+        $user->setFirstName($userAddDTO->firstName);
+        $user->setLastName($userAddDTO->lastName);
+        $user->setForgotPasswordRequest(true);
+        $user->setTwoFAcode((string)random_int(100000, 999999));
+        $user->setTwoFAcodeGeneratedAt(new DateTime());
+        $user->setTwoFAcodeIsActive(true);
+        $user->setCreatedAt(new DateTime());
+
+        // Hash the password
+        $hashedPassword = $this->userPasswordHasher->hashPassword($user, $userAddDTO->password);
+        $user->setPassword($hashedPassword);
+
+        // Set permissions
+        $adminPermissions = $userAddDTO->adminPermissions();
+
+        // Example ["USER_ENGAGEMENT_WRITE", ...]
+        $permissionsArray = array_map(static fn(AdminPermissionsType $p) => $p->value, $adminPermissions);
+        $user->setPermissions($permissionsArray);
+
+        // Persist new user
+        $this->entityManager->persist($user);
+        $this->entityManager->persist($userAuths);
+        $this->entityManager->flush();
+
         return $user;
     }
 }

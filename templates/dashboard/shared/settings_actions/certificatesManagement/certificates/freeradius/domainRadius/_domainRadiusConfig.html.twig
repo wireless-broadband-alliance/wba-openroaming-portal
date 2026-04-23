@@ -1,0 +1,56 @@
+{{ form_start(formCertificateFreeradiusDomain) }}
+<div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+
+    {# Header #}
+    <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">
+        <twig:ux:icon class="w-5 h-5 text-primary" name="wba:upload-rounded"/>
+        <h5 class="text-lg font-semibold text-gray-800">
+            {{ 'certificate_domain_title'|trans({}, 'http_challenge') }}
+        </h5>
+    </div>
+
+    {# Body #}
+    <div class="px-6 py-6 bg-white space-y-6">
+
+        {# Warning Box #}
+        <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm rounded-md p-4">
+            {{ 'certificate_domain_warning'|trans({}, 'http_challenge') }}
+        </div>
+
+        {# Domain Field #}
+        <div class="space-y-2">
+
+            <p class="text-sm font-medium text-gray-700">
+                {{ 'domainDescription'|trans({}, 'http_challenge') }}
+            </p>
+
+            {{ form_label(
+                formCertificateFreeradiusDomain.domain,
+                'domainLabel'|trans({}, 'http_challenge'),
+                {label_attr: {class: 'font-semibold'}},
+            ) }}
+
+            {{ form_widget(
+                formCertificateFreeradiusDomain.domain,
+                {attr: {class: 'form-widget'}},
+            ) }}
+
+            <div class="text-red-500 text-sm ml-1">
+                {{ form_errors(formCertificateFreeradiusDomain.domain) }}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{# Submit Button #}
+<div class="flex justify-end pt-4">
+    <button
+            type="submit"
+            class="px-6 py-2.5 rounded-lg bg-primary text-white shadow-sm hover:bg-primary-dark transition"
+    >
+        {{ 'submit_domain'|trans({}, 'http_challenge') }}
+    </button>
+</div>
+
+{{ form_end(formCertificateFreeradiusDomain) }}

@@ -4,13 +4,20 @@
 /.env.*.local
 /config/secrets/prod/prod.decrypt.private.php
 /public/bundles/
-/var/
 /vendor/
 ###< symfony/framework-bundle ###
 
+# Required var exceptions for certificate generations and management
+var/*
+!var/certs/
+# Except any .gitkeep file under var/certs or subfolders
+var/certs/*
+!var/certs/.gitkeep
+!var/certs/**/.gitkeep
+
 ###> phpunit/phpunit ###
 /phpunit.xml
-.phpunit.result.cache
+/.phpunit.cache/
 ###< phpunit/phpunit ###
 
 ###> symfony/phpunit-bridge ###
@@ -21,27 +28,17 @@
 
 .idea/
 
-signing-keys/privkey.pem
+# Ignore everything inside signing-keys
+signing-keys/*
 
-signing-keys/cert.pem
-
-signing-keys/windowsKey.pfx
-
-signing-keys/ca.pem
-
-signing-keys/chain.pem
-signing-keys/fullchain.pem
-
-.env.martelado
+# Allow ONLY .gitkeep files
+!signing-keys/.gitkeep
+!signing-keys/ca/.gitkeep
 
 release-package/release.zip
 
 public/resources/uploaded/*
-!upload/.gitkeep
-
-assets/styles/randomRealmsColors.css
-
-DockerfileDev
+!public/resources/uploaded/.gitkeep
 
 pgp_public_key/*
 !pgp_public_key/.gitkeep
@@ -66,8 +63,9 @@ pgp_public_key/*
 
 geoLiteDB/GeoLite2-City.mmdb
 
-###> Command for DB reset for local testing ###
+###> Commands for local dev testing ###
 src/Command/ResetRadiusMarcelinaSettingsCommand.php
+src/Command/SeedUserRadiusProfilesCommand.php
 ###< Command for DB reset for local testing ###
 
 ###> symfony/asset-mapper ###
@@ -76,3 +74,16 @@ src/Command/ResetRadiusMarcelinaSettingsCommand.php
 /public/build/
 /node_modules/
 ###< symfony/asset-mapper ###
+
+###> DockerFileCleanedDev ###
+DockerfileCleanedDev
+###< DockerFileCleanedDev ###
+
+###> config/reference this page breaks phpstan with warnings of compatability, because of the project image ###
+config/reference.php
+supervisord.pid
+###< config/reference ###
+
+###> DockerFileCleanedDev ###
+DockerfileCleanedDev
+###< DockerFileCleanedDev ###

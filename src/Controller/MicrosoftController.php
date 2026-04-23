@@ -6,7 +6,6 @@ use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
-use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
@@ -20,6 +19,7 @@ use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
@@ -31,6 +31,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -62,8 +63,8 @@ class MicrosoftController extends AbstractController
     /**
      * @throws Exception
      */
-    #[Route('/connect/microsoft', name: 'connect_microsoft')]
-    public function connect(Request $request): RedirectResponse
+    #[Route('{type}/connect/microsoft', name: 'connect_microsoft', defaults: ['type' => FirewallType::LANDING->value])]
+    public function connect(Request $request, string $type): RedirectResponse
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         /** @var array<string, array{value: string, description: string}> $data */
@@ -97,36 +98,39 @@ class MicrosoftController extends AbstractController
         $previousLoggedID = $request->get('previousLoggedID');
 
         // Retrieve the "microsoft" client
-        $client = $this->clientRegistry->getClient('microsoft');
+        if ($type === FirewallType::DASHBOARD->value) {
+            $client = $this->clientRegistry->getClient('microsoft_dashboard');
+        } else {
+            $client = $this->clientRegistry->getClient('microsoft_landing');
+        }
 
         // Define the minimal required scopes
-        $options = [
-            'scope' => [
-                'wl.emails',
-                // 'wl.basic',
-                // 'wl.offline_access',
-                // 'wl.signin'
-            ],
-            'state' => json_encode(['previousLoggedID' => $previousLoggedID], JSON_THROW_ON_ERROR),
+        $state = [
+            'previousLoggedID' => $previousLoggedID,
         ];
 
         // Get the authorization URL with scopes
-        $redirectUrl = $client->getOAuth2Provider()->getAuthorizationUrl($options);
-
-        // Redirect the user to the authorization URL
-        return $this->redirect($redirectUrl);
+        return $client->redirect(
+            ['openid', 'profile', 'email', 'offline_access', 'User.Read'],
+            ['state' => json_encode($state, JSON_THROW_ON_ERROR)]
+        );
     }
 
     /**
-     * @throws IdentityProviderException
      * @throws Exception
      * @throws GuzzleException
      */
     #[Route('/connect/microsoft/check', name: 'connect_microsoft_check', methods: ['GET'])]
+    #[Route('/dashboard/connect/microsoft/check', name: 'dashboard_connect_microsoft_check', methods: ['GET'])]
     public function connectCheck(Request $request): RedirectResponse
     {
         // Retrieve the "microsoft" client
-        $client = $this->clientRegistry->getClient('microsoft');
+        $routeName = $request->attributes->get('_route');
+
+        $client = match ($routeName) {
+            'dashboard_connect_microsoft_check' => $this->clientRegistry->getClient('microsoft_dashboard'),
+            default => $this->clientRegistry->getClient('microsoft_landing'),
+        };
 
         $code = $request->query->get('code');
         if ($code === null) {
@@ -155,17 +159,20 @@ class MicrosoftController extends AbstractController
         $accessToken = $client->getOAuth2Provider()->getAccessToken('authorization_code', [
             'code' => $code,
         ]);
-        /** @phpstan-ignore-next-line */
-        $resourceOwner = $client->fetchUserFromToken($accessToken);
-        /** @phpstan-ignore-next-line */
-        $data = $resourceOwner->toArray();
-        /** @phpstan-ignore-next-line */
-        $microsoftUserId = $resourceOwner->getId();
-
-        // Map the relevant details from the returned $data array
-        $email = $data['emails']['preferred'] ?? $data['emails']['account'] ?? null;
-        $firstname = $data['first_name'] ?? null;
-        $lastname = $data['last_name'] ?? null;
+        $httpClient = new Client();
+        $response = $httpClient->get(
+            'https://graph.microsoft.com/v1.0/me',
+            [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $accessToken->getToken(),
+                ],
+            ]
+        );
+        $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+        $microsoftUserId = $data['id'] ?? null;
+        $email = $data['mail'] ?? $data['userPrincipalName'] ?? null;
+        $firstname = $data['givenName'] ?? null;
+        $lastname = $data['surname'] ?? null;
 
         // Check if the email is valid
         if (!$this->userStatusChecker->isValidEmail($email, UserProvider::MICROSOFT_ACCOUNT->value)) {
@@ -214,7 +221,10 @@ class MicrosoftController extends AbstractController
         // Authenticate the user
         $this->authenticateUserMicrosoft($user);
 
-        // Redirect the user to the landing page
+
+        if ($routeName === 'dashboard_connect_microsoft_check') {
+            return $this->redirectToRoute('admin_page');
+        }
         return $this->redirectToRoute('app_landing');
     }
 

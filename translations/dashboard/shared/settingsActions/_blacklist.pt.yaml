@@ -1,0 +1,52 @@
+domainsBlacklist: "Domínios na Lista Negra"
+domainsSource: "Fontes de Domínios"
+listOfBlockedDomains: 'Lista de domínios bloqueados na plataforma'
+example: 'example.com'
+addDomain: 'Adicionar Domínio'
+addSource: 'Adicionar Fonte'
+import: 'Importar'
+importDomains: 'Importar Domínios'
+all: 'Todos'
+blocked: 'Bloqueados'
+searchDomains: 'Procurar Domínios ...'
+pattern: 'Domínio'
+createdAt: 'Criado Em'
+lastSeenAt: 'Atualizado Em'
+noDomainsFoundWith: 'Não foram encontrados Domínios com'
+noDomainsFound: 'Não foram encontrados Domínios'
+noDomainsSourcesFoundWith: 'Não foram encontrados Fontes de Domínios com'
+noDomainsSourcesFound: 'Não foram encontrados Fontes de Domínios'
+domainsPerPage: 'Domínios por página'
+domainsSourcePerPage: 'Fontes de Domínios por página'
+noData: 'Sem Dados'
+type: 'Tipo'
+exact: 'Exato'
+exacts: 'Exatos'
+subdomain: 'Subdomínio'
+subdomains: 'Subdomínios'
+wildcard: 'Wildcard'
+active: 'Ativo'
+inactive: 'Inativo'
+activate: 'Ativar'
+deactivate: 'Desativar'
+refresh: 'Atualizar'
+loading: 'A carregar'
+noInformation: 'Sem informação'
+addDomainManually: 'Adicionar Domínio Manualmente'
+addSourceManually: 'Adicionar Fonte Manualmente'
+confirm_delete_domain_source: 'Tem a certeza de que pretende eliminar esta origem de domínio?'
+delete: 'Eliminar'
+editDomain: 'Editar Domínio'
+close: 'Fechar'
+save: 'Guardar'
+domainsSourceWarningType: >
+    Apenas são suportadas importações através de link. O URL fornecido deve apontar
+    para um ficheiro válido em formato <strong>.json</strong>, <strong>.txt</strong> ou <strong>.csv</strong>.
+    <br>
+    Exemplo de um link suportado:
+    <br>
+    <a href="https://raw.githubusercontent.com/nfacha/temporary-email-list/master/list.txt"
+       class="underline"
+       target="_blank" rel="noopener noreferrer">
+       https://raw.githubusercontent.com/nfacha/temporary-email-list/master/list.txt
+    </a>

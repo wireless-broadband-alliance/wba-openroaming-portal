@@ -1,8 +1,8 @@
-# 🛑 Upgrade Guide: Important Instructions for Future Updates
+# Upgrade Guide: Important Instructions for Future Updates
 
 ## Table of Contents
 
-1. [⚠️ Critical Warning: Read Before You Upgrade](#-critical-warning-read-before-you-upgrade-)
+1. [Critical Warning: Read Before You Upgrade](#critical-warning-read-before-you-upgrade)
 2. [General Upgrade Path Guidelines](#general-upgrade-path-guidelines)
 3. [Upgrade Path Matrix](#upgrade-path-matrix)
 4. [Release-Specific Notes: Version 1.8.1](#release-specific-notes-version-181)
@@ -14,12 +14,12 @@
 
 ---
 
-# ⚠️🛑 **CRITICAL WARNING: READ BEFORE YOU UPGRADE** 🛑⚠️
+# **CRITICAL WARNING: READ BEFORE YOU UPGRADE**
 
-> **🚨 FAILURE TO FOLLOW THESE INSTRUCTIONS MAY RESULT IN:**
-> - **Data Loss** 💾
-> - **Significant Downtime** ⌛
-> - **Irreversible System Errors** ❗
+> **FAILURE TO FOLLOW THESE INSTRUCTIONS MAY RESULT IN:**
+> - **Data Loss**
+> - **Significant Downtime**
+> - **Irreversible System Errors**
 
 ### Key Precautions
 
@@ -87,16 +87,18 @@ Upgrading your system requires caution and preparation. Follow these general gui
 
 ## Upgrade Path Matrix
 
-| Current Version | Intermediate Version | Target Version | Notes                                                                                                                  |
-|-----------------|----------------------|----------------|------------------------------------------------------------------------------------------------------------------------|
-| < 1.4.0         | 1.4.0                | 1.7.0          | Run `php bin/console clear:eventEntity` to clean up invalid records.                                                   |
-| 1.4.0           | 1.5                  | 1.7.0          | Run `php bin/console lexik:jwt:generate-keypair` before upgrading.                                                     |
-| 1.5             | 1.6                  | 1.7.0          | Run `php bin/console reset:allocate-providers` before proceeding.                                                      |
-| 1.6             | N/A                  | 1.7.0          | Proceed directly to the release (1.7.0) after reviewing the changelog.                                                 |
-| 1.7.x           | N/A                  | 1.7.0          | Run `php bin/console doctrine:schema:update --force` to apply required schema changes.                                 |
-| 1.8.0 or lower  | N/A                  | 1.8.1          | Run `php bin/console doctrine:migrations:migrate` to apply optimizations & remove deprecated `verificationCode` field. |
-| 1.8.1           | N/A                  | 1.9.0          | Run `php bin/console doctrine:migrations:migrate` to apply optimizations.                                              |
-| 1.9.0           | N/A                  | 1.9.1          | Just small fix, doesn't have any command to be executed.                                                               |
+| Current Version | Target Version | Required Actions                                                                                                                                                                                                                                                                |
+|-----------------|----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `< 1.4.0`       | 1.7.0          | Upgrade to at least 1.4.0 and run `php bin/console clear:eventEntity` to remove invalid legacy records before continuing.                                                                                                                                                       |
+| 1.4.0           | 1.7.0          | Run `php bin/console lexik:jwt:generate-keypair` **before upgrading**.                                                                                                                                                                                                          |
+| 1.5.0           | 1.7.0          | Run `php bin/console reset:allocate-providers` before proceeding.                                                                                                                                                                                                               |
+| 1.6.0           | 1.7.0          | No additional steps required; proceed directly after reviewing the changelog.                                                                                                                                                                                                   |
+| 1.7.x           | 1.7.0          | Run `php bin/console doctrine:schema:update --force` to apply required schema changes.                                                                                                                                                                                          |
+| ≤ 1.8.0         | 1.8.1          | Run `php bin/console doctrine:migrations:migrate` to apply optimizations and remove the deprecated `verificationCode` field.                                                                                                                                                    |
+| 1.8.1           | 1.9.0          | Run `php bin/console doctrine:migrations:migrate`.                                                                                                                                                                                                                              |
+| 1.9.0           | 1.9.1          | Minor patch release — no commands required.                                                                                                                                                                                                                                     |
+| 1.9.1           | 1.10.0         | Run `php bin/console doctrine:migrations:migrate`.                                                                                                                                                                                                                              |
+| 1.10.0          | 1.11.0         | Run `php bin/console doctrine:migrations:migrate`. After upgrading, run `php bin/console prepare-release:v1110` **once** to promote the admin user to **Super Admin** for the new role hierarchy system. Note this command it's only present on this release for the migration. |
 
 Use this table to determine the exact upgrade steps based on your current version.
 

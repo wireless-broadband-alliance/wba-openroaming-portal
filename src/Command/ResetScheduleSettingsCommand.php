@@ -15,7 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
-    name: 'reset:ScheduleSettings',
+    name: 'reset:scheduleSettings',
     description: 'Reset Schedule Settings',
 )]
 
@@ -30,7 +30,7 @@ class ResetScheduleSettingsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('reset:ScheduleSettings')
+            ->setName('reset:scheduleSettings')
             ->setDescription('Reset Schedule Settings')
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
@@ -54,6 +54,7 @@ class ResetScheduleSettingsCommand extends Command
             ['name' => SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON->value, 'value' => '0 1 * * *'],
             ['name' => SettingName::LDAP_SYNC_CRON->value, 'value' => '0 2 * * *'],
             ['name' => SettingName::FREERADIUS_LAST_CONNECTION_CRON->value, 'value' => '0 3 * * *'],
+            ['name' => SettingName::DOMAIN_BLACKLIST_IMPORT_CRON->value, 'value' => '0 4 * * *'],
             ['name' => SettingName::CRON_ADVANCED_STATUS->value, 'value' => 'OFF'],
         ];
 

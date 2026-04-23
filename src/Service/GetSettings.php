@@ -230,7 +230,12 @@ readonly class GetSettings
                 SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON->value => 'Defines the schedule to notify the users when their profile to expire',
                 SettingName::LDAP_SYNC_CRON->value => 'Defines the schedule for LDAP synchronization automation command',
                 SettingName::FREERADIUS_LAST_CONNECTION_CRON->value => 'Defines the schedule for Freeradius server & the user profile last connection',
-                SettingName::CRON_ADVANCED_STATUS->value => 'Saves the previous status mode on the schedule cron configuration page (Simple/Advanced)'
+                SettingName::DOMAIN_BLACKLIST_IMPORT_CRON->value => 'Defines the cron schedule for importing and synchronizing blocked domains.',
+                SettingName::CRON_ADVANCED_STATUS->value => 'Saves the previous status mode on the schedule cron configuration page (Simple/Advanced)',
+                SettingName::CLOUDFLARE_TOKEN->value => 'Token for automatic Cloudflare certificate renewal.',
+                SettingName::RETURN_APPS_ENABLED->value => 'Enables or disables the Return to Apps',
+                SettingName::RETURN_APPS_PACKAGE_NAME_ANDROID->value => 'Name of the package or application associated for android devices',
+                SettingName::RETURN_APPS_ID_IOS->value => 'Name of the package or application associated for iOS devices',
             ],
             LanguageType::PT->value => [
                 SettingName::RADIUS_REALM_NAME->value => 'O nome do realm para o seu servidor RADIUS',
@@ -317,7 +322,11 @@ readonly class GetSettings
                 SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON->value => 'Define o agendamento para notificar os utilizadores quando o perfil estiver prestes a expirar',
                 SettingName::LDAP_SYNC_CRON->value => 'Define o agendamento para o comando automático de sincronização LDAP',
                 SettingName::FREERADIUS_LAST_CONNECTION_CRON->value => 'Define o agendamento para o servidor Freeradius e a última ligação do perfil do utilizador',
-                SettingName::CRON_ADVANCED_STATUS->value => 'Guarda o modo de estado anterior na página de configuração do cron (Simples/Avançado)'
+                SettingName::DOMAIN_BLACKLIST_IMPORT_CRON->value => 'Define o agendamento (cron) para a execução da importação e sincronização dos domínios bloqueados.',
+                SettingName::CRON_ADVANCED_STATUS->value => 'Guarda o modo de estado anterior na página de configuração do cron (Simples/Avançado)',
+                SettingName::CLOUDFLARE_TOKEN->value => 'Token para renovação automática do certificado Cloudflare.',
+                SettingName::RETURN_APPS_PACKAGE_NAME_ANDROID->value => 'Nome do pacote ou da aplicação associado a dispositivos Android',
+                SettingName::RETURN_APPS_ID_IOS->value => 'Nome do pacote ou da aplicação associado a dispositivos iOS',
             ]
         ];
         // phpcs:enable

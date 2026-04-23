@@ -1,0 +1,23 @@
+<div {{ stimulus_controller('nav-dropdown', {toggleSelected: false}) }} class="relative inline-block mb-1 md:mb-0">
+    {# Clickable circle button #}
+    <div
+            {{ stimulus_target('nav-dropdown', 'button') }}
+            {{ stimulus_action('nav-dropdown', 'toggle', 'click') }}
+            class="relative flex items-center justify-center
+               w-8 h-8 md:w-9 md:h-9
+               rounded-full bg-blue-500 text-white
+               shadow-md transition-all duration-300
+               hover:bg-blue-600 hover:shadow-lg cursor-pointer"
+    >
+        <twig:ux:icon name="wba:info" class="w-4 h-4 md:w-5 md:h-5 fill-current"/>
+    </div>
+
+    {# Info message overlay (always in DOM, styled like cookie modal) #}
+    <div
+            {{ stimulus_target('nav-dropdown', 'container') }}
+            class="flex bg-infoBgColor/50 rounded-lg p-4 text-infoTextColor mt-2 hidden">
+        <span>
+            {{ info_text|raw }}
+        </span>
+    </div>
+</div>

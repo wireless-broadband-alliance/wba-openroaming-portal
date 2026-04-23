@@ -7,7 +7,7 @@ export default class extends Controller {
         fetch('/get-terms-status')
             .then((res) => res.json())
             .then((data) => {
-                this.updateTermsCheckbox(data.termsAccepted);
+                this.updateTermsCheckbox(data.terms_accepted);
                 this.toggleSubmitButtons();
             });
     }

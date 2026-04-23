@@ -1,0 +1,41 @@
+<div
+        data-controller="toggle-pages"
+        class="w-full"
+>
+    {# Toggle container #}
+    <div class="flex justify-center mb-6">
+        <div class="flex bg-gray-300 rounded-lg overflow-hidden w-full max-w-md p-1">
+            {# Blacklist #}
+            <button
+                    type="button"
+                    data-toggle-pages-target="toggle1"
+                    data-action="toggle-pages#showPage1"
+                    class="flex-1 text-center px-4 py-2 rounded-md transition-all duration-200
+                       bg-white text-black font-semibold shadow-md"
+            >
+                {{ 'domainsBlacklist'|trans({}, '_blacklist') }}
+            </button>
+
+            {# Source #}
+            <button
+                    type="button"
+                    data-toggle-pages-target="toggle2"
+                    data-action="toggle-pages#showPage2"
+                    class="flex-1 text-center px-4 py-2 rounded-md transition-all duration-200
+                       text-gray-700"
+            >
+                {{ 'domainsSource'|trans({}, '_blacklist') }}
+            </button>
+        </div>
+    </div>
+
+    {# Page 1 #}
+    <div data-toggle-pages-target="page1">
+        {{ include('dashboard/shared/settings_actions/_domains_blacklist_page_content.html.twig') }}
+    </div>
+
+    {# Page 2 #}
+    <div data-toggle-pages-target="page2" class="hidden">
+        {{ include('dashboard/shared/settings_actions/_domains_source_page_content.html.twig') }}
+    </div>
+</div>

@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\DTO;
 
 use App\Enum\UserProvider;
+use App\Validator\Constraints\DomainValidNotInBlacklist;
 use libphonenumber\PhoneNumber;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Constraints\Callback;
@@ -21,7 +24,8 @@ class LoginChoiceDTO
         expression: "this.loginMethod === constant('App\\\\Enum\\\\UserProvider::EMAIL').value",
         constraints: [
             new Assert\NotBlank(message: 'emailNotEmpty'),
-            new Assert\Email(message: 'validEmailAddress')
+            new Assert\Email(message: 'validEmailAddress'),
+            new DomainValidNotInBlacklist()
         ]
     )]
     public ?string $email = null;

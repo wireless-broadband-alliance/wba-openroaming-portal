@@ -127,3 +127,74 @@ unableSendLoginLink: 'Não foi possível enviar o link de login ou o código de 
 loginVerificationCodeSent: 'Enviámos um código de verificação de início de sessão para o seu número de telefone. Verifique as suas mensagens SMS para continuar.'
 loginSuccessfully: 'Login efetuado com sucesso'
 invalidLogin: 'O seu link de login é inválido ou expirou. Solicite um novo link de login para continuar.'
+domainBlacklistConfigurationAppliedSuccessfully: 'Uma nova configuração de Domínios Bloqueados foi aplicada com sucesso.'
+addedNewUser: 'O utilizador "%uuid%" foi criado com sucesso.'
+connectionFailed: 'Falha na ligação à base de dados: %dbConnections%'
+dbConnectionApplied: 'Configurações das bases de dados aplicadas com sucesso.'
+jwtSuccessfully: 'Configurações da aplicação aplicadas com sucesso'
+jwtFailed: 'Falha ao gerar o par de chaves JWT'
+adminConfirmedSuccessfully: 'E-mail do administrador confirmado com sucesso'
+missingRequiredForRadsecProxyTest: 'É necessário especificar o remote_host e a remote_port.'
+radsecproxy_container_not_running: 'O container %container% não está em execução no host %host%:%port%'
+radsecProxyCertUploadedSuccessfully: 'Certificados RadSecProxy carregados com sucesso!'
+radsecProxyConfigAppliedSuccessfully: 'Configuração do RadSecProxy aplicada com sucesso!'
+radsecProxyTestPassed: "Handshake TLS realizado com sucesso usando o conjunto de CA da WBA."
+missingRequiredForFreeradiusTest: 'É necessário especificar o remote_host e a remote_port.'
+freeradiusCertUploadedSuccessfully: 'Certificados Freeradius carregados com sucesso!'
+freeradiusCertGeneratedSuccessfully: 'Certificados Freeradius gerados com sucesso para o teu domínio atualmente: "%domain%"!'
+freeradiusConfigAppliedSuccessfully: 'Configuração do Freeradius aplicada com sucesso!'
+freeradiusTestPassed: 'Handshake TLS realizado com sucesso usando o %caBundle%.'
+pendingProcessCertsCompleted: 'Conclua o teste de todos os certificados antes de terminar o processo'
+configAlreadyApplied: 'Está configuração já está aplicada! Não podes re-submeter o mesmo formulário.'
+certificateProcessAborted: "Este processo foi abortado com sucesso. Por favor, não se esqueça de reconfigurar todo o processo corretamente!"
+not_ev_warning: "Estes certificados não são EV's válidos. A geração do perfil OpenRoaming para Windows 10 irá falhar por causa disso, mas podes progredir se assim o desejares."
+cert_uploaded_are_lets_encrypt_warning: "Os certificados carregados foram emitidos pela Let's Encrypt, que não suporta certificados EV. A geração do perfil OpenRoaming para Windows 10 irá falhar devido a isto, mas pode prosseguir se desejar."
+cert_generated_are_lets_encrypt_warning: "Os certificados gerados são emitidos pela Let's Encrypt. A geração do perfil OpenRoaming para Windows irá falhar por causa disso, mas podes progredir se assim o desejares."
+freeradius_is_not_ev_cert_warning: 'A opção de descarregar perfis OpenRoaming para Windows está desativada porque não é suportada com a configuração atual.'
+cannotReturnToPreviousPhase: 'Já não pode aceder a esta etapa porque já foi concluída.'
+cannotAccessStageYet: "Não pode aceder a esta etapa porque as etapas anteriores não estão concluídas."
+captchaValidationFailed: 'A validação captcha falhou.'
+pfx:
+  success: "Windows PFX foi criado com sucesso!"
+  failure: "Falha ao gerar o ficheiro Windows PFX por favor confirma se esta a inserir EV's válidos!"
+envPermissionDenied: 'O ficheiro . env não tem permissões de escrita. Por favor utilize os seguintes comandos.'
+writeDbSettingsEnv: 'Escreva as novas configurações da base de dados no ficheiro .env'
+dbSettingsApplied: 'Configurações da base de dados aplicadas com sucesso.'
+dbSettingsNotApplied: 'As definições da base de dados não foram aplicadas. Tente novamente.'
+settingsApplied: 'Configurações  aplicadas com sucesso.'
+settingsNotApplied: 'As definições não foram aplicadas. Tente novamente.'
+writeSettingsEnv: 'Escreva as novas configurações no ficheiro .env'
+createJwtPair: 'Gere um novo par de chaves JWT.'
+installationStartedSuccessfully: 'Verificação concluída com sucesso.'
+systemResetRequestStarted: 'Pedido de Restauro do Sistema iniciado. Certifique-se de completar cuidadosamente cada passo do processo de configuração.'
+notValidDomainOrIP: 'O domínio "%domain%" não é válido ou não resolve para um endereço IP.'
+invalidDomainPattern: "Padrão de domínio inválido: %domain%"
+invalidDomainPatternList: "Os seguintes padrões de domínio são inválidos: %domains%"
+domainNotFound: 'Domínio não encontrado.'
+domainDeleted: 'O Domínio "%domain%" eliminado com sucesso.'
+domainAdded: 'O Domínio "%domain%" adicionado com sucesso.'
+domainEdited: 'O Domínio "%domain%" atualizado com sucesso.'
+domainSourceNotFound: 'Fonte de Domínio não encontrada.'
+domainSourceDeleted: 'Fonte de Domínio "%domain%" eliminada com sucesso.'
+domainSourceActivated: 'Fonte de Domínio "%domain%" ativada com sucesso.'
+domainSourceDeactivated: 'Fonte de Domínio "%domain%" desativada com sucesso.'
+sourceAdded: 'A Fonte "%source%" adicionado com sucesso.'
+domainSourceRefreshed: 'A fonte de domínios "%domain%" foi atualizada com sucesso.'
+domainSourceRefreshFailed: 'Falha ao atualizar a fonte de domínios "%domain%".'
+domainSourceInactive: "Esta fonte de domínios está inativa e não pode ser atualizada."
+radiusTLSNameDomainUpdated: 'O hostname TLS do servidor resolver foi atualizado com sucesso para "%domain%".'
+allDomainSourceRefreshed: "As fontes de domínios foram atualizadas com sucesso."
+domainSourceRefreshAllFailed: "Falha ao atualizar as fontes de domínios."
+cloudflareTokenNotMatchesHost: 'O token da Cloudflare não tem permissões para o host %host%'
+httpChallengeAppliedSuccessfully: >
+  Validação concluída com sucesso.
+  Os novos certificados foram verificados e preparados.
+  Serão aplicados ao sistema após finalizar a configuração.
+returnAppsResetSuccessfully: 'As configurações de Retorno para as Apps foram restauradas com sucesso!'
+access_denied_no_session: "Não tem acesso a esta página. Por favor, inicie sessão."
+access_denied_feature_disabled: "Esta funcionalidade está atualmente desativada."
+access_denied_session_expired: "A sua sessão expirou. Por favor, inicie sessão novamente."
+invalidPhoneNumber: 'Número de telefone inválido. Por favor, insira um número válido.'
+phoneNumberRequired: 'O número de telefone é obrigatório.'
+replyCodeTotp: 'Por favor, aguarde %remainingTime% segundos antes de tentar novamente.'
+tooManyAttempts: "Demasiadas tentativas. Tente novamente em %seconds% segundos."

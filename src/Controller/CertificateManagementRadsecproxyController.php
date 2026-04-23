@@ -1,0 +1,573 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Controller;
+
+use App\DTO\CertificateRadSecUploadDTO;
+use App\Entity\Certificate;
+use App\Entity\CertificateSetupProcess;
+use App\Entity\InstallationProgress;
+use App\Entity\User;
+use App\Enum\AdminRoleType;
+use App\Enum\AnalyticalEventType;
+use App\Enum\CertificateFileName;
+use App\Enum\CertificateMachineType;
+use App\Enum\CertificateTestResult;
+use App\Enum\FirewallType;
+use App\Enum\SessionStatus;
+use App\Enum\TrustedWBAFingerprints;
+use App\Form\CertificateRadsecUploadType;
+use App\Form\SimpleSubmitFormType;
+use App\Repository\CertificateRepository;
+use App\Repository\InstallationProgressRepository;
+use App\Security\Voter\UserAuthenticationVoter;
+use App\Service\CertificateRadsecproxyCommandsService;
+use App\Service\CertificateProcessCheckerService;
+use App\Service\CertificateRadsecproxyInfoService;
+use App\Service\CertificateStorageService;
+use App\Service\EventActions;
+use App\Service\GetSettings;
+use App\Service\InstallationService;
+use DateTime;
+use DateTimeImmutable;
+use Doctrine\ORM\EntityManagerInterface;
+use RuntimeException;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
+use Throwable;
+
+class CertificateManagementRadsecproxyController extends AbstractController
+{
+    public function __construct(
+        private readonly GetSettings $getSettings,
+        private readonly TranslatorInterface $translator,
+        private readonly CertificateStorageService $certificateStorageService,
+        private readonly CertificateProcessCheckerService $certificateProcessCheckerService,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly CertificateRadsecproxyCommandsService $certificateRadsecproxyCommandsService,
+        private readonly CertificateRepository $certificateRepository,
+        private readonly CertificateRadsecproxyInfoService $certificateRadsecproxyInfoService,
+        private readonly EventActions $eventActions,
+        private readonly InstallationService $installationService,
+        private readonly InstallationProgressRepository $installationProgressRepository,
+    ) {
+    }
+
+    #[Route(
+        '/dashboard/settings/certificatesManagement/radsecproxy/upload',
+        name: 'admin_dashboard_settings_certs_radsecproxy_upload'
+    )]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
+    public function settingsCertificatesManagementRadsecproxyUpload(
+        Request $request
+    ): Response {
+        $processState = $this->certificateProcessCheckerService->getProcessState();
+        if ($processState['active']) {
+            $nextRoute = $this->certificateProcessCheckerService
+                ->getNextRequiredRoute($processState['stages']);
+
+            // If the required next step is NOT this page, redirect
+            if ($nextRoute && $nextRoute !== $request->attributes->get('_route')) {
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('pendingActiveProcess', [], 'CertificateProcessCheckerService')
+                );
+                return $this->redirectToRoute($nextRoute);
+            }
+        }
+
+        $data = $this->getSettings->getSettings();
+
+        // Prepare DTO
+        $certificateUploadDTO = new CertificateRadSecUploadDTO();
+
+        // Create & handle form
+        $form = $this->createForm(CertificateRadsecUploadType::class, $certificateUploadDTO);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var User $user */
+            $user = $this->getUser();
+            // Create a certificate process before upload and making any actually changes on the DB and files
+            $process = $this->certificateStorageService->createCertificateProcess(
+                $user,
+                $request
+            );
+
+            if ($certificateUploadDTO->client instanceof UploadedFile) {
+                // Save on the tmp folder the uploaded certificates after the validation
+                $this->certificateStorageService->storeUploadedFile(
+                    $certificateUploadDTO->client,
+                    CertificateFileName::CLIENT_PEM->value,
+                    CertificateMachineType::RADSECPROXY->value,
+                    $process
+                );
+            }
+
+            if ($certificateUploadDTO->key instanceof UploadedFile) {
+                // Save on the tmp folder the uploaded certificates after the validation
+                $this->certificateStorageService->storeUploadedFile(
+                    $certificateUploadDTO->key,
+                    CertificateFileName::KEY_PEM->value,
+                    CertificateMachineType::RADSECPROXY->value,
+                    $process,
+                    true
+                );
+            }
+
+            // After the files are validated and the processed, update them once again to add
+            $process->setRadsecproxyFormCompletedAt(new DateTimeImmutable());
+            $process->setUpdatedAt(new DateTimeImmutable());
+
+            $this->entityManager->persist($process);
+            $this->entityManager->flush();
+
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_RADSECPROXY_UPLOAD->value,
+                new DateTime(),
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'by' => $user->getUuid(),
+                ]
+            );
+
+            $this->addFlash(
+                'success',
+                $this->translator->trans(
+                    'radsecProxyCertUploadedSuccessfully',
+                    [],
+                    'controllers'
+                )
+            );
+            return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_config');
+        }
+
+        return $this->render(
+            'dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy/upload.html.twig',
+            [
+                'data' => $data,
+                'certificateUploadDTO' => $certificateUploadDTO,
+                'form' => $form->createView(),
+                'context' => FirewallType::DASHBOARD->value,
+            ]
+        );
+    }
+
+    #[Route(
+        '/dashboard/settings/certificatesManagement/radsecproxy/config',
+        name: 'admin_dashboard_settings_certs_radsecproxy_config'
+    )]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
+    public function settingsCertificatesManagementRadsecproxyConfig(Request $request): Response
+    {
+        // Get current process state
+        $processState = $this->certificateProcessCheckerService->getProcessState();
+        $process = $processState['process'] ?? null;
+
+        // If there's no active process
+        if (!$processState['active']) {
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'noActiveProcess',
+                    [],
+                    'CertificateProcessCheckerService'
+                )
+            );
+            return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
+        }
+
+        // Return last uploaded certificates from the previous step and reads the contents
+        $certificateSet = $this->certificateRadsecproxyInfoService->getLatestCertificatesSet($process);
+
+        // Fetch any data/settings needed for the page
+        $data = $this->getSettings->getSettings();
+        /** @var array<int, array{name: string, content?: string}> $renewCertificateSet */
+        $renewCertificateSet = [];
+
+        foreach ($certificateSet as $certificate) {
+            $content = $certificate['content'] ?? null;
+
+            $entry = [
+                'name' => $certificate['name'],
+            ];
+
+            if (is_string($content)) {
+                $entry['content'] = $content;
+            }
+
+            $renewCertificateSet[] = $entry;
+        }
+
+        $commands = $this->certificateRadsecproxyCommandsService
+            ->getRenewCommands($renewCertificateSet);
+
+        // Form handling
+        $form = $this->createForm(SimpleSubmitFormType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted()) {
+            if ($process?->getRadsecproxyConfigAppliedAt() instanceof DateTimeImmutable) {
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('configAlreadyApplied', [], 'controllers')
+                );
+            } elseif ($form->isValid()) {
+                /** @var User $user */
+                $user = $this->getUser();
+                $process->setRadsecproxyConfigAppliedAt(new DateTimeImmutable());
+                $process->setUpdatedAt(new DateTimeImmutable());
+
+                $this->entityManager->persist($process);
+                $this->entityManager->flush();
+
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_RADSECPROXY_CONFIG->value,
+                    new DateTime(),
+                    [
+                        'ip' => $request->getClientIp(),
+                        'user_agent' => $request->headers->get('User-Agent'),
+                        'by' => $user->getUuid(),
+                    ]
+                );
+
+                $this->addFlash(
+                    'success',
+                    $this->translator->trans('radsecProxyConfigAppliedSuccessfully', [], 'controllers')
+                );
+
+                // Redirect to the next stage automatically
+                return $this->redirectToRoute(
+                    'admin_dashboard_settings_certs_radsecproxy_test',
+                );
+            }
+        }
+
+        return $this->render(
+            'dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy/config.html.twig',
+            [
+                'data' => $data,
+                'form' => $form->createView(),
+                'processState' => $processState,
+                'certificateSet' => $certificateSet,
+                'commands' => $commands,
+            ]
+        );
+    }
+
+    #[Route(
+        '/dashboard/settings/certificatesManagement/radsecproxy/test',
+        name: 'admin_dashboard_settings_certs_radsecproxy_test'
+    )]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
+    public function settingsCertificatesManagementRadsecproxyTest(): Response
+    {
+        // Get current process state
+        $processState = $this->certificateProcessCheckerService->getProcessState();
+
+        // Default fallback
+        $lastInstallation = $this->installationProgressRepository->getLast();
+        if ($lastInstallation instanceof InstallationProgress) {
+            $installationDTO = $this->installationService->fillDto($lastInstallation);
+            $host = $installationDTO->dbFreeradiusIp;
+        }
+
+        // If no active process, redirect to the first stage or fallback
+        if (!$processState['active']) {
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'noActiveProcess',
+                    [],
+                    'CertificateProcessCheckerService'
+                )
+            );
+            return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
+        }
+
+        // Fetch settings/data needed for the page
+        $data = $this->getSettings->getSettings();
+
+        return $this->render(
+            'dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy/test.html.twig',
+            [
+                'data' => $data,
+                'processState' => $processState,
+                'process' => $processState['process'],
+                'host' => $host ?? null,
+            ]
+        );
+    }
+
+    /**
+     * @throws \JsonException
+     */
+    #[Route(
+        '/dashboard/settings/certificatesManagement/radsecproxy/test/run',
+        name: 'admin_dashboard_settings_certs_radsecproxy_test_run',
+        methods: ['POST']
+    )]
+    public function runRadsecproxyTest(Request $request): JsonResponse
+    {
+        $processEntity = $this->certificateProcessCheckerService->getCurrentProcess();
+
+        // Ensure an active process exists
+        if (!$processEntity instanceof CertificateSetupProcess) {
+            return new JsonResponse([
+                'status' => 'error',
+                'message' => $this->translator->trans(
+                    'noActiveProcess',
+                    [],
+                    'CertificateProcessCheckerService'
+                ),
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Decode request payload
+        $payload = json_decode(
+            $request->getContent() ?: '{}',
+            true,
+            512,
+            JSON_THROW_ON_ERROR
+        );
+
+        $remoteHost = $payload['remote_host'];
+        $remotePort = isset($payload['remote_port']) ? (int)$payload['remote_port'] : 2083;
+
+        if (!$remoteHost) {
+            return new JsonResponse([
+                'status' => 'error',
+                'message' => $this->translator->trans(
+                    'missingRequiredForRadsecProxyTest',
+                    [],
+                    'controllers'
+                ),
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Everytime the user tries a new test it will save the used credentials
+        $processEntity->setUpdatedAt(new DateTimeImmutable());
+        $this->entityManager->persist($processEntity);
+        $this->entityManager->flush();
+
+        // Build full paths
+        $clientCert = $this->certificateRepository->findLatestByProcessAndName(
+            $processEntity,
+            CertificateFileName::CLIENT_PEM->value // This name comes from the DTO Upload Radsecproxy
+        );
+        $keyCert = $this->certificateRepository->findLatestByProcessAndName(
+            $processEntity,
+            CertificateFileName::KEY_PEM->value // Same for this one
+        );
+
+        $basePath = $this->getParameter('kernel.project_dir') . '/var/certs/';
+        $clientCertPath = $clientCert instanceof Certificate ? $basePath . $clientCert->getFilePath() : null;
+        $keyCertPath = $keyCert instanceof Certificate ? $basePath . $keyCert->getFilePath() : null;
+
+        // Validate certificate files exist
+        if (!$clientCertPath || !$keyCertPath || !file_exists($clientCertPath) || !file_exists($keyCertPath)) {
+            return new JsonResponse([
+                'status' => 'error',
+                'message' => 'Client or key certificate file not found',
+                'clientCertPath' => $clientCertPath,
+                'keyCertPath' => $keyCertPath,
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        try {
+            $context = stream_context_create([
+                'ssl' => [
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                    'allow_self_signed' => false,
+                    'capture_peer_cert_chain' => true,
+                    'local_cert' => $clientCertPath,
+                    'local_pk' => $keyCertPath,
+                    'crypto_method' => STREAM_CRYPTO_METHOD_TLS_CLIENT,
+                ]
+            ]);
+
+            // Open the TLS connection
+            $connection = @stream_socket_client(
+                "tls://{$remoteHost}:{$remotePort}",
+                $errno,
+                $errstr,
+                15,
+                STREAM_CLIENT_CONNECT,
+                $context
+            );
+
+            // If connection failed with a real error, handle it
+            if ($connection === false && ($errno !== 0 || $errstr !== '')) {
+                // TLS handshake failed
+                $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
+                    $processEntity,
+                    CertificateTestResult::PASSED
+                );
+
+                return new JsonResponse([
+                    'status' => 'error',
+                    'message' => 'TLS Handshake Failed',
+                    'messageDetails' => "Failed to create socket: [$errno] $errstr",
+                    'details' => [
+                        'host' => $remoteHost,
+                        'port' => $remotePort,
+                        'error' => $errstr,
+                        'code' => $errno,
+//                        'basePath' => $basePath,
+//                        'clientCertPath' => $clientCertPath,
+//                        'keyCertPath' => $keyCertPath,
+                    ],
+                ], Response::HTTP_SERVICE_UNAVAILABLE);
+            }
+
+            // Extract peer certificate chain
+            $trustedHashes = array_map(static fn($e) => strtolower($e->value), TrustedWBAFingerprints::cases());
+
+            if ($connection === false) {
+                throw new RuntimeException(
+                    sprintf('TLS connection failed (%d): %s', $errno, $errstr)
+                );
+            }
+
+            $params = stream_context_get_params($connection);
+            $chain = $params['options']['ssl']['peer_certificate_chain'] ?? [];
+
+            // Include the leaf certificate itself
+            $leafCert = $params['options']['ssl']['peer_certificate'] ?? null;
+            if ($leafCert) {
+                array_unshift($chain, $leafCert);
+            }
+
+            $validated = false;
+            foreach ($chain as $cert) {
+                $pem = openssl_x509_export($cert, $out) ? $out : null;
+                if ($pem) {
+                    // Convert PEM to DER
+                    $der = base64_decode((string)preg_replace('#-----.*?-----#', '', (string)$pem));
+                    $hash = strtolower(hash('sha256', $der));
+
+                    if (in_array($hash, $trustedHashes, true)) {
+                        $validated = true;
+                        break;
+                    }
+                }
+            }
+
+            $serverCertDetails = [];
+
+            foreach ($chain as $index => $cert) {
+                $parsed = openssl_x509_parse($cert);
+
+                if ($parsed !== false) {
+                    $serverCertDetails[] = [
+                        'position' => $index === 0 ? 'leaf' : "chain_$index",
+                        'subject' => $parsed['subject'] ?? null,
+                        'issuer' => $parsed['issuer'] ?? null,
+                        'valid_from' => isset($parsed['validFrom_time_t'])
+                            ? date('Y-m-d H:i:s', $parsed['validFrom_time_t'])
+                            : null,
+                        'valid_to' => isset($parsed['validTo_time_t'])
+                            ? date('Y-m-d H:i:s', $parsed['validTo_time_t'])
+                            : null,
+                        'serialNumber' => $parsed['serialNumberHex'] ?? null,
+                    ];
+                }
+            }
+
+            if ($validated === false) {
+                fclose($connection);
+
+                $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
+                    $processEntity,
+                    CertificateTestResult::FAILED
+                );
+
+                return new JsonResponse([
+                    'status' => 'error',
+                    'message' => 'TLS handshake succeeded but certificate chain is NOT signed by a known WBA CA.',
+                    'server_tls_certificates' => $serverCertDetails,
+                ], Response::HTTP_FORBIDDEN);
+            }
+
+            // THIS IS OK [0] -> a non-false $connection OR errno=0 and errstr="" means TLS handshake succeeded
+            $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
+                $processEntity,
+                CertificateTestResult::PASSED
+            );
+
+            // Only close if it’s a valid resource
+            if (is_resource($connection)) {
+                fclose($connection);
+            }
+
+            /** @var User $user */
+            $user = $this->getUser();
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_RADSECPROXY_TEST->value,
+                new DateTime(),
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'by' => $user->getUuid(),
+                ]
+            );
+
+            return new JsonResponse([
+                'status' => 'success',
+                'message' => $this->translator->trans(
+                    'radsecProxyTestPassed',
+                    [],
+                    'controllers'
+                ),
+            ]);
+        } catch (Throwable $e) {
+            // Update DB when test fails
+            $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
+                $processEntity,
+                CertificateTestResult::FAILED
+            );
+
+            return new JsonResponse([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], Response::HTTP_SERVICE_UNAVAILABLE);
+        }
+    }
+
+    #[Route(
+        '/dashboard/settings/certificatesManagement/radsecproxy/skipTest',
+        name: 'admin_dashboard_settings_certs_radsecproxy_skipTest'
+    )]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
+    public function settingsCertificatesManagementRadsecproxySkipTest(): Response
+    {
+        $processEntity = $this->certificateProcessCheckerService->getCurrentProcess();
+        // Ensure an active process exists
+        if (!$processEntity instanceof CertificateSetupProcess) {
+            return new JsonResponse([
+                'status' => 'error',
+                'message' => $this->translator->trans(
+                    'noActiveProcess',
+                    [],
+                    'CertificateProcessCheckerService'
+                ),
+            ], Response::HTTP_BAD_REQUEST);
+        }
+        $processEntity->setRadsecproxyTestResult(CertificateTestResult::PASSED);
+        $this->entityManager->persist($processEntity);
+        $this->entityManager->flush();
+        return $this->redirectToRoute('admin_dashboard_settings_certs_management_freeradius_selection');
+    }
+}

@@ -18,18 +18,23 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  */
 class ScheduleType extends AbstractType
 {
-    public function __construct(
-        private readonly TranslatorInterface $translator
-    ) {
+    private bool $disabled = true;
+
+    public function __construct(private readonly TranslatorInterface $translator)
+    {
     }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $this->disabled = $options['disabled'];
+
         $builder = new DynamicFormBuilder($builder);
 
         $builder
             ->add('use_advanced_mode', CheckboxType::class, [
                 'label' => $this->translator->trans('useAdvancedMode', [], 'ScheduleType'),
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->addDependent(
                 'delete_unconfirmed_users_cron',
@@ -40,6 +45,7 @@ class ScheduleType extends AbstractType
                         'required' => false,
                         'use_advanced_mode' => $use_advanced_mode,
                         'settingName' => SettingName::DELETE_UNCONFIRMED_USERS_CRON->value,
+                        'disabled' => $this->disabled,
                     ]);
                 }
             )
@@ -52,6 +58,7 @@ class ScheduleType extends AbstractType
                         'required' => false,
                         'use_advanced_mode' => $use_advanced_mode,
                         'settingName' => SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON->value,
+                        'disabled' => $this->disabled,
                     ]);
                 }
             )
@@ -64,6 +71,7 @@ class ScheduleType extends AbstractType
                         'required' => false,
                         'use_advanced_mode' => $use_advanced_mode,
                         'settingName' => SettingName::LDAP_SYNC_CRON->value,
+                        'disabled' => $this->disabled,
                     ]);
                 }
             )
@@ -76,6 +84,19 @@ class ScheduleType extends AbstractType
                         'required' => false,
                         'use_advanced_mode' => $use_advanced_mode,
                         'settingName' => SettingName::FREERADIUS_LAST_CONNECTION_CRON->value,
+                        'disabled' => $this->disabled,
+                    ]);
+                }
+            )
+            ->addDependent(
+                'domain_blacklist_import_cron',
+                'use_advanced_mode',
+                function (DependentField $field, ?bool $use_advanced_mode): void {
+                    $field->add(ScheduleSettingType::class, [
+                        'label' => false,
+                        'required' => false,
+                        'use_advanced_mode' => $use_advanced_mode,
+                        'settingName' => SettingName::DOMAIN_BLACKLIST_IMPORT_CRON->value,
                     ]);
                 }
             );
@@ -85,6 +106,7 @@ class ScheduleType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => ScheduleDTO::class,
+            'disabled' => true
         ]);
     }
 }

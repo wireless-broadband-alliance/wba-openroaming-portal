@@ -49,12 +49,17 @@ FROM php:8.4-fpm-bullseye AS runtime
 ENV TZ=UTC
 WORKDIR /var/www/openroaming
 
+# Set CA bundle for Python / requests (Certbot)
+ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+
 # Install runtime deps + PHP extensions
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    nginx supervisor tzdata xmlsec1 libxmlsec1-openssl \
+    nginx supervisor tzdata xmlsec1 libxmlsec1-openssl ca-certificates \
     libpng-dev libjpeg-dev libfreetype6-dev libsqlite3-dev libicu-dev libzip-dev \
     libonig-dev libxml2-dev libgpgme-dev libgpg-error-dev libmemcached-dev \
     libldap2-dev build-essential pkg-config autoconf curl gnupg bash \
+    certbot python3-certbot-nginx python3-certbot-dns-cloudflare python3-certbot-dns-google \
+ && update-ca-certificates \
  && docker-php-ext-configure gd --with-jpeg --with-freetype \
  && docker-php-ext-install intl zip bcmath mbstring pdo pdo_mysql pdo_sqlite soap gd dom exif opcache ldap \
  && pecl channel-update pecl.php.net \
@@ -63,7 +68,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  && rm -rf /var/lib/apt/lists/*
 
 # Set PHP memory limit
-RUN echo "memory_limit=1024M" > /usr/local/etc/php/conf.d/memory.ini \
+RUN echo "memory_limit=1024M" > /usr/local/etc/php/conf.d/memory.ini
 
 # Copy Symfony app from vendor stage
 COPY . /var/www/openroaming

@@ -1,0 +1,23 @@
+subject_registration_details: 'Detalhes do seu registo OpenRoaming'
+
+header_welcome: 'Bem-vindo ao OpenRoaming!'
+
+intro_new_user: >
+    Está quase tudo pronto para se ligar automaticamente à rede Wi-Fi segura OpenRoaming em qualquer parte do mundo.
+    Para concluir a configuração, clique no botão abaixo. Será encaminhado para uma página segura onde poderá instalar o perfil Wi-Fi OpenRoaming.
+    Depois disso, regressará à aplicação para terminar a instalação.
+    O processo demora menos de um minuto.
+
+benefit:
+    auto_connection: 'Ligação automática em hotspots OpenRoaming'
+    secure_auth: 'Autenticação Wi-Fi segura e encriptada'
+    no_captive_portals: 'Sem portais cativos'
+    no_repeated_logins: 'Sem múltiplos logins'
+
+buttons:
+    download_and_install: 'Continuar para vericicar a tua conta'
+
+footer:
+    support_team: 'Equipa de suporte:'
+    thank_you: 'Obrigado'
+    team: 'A equipa %supportTeam%'

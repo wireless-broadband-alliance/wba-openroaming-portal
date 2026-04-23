@@ -1,0 +1,381 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Controller;
+
+use App\DTO\CertificateFreeradiusDomainDTO;
+use App\Entity\CertificateSetupProcess;
+use App\Entity\InstallationProgress;
+use App\Entity\User;
+use App\Enum\AdminRoleType;
+use App\Enum\AnalyticalEventType;
+use App\Enum\InstallationType;
+use App\Enum\PlatformMode;
+use App\Enum\ProcessStatusType;
+use App\Enum\SessionStatus;
+use App\Enum\SettingName;
+use App\Form\CertificateFreeradiusDomainType;
+use App\Form\VerifyPasswordType;
+use App\Repository\CertificateSetupProcessRepository;
+use App\Repository\InstallationProgressRepository;
+use App\Security\Voter\UserAuthenticationVoter;
+use App\Service\CertificateFreeradiusInfoService;
+use App\Service\CertificateProcessCheckerService;
+use App\Service\CertificateRadsecproxyInfoService;
+use App\Service\EventActions;
+use App\Service\GetSettings;
+use App\Service\InstallationService;
+use App\Service\SettingsService;
+use DateTime;
+use DateTimeImmutable;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
+
+class CertificateManagementController extends AbstractController
+{
+    public function __construct(
+        private readonly GetSettings $getSettings,
+        private readonly TranslatorInterface $translator,
+        private readonly CertificateProcessCheckerService $certificateProcessCheckerService,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly InstallationProgressRepository $installationProgressRepository,
+        private readonly CertificateSetupProcessRepository $certificateSetupProcessRepository,
+        private readonly EventActions $eventActions,
+        private readonly InstallationService $installationService,
+        private readonly CertificateFreeradiusInfoService $certificateFreeradiusInfoService,
+        private readonly CertificateRadsecproxyInfoService $certificateRadsecproxyInfoService,
+        private readonly SettingsService $settingsService,
+        private readonly UserPasswordHasherInterface $userPasswordHasher,
+    ) {
+    }
+
+    /**
+     * @throws \DateMalformedStringException
+     */
+    #[Route('/dashboard/settings/certificatesManagement', name: 'admin_dashboard_settings_certs_management')]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_READ)]
+    public function settingsCertificatesManagement(): Response
+    {
+        $lastCompletedInstallation = $this->installationProgressRepository->getLastCompleted();
+        $lastCompletedCertificate = $this->certificateSetupProcessRepository->getLatestCompletedProcess();
+        if ($lastCompletedInstallation instanceof InstallationProgress) {
+            $installationDate = $lastCompletedInstallation->getUpdatedAt();
+        }
+        if ($lastCompletedCertificate instanceof CertificateSetupProcess) {
+            $certificateDate = $lastCompletedCertificate->getUpdatedAt();
+            $certificateSetRadsecproxy = $this->certificateRadsecproxyInfoService->getLatestCertificatesSet(
+                $lastCompletedCertificate
+            );
+            $certificateSetFreeradius = $this->certificateFreeradiusInfoService->readCertificatesOnSigningKeys();
+            $certificateSet = array_merge($certificateSetRadsecproxy, $certificateSetFreeradius);
+        }
+
+        // Default render
+        return $this->render('dashboard/shared/settings_actions.html.twig', [
+            'data' => $this->getSettings->getSettings(),
+            'lastCompletedInstallation' => $installationDate ?? null,
+            'certificateSet' => $certificateSet ?? null,
+            'lastCompletedCertificates' => $certificateDate ?? null,
+        ]);
+    }
+
+    #[Route(
+        '/dashboard/settings/certificatesManagement/freeradius/selection',
+        name: 'admin_dashboard_settings_certs_management_freeradius_selection'
+    )]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    public function settingsCertificatesManagementSelection(Request $request): Response
+    {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        /** @var array<string, array{value: string, description: string}> $data */
+        $data = $this->getSettings->getSettings();
+        // Save the event
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+        // Get current process state
+        $processState = $this->certificateProcessCheckerService->getProcessState();
+        // If there's no active process
+        if (!$processState['active']) {
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'noActiveProcess',
+                    [],
+                    'CertificateProcessCheckerService'
+                )
+            );
+            return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
+        }
+
+        $certificatesFreeradiusDomainDTO = new CertificateFreeradiusDomainDTO();
+        $formCertificateFreeradiusDomainType = $this->createForm(
+            CertificateFreeradiusDomainType::class,
+            $certificatesFreeradiusDomainDTO
+        );
+
+        $formCertificateFreeradiusDomainType->handleRequest($request);
+        if ($formCertificateFreeradiusDomainType->isSubmitted() && $formCertificateFreeradiusDomainType->isValid()) {
+            $domain = $certificatesFreeradiusDomainDTO->domain;
+            // Save updated settings
+            $settingsToUpdate = [
+                SettingName::RADIUS_TLS_NAME->value => [
+                    'value' => $domain,
+                ],
+                SettingName::NAI_REALM->value => [
+                    'value' => $domain,
+                ],
+                SettingName::DOMAIN_NAME->value => [
+                    'value' => $domain,
+                ],
+                SettingName::RADIUS_REALM_NAME->value => [
+                    'value' => $domain,
+                ],
+                SettingName::ENABLE_RADIUS_TLS_RESET->value => [
+                    'value' => 'false',
+                ],
+            ];
+            $processEntity = $processState['process'];
+            $processEntity->setFreeradiusDomainName($domain);
+
+            $this->settingsService->updateSettingsFromArray($settingsToUpdate);
+            $this->settingsService->flush();
+            $this->entityManager->persist($processEntity);
+            $this->entityManager->flush();
+
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::RADIUS_TLS_UPDATED->value,
+                new DateTime(),
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'by' => $currentUser->getUuid(),
+                ]
+            );
+
+            $this->addFlash(
+                'success',
+                $this->translator->trans(
+                    'radiusTLSNameDomainUpdated',
+                    ['%domain%' => $domain],
+                    'controllers'
+                )
+            );
+
+            return $this->redirectToRoute(
+                'admin_dashboard_settings_certs_management_freeradius_selection'
+            );
+        }
+
+        return $this->render(
+            'dashboard/shared/settings_actions/certificatesManagement/certificates/certs_selection.html.twig',
+            [
+                'data' => $data,
+                'formCertificateFreeradiusDomain' => $formCertificateFreeradiusDomainType->createView(),
+            ]
+        );
+    }
+
+    #[Route(
+        '/dashboard/settings/certificatesManagement/certificates/abort',
+        name: 'admin_dashboard_settings_certs_management_certificates_abort',
+        methods: ['POST']
+    )]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
+    public function settingsCertificatesManagementCertificatesAbort(
+        Request $request
+    ): Response {
+        /** @var User $user */
+        $user = $this->getUser();
+        $process = $this->certificateProcessCheckerService->getCurrentProcess();
+
+        // In case there's not active process
+        if (!$process instanceof CertificateSetupProcess) {
+            $this->addFlash(
+                'error',
+                $this->translator->trans('noActiveProcess', [], 'CertificateProcessCheckerService')
+            );
+            return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
+        }
+
+        // Cancel the process and add a tag IN_COMPLETED
+        $process->setStatus(ProcessStatusType::ABORTED);
+        $process->setUpdatedAt(new DateTimeImmutable());
+
+        $this->entityManager->persist($process);
+        $this->entityManager->flush();
+
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_ABORTED->value,
+            new DateTime(),
+            [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'by' => $user->getUuid(),
+            ]
+        );
+
+        $this->addFlash(
+            'success',
+            $this->translator->trans(
+                'certificateProcessAborted',
+                [],
+                'controllers'
+            )
+        );
+
+        return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
+    }
+
+    #[Route(
+        '/dashboard/settings/certificatesManagement/systemReset',
+        name: 'admin_dashboard_settings_certs_management_system_reset',
+        methods: ['POST']
+    )]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
+    public function settingsCertificatesManagementSystemReset(Request $request): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        // Abort pending Installation process if exists
+        $installationProcess = $this->installationProgressRepository->getLast();
+        if (
+            $installationProcess &&
+            $installationProcess->getInstallationState() !== ProcessStatusType::COMPLETED
+        ) {
+            $installationProcess->setInstallationState(ProcessStatusType::ABORTED);
+            $installationProcess->setUpdatedAt(new DateTime());
+            $this->entityManager->persist($installationProcess);
+
+            // Reset system to last valid installation config
+            $this->installationService->resetToLastInstallation();
+        }
+
+        // Abort pending Certificate process if exists
+        $certificateProcess = $this->certificateProcessCheckerService->getCurrentProcess();
+        if ($certificateProcess instanceof \App\Entity\CertificateSetupProcess) {
+            $certificateProcess->setStatus(ProcessStatusType::ABORTED);
+            $certificateProcess->setUpdatedAt(new DateTimeImmutable());
+            $this->entityManager->persist($certificateProcess);
+        }
+
+        $this->entityManager->flush();
+
+        // Set session to redirect the user
+        $session = $request->getSession();
+        $session->set(SessionStatus::SYSTEM_RESET_REQUEST->value, 'admin_dashboard_settings_certs_installation');
+
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::SYSTEM_RESET_REQUEST_STARTED->value,
+            new DateTime(),
+            [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'by' => $user->getUuid(),
+            ]
+        );
+
+        $this->addFlash(
+            'success',
+            $this->translator->trans(
+                'systemResetRequestStarted',
+                [],
+                'controllers'
+            )
+        );
+
+        return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
+    }
+
+    #[Route(
+        '/dashboard/settings/certificatesManagement/verifyIdentity/{type}',
+        name: 'admin_dashboard_settings_certs_installation_verify',
+        requirements: [
+            'type' => 'installation|certificates'
+        ],
+        defaults: [
+            'type' => InstallationType::CERTIFICATES->value,
+        ]
+    )]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
+    public function settingsCertificatesManagementInstallationVerifyIdentity(
+        Request $request,
+        string $type
+    ): RedirectResponse|Response {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($type === InstallationType::INSTALLATION->value) {
+            $eventType = AnalyticalEventType::INSTALLATION_IDENTITY_VERIFIED_CODE->value;
+        } else {
+            $eventType = AnalyticalEventType::CERTIFICATES_IDENTITY_VERIFIED_CODE->value;
+        }
+
+        $form = $this->createForm(VerifyPasswordType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $password = $form->get('password')->getData();
+
+            if ($this->userPasswordHasher->isPasswordValid($user, $password)) {
+                $session = $request->getSession();
+                if ($type === InstallationType::INSTALLATION->value) {
+                    $session->set(SessionStatus::INSTALLATION_VERIFICATION->value, true);
+                } else {
+                    $session->set(SessionStatus::CERTIFICATE_VERIFICATION->value, true);
+                }
+                $eventMetaData = [
+                    'platform' => PlatformMode::LIVE->value,
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'uuid' => $user->getUuid(),
+                    'ip' => $request->getClientIp(),
+                ];
+                $this->eventActions->saveEvent(
+                    $user,
+                    $eventType,
+                    new DateTime(),
+                    $eventMetaData
+                );
+                $this->addFlash(
+                    'success',
+                    $this->translator->trans(
+                        'installationStartedSuccessfully',
+                        [],
+                        'controllers'
+                    )
+                );
+
+                if ($type === InstallationType::INSTALLATION->value) {
+                    return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
+                }
+                return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
+            }
+            $this->addFlash(
+                'error',
+                $this->translator->trans('invalidPassword', [], 'controllers')
+            );
+        }
+
+        $data = $this->getSettings->getSettings();
+        return $this->render(
+            'dashboard/shared/settings_actions/certificatesManagement/partials/confirm_identity.html.twig',
+            [
+                'data' => $data,
+                'form' => $form->createView(),
+                'type' => $type,
+            ]
+        );
+    }
+}

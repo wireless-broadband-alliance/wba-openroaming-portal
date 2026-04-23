@@ -1,0 +1,17 @@
+step:
+  database:
+    title: "Database Configuration"
+    description: "Enter the database connection details to start the installation."
+  settings:
+    title: "Application Settings"
+    description: "Configure the main application settings and required parameters."
+  admin_credentials:
+    title: "Admin Credentials"
+    description: "Create the administrator account used to access the management panel."
+  summary:
+    title: 'Summary'
+    description: 'Review all configured settings before completing the installation.'
+confirm_abort: "Are you sure you want to abort the installation?"
+abort: "Abort Installation"
+installer_info: "Follow the steps to complete the system installation."
+leave: 'Leave Process Configuration'

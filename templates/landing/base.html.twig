@@ -13,17 +13,17 @@
                  style="background-image: url('{{ data.WALLPAPER_IMAGE.value }}');">
                 <div class="h-full w-full flex flex-col">
                     <img class="w-96 max-w-full" src="{{ data.OPENROAMING_LOGO.value }}" alt="OpenRoaming Logo"/>
-                    <h1 class="text-5xl font-segoe text-white mt-[55px] font-bold break-words">
+                    <div class="text-5xl font-segoe text-white mt-[55px] font-bold break-words">
                         {{ data.WELCOME_TEXT.value|raw }}
-                    </h1>
-                    <h2 class="text-white text-2xl mt-[45px] leading-7 break-words">
+                    </div>
+                    <div class="text-white text-2xl mt-[45px] leading-7 break-words">
                         {{ data.WELCOME_DESCRIPTION.value|raw }}
-                    </h2>
-                    <p class="text-white text-lg mt-[55px] mb-6 break-words">
+                    </div>
+                    <div class="text-white text-lg mt-[55px] mb-6 break-words">
                         {{ 'contactText'|trans({}, 'landing') }}
                         <a href="mailto:{{ data.CONTACT_EMAIL.value }}"
                            class="font-semibold underline text-primary break-words">{{ data.CONTACT_EMAIL.value }}</a>
-                    </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -42,8 +42,19 @@
             {% endblock %}
 
             {% block toast_messages %}
-                {{ include('landing/shared/_render_toasts.html.twig') }}
+                {{ include('shared/_render_toasts.html.twig') }}
             {% endblock %}
+
+            {# Certificate Process Status - Checks if the certificates are applied correctly #}
+            {% if isCertificateAborted() %}
+                {% set isDashboard = app.request.pathinfo starts with '/dashboard' %}
+                {% set toastType = isDashboard ? 'toast-error-dashboard' : 'toast-error' %}
+
+                {{ include('shared/_toast.html.twig', {
+                    message: 'abortedCertificatesWarning'|trans({}, 'dashboard'),
+                    toast_type: toastType,
+                }) }}
+            {% endif %}
 
             {% block second_col %}
             {% endblock %}

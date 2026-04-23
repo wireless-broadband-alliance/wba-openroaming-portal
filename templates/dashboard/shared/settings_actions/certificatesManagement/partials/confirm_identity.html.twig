@@ -1,0 +1,48 @@
+{% extends 'dashboard/shared/settings_actions/certificatesManagement/partials/base.html.twig' %}
+
+{% block title %}
+    {{ 'adminPageWBA'|trans({}, '_header_admin') }}
+{% endblock %}{% block installation_content %}
+    <div class="w-full max-w-xl mx-auto py-10 px-6">
+
+        <div class="text-center">
+            <h1 class="text-3xl font-semibold">
+                {{ 'title'|trans({}, 'confirm_identity') }}
+            </h1>
+
+            <p class="mt-4 text-gray-600 text-base leading-relaxed">
+                {% if type == constant('App\\Enum\\AnalyticalEventType::INSTALLATION_IDENTITY_VERIFIED_RESEND_CODE').value %}
+                    {{ 'installationDescription'|trans({}, 'confirm_identity') }}
+                {% else %}
+                    {{ 'certificatesDescription'|trans({}, 'confirm_identity') }}
+                {% endif %}
+            </p>
+        </div>
+
+        {{ form_start(form, {attr: {autocomplete: 'off', class: 'mt-10 space-y-6'}}) }}
+
+        <div class="max-w-md mx-auto">
+            {{ form_widget(form.password, {
+                attr: {
+                    class: 'form-widget w-full text-center text-lg py-3',
+                    placeholder: 'form.password_placeholder'|trans({}, 'login_landing'),
+                },
+            }) }}
+
+            <div class="mt-2 text-red-500 text-sm text-center">
+                {{ form_errors(form.password) }}
+            </div>
+        </div>
+
+        <div class="flex justify-center pt-4">
+            <button type="submit"
+                    class="btn-primary min-w-[220px]">
+                {{ 'verify'|trans({}, 'confirm') }}
+            </button>
+        </div>
+
+        {{ form_row(form._token) }}
+        {{ form_end(form) }}
+
+    </div>
+{% endblock %}

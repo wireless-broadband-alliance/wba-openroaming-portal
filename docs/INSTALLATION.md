@@ -1,54 +1,139 @@
-# ⚙️ Installation Guide
+# Installation Guide
 
 This guide is intended solely to assist in setting up the OpenRoaming Provisioning Portal. It provides step-by-step
 instructions for configuring the Portal.
 
 Please follow the instructions below, starting from the **root** folder of the project, to prepare it:
 
-1. **Update Environment Variables**: After you have obtained the project, make sure to update your environment
-   variables. A sample file named `.env.sample` is provided in the project root directory. Duplicate the sample file and
-   rename it to `.env`. You can then modify the environment variables to match your specific configuration. 🗝️
+## 1. **Update Environment Variables**
+
+After you have obtained the project, make sure to update your environment
+variables. A sample file named `.env.sample` is provided in the project root directory. Duplicate the sample file and
+rename it to `.env`. You can then modify the environment variables to match your specific configuration.
 
 **Note**: When updating the database credentials in the `.env` file, make sure they **match the credentials specified in
 the docker-compose.yml** file.
 Failure to match the credentials will result in the application being unable to connect to
 the database.
 
-2. **Start Services**: Use Docker to start the necessary services. Execute the following command: 🐳
+## 2. **Start Services**
+
+Use Docker to start the necessary services. There are two scenarios:
+
+#### a) **Production / prebuilt image (default)**
 
 ```bash
-- docker compose up -d
+docker compose up -d
 ```
 
-or, only for local usage and testing,
+This will pull the prebuilt image with all dependencies included.
+
+---
+
+#### b) **Local Development / Testing**
+
+If you want to use `docker-compose-local.yml` for **development or testing**, the container **does not include
+preinstalled dependencies**. Follow these steps **before starting the containers**:
+
+1. **Install project dependencies** on your host machine:
 
 ```bash
-- docker compose -f docker-compose-local.yml up -d
+sudo composer install     # PHP dependencies
 ```
 
-3. **Check Containers Status**: After executing the previous command, ensure that all containers for each service are
-   appropriately formed. The following command may be used to verify the status of each container, example:
+2. **Create the containers** on your host machine:
 
 ```bash
-- docker ps
+docker-compose -f docker-compose-local.yml up -d
 ```
 
-4. **Upload Certificates**:
-   Upload your certificate files to the `public/signing-keys` directory for the portal o eventually generate profiles
-   based on your certificates.
-   You can either upload the certs to this folder, inside/outside the container web, but off course before creating it.
+## 3. **Check Containers Status**
 
-5. **Generate PFX Signing Key**: Now, inside the `web` container, go to the tools directory and run the generatePfx
-   script by doing this:
+After executing the previous command, ensure that all containers for each service are
+appropriately formed. The following command may be used to verify the status of each container, example:
 
 ```bash
-- docker exec -it <web-container-id> bash
-- cd tools
-- sh generatePfxSigningKey.sh
+docker ps
 ```
 
-6. **Migrations, Fixtures and Permissions**: Still inside of the`web` container, you need to run this 3 commands to load
-   the database schema, load is respective settings and add permissions to a specific folder to save images:
+## 4. **Build Tailwind Dependencies**
+
+First, enter the `web` container:
+
+```bash
+docker exec -it <web-container-id> bash
+```
+
+Once inside the container, compile the required Tailwind CSS and frontend assets. The **default build command** is:
+
+```bash
+php bin/console tailwind:build
+```
+
+### For Production
+
+To compile and **minify** assets for production:
+
+```bash
+php bin/console tailwind:build --minify
+php bin/console asset-map:compile
+```
+
+### For Development
+
+For continuous development and watching changes:
+
+```bash
+php bin/console tailwind:build -w
+```
+
+> For a complete guide on building and managing assets in different environments (development or production), please
+> refer to the [Asset Mapper Documentation](ASSETMAPPER.md).
+
+### 5. **Upload Certificates**
+
+Still inside the `web` container, upload your certificate files to the portal.
+
+1. **Copy your certificate files** to the `public/signing-keys` folder.
+
+2. The portal supports **Let's Encrypt certificates** (commonly used for **OpenRoaming / FreeRADIUS authentication**).
+   The certificate files should be placed using the following structure:
+
+```
+public/signing-keys/
+ ├── cert.pem
+ ├── chain.pem
+ ├── fullchain.pem
+ ├── privkey.pem
+ └── ca/
+     └── ca.pem
+```
+
+3. **In case you also have your custom CA**, please place it inside the `ca/` folder as `ca.pem`.
+
+```text
+public/signing-keys/ca/ca.pem
+```
+
+> **Note:** When using Let's Encrypt, these files are typically generated in
+> `/etc/letsencrypt/live/<your-domain>/` and can be copied into the folder above.
+
+> Make sure `ca.pem` is in the `ca/` subfolder — the portal uses this folder specifically for trusted root CAs.
+> You can copy files from your host machine into the container or directly into the folder before creating profiles.
+
+## 6. **Generate PFX Signing Key**
+
+While still inside the `web` container, go to the `tools` directory and run the PFX generation script:
+
+```bash
+cd tools
+sh generatePfxSigningKey.sh
+```
+
+## 7. **Migrations, Fixtures and Permissions**
+
+Still inside of the`web` container, you need to run this 3 commands to load
+the database schema, load is respective settings and add permissions to a specific folder to save images:
 
 ```bash
 - php bin/console doctrine:migrations:migrate
@@ -74,7 +159,7 @@ Make sure to check the `src/DataFixtures/SettingFixture.php` file for any refere
 migrations about
 the database on the migrations folder of the project.
 
-7. **Generate JWT Keys**
+## 8. **Generate JWT Keys**
 
 This step is required for the **API** configuration. To enable JWT authentication, you need to generate a key pair (
 private and public keys). Make sure to run the
@@ -84,7 +169,7 @@ following command on the root folder of the project to generate these keys:
 php bin/console lexik:jwt:generate-keypair 
 ```
 
-or 
+or
 
 ```bash
 php bin/console lexik:jwt:generate-keypair --passphrase=<your_passphrase>
@@ -97,7 +182,10 @@ This command will create the following files in the `config/jwt` directory:
 
 Make sure to keep these keys secure, especially the private key.
 
-8. **Configure JWT and CORS**: Make sure this configuration is set up on `.env` the JWT and CORS environment variables in your `.env` file:
+## 9. **Configure JWT and CORS**
+
+Make sure this configuration is set up on `.env` the JWT and CORS environment variables
+in your `.env` file:
 
 ```env
 JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
@@ -115,14 +203,14 @@ The `CORS_ALLOW_ORIGIN` regex allows requests from `localhost` or `127.0.0.1` du
 Adjust it based on your deployment needs, and make sure to not use the default value from the sample in a production
 environment.
 
-## 🛑 Important References Configurations 🛑
+## Important References Configurations
 
 ### For a complete installation of the portal, please follow these steps
 
-These steps will enhance the portal's security and enable key features required for its full functionality 
+These steps will enhance the portal's security and enable key features required for its full functionality
 (Cron Commands, Microsoft login, Google Login, SAML login and GeoLite2).
 
-### 🔧 Set up a CRON Job for automation commands
+### Set up a CRON Job for automation commands
 
 For reference, all the previous documentation related to the **CRONGUI.md** was discontinued. Now the framework
 handles all this automation, and the supervisor configuration takes cares of the process. If you want to run the
@@ -174,20 +262,19 @@ make sure to expose a SAML attribute on your IDP named
 to expose a unique id of the SAML account.
 This property it's required to authenticate users if one of them doesn't have an email defined on the IDP.
 
-
-### GeoLite Configuration 
+### GeoLite Configuration
 
 > **Important**: GeoLite2 is mandatory for a complete portal installation
 
-GeoLite2 is important for personalizing the user experience based on their location. It allows the portal to identify 
-the user's region from their IP address, helping us adjust content, set cookies properly, and comply with local laws, 
-such as the GDPR. By using GeoLite2, we ensure that our portal delivers relevant content and respects privacy and 
+GeoLite2 is important for personalizing the user experience based on their location. It allows the portal to identify
+the user's region from their IP address, helping us adjust content, set cookies properly, and comply with local laws,
+such as the GDPR. By using GeoLite2, we ensure that our portal delivers relevant content and respects privacy and
 cookie consent regulations.
 
 For detailed instructions on the GeoLite GUI setup, operations, and usage, refer to
 the [GeoLite GUI Guide](../docs/GEOLITEGUI.md).
 
-### 🛑 Important Security Note after Installation 🛑
+### Important Security Note after Installation
 
 **It is critical to change the application to "prod"** mode before exposing the OpenRoaming Provisioning Portal to the
 internet or any production environment. Running the portal in "dev" mode on a public network **could reveal vital
@@ -198,13 +285,14 @@ It's **recommended** to follow standard security practices, including:
 - Properly configuring **firewalls** to **protect database servers** and another critical infrastructure.
 - Ensuring all **software** and **dependencies** are **up to date** with the latest security patches.
 
-And again, please **do not share** any of your generated keys from these installations steps and keep as safe as possible.
+And again, please **do not share** any of your generated keys from these installations steps and keep as safe as
+possible.
 
-## 🎉 Congratulations! 🎉
+## Congratulations!
 
-You've successfully completed the installation process of the OpenRoaming Provisioning Portal. 🚀
+You've successfully completed the installation process of the OpenRoaming Provisioning Portal.
 
-Now, it's time to access your fully set-up portal! 🌐
+Now, it's time to access your fully set-up portal!
 
 To get started, open your favorite web browser and type the following address in the URL bar:
 http://YOUR_SERVER_IP:80
@@ -214,12 +302,13 @@ If you are running the portal locally, you can
 use localhost for an IP address.
 And make sure to use **port 80**, it's the default port of the project.
 
-If you encounter any issues or have any questions along the way, don't hesitate to check to the **Troubleshooting** section on this README or reach out to our support team for assistance.
+If you encounter any issues or have any questions along the way, don't hesitate to check to the **Troubleshooting**
+section on this README or reach out to our support team for assistance.
 
 Thank you for choosing the OpenRoaming Provisioning Portal. We hope it helps your Wi-Fi experience and makes it easier
-to connect in any location! 💻📱
+to connect in any location!
 
-## 🚧 Troubleshooting
+## Troubleshooting
 
 Here are some probable troubleshooting issues you may experience during the OpenRoaming Provisioning Portal
 installation:
@@ -246,7 +335,12 @@ To solve this, use the chmod command inside the `web` container, to give the scr
 - chmod +x tools/generatePfxSigningKey.sh
 ```
 
-## 📞 Contact and Feedback
+## Important Reference
+
+> After completing installation, make sure to review the [Security Notes](SECURITY.md) for important production
+> considerations.
+
+## Contact and Feedback
 
 Your suggestions and questions will help us improve the platform's usability and experience.
 

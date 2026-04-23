@@ -1,24 +1,39 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Service;
 
-class DomainService
+use App\Enum\DomainMatchType;
+
+readonly class DomainService
 {
-    // Validate domain names and check if they resolve to an IP address
-    // Validation comes from here: https://www.php.net/manual/en/function.dns-get-record.php
-    /**
-     * Check whether a given domain name is syntactically valid and resolvable.
-     *
-     * @param non-empty-string $domain
-     */
+    public function normalize(string $domain): string
+    {
+        $domain = strtolower(trim($domain));
+
+        // IDN → ASCII (safe)
+        $ascii = idn_to_ascii(
+            $domain,
+            IDNA_DEFAULT,
+            INTL_IDNA_VARIANT_UTS46
+        );
+
+        return $ascii ?: $domain;
+    }
+
     public function isValidDomain(string $domain): bool
     {
-        if (!filter_var($domain, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
-            return false;
-        }
-
-        $dnsRecords = @dns_get_record($domain, DNS_A + DNS_AAAA);
-
-        return $dnsRecords !== false && $dnsRecords !== [];
+        return (bool)filter_var(
+            $domain,
+            FILTER_VALIDATE_DOMAIN,
+            FILTER_FLAG_HOSTNAME
+        );
+    }
+    public function detectMatchType(string $domain): DomainMatchType
+    {
+        return str_starts_with($domain, '*.')
+            ? DomainMatchType::SUBDOMAIN
+            : DomainMatchType::EXACT;
     }
 }

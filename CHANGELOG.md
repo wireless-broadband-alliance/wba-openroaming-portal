@@ -1,8 +1,41 @@
 # Changelog
 
+# Release V1.10.0
+
+- Installation Widget implementation (For first time project setup / for later use on the admin page configuration).
+- Certificate Management for the admin page (for radsecproxy/freeradius certificates).
+- Return App configuration page (for centralized endpoint management for both android / iOS devices).
+- Added a new user role, Super Admin, to allow the management of the platform and the other admins.
+- Added new pages to configure the permissions of the platform admins.
+- Added a new configuration page, to manage the black-listed domains used for registration and authentication with
+  Google, Microsoft and Simple Email/Password.
+- Added a new validator for each authentication method or registration to block blacklisted domains
+- New loading screen for long time requests (example, refresh domains)
+- Add new `SAML_IDENTIFIER_ATTRIBUTE` environment variable to support configurable SAML user identifier mapping (
+  sAMAccountName, email, uid, or username).
+- Added `SAML_ATTRIBUTE_MAPPING` configuration to allow fully customizable SAML attribute mappings (uuid, email,
+  first_name, last_name) per Identity Provider.
+- **Required one-time action:** After upgrading, run
+  the [PrepareReleaseV1100Command.php](src/Command/PrepareReleaseV1100Command.php) to migrate
+  existing administrator permissions to the new **Super Admin** role hierarchy.
+  This command should be executed **only once** and while the portal is **offline or restricted**. Also this command
+  change the ca.pem cert location (`/signing-keys/ca`)
+    - Run the command with:
+      ```bash
+      php bin/console prepare-release:v1100
+      ```
+- It's required to run the new migrations this will set up the new entities for the new domains, sources page (
+  `DomainsBlacklist`, `DomainsSource`), installation widget with the certificates management (`InstalationWidget`,
+  `Certificate` & `CertificateSetupProcess`) & the Fingerprints for apps associations with the portal
+    - Run the migrations with:
+      ```bash
+      php bin/console doctrine:migrations:migrate
+      ```
+
 # Release V1.9.1
 
-- Fix problem with PGP Encryption where the previous implementation didn't set a **GNUPGHOME**, so GnuPG was trying to use the default location
+- Fix problem with PGP Encryption where the previous implementation didn't set a **GNUPGHOME**, so GnuPG was trying to
+  use the default location
   which was not writable by the PHP.
 - Also, a reveal password toggle on the delete account page was added.
 
@@ -56,12 +89,13 @@
     - This new command is configurable on the page `dashboard/settings/schedule` because he is also cron based.
 - New bundle installed `composer require symfony/lock` required for the command next execution only start when the
   current active ends.
-- Symfony version increase for maintained version (7.3.3), it bug fixes and security fixes until January 2026.
+- Symfony version increase for maintained version (7.4.3), it bug fixes and security fixes with support until November
+    2028.
 - NPM webpack-cli deprecations fixed to the latest stabled release (
     - (https://www.npmjs.com/package/webpack-cli/v/5.1.4)) compatible with "@symfony/webpack-encore": "^5.1.0".
 - New validation on the Admin Authentication Methods page to check whether the project has all required certificates.
-- Also for this release, it's required to run the new migrations to set up the new entity for the translations (
-  `SettingTranslation`). And the new setting for the login with uuid (`LOGIN_WITH_UUID_ONLY`):
+- It's required to run the new migrations to set up the new entity for the translations (
+  `SettingTranslation`), and the new setting for the login with uuid (`LOGIN_WITH_UUID_ONLY`).
     - Run the migrations with:
       ```bash
       php bin/console doctrine:migrations:migrate
@@ -75,9 +109,9 @@ As part of our ongoing improvements and rework of the API endpoints, **API v1 an
 These versions will no longer receive updates, and clients are strongly encouraged to migrate to **API v3**.
 
 * **Date of deprecation:** 2026-06-19 (or the first release after this date)
-* **Grace period:** v1 and v2 will continue to function temporarily, but **all users must migrate within 6 months from 2026-01-19**.
+* **Grace period:** v1 and v2 will continue to function temporarily, but **all users must migrate within 6 months from
+  2026-01-19**.
 * **The first release after this date of deprecation will fully remove v1 and v2 code and routes**
-
 
 ### Recommended Action
 

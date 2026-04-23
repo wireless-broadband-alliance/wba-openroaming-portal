@@ -4,7 +4,8 @@
     warningMessage: true,
 }) }}
 
-<form action="{{ path('admin_dashboard_settings_terms', {language: language}) }}" method="post" enctype="multipart/form-data">
+<form action="{{ path('admin_dashboard_settings_terms', {language: language}) }}" method="post"
+      enctype="multipart/form-data">
     {{ form_row(form._token) }}
 
     <div class="grid gap-4 lg:grid-cols-2 p-2">
@@ -42,12 +43,16 @@
                                 <div class="flex flex-col items-center space-y-2 mt-5" data-controller="radio">
                                     {# Render "ON" Radio Input #}
                                     <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
-                                           name="onLabelLogin" >
+                                           name="onLabelLogin">
                                         Link
                                         <input type="radio"
                                                name="{{ form.TOS.vars.full_name }}"
                                                value="LINK"
-                                               class="radio-input hidden"{{ form.TOS.vars.value == 'LINK' ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'showLink') }} {{ stimulus_target('radio-card', 'link') }}>
+                                               class="radio-input hidden"
+                                                {{ form.TOS.vars.value == 'LINK' ? 'checked' : '' }}
+                                                {% if form.TOS.vars.disabled %} disabled="disabled" {% endif %}
+                                                {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'showLink') }}
+                                                {{ stimulus_target('radio-card', 'link') }}>
                                         <div class="custom-radio pr-3 pt-1.5 {{ form.TOS.vars.data == 'LINK' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                                  viewBox="0 0 14 10"
@@ -65,7 +70,10 @@
                                         <input type="radio"
                                                name="{{ form.TOS.vars.full_name }}"
                                                value="TEXT_EDITOR"
-                                               class="radio-input hidden" {{ form.TOS.vars.value == 'TEXT_EDITOR' ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'showTextEditor') }}>
+                                               class="radio-input hidden"
+                                                {{ form.TOS.vars.value == 'TEXT_EDITOR' ? 'checked' : '' }}
+                                                {% if form.TOS.vars.disabled %} disabled="disabled" {% endif %}
+                                                {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'showTextEditor') }}>
                                         <div class="custom-radio pr-3 pt-1.5 {{ form.TOS.vars.data == 'TEXT_EDITOR' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                                  viewBox="0 0 14 10"
@@ -132,12 +140,16 @@
                                 <div class="flex flex-col items-center space-y-2 mt-5" data-controller="radio">
                                     {# Render "ON" Radio Input #}
                                     <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
-                                           name="onLabelLogin" >
+                                           name="onLabelLogin">
                                         Link
                                         <input type="radio"
                                                name="{{ form.PRIVACY_POLICY.vars.full_name }}"
                                                value="LINK"
-                                               class="radio-input hidden"{{ form.PRIVACY_POLICY.vars.value == 'LINK' ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'showLink') }} {{ stimulus_target('radio-card', 'link') }}>
+                                               class="radio-input hidden"
+                                                {{ form.PRIVACY_POLICY.vars.value == 'LINK' ? 'checked' : '' }}
+                                                {% if form.PRIVACY_POLICY.vars.disabled %} disabled="disabled" {% endif %}
+                                                {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'showLink') }}
+                                                {{ stimulus_target('radio-card', 'link') }}>
                                         <div class="custom-radio pr-3 pt-1.5 {{ form.PRIVACY_POLICY.vars.data == 'LINK' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                                  viewBox="0 0 14 10"
@@ -155,7 +167,10 @@
                                         <input type="radio"
                                                name="{{ form.PRIVACY_POLICY.vars.full_name }}"
                                                value="TEXT_EDITOR"
-                                               class="radio-input hidden" {{ form.PRIVACY_POLICY.vars.value == 'TEXT_EDITOR' ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'showTextEditor') }}>
+                                               class="radio-input hidden"
+                                                {{ form.PRIVACY_POLICY.vars.value == 'TEXT_EDITOR' ? 'checked' : '' }}
+                                                {% if form.PRIVACY_POLICY.vars.disabled %} disabled="disabled" {% endif %}
+                                                {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'showTextEditor') }}>
                                         <div class="custom-radio pr-3 pt-1.5 {{ form.PRIVACY_POLICY.vars.data == 'TEXT_EDITOR' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                                  viewBox="0 0 14 10"
@@ -193,16 +208,18 @@
     {# Footer #}
     <div class="mt-8 divider-solid"></div>
 
+    {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::TERMS_POLICIES_WRITE')) %}
     <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
         <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingTerms'}) }}"
-           onclick="return confirm('{{ 'resetMessage'|trans({}, 'settings_actions_general') }}')"
+           data-confirm="{{ 'resetMessage'|trans({}, 'settings_actions_general')|e('html_attr') }}"
            class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
             {{ 'reset'|trans({}, 'settings_actions_general') }}
         </a>
 
-        <button type="submit" class="btn-primary"
-                onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general') }}')">
-            {{ 'saveChanges'|trans({}, 'settings_actions_general') }}
-        </button>
-    </div>
+            <button type="submit" class="btn-primary"
+                    onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general') }}')">
+                {{ 'saveChanges'|trans({}, 'settings_actions_general') }}
+            </button>
+        </div>
+    {% endif %}
 </form>

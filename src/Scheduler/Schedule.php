@@ -51,10 +51,34 @@ readonly class Schedule implements ScheduleProviderInterface
                 )
             )
 
+            // By default, daily at 03:00
             ->add(
                 RecurringMessage::cron(
                     $this->getRequiredSetting(SettingName::FREERADIUS_LAST_CONNECTION_CRON->value),
                     new RunCommandMessage('backup:freeradiusLastConnection')
+                )
+            )
+
+            // Executes once a week on Sunday at 03:30
+            ->add(
+                RecurringMessage::cron(
+                    '30 3 * * 0',
+                    new RunCommandMessage('clear:uploaded-certs')
+                )
+            )
+            // Executes once a week on Sunday at 04:00
+            ->add(
+                RecurringMessage::cron(
+                    '0 4 * * *',
+                    new RunCommandMessage('notify:superAdminWhenCertsExpires')
+                )
+            )
+
+            // By default, daily at 04:00
+            ->add(
+                RecurringMessage::cron(
+                    $this->getRequiredSetting(SettingName::DOMAIN_BLACKLIST_IMPORT_CRON->value),
+                    new RunCommandMessage('import:temporary-domains')
                 )
             );
     }
