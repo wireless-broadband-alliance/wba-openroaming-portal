@@ -174,12 +174,12 @@
         <div class="flex items-center gap-3">
             {% if totalCurrentAuths >= 1 %}
                 <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                    <twig:ux:icon class="w-5 text-[#7DB928]" name="wba:security-check-ok" />
+                    <twig:ux:icon class="w-6 text-[#7DB928]" name="wba:security-check-ok" />
                 </div>
                 <span class="text-lg font-bold text-[#7DB928]">{{ totalCurrentAuths }}</span>
             {% else %}
                 <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                    <twig:ux:icon class="w-5 text-red-500" name="wba:security-check-error" />
+                    <twig:ux:icon class="w-6 text-red-500" name="wba:security-check-error" />
                 </div>
                 <span class="text-sm font-medium text-red-500">{{ 'noDataAvailable'|trans({}, 'freeradius_statistics') }}</span>
             {% endif %}
@@ -197,7 +197,7 @@
             {# Uploads #}
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                    <twig:ux:icon class="w-5 fill-current text-gray-500" name="wba:upload-freeradius-statistics" />
+                    <twig:ux:icon class="w-6 fill-current text-gray-500" name="wba:upload-freeradius-statistics" />
                 </div>
                 <div>
                     <p class="text-xs text-gray-400 mb-0.5">{{ 'uploads'|trans({}, 'freeradius_statistics') }}</p>
@@ -210,7 +210,7 @@
             {# Downloads #}
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                    <twig:ux:icon class="w-5 fill-current text-gray-500" name="wba:download-freeradius-statistics" />
+                    <twig:ux:icon class="w-6 fill-current text-gray-500" name="wba:download-freeradius-statistics" />
                 </div>
                 <div>
                     <p class="text-xs text-gray-400 mb-0.5">{{ 'downloads'|trans({}, 'freeradius_statistics') }}</p>
