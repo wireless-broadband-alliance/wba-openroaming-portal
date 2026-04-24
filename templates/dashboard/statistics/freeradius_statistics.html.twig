@@ -192,30 +192,41 @@
 
         {% set input = totalTrafficFreeradius.input_bytes ?? 0 %}
         {% set output = totalTrafficFreeradius.output_bytes ?? 0 %}
+        {% set hasData = input > 0 or output > 0 %}
 
         <div class="flex gap-8">
             {# Uploads #}
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                    <twig:ux:icon class="w-6 fill-current text-gray-500" name="wba:upload-freeradius-statistics" />
-                </div>
-                <div>
-                    <p class="text-xs text-gray-400 mb-0.5">{{ 'uploads'|trans({}, 'freeradius_statistics') }}</p>
-                    <p class="text-lg font-bold text-gray-800 leading-tight">
-                        {{ totalTrafficFreeradius.input_human ?? '0 B' }}
+            <div class="flex flex-col gap-2">
+                <p class="text-xs text-gray-400">{{ 'uploads'|trans({}, 'freeradius_statistics') }}</p>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full {{ hasData ? 'bg-gray-100' : 'bg-red-100' }} flex items-center justify-center flex-shrink-0">
+                        <twig:ux:icon class="w-6 fill-current {{ hasData ? 'text-gray-500' : 'text-red-500' }}"
+                                      name="wba:upload-freeradius-statistics" />
+                    </div>
+                    <p class="text-base {{ hasData ? 'font-bold text-gray-800' : 'text-red-500' }} leading-tight">
+                        {% if hasData %}
+                            {{ totalTrafficFreeradius.input_human }}
+                        {% else %}
+                            {{ 'noDataAvailable'|trans({}, 'freeradius_statistics') }}
+                        {% endif %}
                     </p>
                 </div>
             </div>
 
             {# Downloads #}
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                    <twig:ux:icon class="w-6 fill-current text-gray-500" name="wba:download-freeradius-statistics" />
-                </div>
-                <div>
-                    <p class="text-xs text-gray-400 mb-0.5">{{ 'downloads'|trans({}, 'freeradius_statistics') }}</p>
-                    <p class="text-lg font-bold text-gray-800 leading-tight">
-                        {{ totalTrafficFreeradius.output_human ?? '0 B' }}
+            <div class="flex flex-col gap-2">
+                <p class="text-xs text-gray-400">{{ 'downloads'|trans({}, 'freeradius_statistics') }}</p>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full {{ hasData ? 'bg-gray-100' : 'bg-red-100' }} flex items-center justify-center flex-shrink-0">
+                        <twig:ux:icon class="w-6 fill-current {{ hasData ? 'text-gray-500' : 'text-red-500' }}"
+                                      name="wba:download-freeradius-statistics" />
+                    </div>
+                    <p class="text-base {{ hasData ? 'font-bold text-gray-800' : 'text-red-500' }} leading-tight">
+                        {% if hasData %}
+                            {{ totalTrafficFreeradius.output_human }}
+                        {% else %}
+                            {{ 'noDataAvailable'|trans({}, 'freeradius_statistics') }}
+                        {% endif %}
                     </p>
                 </div>
             </div>
