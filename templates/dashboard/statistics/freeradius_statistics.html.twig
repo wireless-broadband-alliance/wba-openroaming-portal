@@ -161,7 +161,7 @@
                         {{ stimulus_target('card', 'button') }}
                         {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
                      src="{{ asset('resources/logos/info_icon.svg') }}"
-                     alt="info_icon"/>
+                     alt="info_icon" />
             </label>
         </div>
 
@@ -174,12 +174,12 @@
         <div class="flex items-center gap-3">
             {% if totalCurrentAuths >= 1 %}
                 <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                    <twig:ux:icon class="w-5 text-[#7DB928]" name="wba:security-check" />
+                    <twig:ux:icon class="w-5 text-[#7DB928]" name="wba:security-check-ok" />
                 </div>
                 <span class="text-lg font-bold text-[#7DB928]">{{ totalCurrentAuths }}</span>
             {% else %}
                 <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                    <twig:ux:icon class="w-5 text-red-500" name="wba:security-check" />
+                    <twig:ux:icon class="w-5 text-red-500" name="wba:security-check-error" />
                 </div>
                 <span class="text-sm font-medium text-red-500">{{ 'noDataAvailable'|trans({}, 'freeradius_statistics') }}</span>
             {% endif %}
