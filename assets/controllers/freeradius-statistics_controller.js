@@ -95,13 +95,13 @@ export default class extends Controller {
 
         const data = {
             labels,
-            datasets: [this.barDataset('Total Session Time', values, 'success', true)],
+            datasets: [this.lineDataset('Total Session Time', values, 'success', true)],
         };
 
         this.createChart(target, {
-            type: 'bar',
+            type: 'line',
             data,
-            options: this.baseOptions({ isDuration: true, minimal: true }),
+            options: this.baseOptions({ tension: 0.35, isDuration: true, minimal: true }),
         });
     }
 
@@ -193,8 +193,8 @@ export default class extends Controller {
             backgroundColor: this.soft[colorKey],
             fill: true,
             borderWidth: 2,
-            pointRadius: 2,
-            pointHoverRadius: 5,
+            pointRadius: 0,        // no dots at rest
+            pointHoverRadius: 5,   // dot appears on hover
             meta: { isDuration },
         };
     }
