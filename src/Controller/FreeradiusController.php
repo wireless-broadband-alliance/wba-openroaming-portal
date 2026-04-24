@@ -91,6 +91,14 @@ class FreeradiusController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_statistics_freeradius');
         }
 
+        // After computing $startDate and $endDate, detect which preset was used
+        $activePreset = $request->query->get('preset', '');
+
+        // Validate it's a known value, otherwise treat as custom
+        if (!in_array($activePreset, ['yesterday', '7d', '30d', '1m'])) {
+            $activePreset = ($startDateString || $endDateString) ? 'custom' : '7d';
+        }
+
         // Authentication Attempts
         $fetchChartAuthenticationsFreeradius = $this->statisticsFreeradius
             ->getAuthenticationStats($startDate, $endDate);
@@ -220,6 +228,7 @@ class FreeradiusController extends AbstractController
             'selectedEndDate' => $endDate->format('Y-m-d\TH:i'),
             'exportFreeradiusStatistics' => $export_freeradius_statistics,
             'paginationApUsage' => true,
+            'activePreset' => $activePreset,
         ]);
     }
 

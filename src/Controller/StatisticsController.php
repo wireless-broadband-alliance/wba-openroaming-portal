@@ -66,6 +66,14 @@ class StatisticsController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_statistics');
         }
 
+        // After computing $startDate and $endDate, detect which preset was used
+        $activePreset = $request->query->get('preset', '');
+
+        // Validate it's a known value, otherwise treat as custom
+        if (!in_array($activePreset, ['yesterday', '7d', '30d', '1m'])) {
+            $activePreset = ($startDateString || $endDateString) ? 'custom' : '7d';
+        }
+
         $fetchChartSMSEmail = $this->portalStatistics->getSMSEmailStats($startDate, $endDate);
         $fetchChartAuthentication = $this->portalStatistics->getAuthenticationStats($startDate, $endDate);
         $fetchChartDevices = $this->portalStatistics->getDevicesStats($startDate, $endDate);
@@ -97,6 +105,7 @@ class StatisticsController extends AbstractController
             'twoFADataJson' => json_encode($fetchChart2FA, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate->format('Y-m-d\TH:i'),
             'selectedEndDate' => $endDate->format('Y-m-d\TH:i'),
+            'activePreset' => $activePreset,
         ]);
     }
 }

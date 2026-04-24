@@ -1,23 +1,68 @@
-<form data-controller="date-filter" action="{{ path(routeName) }}"
-      method="get"
-      class="flex flex-col sm:flex-row items-center gap-2">
-    <input data-date-filter-target="start" type="datetime-local" name="startDate" id="startDate"
-           class="rounded text-sm bg-transparent py-1 px-2 border border-gray-300 focus:ring-0 w-auto"
-           value="{{ selectedStartDate }}"
-           onchange="this.form.submit()">
-    <span class="px-1"> to </span>
-    <input data-date-filter-target="end" type="datetime-local" name="endDate" id="endDate"
-           class="rounded text-sm bg-transparent py-1 px-2 border border-gray-300 focus:ring-0 w-full sm:w-auto"
-           value="{{ selectedEndDate }}"
-           onchange="this.form.submit()">
-    <select data-date-filter-target="preset"
-            data-action="change->date-filter#applyPreset"
-            class="rounded text-sm bg-transparent py-1 px-2 border border-gray-300">
+<div data-controller="date-filter"
+     data-date-filter-active-preset-value="{{ activePreset }}"
+     class="flex items-center gap-2 flex-wrap">
 
-        <option value="">{{ 'timeInterval'|trans({}, 'statistics') }}</option>
-        <option value="1d">{{ '24Hours'|trans({}, 'statistics') }}</option>
-        <option value="7d">{{ '7Days'|trans({}, 'statistics') }}</option>
-        <option value="1m">{{ '1Month'|trans({}, 'statistics') }}</option>
-        <option value="1y">{{ '1Year'|trans({}, 'statistics') }}</option>
-    </select>
-</form>
+    {# Hidden input so the preset value is submitted with the form #}
+    <input type="hidden" name="preset" data-date-filter-target="presetInput" value="{{ activePreset }}">
+
+    {# Preset pill group #}
+    <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-[3px]">
+        <button type="button"
+                data-date-filter-target="presetBtn"
+                data-action="click->date-filter#applyPreset"
+                data-value="yesterday"
+                class="preset-btn px-3 py-[5px] rounded-md text-sm text-gray-500 hover:bg-white hover:text-gray-800 transition-all duration-150">
+            {{ 'yesterday'|trans({}, '_date_filter') }}
+        </button>
+        <button type="button"
+                data-date-filter-target="presetBtn"
+                data-action="click->date-filter#applyPreset"
+                data-value="7d"
+                class="preset-btn px-3 py-[5px] rounded-md text-sm text-gray-500 hover:bg-white hover:text-gray-800 transition-all duration-150">
+            {{ 'last7Days'|trans({}, '_date_filter') }}
+        </button>
+        <button type="button"
+                data-date-filter-target="presetBtn"
+                data-action="click->date-filter#applyPreset"
+                data-value="30d"
+                class="preset-btn px-3 py-[5px] rounded-md text-sm text-gray-500 hover:bg-white hover:text-gray-800 transition-all duration-150">
+            {{ 'last30Days'|trans({}, '_date_filter') }}
+        </button>
+        <button type="button"
+                data-date-filter-target="presetBtn"
+                data-action="click->date-filter#applyPreset"
+                data-value="1m"
+                class="preset-btn px-3 py-[5px] rounded-md text-sm text-gray-500 hover:bg-white hover:text-gray-800 transition-all duration-150">
+            {{ 'lastMonth'|trans({}, '_date_filter') }}
+        </button>
+        <button type="button"
+                data-date-filter-target="presetBtn"
+                data-action="click->date-filter#applyPreset"
+                data-value="custom"
+                class="preset-btn px-3 py-[5px] rounded-md text-sm text-gray-500 hover:bg-white hover:text-gray-800 transition-all duration-150">
+            {{ 'custom'|trans({}, '_date_filter') }}
+        </button>
+    </div>
+
+    {# Hidden custom date inputs — shown only when Custom is active #}
+    <form data-date-filter-target="customForm"
+          action="{{ path(routeName) }}"
+          method="get"
+          class="hidden items-center gap-2">
+        <input type="hidden" name="preset" value="custom">
+        <div class="w-px h-5 bg-gray-200"></div>
+        <input data-date-filter-target="start"
+               type="datetime-local"
+               name="startDate"
+               class="rounded-md text-xs bg-white py-[5px] px-2 border border-gray-300 focus:ring-0 focus:border-[#7DB928] transition-colors"
+               value="{{ selectedStartDate }}"
+               onchange="this.form.submit()">
+        <span class="text-xs text-gray-400">→</span>
+        <input data-date-filter-target="end"
+               type="datetime-local"
+               name="endDate"
+               class="rounded-md text-xs bg-white py-[5px] px-2 border border-gray-300 focus:ring-0 focus:border-[#7DB928] transition-colors"
+               value="{{ selectedEndDate }}"
+               onchange="this.form.submit()">
+    </form>
+</div>
