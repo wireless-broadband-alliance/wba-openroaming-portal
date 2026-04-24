@@ -16,7 +16,7 @@
                 <label class="flex items-center bg-opacity-40">
                     <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
                             {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
-                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon" />
                 </label>
             </div>
 
@@ -38,7 +38,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10" fill="none">
                             <path fill-rule="evenodd" clip-rule="evenodd"
                                   d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
-                                  fill="#210124"/>
+                                  fill="#210124" />
                         </svg>
                     </div>
                 </label>
@@ -58,7 +58,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10" fill="none">
                             <path fill-rule="evenodd" clip-rule="evenodd"
                                   d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
-                                  fill="#210124"/>
+                                  fill="#210124" />
                         </svg>
                     </div>
                 </label>
@@ -82,7 +82,7 @@
                 </div>
                 <label class="flex items-center bg-opacity-40">
                     <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
-                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon" />
                 </label>
             </div>
 
@@ -104,7 +104,7 @@
                 </div>
                 <label class="flex items-center bg-opacity-40">
                     <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
-                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon" />
                 </label>
             </div>
 
@@ -152,7 +152,7 @@
                     <img class="w-6 cursor-pointer"
                             {{ stimulus_target('card', 'button') }}
                             {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
-                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon" />
                 </label>
             </div>
 
@@ -175,7 +175,7 @@
                             <button type="button"
                                     class="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
                                     data-action="trusted-proxies#remove">
-                                <twig:ux:icon name="wba:cross-circle-rounded" class="w-6 h-auto fill-current"/>
+                                <twig:ux:icon name="wba:cross-circle-rounded" class="w-6 h-auto fill-current" />
                             </button>
                         </div>
                     </div>
@@ -191,7 +191,7 @@
                         <button type="button"
                                 class="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
                                 data-action="trusted-proxies#remove">
-                            <twig:ux:icon name="wba:cross-circle-rounded" class="w-6 h-auto fill-current"/>
+                            <twig:ux:icon name="wba:cross-circle-rounded" class="w-6 h-auto fill-current" />
                         </button>
                     </div>
                 </div>
@@ -208,7 +208,7 @@
             {# Icon #}
             <div class="flex-shrink-0 flex justify-center md:justify-start">
                 <twig:ux:icon name="wba:info"
-                              class="w-6 h-6 md:w-5 md:h-5 fill-current"/>
+                              class="w-6 h-6 md:w-5 md:h-5 fill-current" />
             </div>
 
             {# Content #}
@@ -224,23 +224,13 @@
                 <ul class="list-disc ml-5 mt-2 text-sm text-blue-900 space-y-2">
                     <li>
                         <strong>{{ 'info_details.android_label'|trans({}, '_returnApps') }}</strong>
-                        <code class="block break-all mt-1 bg-white/50 px-2 py-1 rounded text-xs">
-                            {{ app.request.schemeAndHttpHost ~ app.request.baseUrl }}/.well-known/assetlinks.json
-                        </code>
-                        <span class="block mt-1">
-                        – {{ 'info_details.android_info'|trans({}, '_returnApps') }}
-                    </span>
+                        <code class="block break-all mt-1 bg-white/50 px-2 py-1 rounded text-xs">{{ app.request.schemeAndHttpHost ~ app.request.baseUrl ~ '/.well-known/assetlinks.json' }}</code>
+                        <span class="block mt-1">– {{ 'info_details.android_info'|trans({}, '_returnApps') }}</span>
                     </li>
-
                     <li>
                         <strong>{{ 'info_details.ios_label'|trans({}, '_returnApps') }}</strong>
-                        <code class="block break-all mt-1 bg-white/50 px-2 py-1 rounded text-xs">
-                            {{ app.request.schemeAndHttpHost ~ app.request.baseUrl }}
-                            /.well-known/apple-app-site-association
-                        </code>
-                        <span class="block mt-1">
-                        – {{ 'info_details.ios_info'|trans({}, '_returnApps') }}
-                    </span>
+                        <code class="block break-all mt-1 bg-white/50 px-2 py-1 rounded text-xs">{{ app.request.schemeAndHttpHost ~ app.request.baseUrl ~ '/.well-known/apple-app-site-association' }}</code>
+                        <span class="block mt-1">– {{ 'info_details.ios_info'|trans({}, '_returnApps') }}</span>
                     </li>
                 </ul>
 
