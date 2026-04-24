@@ -2,8 +2,10 @@
      data-date-filter-active-preset-value="{{ activePreset }}"
      class="flex items-center gap-2 flex-wrap">
 
-    {# Hidden input so the preset value is submitted with the form #}
+    {# Hidden inputs — must be outside any hidden element so Stimulus can always find them #}
     <input type="hidden" name="preset" data-date-filter-target="presetInput" value="{{ activePreset }}">
+    <input type="hidden" name="startDate" data-date-filter-target="start" value="{{ selectedStartDate }}">
+    <input type="hidden" name="endDate" data-date-filter-target="end" value="{{ selectedEndDate }}">
 
     {# Preset pill group #}
     <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-[3px]">
@@ -44,25 +46,54 @@
         </button>
     </div>
 
-    {# Hidden custom date inputs — shown only when Custom is active #}
-    <form data-date-filter-target="customForm"
-          action="{{ path(routeName) }}"
-          method="get"
-          class="hidden items-center gap-2">
-        <input type="hidden" name="preset" value="custom">
-        <div class="w-px h-5 bg-gray-200"></div>
-        <input data-date-filter-target="start"
-               type="datetime-local"
-               name="startDate"
-               class="rounded-md text-xs bg-white py-[5px] px-2 border border-gray-300 focus:ring-0 focus:border-[#7DB928] transition-colors"
-               value="{{ selectedStartDate }}"
-               onchange="this.form.submit()">
-        <span class="text-xs text-gray-400">→</span>
-        <input data-date-filter-target="end"
-               type="datetime-local"
-               name="endDate"
-               class="rounded-md text-xs bg-white py-[5px] px-2 border border-gray-300 focus:ring-0 focus:border-[#7DB928] transition-colors"
-               value="{{ selectedEndDate }}"
-               onchange="this.form.submit()">
-    </form>
+    {# Custom date picker — shown only when Custom is active #}
+    <div data-date-filter-target="customPicker"
+         class="hidden items-center gap-2">
+        <div class="sep w-px h-5 bg-gray-200"></div>
+
+        <div class="relative" data-date-filter-target="pickerWrap">
+            <button type="button"
+                    data-action="click->date-filter#togglePicker"
+                    data-date-filter-target="pickerTrigger"
+                    class="flex items-center gap-2 border border-gray-300 rounded-md px-3 py-[5px] text-sm bg-white hover:border-[#7DB928] transition-colors">
+                <svg class="w-3.5 h-3.5 text-gray-400" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                     stroke-width="1.5">
+                    <rect x="1.5" y="3" width="13" height="11" rx="2" />
+                    <path d="M5 1v4M11 1v4M1.5 7h13" />
+                </svg>
+                <span data-date-filter-target="rangeLabel" class="text-gray-500 text-xs">
+                    {% if selectedStartDate and selectedEndDate %}
+                        <span class="text-gray-800 font-medium">{{ selectedStartDate|date('d M Y') }}</span>
+                        → <span class="text-gray-800 font-medium">{{ selectedEndDate|date('d M Y') }}</span>
+                    {% else %}
+                        Pick a range
+                    {% endif %}
+                </span>
+                <span data-date-filter-target="pickerArrow" class="text-[10px] text-gray-400">▼</span>
+            </button>
+
+            {# Dropdown #}
+            <div data-date-filter-target="pickerDropdown"
+                 class="hidden absolute right-0 top-full mt-2 z-50 bg-white border border-gray-200 rounded-xl p-4 shadow-lg w-[580px]">
+
+                <div class="grid grid-cols-2 gap-4" data-date-filter-target="calendarGrid"></div>
+
+                <div class="flex items-center justify-between border-t border-gray-100 pt-3 mt-3">
+                    <span data-date-filter-target="footerSummary" class="text-xs text-gray-500"></span>
+                    <div class="flex gap-2">
+                        <button type="button"
+                                data-action="click->date-filter#clearRange"
+                                class="text-xs border border-gray-200 rounded-md px-3 py-1.5 text-gray-500 hover:border-gray-400 hover:text-gray-700 transition-colors">
+                            {{ 'clear'|trans({}, '_date_filter') }}
+                        </button>
+                        <button type="button"
+                                data-action="click->date-filter#applyCustomRange"
+                                class="text-xs bg-[#7DB928] text-white rounded-md px-4 py-1.5 font-medium hover:opacity-90 transition-opacity">
+                            {{ 'applyRange'|trans({}, '_date_filter') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
