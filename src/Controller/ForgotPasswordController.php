@@ -34,10 +34,13 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -61,7 +64,8 @@ class ForgotPasswordController extends AbstractController
         private readonly EmailGenerator $emailGenerator,
         private readonly EntityManagerInterface $entityManager,
         private readonly MagicLinkService $magicLinkService,
-        private readonly UserPasswordHasherInterface $userPasswordHasher
+        private readonly UserPasswordHasherInterface $userPasswordHasher,
+        private readonly RateLimiterFactory $verifyAccountLimiter,
     ) {
     }
 
@@ -361,6 +365,25 @@ class ForgotPasswordController extends AbstractController
         $uuid = $request->query->get('uuid');
         $twoFaCode = $request->query->get('twoFaCode');
 
+        $key = $request->getClientIp() . '_' . $uuid;
+
+        $limiter = $this->verifyAccountLimiter->create($key);
+        $limit = $limiter->consume();
+
+        if (!$limit->isAccepted()) {
+            $retryAfter = $limit->getRetryAfter();
+            $seconds = $retryAfter->getTimestamp() - time();
+
+            throw new TooManyRequestsHttpException(
+                $seconds,
+                $this->translator->trans(
+                    'tooManyAttempts',
+                    ['%seconds%' => $seconds],
+                    'controllers'
+                )
+            );
+        }
+
 
         // Get the user with the matching email, excluding admin users
         $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
@@ -423,6 +446,26 @@ class ForgotPasswordController extends AbstractController
 
         // Get the uuid and verification code from the URL query parameters
         $uuid = $request->getSession()->get('forgot_password_uuid');
+
+        $key = $request->getClientIp() . '_' . $uuid;
+
+        $limiter = $this->verifyAccountLimiter->create($key);
+        $limit = $limiter->consume();
+
+        if (!$limit->isAccepted()) {
+            $retryAfter = $limit->getRetryAfter();
+            $seconds = $retryAfter->getTimestamp() - time();
+
+            throw new TooManyRequestsHttpException(
+                $seconds,
+                $this->translator->trans(
+                    'tooManyAttempts',
+                    ['%seconds%' => $seconds],
+                    'controllers'
+                )
+            );
+        }
+
         if (!$uuid) {
             $this->addFlash(
                 'error',
