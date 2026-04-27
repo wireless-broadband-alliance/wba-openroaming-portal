@@ -6,6 +6,10 @@ namespace App\Service\Statistics;
 
 readonly class DashboardFormatter
 {
+    /**
+     * @param array<array{input?: int|float, output?: int|float}> $traffic
+     * @return array{input_bytes: int|float, output_bytes: int|float, input_human: string, output_human: string}
+     */
     public function formatTraffic(array $traffic): array
     {
         $input = 0;
@@ -17,16 +21,16 @@ readonly class DashboardFormatter
         }
 
         return [
-            // raw values (for charts, progress bars, calculations)
             'input_bytes' => $input,
             'output_bytes' => $output,
-
-            // formatted values (for display only)
             'input_human' => $this->formatBytes($input),
             'output_human' => $this->formatBytes($output),
         ];
     }
 
+    /**
+     * @param array<int|float> $values
+     */
     public function sum(array $values): float
     {
         return array_sum($values);
