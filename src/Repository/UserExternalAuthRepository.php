@@ -46,6 +46,8 @@ class UserExternalAuthRepository extends ServiceEntityRepository
 
     /**
      * Fetch platform users counts based on the providerId within a date range.
+     *
+     * @return array<int, array{provider: string, count: int}>
      * @throws \JsonException
      */
     public function countAuthenticationProviders(DateTime $start, DateTime $end): array
@@ -63,6 +65,8 @@ class UserExternalAuthRepository extends ServiceEntityRepository
 
     /**
      * Fetch platform users counts based on the portal type (SMS || Email)
+     *
+     * @return array<int, array{provider_id: string, count: int}>
      * @throws \JsonException
      */
     public function findPortalUsers(DateTime $start, DateTime $end): array
