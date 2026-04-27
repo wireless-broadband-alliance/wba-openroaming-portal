@@ -1,29 +1,38 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ['presetBtn', 'customPicker', 'pickerTrigger', 'pickerDropdown',
-        'pickerArrow', 'rangeLabel', 'calendarGrid', 'footerSummary',
-        'start', 'end'];
+    static targets = [
+        'presetBtn',
+        'customPicker',
+        'pickerTrigger',
+        'pickerDropdown',
+        'pickerArrow',
+        'rangeLabel',
+        'calendarGrid',
+        'footerSummary',
+        'start',
+        'end',
+    ];
     static values = { activePreset: String };
 
-    #rangeStart  = null;
-    #rangeEnd    = null;
-    #selecting   = false;
-    #hoverDay    = null;
-    #viewYear    = null;
-    #viewMonth   = null;
-    #pickerOpen  = false;
-    #hoverTimer  = null;
-    #clickLock   = false;   // prevents hover re-render from eating the 2nd click
+    #rangeStart = null;
+    #rangeEnd = null;
+    #selecting = false;
+    #hoverDay = null;
+    #viewYear = null;
+    #viewMonth = null;
+    #pickerOpen = false;
+    #hoverTimer = null;
+    #clickLock = false; // prevents hover re-render from eating the 2nd click
 
     connect() {
         const now = new Date();
         // Start view on the month BEFORE current so current month is on the right
         this.#viewMonth = now.getMonth() === 0 ? 11 : now.getMonth() - 1;
-        this.#viewYear  = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
+        this.#viewYear = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
 
         if (this.startTarget.value) this.#rangeStart = new Date(this.startTarget.value);
-        if (this.endTarget.value)   this.#rangeEnd   = new Date(this.endTarget.value);
+        if (this.endTarget.value) this.#rangeEnd = new Date(this.endTarget.value);
 
         const active = this.activePresetValue;
         if (active) {
@@ -72,7 +81,7 @@ export default class extends Controller {
                 break;
             case '1m':
                 start = new Date(now.getFullYear(), now.getMonth() - 1, 1, 0, 0);
-                end   = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59);
+                end = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59);
                 break;
             default:
                 return;
@@ -82,7 +91,7 @@ export default class extends Controller {
     }
 
     markActive(value) {
-        this.presetBtnTargets.forEach(btn => {
+        this.presetBtnTargets.forEach((btn) => {
             const on = btn.dataset.value === value;
             btn.classList.toggle('!bg-[#7DB928]', on);
             btn.classList.toggle('!text-white', on);
@@ -126,11 +135,10 @@ export default class extends Controller {
     // ── Calendar rendering ────────────────────────────────────────────────────
 
     #renderCalendars() {
-        const m1 = { y: this.#viewYear,  m: this.#viewMonth };
+        const m1 = { y: this.#viewYear, m: this.#viewMonth };
         const m2 = this.#nextMonth(m1);
         this.calendarGridTarget.innerHTML =
-          this.#buildCal(m1.y, m1.m, 'left') +
-          this.#buildCal(m2.y, m2.m, 'right');
+            this.#buildCal(m1.y, m1.m, 'left') + this.#buildCal(m2.y, m2.m, 'right');
         this.#updateFooter();
         this.#updateTriggerLabel();
     }
@@ -140,56 +148,78 @@ export default class extends Controller {
     }
 
     #buildCal(year, month, side) {
-        const DAYS   = ['Su','Mo','Tu','We','Th','Fr','Sa'];
-        const MONTHS = ['January','February','March','April','May','June',
-            'July','August','September','October','November','December'];
-        const dim    = new Date(year, month + 1, 0).getDate();
-        const fd     = new Date(year, month, 1).getDay();
-        const today  = new Date();
-        const eff    = (this.#selecting && this.#hoverDay) ? this.#hoverDay : this.#rangeEnd;
+        const DAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+        const MONTHS = [
+            'January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'December',
+        ];
+        const dim = new Date(year, month + 1, 0).getDate();
+        const fd = new Date(year, month, 1).getDay();
+        const today = new Date();
+        const eff = this.#selecting && this.#hoverDay ? this.#hoverDay : this.#rangeEnd;
 
         let html = `<div>
             <div class="flex items-center justify-between mb-2">
-                ${side === 'left'
-          ? `<button type="button" data-action="click->date-filter#prevMonth"
+                ${
+                    side === 'left'
+                        ? `<button type="button" data-action="click->date-filter#prevMonth"
                                class="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 text-base">&#8249;</button>`
-          : `<div class="w-6"></div>`}
+                        : `<div class="w-6"></div>`
+                }
                 <span class="text-xs font-medium text-gray-700">${MONTHS[month]} ${year}</span>
-                ${side === 'right'
-          ? `<button type="button" data-action="click->date-filter#nextMonth"
+                ${
+                    side === 'right'
+                        ? `<button type="button" data-action="click->date-filter#nextMonth"
                                class="w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 text-gray-400 text-base">&#8250;</button>`
-          : `<div class="w-6"></div>`}
+                        : `<div class="w-6"></div>`
+                }
             </div>
             <div class="grid grid-cols-7 gap-[2px]">`;
 
-        DAYS.forEach(d => {
+        DAYS.forEach((d) => {
             html += `<div class="text-[10px] text-gray-400 text-center pb-1">${d}</div>`;
         });
 
         for (let i = 0; i < fd; i++) html += `<div></div>`;
 
         for (let d = 1; d <= dim; d++) {
-            const date    = new Date(year, month, d);
+            const date = new Date(year, month, d);
             const isStart = this.#sameDay(date, this.#rangeStart);
-            const isEnd   = eff && this.#sameDay(date, eff);
-            const isIn    = this.#between(date, this.#rangeStart, eff);
+            const isEnd = eff && this.#sameDay(date, eff);
+            const isIn = this.#between(date, this.#rangeStart, eff);
             const isToday = this.#sameDay(date, today);
 
-            const isBlocked = this.#selecting && this.#rangeStart && (() => {
-                const diff = Math.round(Math.abs(date - this.#rangeStart) / 86400000) + 1;
-                return diff > 365;
-            })();
+            const isBlocked =
+                this.#selecting &&
+                this.#rangeStart &&
+                (() => {
+                    const diff = Math.round(Math.abs(date - this.#rangeStart) / 86400000) + 1;
+                    return diff > 365;
+                })();
 
-            let cls = 'w-full aspect-square flex items-center justify-center text-[11px] transition-colors duration-75 ';
+            let cls =
+                'w-full aspect-square flex items-center justify-center text-[11px] transition-colors duration-75 ';
 
             if (isBlocked) {
                 cls += 'text-gray-300 cursor-not-allowed ';
             } else if (isStart && isEnd) {
                 cls += 'bg-[#7DB928] text-white font-medium rounded-md cursor-pointer ';
             } else if (isStart) {
-                cls += 'bg-[#7DB928] text-white font-medium rounded-l-md rounded-r-none cursor-pointer ';
+                cls +=
+                    'bg-[#7DB928] text-white font-medium rounded-l-md rounded-r-none cursor-pointer ';
             } else if (isEnd) {
-                cls += 'bg-[#7DB928] text-white font-medium rounded-r-md rounded-l-none cursor-pointer ';
+                cls +=
+                    'bg-[#7DB928] text-white font-medium rounded-r-md rounded-l-none cursor-pointer ';
             } else if (isIn) {
                 cls += 'bg-[#7DB928]/10 text-[#3B6D11] rounded-none cursor-pointer ';
             } else if (isToday) {
@@ -209,14 +239,18 @@ export default class extends Controller {
 
     // ── Calendar interactions ─────────────────────────────────────────────────
     prevMonth() {
-        if (this.#viewMonth === 0) { this.#viewMonth = 11; this.#viewYear--; }
-        else this.#viewMonth--;
+        if (this.#viewMonth === 0) {
+            this.#viewMonth = 11;
+            this.#viewYear--;
+        } else this.#viewMonth--;
         this.#renderCalendars();
     }
 
     nextMonth() {
-        if (this.#viewMonth === 11) { this.#viewMonth = 0; this.#viewYear++; }
-        else this.#viewMonth++;
+        if (this.#viewMonth === 11) {
+            this.#viewMonth = 0;
+            this.#viewYear++;
+        } else this.#viewMonth++;
         this.#renderCalendars();
     }
 
@@ -227,23 +261,25 @@ export default class extends Controller {
         // Block any queued hover re-render from firing after this click
         clearTimeout(this.#hoverTimer);
         this.#clickLock = true;
-        setTimeout(() => { this.#clickLock = false; }, 100);
+        setTimeout(() => {
+            this.#clickLock = false;
+        }, 100);
 
         const { year, month, day } = event.currentTarget.dataset;
         const date = new Date(+year, +month, +day);
 
         if (!this.#selecting || !this.#rangeStart) {
             this.#rangeStart = date;
-            this.#rangeEnd   = null;
-            this.#selecting  = true;
+            this.#rangeEnd = null;
+            this.#selecting = true;
             this.#clearWarning();
         } else {
             let start = this.#rangeStart;
-            let end   = date;
+            let end = date;
 
             if (date < this.#rangeStart) {
                 start = date;
-                end   = this.#rangeStart;
+                end = this.#rangeStart;
             } else if (this.#sameDay(date, this.#rangeStart)) {
                 end = new Date(date);
             }
@@ -256,9 +292,9 @@ export default class extends Controller {
             }
 
             this.#rangeStart = start;
-            this.#rangeEnd   = end;
-            this.#selecting  = false;
-            this.#hoverDay   = null;
+            this.#rangeEnd = end;
+            this.#selecting = false;
+            this.#hoverDay = null;
             this.#clearWarning();
         }
 
@@ -294,9 +330,9 @@ export default class extends Controller {
     clearRange() {
         clearTimeout(this.#hoverTimer);
         this.#rangeStart = null;
-        this.#rangeEnd   = null;
-        this.#selecting  = false;
-        this.#hoverDay   = null;
+        this.#rangeEnd = null;
+        this.#selecting = false;
+        this.#hoverDay = null;
         this.#renderCalendars();
     }
 
@@ -315,10 +351,13 @@ export default class extends Controller {
 
     // ── Helpers ───────────────────────────────────────────────────────────────
     #sameDay(a, b) {
-        return a && b
-          && a.getFullYear() === b.getFullYear()
-          && a.getMonth()    === b.getMonth()
-          && a.getDate()     === b.getDate();
+        return (
+            a &&
+            b &&
+            a.getFullYear() === b.getFullYear() &&
+            a.getMonth() === b.getMonth() &&
+            a.getDate() === b.getDate()
+        );
     }
 
     #between(d, a, b) {
@@ -330,7 +369,7 @@ export default class extends Controller {
     }
 
     #updateFooter() {
-        const eff = (this.#selecting && this.#hoverDay) ? this.#hoverDay : this.#rangeEnd;
+        const eff = this.#selecting && this.#hoverDay ? this.#hoverDay : this.#rangeEnd;
 
         if (!this.#rangeStart) {
             this.footerSummaryTarget.innerHTML = `<span class="text-gray-400">Select a start date</span>`;
@@ -342,23 +381,22 @@ export default class extends Controller {
         }
 
         const days = Math.round(Math.abs(eff - this.#rangeStart) / 86400000) + 1;
-        this.footerSummaryTarget.innerHTML =
-          `Selected: <strong class="text-gray-800">${days} day${days !== 1 ? 's' : ''}</strong>`;
+        this.footerSummaryTarget.innerHTML = `Selected: <strong class="text-gray-800">${days} day${days !== 1 ? 's' : ''}</strong>`;
     }
 
     #updateTriggerLabel() {
-        const eff = (this.#selecting && this.#hoverDay) ? this.#hoverDay : this.#rangeEnd;
-        const fmt = d => d
-          ? d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-          : '…';
+        const eff = this.#selecting && this.#hoverDay ? this.#hoverDay : this.#rangeEnd;
+        const fmt = (d) =>
+            d
+                ? d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+                : '…';
 
         if (!this.#rangeStart) {
             this.rangeLabelTarget.innerHTML = `<span class="text-gray-400">Pick a range</span>`;
             return;
         }
 
-        this.rangeLabelTarget.innerHTML =
-          `<span class="text-gray-800 font-medium">${fmt(this.#rangeStart)}</span>
+        this.rangeLabelTarget.innerHTML = `<span class="text-gray-800 font-medium">${fmt(this.#rangeStart)}</span>
              <span class="text-gray-400 mx-1">→</span>
              <span class="text-gray-800 font-medium">${fmt(eff)}</span>`;
     }
@@ -368,19 +406,24 @@ export default class extends Controller {
         form.method = 'get';
         form.action = window.location.pathname;
 
-        [['preset', preset], ['startDate', this.formatDate(start)], ['endDate', this.formatDate(end)]]
-          .forEach(([n, v]) => {
-              const i = document.createElement('input');
-              i.type = 'hidden'; i.name = n; i.value = v;
-              form.appendChild(i);
-          });
+        [
+            ['preset', preset],
+            ['startDate', this.formatDate(start)],
+            ['endDate', this.formatDate(end)],
+        ].forEach(([n, v]) => {
+            const i = document.createElement('input');
+            i.type = 'hidden';
+            i.name = n;
+            i.value = v;
+            form.appendChild(i);
+        });
 
         document.body.appendChild(form);
         form.submit();
     }
 
     formatDate(date) {
-        const pad = n => String(n).padStart(2, '0');
+        const pad = (n) => String(n).padStart(2, '0');
         return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
     }
 
@@ -389,12 +432,15 @@ export default class extends Controller {
         if (!el) {
             el = document.createElement('div');
             el.dataset.rangeWarning = '';
-            el.className = 'flex items-center gap-2 mt-2 px-3 py-2 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs';
+            el.className =
+                'flex items-center gap-2 mt-2 px-3 py-2 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs';
             el.innerHTML = `<svg class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 16 16" fill="currentColor">
             <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 3.5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 4.5zm0 7a.875.875 0 1 1 0-1.75.875.875 0 0 1 0 1.75z"/>
         </svg><span></span>`;
             // Insert it above the footer
-            const footer = this.pickerDropdownTarget.querySelector('.flex.items-center.justify-between.border-t');
+            const footer = this.pickerDropdownTarget.querySelector(
+                '.flex.items-center.justify-between.border-t'
+            );
             this.pickerDropdownTarget.insertBefore(el, footer);
         }
         el.querySelector('span').textContent = msg;

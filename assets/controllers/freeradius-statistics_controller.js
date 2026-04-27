@@ -54,7 +54,9 @@ export default class extends Controller {
             type: 'line',
             data: {
                 labels,
-                datasets: [this.lineDataset(target.dataset.labelAccepted, accepted, 'primary', false)],
+                datasets: [
+                    this.lineDataset(target.dataset.labelAccepted, accepted, 'primary', false),
+                ],
             },
             options: this.splitChartOptions(),
         });
@@ -73,7 +75,9 @@ export default class extends Controller {
             type: 'line',
             data: {
                 labels,
-                datasets: [this.lineDataset(target.dataset.labelRejected, rejected, 'danger', false)],
+                datasets: [
+                    this.lineDataset(target.dataset.labelRejected, rejected, 'danger', false),
+                ],
             },
             options: this.splitChartOptions(),
         });
@@ -212,8 +216,8 @@ export default class extends Controller {
             backgroundColor: this.soft[colorKey],
             fill: true,
             borderWidth: 2,
-            pointRadius: 0,        // no dots at rest
-            pointHoverRadius: 5,   // dot appears on hover
+            pointRadius: 0, // no dots at rest
+            pointHoverRadius: 5, // dot appears on hover
             meta: { isDuration },
         };
     }
@@ -265,8 +269,8 @@ export default class extends Controller {
 
             const index = points[0].index;
             other.tooltip.setActiveElements(
-              other.data.datasets.map((_, di) => ({ datasetIndex: di, index })),
-              { x: 0, y: 0 }
+                other.data.datasets.map((_, di) => ({ datasetIndex: di, index })),
+                { x: 0, y: 0 }
             );
             other.setDatasetVisibility(0, true);
             other.update('none');
@@ -289,7 +293,7 @@ export default class extends Controller {
                 intersect: false,
             },
             plugins: {
-                legend: { display: false },  // removes the colored box label only
+                legend: { display: false }, // removes the colored box label only
                 tooltip: {
                     callbacks: {
                         label: (context) => `${context.dataset.label}: ${context.raw}`,
@@ -303,7 +307,7 @@ export default class extends Controller {
             scales: {
                 x: {
                     ticks: {
-                        display: true,   // keeps date labels
+                        display: true, // keeps date labels
                         maxRotation: 0,
                         autoSkip: true,
                         maxTicksLimit: 7,
@@ -313,7 +317,7 @@ export default class extends Controller {
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        display: true,   // keeps number labels
+                        display: true, // keeps number labels
                         precision: 0,
                     },
                     grid: { color: 'rgba(0,0,0,0.05)' },
