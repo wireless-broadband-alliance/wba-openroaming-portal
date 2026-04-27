@@ -21,6 +21,8 @@ export default class extends Controller {
         success: 'rgba(16,185,129,0.12)',
     };
 
+    static chartRegistry = {};
+
     connect() {
         const target = this.chartTarget;
         if (!target) return;
@@ -28,7 +30,8 @@ export default class extends Controller {
         const type = target.dataset.chartType || 'default';
 
         const handlers = {
-            auth: this.renderAuthChart.bind(this),
+            accepted: this.renderAcceptedChart.bind(this),
+            rejected: this.renderRejectedChart.bind(this),
             session: this.renderSessionChart.bind(this),
             sessionTotal: this.renderSessionTotalChart.bind(this),
             wifiTags: this.renderWifiTagsChart.bind(this),
@@ -41,26 +44,42 @@ export default class extends Controller {
     // =========================
     // AUTH
     // =========================
-    renderAuthChart(target) {
+    // ACCEPTED (split top)
+    renderAcceptedChart(target) {
         const raw = this.parseData(target);
         const labels = Object.keys(raw).sort();
-
         const accepted = labels.map((d) => raw[d]?.accepted ?? 0);
+
+        const chart = this.createChart(target, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [this.lineDataset(target.dataset.labelAccepted, accepted, 'primary', false)],
+            },
+            options: this.splitChartOptions(),
+        });
+
+        this.constructor.chartRegistry['accepted'] = chart;
+        this.bindSyncedHover(target, 'accepted', 'rejected');
+    }
+
+    // REJECTED (split bottom)
+    renderRejectedChart(target) {
+        const raw = this.parseData(target);
+        const labels = Object.keys(raw).sort();
         const rejected = labels.map((d) => raw[d]?.rejected ?? 0);
 
-        const data = {
-            labels,
-            datasets: [
-                this.lineDataset('Accepted', accepted, 'primary', false),
-                this.lineDataset('Rejected', rejected, 'danger', false),
-            ],
-        };
-
-        this.createChart(target, {
+        const chart = this.createChart(target, {
             type: 'line',
-            data,
-            options: this.baseOptions({ tension: 0.3, isDuration: false }),
+            data: {
+                labels,
+                datasets: [this.lineDataset(target.dataset.labelRejected, rejected, 'danger', false)],
+            },
+            options: this.splitChartOptions(),
         });
+
+        this.constructor.chartRegistry['rejected'] = chart;
+        this.bindSyncedHover(target, 'rejected', 'accepted');
     }
 
     // =========================
@@ -225,14 +244,82 @@ export default class extends Controller {
         if (this.chartInstance) {
             this.chartInstance.destroy();
         }
-
         this.chartInstance = new Chart(target, config);
+        return this.chartInstance;
     }
 
     formatDuration(seconds) {
         const hours = Math.floor(seconds / 3600);
         const minutes = Math.floor((seconds % 3600) / 60);
         return `${hours}h ${minutes}m`;
+    }
+
+    bindSyncedHover(target, selfKey, otherKey) {
+        target.addEventListener('mousemove', (e) => {
+            const self = this.constructor.chartRegistry[selfKey];
+            const other = this.constructor.chartRegistry[otherKey];
+            if (!self || !other) return;
+
+            const points = self.getElementsAtEventForMode(e, 'index', { intersect: false }, true);
+            if (!points.length) return;
+
+            const index = points[0].index;
+            other.tooltip.setActiveElements(
+              other.data.datasets.map((_, di) => ({ datasetIndex: di, index })),
+              { x: 0, y: 0 }
+            );
+            other.setDatasetVisibility(0, true);
+            other.update('none');
+        });
+
+        target.addEventListener('mouseleave', () => {
+            const other = this.constructor.chartRegistry[otherKey];
+            if (!other) return;
+            other.tooltip.setActiveElements([], {});
+            other.update('none');
+        });
+    }
+
+    splitChartOptions() {
+        return {
+            maintainAspectRatio: false,
+            responsive: true,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            plugins: {
+                legend: { display: false },  // removes the colored box label only
+                tooltip: {
+                    callbacks: {
+                        label: (context) => `${context.dataset.label}: ${context.raw}`,
+                    },
+                },
+            },
+            elements: {
+                line: { tension: 0.3, borderWidth: 2 },
+                point: { radius: 0, hoverRadius: 5 },
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        display: true,   // keeps date labels
+                        maxRotation: 0,
+                        autoSkip: true,
+                        maxTicksLimit: 7,
+                    },
+                    grid: { display: false },
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        display: true,   // keeps number labels
+                        precision: 0,
+                    },
+                    grid: { color: 'rgba(0,0,0,0.05)' },
+                },
+            },
+        };
     }
 
     // =========================

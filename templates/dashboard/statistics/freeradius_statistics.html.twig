@@ -27,24 +27,58 @@
     </div>
 
     {# Authentication Attempts #}
-    <div class="w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-4 shadow">
-        <div class="flex flex-row justify-between items-center">
+    <div class="w-full bg-white rounded-lg px-5 py-4 flex flex-col gap-4 shadow">
+        <div class="flex flex-row justify-between items-start">
             <h1 class="text-lg font-medium">{{ 'authenticationAttempts'|trans({}, 'freeradius_statistics') }}</h1>
-            <div class="flex gap-6 text-sm text-gray-500">
-                <span>{{ 'accepted'|trans({}, 'freeradius_statistics') }}: <strong>{{ authCounts['Accepted'] }}</strong></span>
-                <span>{{ 'rejected'|trans({}, 'freeradius_statistics') }}: <strong>{{ authCounts['Rejected'] }}</strong></span>
+            <div class="flex gap-8 text-sm">
+                <div class="flex flex-col items-start">
+                    <span class="text-gray-400 text-xs">{{ 'accepted'|trans({}, 'freeradius_statistics') }}</span>
+                    <strong class="text-green-500 text-base">{{ authCounts['Accepted'] }}</strong>
+                </div>
+                <div class="flex flex-col items-start">
+                    <span class="text-gray-400 text-xs">{{ 'rejected'|trans({}, 'freeradius_statistics') }}</span>
+                    <strong class="text-red-500 text-base">{{ authCounts['Rejected'] }}</strong>
+                </div>
+                <div class="flex flex-col items-start">
+                    <span class="text-gray-400 text-xs">{{ 'totalAttempts'|trans({}, 'freeradius_statistics') }}</span>
+                    <strong class="text-gray-800 text-base">{{ authCounts['Accepted'] + authCounts['Rejected'] }}</strong>
+                </div>
             </div>
         </div>
-        <div class="w-full h-64 relative">
-            <canvas
-                    id="authAttemptsChart"
-                    data-controller="freeradius-statistics"
-                    data-chart-type="auth"
-                    data-freeradius-statistics-target="chart"
-                    data-chart-data="{{ authAttemptsJson }}"
-                    data-label-accepted="{{ 'accepted'|trans({}, 'freeradius_statistics') }}"
-                    data-label-rejected="{{ 'rejected'|trans({}, 'freeradius_statistics') }}"
-            ></canvas>
+
+        {# Top chart — Accepted #}
+        <div class="w-full relative">
+            <p class="text-xs font-medium text-primary mb-1">{{ 'accepted'|trans({}, 'freeradius_statistics') }}</p>
+            <div class="h-40">
+                <canvas
+                        id="authAcceptedChart"
+                        data-controller="freeradius-statistics"
+                        data-chart-type="accepted"
+                        data-freeradius-statistics-target="chart"
+                        data-chart-data="{{ authAttemptsJson }}"
+                        data-label-accepted="{{ 'accepted'|trans({}, 'freeradius_statistics') }}"
+                        data-label-rejected="{{ 'rejected'|trans({}, 'freeradius_statistics') }}"
+                ></canvas>
+            </div>
+        </div>
+
+        {# Divider #}
+        <div class="border-t border-gray-100"></div>
+
+        {# Bottom chart — Rejected #}
+        <div class="w-full relative">
+            <p class="text-xs font-medium text-red-500 mb-1">{{ 'rejected'|trans({}, 'freeradius_statistics') }}</p>
+            <div class="h-40">
+                <canvas
+                        id="authRejectedChart"
+                        data-controller="freeradius-statistics"
+                        data-chart-type="rejected"
+                        data-freeradius-statistics-target="chart"
+                        data-chart-data="{{ authAttemptsJson }}"
+                        data-label-accepted="{{ 'accepted'|trans({}, 'freeradius_statistics') }}"
+                        data-label-rejected="{{ 'rejected'|trans({}, 'freeradius_statistics') }}"
+                ></canvas>
+            </div>
         </div>
     </div>
 
