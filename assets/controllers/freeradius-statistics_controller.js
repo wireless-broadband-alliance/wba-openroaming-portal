@@ -103,7 +103,7 @@ export default class extends Controller {
         this.createChart(target, {
             type: 'line',
             data,
-            options: this.baseOptions({ tension: 0.35, isDuration: true, minimal: true }),
+            options: this.baseOptions({ tension: 0.35, isDuration: true }),
         });
     }
 
@@ -124,7 +124,7 @@ export default class extends Controller {
         this.createChart(target, {
             type: 'line',
             data,
-            options: this.baseOptions({ tension: 0.35, isDuration: true, minimal: true }),
+            options: this.baseOptions({ tension: 0.35, isDuration: true }),
         });
     }
 
@@ -329,7 +329,7 @@ export default class extends Controller {
     // =========================
     // BASE OPTIONS
     // =========================
-    baseOptions({ tension = 0, isDuration = false, minimal = false } = {}) {
+    baseOptions({ tension = 0, isDuration = false } = {}) {
         return {
             maintainAspectRatio: false,
             responsive: true,
