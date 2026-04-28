@@ -10,14 +10,14 @@ export default class extends Controller {
     colors = {
         primary: '#7DB928',
         danger: '#FE4068',
-        info: '#3B82F6',
+        info: '#38A2AE',
         success: '#10B981',
     };
 
     soft = {
         primary: 'rgba(125,185,40,0.12)',
         danger: 'rgba(254,64,104,0.12)',
-        info: 'rgba(59,130,246,0.12)',
+        info: 'rgba(238, 246, 247)',
         success: 'rgba(16,185,129,0.12)',
     };
 
@@ -118,7 +118,7 @@ export default class extends Controller {
 
         const data = {
             labels,
-            datasets: [this.lineDataset('Total Session Time', values, 'success', true)],
+            datasets: [this.lineDataset('Total Session Time', values, 'info', true)],
         };
 
         this.createChart(target, {

@@ -87,14 +87,13 @@
 
         {# Average Session Time #}
         <div class="w-full bg-white rounded-lg px-5 py-3 shadow">
-            <div class="flex flex-row justify-between items-center pb-2">
+            <div class="flex flex-row justify-between items-start pb-2">
                 <h1 class="text-lg font-medium">{{ 'averageSessionTime'|trans({}, 'freeradius_statistics') }}</h1>
-                <span class="text-sm text-gray-400">{{ 'inHours'|trans({}, 'freeradius_statistics') }}</span>
+                <div class="text-right border-l border-gray-200 pl-3">
+                    <p class="text-xs text-gray-400">{{ 'totalAverageOf'|trans({}, 'freeradius_statistics') }}</p>
+                    <strong class="text-base">{{ sessionTimeAverage }}</strong>
+                </div>
             </div>
-            <p class="text-sm text-gray-500 mb-2">
-                {{ 'totalAverageOf'|trans({}, 'freeradius_statistics') }}
-                <strong>{{ sessionTimeAverage }}</strong>
-            </p>
             <div class="w-full h-48 relative">
                 <canvas
                         id="sessionTimeChart"
@@ -108,14 +107,13 @@
 
         {# Total Session Time #}
         <div class="w-full bg-white rounded-lg px-5 py-3 shadow">
-            <div class="flex flex-row justify-between items-center pb-2">
-                <h1 class="text-lg font-medium">{{ 'sessionTime'|trans({}, 'freeradius_statistics') }}</h1>
-                <span class="text-sm text-gray-400">{{ 'inHours'|trans({}, 'freeradius_statistics') }}</span>
+            <div class="flex flex-row justify-between items-start pb-2">
+                <h1 class="text-lg font-medium">{{ 'averageSessionTime'|trans({}, 'freeradius_statistics') }}</h1>
+                <div class="text-right border-l border-gray-200 pl-3">
+                    <p class="text-xs text-gray-400">{{ 'totalOf'|trans({}, 'freeradius_statistics') }}</p>
+                    <strong class="text-base">{{ sessionTimeAverage }}</strong>
+                </div>
             </div>
-            <p class="text-sm text-gray-500 mb-2">
-                {{ 'totalOf'|trans({}, 'freeradius_statistics') }}
-                <strong>{{ totalTime }}</strong>
-            </p>
             <div class="w-full h-48 relative">
                 <canvas
                         id="totalTimeChart"
