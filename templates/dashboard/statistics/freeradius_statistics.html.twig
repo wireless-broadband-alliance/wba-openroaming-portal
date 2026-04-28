@@ -31,15 +31,15 @@
         <div class="flex flex-row justify-between items-start">
             <h1 class="text-lg font-medium">{{ 'authenticationAttempts'|trans({}, 'freeradius_statistics') }}</h1>
             <div class="flex gap-8 text-sm">
-                <div class="flex flex-col items-start">
+                <div class="flex flex-col items-start border-l border-gray-200 pl-4">
                     <span class="text-gray-400 text-xs">{{ 'accepted'|trans({}, 'freeradius_statistics') }}</span>
                     <strong class="text-green-500 text-base">{{ authCounts['Accepted'] }}</strong>
                 </div>
-                <div class="flex flex-col items-start">
+                <div class="flex flex-col items-start border-l border-gray-200 pl-4">
                     <span class="text-gray-400 text-xs">{{ 'rejected'|trans({}, 'freeradius_statistics') }}</span>
                     <strong class="text-red-500 text-base">{{ authCounts['Rejected'] }}</strong>
                 </div>
-                <div class="flex flex-col items-start">
+                <div class="flex flex-col items-start border-l border-gray-200 pl-4">
                     <span class="text-gray-400 text-xs">{{ 'totalAttempts'|trans({}, 'freeradius_statistics') }}</span>
                     <strong class="text-gray-800 text-base">{{ authCounts['Accepted'] + authCounts['Rejected'] }}</strong>
                 </div>
