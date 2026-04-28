@@ -381,14 +381,17 @@ export default class extends Controller {
                         maxRotation: 0,
                         autoSkip: false,
                         font: { size: 11 },
-                        callback: function(value, index, ticks) {
+                        callback: function (value, index, ticks) {
                             if (index === 0 || index === ticks.length - 1) {
                                 const label = this.getLabelForValue(value);
                                 const date = new Date(label);
-                                return date.toLocaleDateString('en-GB', { month: 'short', year: '2-digit' });
+                                return date.toLocaleDateString('en-GB', {
+                                    month: 'short',
+                                    year: '2-digit',
+                                });
                             }
                             return '';
-                        }
+                        },
                     },
                     grid: { display: false },
                 },
