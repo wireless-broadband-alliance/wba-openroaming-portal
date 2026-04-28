@@ -341,7 +341,7 @@ export default class extends Controller {
 
             plugins: {
                 legend: {
-                    display: !minimal,
+                    display: false,
                 },
 
                 tooltip: {
@@ -377,19 +377,25 @@ export default class extends Controller {
             scales: {
                 x: {
                     ticks: {
-                        display: !minimal,
+                        display: true,
                         maxRotation: 0,
-                        autoSkip: true,
-                        maxTicksLimit: 7,
+                        autoSkip: false,
+                        font: { size: 11 },
+                        callback: function(value, index, ticks) {
+                            if (index === 0 || index === ticks.length - 1) {
+                                const label = this.getLabelForValue(value);
+                                const date = new Date(label);
+                                return date.toLocaleDateString('en-GB', { month: 'short', year: '2-digit' });
+                            }
+                            return '';
+                        }
                     },
-                    grid: {
-                        display: false,
-                    },
+                    grid: { display: false },
                 },
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        display: !minimal,
+                        display: false,
                         precision: 0,
                     },
                     grid: {
