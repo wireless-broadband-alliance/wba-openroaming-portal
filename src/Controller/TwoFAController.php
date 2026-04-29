@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Event;
 use App\Entity\User;
+use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\CodeVerificationType;
 use App\Enum\DefaultUser;
@@ -70,12 +71,12 @@ class TwoFAController extends AbstractController
         }
 
         // Handle access restrictions based on the context
-        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
+        if ($context === FirewallType::DASHBOARD->value && !$this->isGranted(AdminRoleType::ROLE_ADMIN->value)) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAdminCanAccessThisPage', [], 'controllers')
             );
-            return $this->redirectToRoute('app_dashboard_login');
+            return $this->redirectToRoute('app_dashboard_logout');
         }
 
         $data = $this->getSettings->getSettings();
@@ -155,7 +156,7 @@ class TwoFAController extends AbstractController
             $this->addFlash(
                 'error',
                 $this->totpService->getLastError() ??
-                    $this->translator->trans('invalidCodeTOTP', [], 'controllers')
+                $this->translator->trans('invalidCodeTOTP', [], 'controllers')
             );
         }
         $secret = $user->getTwoFAsecret() ?: $this->totpService->generateSecret();

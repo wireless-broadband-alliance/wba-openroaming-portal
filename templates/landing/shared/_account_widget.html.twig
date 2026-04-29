@@ -5,88 +5,88 @@
         <button type="button"
                 class="ml-auto flex flex-row justify-end gap-x-[12px] items-center text-[#707070]" {{ stimulus_action('widget', 'close') }}>
             <span>{{ 'close'|trans({}, '_account_widget') }}</span>
-            <twig:ux:icon name="wba:cross-circle-rounded" class="w-6 h-auto fill-current"/>
+            <twig:ux:icon name="wba:cross-circle-rounded" class="w-6 h-auto fill-current" />
         </button>
     </div>
 
     <div {{ stimulus_controller('fields') }}>
-            <h1 class="text-lg mb-8 mt-10">{{ 'personalData.title'|trans({}, '_account_widget') }}</h1>
+        <h1 class="text-lg mb-8 mt-10">{{ 'personalData.title'|trans({}, '_account_widget') }}</h1>
 
         {{ form_start(form, {action: path('app_landing_account_user')}) }}
         {{ form_errors(form) }}
 
-            <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
-                <div class="relative w-full">
-                    {{ form_label(form.firstName, 'personalData.firstName'|trans({}, '_account_widget'), {label_attr: {class: 'form-label'}}) }}
-                    {{ form_widget(form.firstName, {attr: {class: 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
-                    {{ form_errors(form.firstName) }}
-                </div>
-
-                <div class="relative w-full">
-                    {{ form_label(form.lastName, 'personalData.lastName'|trans({}, '_account_widget'), {label_attr: {class: 'form-label'}}) }}
-                    {{ form_widget(form.lastName, {attr: {class: 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
-                    {{ form_errors(form.lastName) }}
-                </div>
+        <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
+            <div class="relative w-full">
+                {{ form_label(form.firstName, 'personalData.firstName'|trans({}, '_account_widget'), {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.firstName, {attr: {class: 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
+                {{ form_errors(form.firstName) }}
             </div>
 
-            <button {{ stimulus_target('fields', 'button') }} class="mt-6 w-[180px] btn-primary cursor-not-allowed"
-                                                              type="submit" disabled>
-                {{ 'personalData.applyBtn'|trans({}, '_account_widget') }}
-            </button>
+            <div class="relative w-full">
+                {{ form_label(form.lastName, 'personalData.lastName'|trans({}, '_account_widget'), {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.lastName, {attr: {class: 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
+                {{ form_errors(form.lastName) }}
+            </div>
+        </div>
 
-            {{ form_rest(form) }}
-            {{ form_end(form) }}
+        <button {{ stimulus_target('fields', 'button') }} class="mt-6 w-[180px] btn-primary cursor-not-allowed"
+                                                          type="submit" disabled>
+            {{ 'personalData.applyBtn'|trans({}, '_account_widget') }}
+        </button>
+
+        {{ form_rest(form) }}
+        {{ form_end(form) }}
     </div>
 
     {% if data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::OFF').value %}
         {# Form Password Section #}
         <div {{ stimulus_controller('fields') }}>
-                <h1 class="text-lg mb-8 mt-10">{{ 'changePassword.title'|trans({}, '_account_widget') }}</h1>
+            <h1 class="text-lg mb-8 mt-10">{{ 'changePassword.title'|trans({}, '_account_widget') }}</h1>
 
             {{ form_start(formPassword, {action: path('app_landing_account_user')}) }}
-                {{ form_errors(formPassword) }}
+            {{ form_errors(formPassword) }}
 
-                <div class="flex flex-col gap-x-6 gap-y-8">
-                    <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
-                        <div class="relative w-full">
-                            {{ form_label(formPassword.password, 'changePassword.current'|trans({}, '_account_widget'), {label_attr: {class: 'form-label'}}) }}
-                            {{ form_widget(formPassword.password, {attr: {class: 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
-                            {{ form_errors(formPassword.password) }}
-                        </div>
-
-                        <div class="hidden lg:flex w-full"></div>
+            <div class="flex flex-col gap-x-6 gap-y-8">
+                <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
+                    <div class="relative w-full">
+                        {{ form_label(formPassword.password, 'changePassword.current'|trans({}, '_account_widget'), {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(formPassword.password, {attr: {class: 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
+                        {{ form_errors(formPassword.password) }}
                     </div>
 
-                    <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
-                        <div class="relative w-full">
-                            {{ form_label(formPassword.newPassword, 'changePassword.new'|trans({}, '_account_widget'), {label_attr: {class: 'form-label'}}) }}
-                            {{ form_widget(formPassword.newPassword, {attr: {class: 'form-widget', minlength: 7, 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
-                            {{ form_errors(formPassword.newPassword) }}
-                        </div>
-
-                        <div class="relative w-full">
-                            {{ form_label(formPassword.confirmPassword, 'changePassword.confirm'|trans({}, '_account_widget'), {label_attr: {class: 'form-label'}}) }}
-                            {{ form_widget(formPassword.confirmPassword, {attr: {class: 'form-widget', minlength: 7, 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
-                            {{ form_errors(formPassword.confirmPassword) }}
-                        </div>
-                    </div>
+                    <div class="hidden lg:flex w-full"></div>
                 </div>
 
-                {# Turnstile Checker #}
-                {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\OperationMode::ON').value %}
-                    <div class="ml-3 mt-5">
-                        {{ form_widget(formPassword.security) }}
+                <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
+                    <div class="relative w-full">
+                        {{ form_label(formPassword.newPassword, 'changePassword.new'|trans({}, '_account_widget'), {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(formPassword.newPassword, {attr: {class: 'form-widget', minlength: 7, 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
+                        {{ form_errors(formPassword.newPassword) }}
                     </div>
-                {% endif %}
 
-                <button {{ stimulus_target('fields', 'button') }}
-                        class="mt-6 w-[180px] btn-primary cursor-not-allowed"
-                        type="submit" disabled>
-                    {{ 'changePassword.changeBtn'|trans({}, '_account_widget') }}
-                </button>
+                    <div class="relative w-full">
+                        {{ form_label(formPassword.confirmPassword, 'changePassword.confirm'|trans({}, '_account_widget'), {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(formPassword.confirmPassword, {attr: {class: 'form-widget', minlength: 7, 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
+                        {{ form_errors(formPassword.confirmPassword) }}
+                    </div>
+                </div>
+            </div>
 
-                {{ form_rest(formPassword) }}
-                {{ form_end(formPassword) }}
+            {# Turnstile Checker #}
+            {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\OperationMode::ON').value %}
+                <div class="ml-3 mt-5">
+                    {{ form_widget(formPassword.security) }}
+                </div>
+            {% endif %}
+
+            <button {{ stimulus_target('fields', 'button') }}
+                    class="mt-6 w-[180px] btn-primary cursor-not-allowed"
+                    type="submit" disabled>
+                {{ 'changePassword.changeBtn'|trans({}, '_account_widget') }}
+            </button>
+
+            {{ form_rest(formPassword) }}
+            {{ form_end(formPassword) }}
         </div>
     {% endif %}
 
@@ -157,7 +157,7 @@
 
     {# Additional Option: Danger Zone for Account Deletion #}
     {% if user.email is not null or user.phoneNumber is not null %}
-        {% if not is_granted('ROLE_ADMIN') %}
+        {% if not is_granted(constant('App\\Enum\\AdminRoleType::ROLE_ADMIN').value) %}
             <div class="divider my-8"></div>
             <h1 class="text-lg mb-8 mt-10 !text-red-600 font-bold uppercase">
                 {{ 'dangerZone.title'|trans({}, '_account_widget') }}

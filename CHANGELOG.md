@@ -1,5 +1,13 @@
 # Changelog
 
+# Release V1.10.1
+
+- New dedicated SAML config for username identifiers (`userExternalAuths`)
+- Fixed SAML integration on APIs (broke after the dashboard integration)
+- Fixed SAML account deletion (same root cause)
+- Added fallback when `pgp_public_key` isn't configured
+- Validators now block admins from deleting their own account via the landing page widget
+
 # Release V1.10.0
 
 - Installation Widget implementation (For first time project setup / for later use on the admin page configuration).

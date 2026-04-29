@@ -18,8 +18,11 @@ readonly class SamlResolverService
     /**
      * @return array{idp_entity_id: string, certificate: string}
      */
-    public function decodeSamlResponse(string $samlResponse, string $expectedIdpEntityId): array
-    {
+    public function decodeSamlResponse(
+        string $samlResponse,
+        string $expectedIdpEntityId,
+        string $expectedSpEntityId
+    ): array {
         // Decode the SamlResponse for data validation with the DB
         $decodedSamlResponse = base64_decode($samlResponse, true);
 
@@ -68,13 +71,13 @@ readonly class SamlResolverService
         }
 
         foreach ($audiences as $audience) {
-            $trimmedAudience = trim((string) $audience);
-            if ($trimmedAudience === '' || $trimmedAudience === '0' || $trimmedAudience !== $expectedIdpEntityId) {
+            $trimmedAudience = trim($audience);
+            if ($trimmedAudience === '' || $trimmedAudience !== $expectedSpEntityId) {
                 throw new AuthenticationException(
                     $this->translator->trans(
                         'invalidIssuerSAMLResponse',
                         [
-                            '%expected%' => $expectedIdpEntityId,
+                            '%expected%' => $expectedSpEntityId,
                             '%got%' => $trimmedAudience ?: 'empty',
                         ],
                         'SamlResolverService'
@@ -95,7 +98,7 @@ readonly class SamlResolverService
         // Return both the Audience (idp_entity_id) and the Certificate
         return [
             'idp_entity_id' => $idpEntityId,
-            'certificate'   => $certificate,
+            'certificate' => $certificate,
         ];
     }
 

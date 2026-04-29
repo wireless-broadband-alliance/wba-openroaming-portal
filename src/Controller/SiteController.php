@@ -30,7 +30,9 @@ use App\Service\TwoFAService;
 use App\Service\UserDeletionService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
 use Exception;
+use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -64,6 +66,10 @@ class SiteController extends AbstractController
     ) {
     }
 
+    /**
+     * @throws \JsonException
+     * @throws ORMException
+     */
     #[Route('/', name: 'app_landing')]
     public function landing(
         Request $request,
@@ -80,18 +86,23 @@ class SiteController extends AbstractController
         // Check if the user_verification setting is active
         if ($currentUser && $data[SettingName::USER_VERIFICATION->value]["value"] === OperationMode::ON->value) {
             // Retrieve the cookie about SAML_ACCOUNT Deletion from the request
-            $previousLoggedID = $request->cookies->get('previousLoggedID');
+            $previousLoggedID = (int)$request->cookies->get('previousLoggedID');
             $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
-            if ($previousLoggedID && $previousLoggedID == $currentUser->getId()) {
-                $this->userDeletionService->deleteUser(
+            if ($previousLoggedID && $previousLoggedID === $currentUser->getId()) {
+                $result = $this->userDeletionService->deleteUser(
                     $currentUser,
                     $userExternalAuths,
                     $request,
                     $currentUser
                 );
 
+                if (!$result['success'] || $result['success'] !== true) {
+                    throw new RuntimeException($result['message']);
+                }
+
                 return $this->redirectToRoute('app_logout');
             }
+
             // Checks if the user has a "forgot_password_request", if yes, return to the password-reset form
             if ($currentUser->isForgotPasswordRequest()) {
                 $this->addFlash(
@@ -105,9 +116,9 @@ class SiteController extends AbstractController
             }
             // Check if the user is verified
             if (
+                $data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::OFF->value &&
                 $userExternalAuths[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value &&
-                !$session->has('session_verified') &&
-                $data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::OFF->value
+                !$session->has('session_verified')
             ) {
                 if (
                     $this->twoFAService->canValidationCode(

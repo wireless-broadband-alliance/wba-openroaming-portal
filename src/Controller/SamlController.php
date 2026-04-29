@@ -74,14 +74,13 @@ class SamlController extends AbstractController
         }
 
         $attributes = $auth->getAttributes();
-        $email = $attributes['email'][0] ?? null;
+        $uuid = $attributes['uuid'][0] ?? null;
 
-        if (!$email) {
+        if (!$uuid) {
             return $this->redirectToRoute('app_dashboard_login');
         }
 
-        $user = $this->userRepository->findOneBy(['email' => $email]);
-
+        $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
         if (!$user instanceof User) {
             $this->addFlash(
                 'error',

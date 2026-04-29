@@ -309,7 +309,7 @@ readonly class InstallationService
         $dto->dbFreeradiusIp = $dbFreeradiusPartials['host'];
         $dto->dbFreeradiusPort = (string)$dbFreeradiusPartials['port'];
 
-        $dto->trustedProxies = implode(',', $installationProgress->getTrustedProxies());
+        $dto->trustedProxies = implode(',', $installationProgress->getTrustedProxies() ?? []);
         $dto->turnstileKey = $installationProgress->getTurnstileKey();
         $dto->turnstileSecret = $installationProgress->getTurnstileSecret();
 
