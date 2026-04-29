@@ -99,11 +99,11 @@ class InstallationProgress
     }
 
     /**
-     * @return string[]|null
+     * @return string[]
      */
-    public function getTrustedProxies(): ?array
+    public function getTrustedProxies(): array
     {
-        return $this->trustedProxies;
+        return $this->trustedProxies ?? [];
     }
 
     /**
