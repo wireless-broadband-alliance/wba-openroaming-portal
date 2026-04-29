@@ -115,7 +115,8 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('app_logout');
             }
             // Check if the user is verified
-            if ($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::OFF->value &&
+            if (
+                $data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::OFF->value &&
                 $userExternalAuths[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value &&
                 !$session->has('session_verified')
             ) {
