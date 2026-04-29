@@ -1,5 +1,13 @@
 # Changelog
 
+# Release V1.10.1
+
+- New dedicated SAML config for username identifiers (`userExternalAuths`)
+- Fixed SAML integration on APIs (broke after the dashboard integration)
+- Fixed SAML account deletion (same root cause)
+- Added fallback when `pgp_public_key` isn't configured
+- Validators now block admins from deleting their own account via the landing page widget
+
 # Release V1.10.0
 
 - Installation Widget implementation (For first time project setup / for later use on the admin page configuration).
@@ -15,6 +23,13 @@
   sAMAccountName, email, uid, or username).
 - Added `SAML_ATTRIBUTE_MAPPING` configuration to allow fully customizable SAML attribute mappings (uuid, email,
   first_name, last_name) per Identity Provider.
+- It's required to run the new migrations this will set up the new entities for the new domains, sources page (
+  `DomainsBlacklist`, `DomainsSource`), installation widget with the certificates management (`InstalationWidget`,
+  `Certificate` & `CertificateSetupProcess`) & the Fingerprints for apps associations with the portal
+    - Run the migrations with:
+      ```bash
+      php bin/console doctrine:migrations:migrate
+      ```
 - **Required one-time action:** After upgrading, run
   the [PrepareReleaseV1100Command.php](src/Command/PrepareReleaseV1100Command.php) to migrate
   existing administrator permissions to the new **Super Admin** role hierarchy.
@@ -24,13 +39,20 @@
       ```bash
       php bin/console prepare-release:v1100
       ```
-- It's required to run the new migrations this will set up the new entities for the new domains, sources page (
-  `DomainsBlacklist`, `DomainsSource`), installation widget with the certificates management (`InstalationWidget`,
-  `Certificate` & `CertificateSetupProcess`) & the Fingerprints for apps associations with the portal
-    - Run the migrations with:
+
+- **Required one-time action:** Fix directory permissions for VichUploader cache to resolve an Internal Server Error 500
+  caused by a non-writable folder (`var/cache/prod/vich_uploader`).
+  This step ensures the web server can correctly write uploaded file metadata and prevents upload failures after
+  deployment.
+    - Run the following commands:
+
       ```bash
-      php bin/console doctrine:migrations:migrate
+      chown -R www-data:www-data /var/www/openroaming/var/cache/prod/vich_uploader
+      chmod -R 777 /var/www/openroaming/var/cache/prod/vich_uploader
       ```
+
+    - This should be executed **once after deployment or when cache directories are recreated**, ideally during
+      maintenance or while the portal is in a controlled state.
 
 # Release V1.9.1
 

@@ -335,6 +335,21 @@ To solve this, use the chmod command inside the `web` container, to give the scr
 - chmod +x tools/generatePfxSigningKey.sh
 ```
 
+6. **VichUploader Cache Directory Not Writable (HTTP 500 Error)**:
+   You may encounter an Internal Server Error 500 caused by the `vich_uploader` cache directory not being writable (
+   `var/cache/prod/vich_uploader`). This typically happens after deployments or cache regeneration when folder
+   permissions are incorrect.
+
+   To fix this, ensure correct ownership and permissions:
+
+   ```bash
+   chown -R www-data:www-data /var/www/openroaming/var/cache/prod/vich_uploader
+   chmod -R 777 /var/www/openroaming/var/cache/prod/vich_uploader
+   ```
+
+- This step should be executed **after deployment or when the cache directory is recreated**
+- Its recommended to run during maintenance or controlled downtime if users are affected
+
 ## Important Reference
 
 > After completing installation, make sure to review the [Security Notes](SECURITY.md) for important production

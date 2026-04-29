@@ -242,7 +242,8 @@ class AuthController extends AbstractController
 
         $samlResponseData = $this->samlResolverService->decodeSamlResponse(
             $samlResponseRaw,
-            $this->getParameter('app.saml_idp_entity_id')
+            $this->getParameter('app.saml_idp_entity_id'),
+            $this->getParameter('app.saml_sp_entity_id')
         );
         $idpCertificate = $samlResponseData['certificate'];
 
