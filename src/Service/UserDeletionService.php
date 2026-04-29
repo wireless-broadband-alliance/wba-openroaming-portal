@@ -27,12 +27,12 @@ readonly class UserDeletionService
     ) {
     }
 
-  /**
-   * @param UserExternalAuth[] $userExternalAuths Array of external auth objects
-   * @return array<string, mixed>
-   * @throws \JsonException
-   * @throws ORMException
-   */
+    /**
+     * @param UserExternalAuth[] $userExternalAuths Array of external auth objects
+     * @return array<string, mixed>
+     * @throws \JsonException
+     * @throws ORMException
+     */
     public function deleteUser(User $user, array $userExternalAuths, Request $request, User $admin): array
     {
         $deletedUserUuid = $user->getUuid();
@@ -41,58 +41,58 @@ readonly class UserDeletionService
         $phoneNumber = null;
         if ($user->getPhoneNumber() instanceof PhoneNumber) {
             $phoneNumber = "+" .
-            $user->getPhoneNumber()->getCountryCode() .
-            $user->getPhoneNumber()->getNationalNumber();
+                $user->getPhoneNumber()->getCountryCode() .
+                $user->getPhoneNumber()->getNationalNumber();
         }
 
         $deletedUserData = [
-        'id' => $user->getId(),
-        'uuid' => $user->getUuid(),
-        'email' => $user->getEmail() ?? 'This value is empty',
-        'phoneNumber' => $phoneNumber ?? 'This value is empty',
-        'firstName' => $user->getFirstName() ?? 'This value is empty',
-        'lastName' => $user->getLastName() ?? 'This value is empty',
-        'createdAt' => $user->getCreatedAt()?->format('Y-m-d H:i:s'),
-        'bannedAt' => $user->getBannedAt()?->format('Y-m-d H:i:s'),
-        'deletedAt' => new DateTime(),
+            'id' => $user->getId(),
+            'uuid' => $user->getUuid(),
+            'email' => $user->getEmail() ?? 'This value is empty',
+            'phoneNumber' => $phoneNumber ?? 'This value is empty',
+            'firstName' => $user->getFirstName() ?? 'This value is empty',
+            'lastName' => $user->getLastName() ?? 'This value is empty',
+            'createdAt' => $user->getCreatedAt()?->format('Y-m-d H:i:s'),
+            'bannedAt' => $user->getBannedAt()?->format('Y-m-d H:i:s'),
+            'deletedAt' => new DateTime(),
         ];
 
         $deletedUserExternalAuthData = [];
         foreach ($userExternalAuths as $externalAuth) {
             $deletedUserExternalAuthData[] = [
-            'provider' => $externalAuth->getProvider(),
-            'providerId' => $externalAuth->getProviderId()
+                'provider' => $externalAuth->getProvider(),
+                'providerId' => $externalAuth->getProviderId()
             ];
         }
 
         $combinedData = [
-        'user' => $deletedUserData,
-        'externalAuths' => $deletedUserExternalAuthData,
+            'user' => $deletedUserData,
+            'externalAuths' => $deletedUserExternalAuthData,
         ];
         $jsonDataCombined = json_encode($combinedData, JSON_THROW_ON_ERROR);
 
         $pgpEncryptedData = $this->encryptionService->encrypt($jsonDataCombined);
 
-      // Make sure encryption returned a string
+        // Make sure encryption returned a string
         if (!is_string($pgpEncryptedData) || ($pgpEncryptedData === '' || $pgpEncryptedData === '0')) {
             return [
-            'success' => false,
-            'message' => $this->translator->trans('encryptionFailed', [], 'UserDeletionService'),
+                'success' => false,
+                'message' => $this->translator->trans('encryptionFailed', [], 'UserDeletionService'),
             ];
         }
 
-      // Check for special error signals returned by the service
+        // Check for special error signals returned by the service
         if ($pgpEncryptedData === UserVerificationStatus::MISSING_PUBLIC_KEY_CONTENT->value) {
             return [
-            'success' => false,
-            'message' => $this->translator->trans('publicKeyMissing', [], 'UserDeletionService'),
+                'success' => false,
+                'message' => $this->translator->trans('publicKeyMissing', [], 'UserDeletionService'),
             ];
         }
 
         if ($pgpEncryptedData === UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT->value) {
             return [
-            'success' => false,
-            'message' => $this->translator->trans('publicKeyEmpty', [], 'UserDeletionService'),
+                'success' => false,
+                'message' => $this->translator->trans('publicKeyEmpty', [], 'UserDeletionService'),
             ];
         }
 
@@ -117,15 +117,15 @@ readonly class UserDeletionService
             UserRadiusProfileRevokeReason::USER_ACCOUNT_DELETED->value
         );
 
-      // Persist changes
+        // Persist changes
         $this->entityManager->persist($deletedUserDataEntity);
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
         $eventMetadata = [
-        'uuid' => $deletedUserUuid,
-        'deletedBy' => $deletedUserByUuid,
-        'ip' => $request->getClientIp(),
+            'uuid' => $deletedUserUuid,
+            'deletedBy' => $deletedUserByUuid,
+            'ip' => $request->getClientIp(),
         ];
 
 
@@ -137,8 +137,8 @@ readonly class UserDeletionService
         );
 
         return [
-        'success' => true,
-        'message' => $this->translator->trans('userSuccessfullyDeleted', [], 'UserDeletionService')
+            'success' => true,
+            'message' => $this->translator->trans('userSuccessfullyDeleted', [], 'UserDeletionService')
         ];
     }
 }

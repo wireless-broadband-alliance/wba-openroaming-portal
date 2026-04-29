@@ -125,16 +125,14 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         $user->setDisabled(false);
         $user->setCreatedAt(new DateTime());
 
-        $samlIdentifierAttribute = $this->parameterBag->get('app.saml_identifier_attribute');
-        $samlIdentifier = $this->getAttributeValue(
-            $attributes,
-            $samlIdentifierAttribute
-        );
+        $samlAccountName = isset($this->attribute_mapping['username'])
+            ? $this->getAttributeValue($attributes, $this->attribute_mapping['username'])
+            : ($attributes['sAMAccountName'][0] ?? null);
 
         $userAuth = new UserExternalAuth();
         $userAuth->setUser($user)
             ->setProvider(UserProvider::SAML->value)
-            ->setProviderId($samlIdentifier);
+            ->setProviderId($samlAccountName);
 
         $this->entityManager->persist($user);
         $this->entityManager->persist($userAuth);
