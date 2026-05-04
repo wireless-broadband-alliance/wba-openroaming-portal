@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\TimeRangePresetStatistics;
 use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\EventActions;
 use App\Service\FreeradiusConnectionService;
@@ -93,10 +94,11 @@ class FreeradiusController extends AbstractController
 
         // After computing $startDate and $endDate, detect which preset was used
         $activePreset = $request->query->get('preset', '');
+        $activePreset = TimeRangePresetStatistics::fromInput($activePreset ?? '');
 
-        // Validate it's a known value, otherwise treat as custom
-        if (!in_array($activePreset, ['yesterday', '7d', '30d', '1m'])) {
-            $activePreset = ($startDateString || $endDateString) ? 'custom' : '7d';
+        // If it resolved to Custom but there are no dates, fall back to default
+        if ($activePreset === TimeRangePresetStatistics::Custom && !$startDateString && !$endDateString) {
+            $activePreset = TimeRangePresetStatistics::default();
         }
 
         // Authentication Attempts
@@ -228,7 +230,7 @@ class FreeradiusController extends AbstractController
             'selectedEndDate' => $endDate->format('Y-m-d\TH:i'),
             'exportFreeradiusStatistics' => $export_freeradius_statistics,
             'paginationApUsage' => true,
-            'activePreset' => $activePreset,
+            'activePreset' => $activePreset->value,
         ]);
     }
 

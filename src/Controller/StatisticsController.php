@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Enum\TimeRangePresetStatistics;
 use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Security\Voter\UserAuthenticationVoter;
@@ -68,10 +69,11 @@ class StatisticsController extends AbstractController
 
         // After computing $startDate and $endDate, detect which preset was used
         $activePreset = $request->query->get('preset', '');
+        $activePreset = TimeRangePresetStatistics::fromInput($activePreset ?? '');
 
-        // Validate it's a known value, otherwise treat as custom
-        if (!in_array($activePreset, ['yesterday', '7d', '30d', '1m'])) {
-            $activePreset = ($startDateString || $endDateString) ? 'custom' : '7d';
+        // If it resolved to Custom but there are no dates, fall back to default
+        if ($activePreset === TimeRangePresetStatistics::Custom && !$startDateString && !$endDateString) {
+            $activePreset = TimeRangePresetStatistics::default();
         }
 
         $fetchChartSMSEmail = $this->portalStatistics->getSMSEmailStats($startDate, $endDate);
@@ -105,7 +107,7 @@ class StatisticsController extends AbstractController
             'twoFADataJson' => json_encode($fetchChart2FA, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate->format('Y-m-d\TH:i'),
             'selectedEndDate' => $endDate->format('Y-m-d\TH:i'),
-            'activePreset' => $activePreset,
+            'activePreset' => $activePreset->value,
         ]);
     }
 }
