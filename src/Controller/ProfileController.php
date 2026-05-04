@@ -123,8 +123,10 @@ class ProfileController extends AbstractController
                 $radiusUser->getUsername(),
                 base64_encode((string)$radiusUser->getValue()),
                 (string)$this->settingRepository->findOneBy(['name' => SettingName::DOMAIN_NAME->value])->getValue(),
-                (string)$this->settingRepository->findOneBy(['name' =>
-                    SettingName::RADIUS_TLS_NAME->value])->getValue(),
+                (string)$this->settingRepository->findOneBy([
+                    'name' =>
+                        SettingName::RADIUS_TLS_NAME->value
+                ])->getValue(),
                 (string)$this->settingRepository->findOneBy(['name' => SettingName::DISPLAY_NAME->value])->getValue(),
                 $expirationDate['limitTime']->format('Y-m-d')
             ],
@@ -336,6 +338,7 @@ class ProfileController extends AbstractController
     /**
      * @throws RandomException
      * @throws InvalidArgumentException
+     * @throws Exception
      */
     #[Route('/profile/windows', name: 'profile_windows')]
     #[IsGranted("ROLE_USER")]
@@ -346,8 +349,10 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
+        $isWindows10 = $this->userAgentOsDetector->isWindows10OrBelow($request);
+
         // Block Windows 10 profiles if FreeRADIUS cert is not EV
-        if ($this->userAgentOsDetector->isWindows10OrBelow($request)) {
+        if ($isWindows10) {
             $currentProcess = $this->certificateProcessCheckerService->getCurrentProcess();
             if ($currentProcess && !$currentProcess->isFreeradiusCertEV()) {
                 $this->addFlash(
@@ -380,10 +385,16 @@ class ProfileController extends AbstractController
             $this->radiusProfileRepository,
             $this->settingRepository->findOneBy(['name' => SettingName::RADIUS_REALM_NAME->value])->getValue()
         );
-        $profile = file_get_contents('../profile_templates/windows/template.xml');
+
+        $templateFile = $isWindows10
+            ? '../profile_templates/windows/template.xml'
+            : '../profile_templates/windows/template_win11.xml';
+
+        $profile = file_get_contents($templateFile);
         if ($profile === false) {
             throw new RuntimeException('Failed to load Windows template file');
         }
+
         $profile = str_replace([
             '@USERNAME@',
             '@PASSWORD@',
@@ -404,42 +415,42 @@ class ProfileController extends AbstractController
             $this->settingRepository->findOneBy(['name' => SettingName::DISPLAY_NAME->value])->getValue(),
         ], $profile);
 
-        //Windows Specific
         $randomFactorIdentifier = bin2hex(random_bytes(16));
-        $randomFileName = 'windows_unsigned_' . $randomFactorIdentifier . '.xml';
-        $randomSignedFileName = 'windows_signed_' . $randomFactorIdentifier . '.xml';
-        $signedFilePath = '/tmp/' . $randomSignedFileName;
-        $unSignedFilePath = '/tmp/' . $randomFileName;
+
+        // Both Win10 and Win11 require signing — Win10 uses EV/RSA, Win11 uses LE/ECDSA
+        $unSignedFilePath = '/tmp/windows_unsigned_' . $randomFactorIdentifier . '.xml';
+        $signedFilePath = '/tmp/windows_signed_' . $randomFactorIdentifier . '.xml';
+
         file_put_contents($unSignedFilePath, $profile);
+
         $command = [
             'xmlsec1',
             '--sign',
             '--pkcs12',
             '/var/www/openroaming/signing-keys/windowsKey.pfx',
             '--pwd',
-            "",
+            '',
             '--output',
             $signedFilePath,
             $unSignedFilePath,
         ];
+
         $process = new Process($command);
         try {
             $process->mustRun();
             unlink($unSignedFilePath);
         } catch (ProcessFailedException $exception) {
             throw new RuntimeException(
-                $this->translator->trans(
-                    'signingFailed',
-                    [],
-                    'controllers'
-                ) . $exception->getMessage(),
+                $this->translator->trans('signingFailed', [], 'controllers') . $exception->getMessage(),
                 $exception->getCode(),
                 $exception
             );
         }
-        $uuid = uniqid("", true);
+
         $signedProfileContents = file_get_contents($signedFilePath);
         unlink($signedFilePath);
+
+        $uuid = uniqid('', true);
         $cache = new CacheUtils();
         $cache->write('profile_' . $uuid, $signedProfileContents);
 
@@ -447,8 +458,8 @@ class ProfileController extends AbstractController
             'ip' => $request->getClientIp(),
             'user_agent' => $request->headers->get('User-Agent'),
             'platform' => $this->settingRepository->findOneBy([
-                'name' => [SettingName::PLATFORM_MODE->value
-                ]])->getValue(),
+                'name' => [SettingName::PLATFORM_MODE->value]
+            ])->getValue(),
             'type' => OSType::WINDOWS->value,
         ];
 
