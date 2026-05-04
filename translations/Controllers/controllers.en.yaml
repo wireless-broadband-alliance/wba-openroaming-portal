@@ -200,3 +200,4 @@ invalidPhoneNumber: 'Invalid phone number. Please enter a valid phone number.'
 phoneNumberRequired: 'Phone number cannot be empty.'
 replyCodeTotp: 'Please wait %remainingTime% seconds before trying again.'
 tooManyAttempts: "Too many requests. Please try again in %seconds% seconds."
+redirectingToApp: 'Redirected to the app.'

@@ -38,6 +38,7 @@ class AssetLinksController extends AbstractController
         private readonly SettingsService $settingsService,
         private readonly EntityManagerInterface $entityManager,
         private readonly ReturnAppFingerprintRepository $returnAppFingerprintRepository,
+        private readonly RouterInterface $router,
     ) {
     }
 
@@ -110,7 +111,7 @@ class AssetLinksController extends AbstractController
         $appIds = $appIds ? [$appIds] : [];
 
         // Add the corresponding for the app redirection
-        $path = 'return-to-app';
+        $path = ltrim($this->router->generate('app_return_to_app'), '/');
         $components = [
             [
                 '/' => '/' . $path,
@@ -128,6 +129,18 @@ class AssetLinksController extends AbstractController
                 ],
             ],
         ]);
+    }
+
+    #[Route('/return-to-app', name: 'app_return_to_app')]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function returnToApp(): Response
+    {
+        $this->addFlash(
+            'success',
+            $this->translator->trans('redirectingToApp', [], 'controllers')
+        );
+
+        return $this->redirectToRoute('app_api_landing');
     }
 
     #[Route('/dashboard/settings/returnApps', name: 'admin_dashboard_return_apps')]
