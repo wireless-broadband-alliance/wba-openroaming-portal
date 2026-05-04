@@ -19,6 +19,7 @@ use App\Service\CertificateProcessCheckerService;
 use App\Service\EventActions;
 use App\Service\ExpirationProfileService;
 use App\Service\TwoFAService;
+use App\Service\UserAgentOsDetector;
 use App\Twig\CertificateProcessExtension;
 use App\Utils\CacheUtils;
 use DateTime;
@@ -54,6 +55,7 @@ class ProfileController extends AbstractController
         private readonly RadiusUserRepository $radiusUserRepository,
         private readonly UserRadiusProfileRepository $radiusProfileRepository,
         private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly UserAgentOsDetector $userAgentOsDetector,
     ) {
     }
 
@@ -344,19 +346,16 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        // Block Windows profile if FreeRADIUS cert is not EV
-        $currentProcess = $this->certificateProcessCheckerService->getCurrentProcess();
-        if ($currentProcess && !$currentProcess->isFreeradiusCertEV()) {
-            $this->addFlash(
-                'error',
-                $this->translator->trans(
-                    'freeradius_is_not_ev_cert_warning',
-                    [],
-                    'controllers'
-                )
-            );
-
-            return $this->redirectToRoute('app_landing');
+        // Block Windows 10 profiles if FreeRADIUS cert is not EV
+        if ($this->userAgentOsDetector->isWindows10OrBelow($request)) {
+            $currentProcess = $this->certificateProcessCheckerService->getCurrentProcess();
+            if ($currentProcess && !$currentProcess->isFreeradiusCertEV()) {
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('freeradius_is_not_ev_cert_warning', [], 'controllers')
+                );
+                return $this->redirectToRoute('app_landing');
+            }
         }
 
         /** @var User $user */
