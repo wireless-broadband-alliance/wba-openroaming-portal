@@ -130,6 +130,18 @@ class AssetLinksController extends AbstractController
         ]);
     }
 
+    #[Route('/return-to-app', name: 'app_return_to_app')]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function returnToApp(): Response
+    {
+        $this->addFlash(
+            'success',
+            $this->translator->trans('redirectingToApp', [], 'controllers')
+        );
+
+        return $this->redirectToRoute('app_api_landing');
+    }
+
     #[Route('/dashboard/settings/returnApps', name: 'admin_dashboard_return_apps')]
     #[IsGranted(UserAuthenticationVoter::RETURN_APPS_MANAGEMENT_READ)]
     public function settingsReturnApps(Request $request): Response

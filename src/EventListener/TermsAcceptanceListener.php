@@ -67,6 +67,7 @@ readonly class TermsAcceptanceListener
             '/.well-known/assetlinks.json',
             '/login/confirmation',
             '/app/continue',
+            '/return-to-app',
             '/.well-known/assetlinks.json',
             '/.well-known/apple-app-site-association'
         ];
