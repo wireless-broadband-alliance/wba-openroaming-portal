@@ -4,60 +4,251 @@ import { Chart } from 'chart.js';
 export default class extends Controller {
     static targets = ['chart'];
 
-    /**
-     * Called when the controller connects to the DOM.
-     * Automatically initializes the chart for the connected canvas element.
-     */
+    // =========================
+    // DESIGN SYSTEM
+    // =========================
+
+    // Semantic colors (named usage)
+    colors = {
+        primary: '#7DB928',
+        danger:  '#FE4068',
+        info:    '#38A2AE',
+    };
+
+    // Ordered palette — item[0] = green, item[1] = red, item[2] = teal, etc.
+    palette = [
+        { solid: '#7DB928', soft: 'rgba(125,185,40,0.15)'  },  // 0 — green
+        { solid: '#8A63FF', soft: 'rgba(138,99,255,0.15)'  },  // 1 — purple
+        { solid: '#38A2AE', soft: 'rgba(56,162,174,0.15)'  },  // 2 — teal
+        { solid: '#F59E0B', soft: 'rgba(245,158,11,0.15)'  },  // 3 — amber
+        { solid: '#FE4068', soft: 'rgba(254,64,104,0.15)'  },  // 4 — pink/red
+        { solid: '#10B981', soft: 'rgba(16,185,129,0.15)'  },  // 5 — emerald
+    ];
+
+    // =========================
+    // CONNECT
+    // =========================
     connect() {
         const target = this.chartTarget;
         if (!target) return console.error('Chart target not found!');
 
-        const chartData = target.dataset.chartData;
-        const chartType = target.dataset.chartType || 'bar'; // Default to type "bar" if not specified
+        const style = target.dataset.chartStyle || '';
 
-        // Initialize the chart
-        this.initChart(target, chartData, chartType);
+        const handlers = {
+            'sms-email':       this.renderSmsEmailChart.bind(this),
+            'authentication':  this.renderAuthenticationChart.bind(this),
+            'devices':         this.renderDevicesChart.bind(this),
+            'platform-status': this.renderHorizontalBarChart.bind(this),
+            'users-verified':  this.renderHorizontalBarChart.bind(this),
+            '2fa':             this.renderHorizontalBarChart.bind(this),
+        };
+
+        const handler = handlers[style] || this.renderDefaultChart.bind(this);
+        handler(target);
     }
 
-    /**
-     * Initializes a Chart.js chart with the given configuration.
-     * @param {HTMLElement} target - The canvas element
-     * @param {String} data - The chart data in JSON format
-     * @param {String} chartType - The chart type (e.g., "bar", "line")
-     */
-    initChart(target, data, chartType) {
-        const parsedData = JSON.parse(data);
+    // =========================
+    // CHART RENDERERS
+    // =========================
 
-        // Default chart options
-        const chartOptions = {
-            type: chartType, // Chart type (e.g., "bar")
-            data: parsedData,
-            options: {
-                plugins: {
-                    legend: {
-                        display: false, // Hide the legend (labels at the top)
-                    },
-                },
-                scales: {
-                    y: {
-                        ticks: {
-                            precision: 0,
-                        },
-                    },
-                },
+    /**
+     * Doughnut chart with center label (SMS & Email card)
+     */
+    renderSmsEmailChart(canvas) {
+        canvas.width  = 200;
+        canvas.height = 200;
+
+        const parsedData    = this.parseData(canvas);
+        const labels        = parsedData.labels ?? [];
+        const values        = parsedData.datasets?.[0]?.data ?? [];
+        const total         = parsedData.total ?? 0;
+        const segmentColors = labels.map((_, i) => this.palette[i % this.palette.length].solid);
+
+        const dominantIndex = values.indexOf(Math.max(...values));
+        const dominantPct   = total > 0 ? Math.round((values[dominantIndex] / total) * 100) : 0;
+        const dominantLabel = labels[dominantIndex] ?? '';
+
+        // Paint legend dots using the same palette order
+        segmentColors.forEach((color, i) => {
+            const dot = document.querySelector(`.sms-email-dot-${i}`);
+            if (dot) dot.style.background = color;
+        });
+
+        const centerLabelPlugin = {
+            id: 'centerLabel',
+            afterDraw(chart) {
+                const { ctx, chartArea: { top, bottom, left, right } } = chart;
+                const cx = (left + right) / 2;
+                const cy = (top + bottom) / 2;
+                ctx.save();
+                ctx.textAlign    = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font         = 'bold 1.4rem sans-serif';
+                ctx.fillStyle    = '#111';
+                ctx.fillText(`${dominantPct}%`, cx, cy - 10);
+                ctx.font      = '0.75rem sans-serif';
+                ctx.fillStyle = '#6b7280';
+                ctx.fillText(`use ${dominantLabel}`, cx, cy + 12);
+                ctx.restore();
             },
         };
 
-        // Dynamic handling for horizontal/vertical bar charts
-        if (target.dataset.indexAxis === 'y') {
-            // Check if indexAxis is set to y
-            chartOptions.options.indexAxis = 'y'; // Set the bar chart as horizontal
-            chartOptions.options.scales = {
-                x: { ticks: { precision: 0 } }, // Customize for horizontal bars
-            };
+        this.createChart(canvas, {
+            type: 'doughnut',
+            data: {
+                labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: segmentColors,
+                    borderWidth: 0,
+                    borderRadius: 4,
+                }],
+            },
+            options: {
+                cutout: '75%',
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false },
+                },
+            },
+            plugins: [centerLabelPlugin],
+        });
+    }
+
+    /**
+     * Vertical bar charts
+     */
+    renderAuthenticationChart(target) {
+        this.renderVerticalBarChart(target);
+    }
+
+    renderDevicesChart(target) {
+        this.renderVerticalBarChart(target);
+    }
+
+    renderVerticalBarChart(target) {
+        const parsedData = this.parseData(target);
+
+        if (parsedData.datasets) {
+            parsedData.datasets.forEach((dataset, i) => {
+                const entry = this.palette[i % this.palette.length];
+                dataset.backgroundColor      = entry.soft;
+                dataset.hoverBackgroundColor = entry.solid;
+                dataset.borderRadius         = 4;
+            });
         }
 
-        // Create the chart
-        new Chart(target, chartOptions);
+        this.createChart(target, {
+            type: 'bar',
+            data: parsedData,
+            options: this.verticalBarOptions(),
+        });
+    }
+
+    /**
+     * Horizontal bar charts
+     */
+    renderHorizontalBarChart(target) {
+        const parsedData = this.parseData(target);
+
+        if (parsedData.datasets) {
+            parsedData.datasets.forEach((dataset, i) => {
+                const entry = this.palette[i % this.palette.length];
+                dataset.backgroundColor      = entry.soft;
+                dataset.hoverBackgroundColor = entry.solid;
+                dataset.borderRadius         = 4;
+            });
+        }
+
+        this.createChart(target, {
+            type: 'bar',
+            data: parsedData,
+            options: this.horizontalBarOptions(),
+        });
+    }
+
+    /**
+     * Fallback
+     */
+    renderDefaultChart(target) {
+        const parsedData   = this.parseData(target);
+        const chartType    = target.dataset.chartType || 'bar';
+        const isHorizontal = target.dataset.indexAxis === 'y';
+
+        if (parsedData.datasets) {
+            parsedData.datasets.forEach((dataset, i) => {
+                const entry = this.palette[i % this.palette.length];
+                dataset.backgroundColor      = entry.soft;
+                dataset.hoverBackgroundColor = entry.solid;
+                dataset.borderRadius         = 4;
+            });
+        }
+
+        this.createChart(target, {
+            type: chartType,
+            data: parsedData,
+            options: isHorizontal ? this.horizontalBarOptions() : this.verticalBarOptions(),
+        });
+    }
+
+    // =========================
+    // CHART OPTIONS
+    // =========================
+    verticalBarOptions() {
+        return {
+            maintainAspectRatio: false,
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 },
+                    grid: { color: 'rgba(0,0,0,0.05)' },
+                },
+                x: {
+                    grid: { display: false },
+                },
+            },
+        };
+    }
+
+    horizontalBarOptions() {
+        return {
+            maintainAspectRatio: false,
+            responsive: true,
+            indexAxis: 'y',
+            plugins: { legend: { display: false } },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 },
+                    grid: { color: 'rgba(0,0,0,0.05)' },
+                },
+                y: {
+                    grid: { display: false },
+                },
+            },
+        };
+    }
+
+    // =========================
+    // HELPERS
+    // =========================
+    parseData(target) {
+        try {
+            return JSON.parse(target.dataset.chartData || '{}');
+        } catch (e) {
+            console.error('Invalid chart JSON:', e);
+            return {};
+        }
+    }
+
+    createChart(target, config) {
+        if (this.chartInstance) {
+            this.chartInstance.destroy();
+        }
+        this.chartInstance = new Chart(target, config);
+        return this.chartInstance;
     }
 }

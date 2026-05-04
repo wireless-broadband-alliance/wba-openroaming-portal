@@ -42,13 +42,31 @@ readonly class PortalStatistics
 
         foreach ($rows as $row) {
             match ($row['provider_id']) {
-                UserProvider::EMAIL->value => $result['Email'] = (int)$row['count'],
+                UserProvider::EMAIL->value        => $result['Email'] = (int)$row['count'],
                 UserProvider::PHONE_NUMBER->value => $result['Phone'] = (int)$row['count'],
                 default => null,
             };
         }
 
-        return $this->generateDatasets->generateDatasets($result);
+        $total = array_sum($result);
+
+        $legend = [];
+        foreach ($result as $label => $count) {
+            $legend[] = [
+                'label' => $label,
+                'count' => $count,
+                'pct'   => $total > 0 ? round(($count / $total) * 100) : 0,
+            ];
+        }
+
+        $datasets = $this->generateDatasets->generateDatasets($result);
+        $datasets['total'] = $total;
+
+        return [
+            'datasets' => $datasets,
+            'total'    => $total,
+            'legend'   => $legend,
+        ];
     }
 
     /**

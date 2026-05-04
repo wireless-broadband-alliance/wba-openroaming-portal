@@ -99,7 +99,9 @@ class StatisticsController extends AbstractController
         return $this->render('dashboard/statistics/statistics.html.twig', [
             'user' => $currentUser,
             'data' => $data,
-            'SMSEmailDataJson' => json_encode($fetchChartSMSEmail, JSON_THROW_ON_ERROR),
+            'SMSEmailDataJson' => json_encode($fetchChartSMSEmail['datasets'], JSON_THROW_ON_ERROR),
+            'SMSEmailTotal' => $fetchChartSMSEmail['total'] ?? 0,
+            'SMSEmailLegend' => $fetchChartSMSEmail['legend'] ?? 0,
             'authenticationDataJson' => json_encode($fetchChartAuthentication, JSON_THROW_ON_ERROR),
             'devicesDataJson' => json_encode($fetchChartDevices, JSON_THROW_ON_ERROR),
             'platformStatusDataJson' => json_encode($fetchChartPlatformStatus, JSON_THROW_ON_ERROR),
