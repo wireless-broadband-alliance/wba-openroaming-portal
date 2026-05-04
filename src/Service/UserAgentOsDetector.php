@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Service;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -9,14 +11,14 @@ class UserAgentOsDetector
     public function isWindows10OrBelow(Request $request): bool
     {
         $platform = $request->headers->get('Sec-CH-UA-Platform', '');
-        $isWindows = str_contains(strtolower($platform), 'windows');
+        $isWindows = str_contains(strtolower((string) $platform), 'windows');
 
         if (!$isWindows) {
             return false;
         }
 
         $platformVersion = $request->headers->get('Sec-CH-UA-Platform-Version', '');
-        $majorVersion = (int) explode('.', trim($platformVersion, '"'))[0];
+        $majorVersion = (int) explode('.', trim((string) $platformVersion, '"'))[0];
 
         // If no version hints available, assume Win11+ (don't block)
         if ($majorVersion === 0) {
@@ -30,10 +32,10 @@ class UserAgentOsDetector
     public function isWindows(Request $request): bool
     {
         $platform = $request->headers->get('Sec-CH-UA-Platform', '');
-        if (str_contains(strtolower($platform), 'windows')) {
+        if (str_contains(strtolower((string) $platform), 'windows')) {
             return true;
         }
 
-        return str_contains($request->headers->get('User-Agent', ''), 'Windows');
+        return str_contains((string) $request->headers->get('User-Agent', ''), 'Windows');
     }
 }
