@@ -34,7 +34,7 @@ export default class extends Controller {
         const handlers = {
             'sms-email':       () => this.renderDoughnutChart(target, 'sms-email'),
             'authentication':  () => this.renderDoughnutChart(target, 'authentication'),
-            'devices':         () => this.renderVerticalBarChart(target),
+            'devices':         () => this.renderDoughnutChart(target, 'devices'),
             'platform-status': () => this.renderHorizontalBarChart(target),
             'users-verified':  () => this.renderHorizontalBarChart(target),
             '2fa':             () => this.renderHorizontalBarChart(target),

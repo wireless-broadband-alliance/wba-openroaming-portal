@@ -131,25 +131,22 @@ readonly class PortalStatistics
         $result = [
             OSType::ANDROID->value => 0,
             OSType::WINDOWS->value => 0,
-            OSType::MACOS->value => 0,
-            OSType::IOS->value => 0,
+            OSType::MACOS->value   => 0,
+            OSType::IOS->value     => 0,
         ];
 
         foreach ($events as $event) {
             $metadata = $event->getEventMetadata();
-
             if (!isset($metadata['type'])) {
                 continue;
             }
-
             $type = $metadata['type'];
-
             if (isset($result[$type])) {
                 $result[$type]++;
             }
         }
 
-        return $this->generateDatasets->generateDatasets($result);
+        return $this->buildChartData($result);
     }
 
     /**
