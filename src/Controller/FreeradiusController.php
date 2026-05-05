@@ -94,7 +94,7 @@ class FreeradiusController extends AbstractController
 
         // After computing $startDate and $endDate, detect which preset was used
         $activePreset = $request->query->get('preset', '');
-        $activePreset = TimeRangePresetStatistics::fromInput($activePreset ?? '');
+        $activePreset = TimeRangePresetStatistics::fromInput($activePreset);
 
         // If it resolved to Custom but there are no dates, fall back to default
         if ($activePreset === TimeRangePresetStatistics::Custom && !$startDateString && !$endDateString) {
