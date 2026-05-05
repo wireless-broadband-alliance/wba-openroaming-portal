@@ -143,7 +143,16 @@
 
         {# Users Management #}
         <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
-            <h1 class="text-lg font-medium">{{ 'usersManagement'|trans({}, 'statistics') }}</h1>
+            <div class="flex items-center justify-between">
+                <h1 class="text-lg font-medium">{{ 'usersManagement'|trans({}, 'statistics') }}</h1>
+                <div class="flex items-center gap-3">
+                    <div class="w-px h-6 bg-gray-200"></div>
+                    <div class="text-right">
+                        <span class="block text-gray-400 text-xs">Total</span>
+                        <strong class="text-gray-900 text-sm">{{ charts.usersVerified.total|number_format(0, '.', ' ') }}</strong>
+                    </div>
+                </div>
+            </div>
             <div class="relative h-64">
                 <canvas data-controller="statistics"
                         data-statistics-target="chart"
@@ -154,7 +163,16 @@
 
         {# Users 2FA Configuration Status #}
         <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
-            <h1 class="text-lg font-medium">{{ 'users2FAStatus'|trans({}, 'statistics') }}</h1>
+            <div class="flex items-center justify-between">
+                <h1 class="text-lg font-medium">{{ 'users2FAStatus'|trans({}, 'statistics') }}</h1>
+                <div class="flex items-center gap-3">
+                    <div class="w-px h-6 bg-gray-200"></div>
+                    <div class="text-right">
+                        <span class="block text-gray-400 text-xs">Total</span>
+                        <strong class="text-gray-900 text-sm">{{ charts.twoFA.total|number_format(0, '.', ' ') }}</strong>
+                    </div>
+                </div>
+            </div>
             <div class="relative h-64">
                 <canvas data-controller="statistics"
                         data-statistics-target="chart"
@@ -162,6 +180,6 @@
                         data-chart-data="{{ charts.twoFA.dataJson }}"></canvas>
             </div>
         </div>
-        
+
     </div>
 {% endblock %}

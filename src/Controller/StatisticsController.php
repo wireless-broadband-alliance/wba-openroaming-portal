@@ -118,13 +118,13 @@ class StatisticsController extends AbstractController
      */
     private function prepareChart(array $chart): array
     {
-        $datasets = $chart['datasets'] ?? $chart;
+        $datasets          = $chart['datasets'] ?? $chart;
         $datasets['total'] = $chart['total'] ?? 0;
 
         return [
             'dataJson' => json_encode($datasets, JSON_THROW_ON_ERROR),
-            'total' => $chart['total'] ?? 0,
-            'legend' => $chart['legend'] ?? [],
+            'total'    => $chart['total'] ?? 0,
+            'legend'   => $chart['legend'] ?? [],
         ];
     }
 }

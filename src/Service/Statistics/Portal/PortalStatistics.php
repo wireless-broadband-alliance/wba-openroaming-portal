@@ -86,34 +86,32 @@ readonly class PortalStatistics
         $users = $this->userRepository->findByDateRange($start, $end);
 
         $result = [
-            UserTwoFactorAuthenticationStatus::DISABLED->value => 0,
             UserTwoFactorAuthenticationStatus::TOTP->value => 0,
             UserTwoFactorAuthenticationStatus::SMS->value => 0,
             UserTwoFactorAuthenticationStatus::EMAIL->value => 0,
+            UserTwoFactorAuthenticationStatus::DISABLED->value => 0,
         ];
 
         foreach ($users as $user) {
             $type = $user->getTwoFAtype();
-
             if (isset($result[$type])) {
                 $result[$type]++;
             }
         }
 
         $labels = [
-            UserTwoFactorAuthenticationStatus::DISABLED->value => 'Disabled',
             UserTwoFactorAuthenticationStatus::TOTP->value => 'TOTP App',
             UserTwoFactorAuthenticationStatus::SMS->value => 'SMS',
             UserTwoFactorAuthenticationStatus::EMAIL->value => 'Email',
+            UserTwoFactorAuthenticationStatus::DISABLED->value => 'Disabled',
         ];
 
         $final = [];
-
         foreach ($result as $type => $count) {
             $final[$labels[$type]] = $count;
         }
 
-        return $this->generateDatasets->generateDatasets($final);
+        return $this->buildChartData($final);
     }
 
     /**
@@ -131,8 +129,8 @@ readonly class PortalStatistics
         $result = [
             OSType::ANDROID->value => 0,
             OSType::WINDOWS->value => 0,
-            OSType::MACOS->value   => 0,
-            OSType::IOS->value     => 0,
+            OSType::MACOS->value => 0,
+            OSType::IOS->value => 0,
         ];
 
         foreach ($events as $event) {
@@ -198,7 +196,7 @@ readonly class PortalStatistics
             UserVerificationStatus::BANNED->value => (int)($row['banned']),
         ];
 
-        return $this->generateDatasets->generateDatasets($result);
+        return $this->buildChartData($result);
     }
 
     /**

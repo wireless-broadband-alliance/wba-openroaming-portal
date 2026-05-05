@@ -35,7 +35,7 @@ export default class extends Controller {
             'sms-email':       () => this.renderDoughnutChart(target, 'sms-email'),
             'authentication':  () => this.renderDoughnutChart(target, 'authentication'),
             'devices':         () => this.renderDoughnutChart(target, 'devices'),
-            'platform-status': () => this.renderDoughnutChart(target),
+            'platform-status': () => this.renderDoughnutChart(target, 'platform-status'),
             'users-verified':  () => this.renderHorizontalBarChart(target),
             '2fa':             () => this.renderHorizontalBarChart(target),
         };
@@ -145,10 +145,10 @@ export default class extends Controller {
         const parsedData = this.parseData(target);
 
         if (parsedData.datasets) {
-            parsedData.datasets.forEach((dataset, i) => {
-                const entry = this.palette[i % this.palette.length];
-                dataset.backgroundColor      = entry.soft;
-                dataset.hoverBackgroundColor = entry.solid;
+            parsedData.datasets.forEach((dataset) => {
+                // Color each bar individually by its index in the data array
+                dataset.backgroundColor      = dataset.data.map((_, i) => this.palette[i % this.palette.length].soft);
+                dataset.hoverBackgroundColor = dataset.data.map((_, i) => this.palette[i % this.palette.length].solid);
                 dataset.borderRadius         = 4;
             });
         }
