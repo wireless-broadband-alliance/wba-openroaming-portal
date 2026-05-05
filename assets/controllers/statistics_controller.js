@@ -9,17 +9,17 @@ export default class extends Controller {
     // =========================
     colors = {
         primary: '#7DB928',
-        danger:  '#FE4068',
-        info:    '#38A2AE',
+        danger: '#FE4068',
+        info: '#38A2AE',
     };
 
     palette = [
-        { solid: '#7DB928', soft: 'rgba(125,185,40,0.15)'  },  // 0 — green
-        { solid: '#8A63FF', soft: 'rgba(138,99,255,0.15)'  },  // 1 — purple
-        { solid: '#38A2AE', soft: 'rgba(56,162,174,0.15)'  },  // 2 — teal
-        { solid: '#F59E0B', soft: 'rgba(245,158,11,0.15)'  },  // 3 — amber
-        { solid: '#FE4068', soft: 'rgba(254,64,104,0.15)'  },  // 4 — pink/red
-        { solid: '#10B981', soft: 'rgba(16,185,129,0.15)'  },  // 5 — emerald
+        { solid: '#7DB928', soft: 'rgba(125,185,40,0.15)' }, // 0 — green
+        { solid: '#8A63FF', soft: 'rgba(138,99,255,0.15)' }, // 1 — purple
+        { solid: '#38A2AE', soft: 'rgba(56,162,174,0.15)' }, // 2 — teal
+        { solid: '#F59E0B', soft: 'rgba(245,158,11,0.15)' }, // 3 — amber
+        { solid: '#FE4068', soft: 'rgba(254,64,104,0.15)' }, // 4 — pink/red
+        { solid: '#10B981', soft: 'rgba(16,185,129,0.15)' }, // 5 — emerald
     ];
 
     // =========================
@@ -32,12 +32,12 @@ export default class extends Controller {
         const style = target.dataset.chartStyle || '';
 
         const handlers = {
-            'sms-email':       () => this.renderDoughnutChart(target, 'sms-email'),
-            'authentication':  () => this.renderDoughnutChart(target, 'authentication'),
-            'devices':         () => this.renderDoughnutChart(target, 'devices'),
+            'sms-email': () => this.renderDoughnutChart(target, 'sms-email'),
+            authentication: () => this.renderDoughnutChart(target, 'authentication'),
+            devices: () => this.renderDoughnutChart(target, 'devices'),
             'platform-status': () => this.renderDoughnutChart(target, 'platform-status'),
-            'users-verified':  () => this.renderHorizontalBarChart(target),
-            '2fa':             () => this.renderHorizontalBarChart(target),
+            'users-verified': () => this.renderHorizontalBarChart(target),
+            '2fa': () => this.renderHorizontalBarChart(target),
         };
 
         const handler = handlers[style] || (() => this.renderDefaultChart(target));
@@ -53,17 +53,17 @@ export default class extends Controller {
      * dotPrefix matches the CSS class prefix in Twig e.g. "sms-email" → ".sms-email-dot-0"
      */
     renderDoughnutChart(canvas, dotPrefix) {
-        canvas.width  = 200;
+        canvas.width = 200;
         canvas.height = 200;
 
-        const parsedData    = this.parseData(canvas);
-        const labels        = parsedData.labels ?? [];
-        const values        = parsedData.datasets?.[0]?.data ?? [];
-        const total         = parsedData.total ?? 0;
+        const parsedData = this.parseData(canvas);
+        const labels = parsedData.labels ?? [];
+        const values = parsedData.datasets?.[0]?.data ?? [];
+        const total = parsedData.total ?? 0;
         const segmentColors = labels.map((_, i) => this.palette[i % this.palette.length].solid);
 
         const dominantIndex = values.indexOf(Math.max(...values));
-        const dominantPct   = total > 0 ? Math.round((values[dominantIndex] / total) * 100) : 0;
+        const dominantPct = total > 0 ? Math.round((values[dominantIndex] / total) * 100) : 0;
         const dominantLabel = labels[dominantIndex] ?? '';
 
         // Paint legend dots
@@ -75,16 +75,19 @@ export default class extends Controller {
         const centerLabelPlugin = {
             id: `centerLabel-${dotPrefix}`,
             afterDraw(chart) {
-                const { ctx, chartArea: { top, bottom, left, right } } = chart;
+                const {
+                    ctx,
+                    chartArea: { top, bottom, left, right },
+                } = chart;
                 const cx = (left + right) / 2;
                 const cy = (top + bottom) / 2;
                 ctx.save();
-                ctx.textAlign    = 'center';
+                ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.font         = 'bold 1.4rem sans-serif';
-                ctx.fillStyle    = '#111';
+                ctx.font = 'bold 1.4rem sans-serif';
+                ctx.fillStyle = '#111';
                 ctx.fillText(`${dominantPct}%`, cx, cy - 10);
-                ctx.font      = '0.75rem sans-serif';
+                ctx.font = '0.75rem sans-serif';
                 ctx.fillStyle = '#6b7280';
                 ctx.fillText(`use ${dominantLabel}`, cx, cy + 12);
                 ctx.restore();
@@ -95,20 +98,22 @@ export default class extends Controller {
             type: 'doughnut',
             data: {
                 labels,
-                datasets: [{
-                    data: values,
-                    backgroundColor: segmentColors,
-                    borderWidth: 2,
-                    borderColor: '#fff',
-                    borderRadius: 2,
-                    spacing: 1,
-                }],
+                datasets: [
+                    {
+                        data: values,
+                        backgroundColor: segmentColors,
+                        borderWidth: 2,
+                        borderColor: '#fff',
+                        borderRadius: 2,
+                        spacing: 1,
+                    },
+                ],
             },
             options: {
                 cutout: '75%',
                 maintainAspectRatio: false,
                 plugins: {
-                    legend:  { display: false },
+                    legend: { display: false },
                     tooltip: { enabled: false },
                 },
             },
@@ -125,9 +130,9 @@ export default class extends Controller {
         if (parsedData.datasets) {
             parsedData.datasets.forEach((dataset, i) => {
                 const entry = this.palette[i % this.palette.length];
-                dataset.backgroundColor      = entry.soft;
+                dataset.backgroundColor = entry.soft;
                 dataset.hoverBackgroundColor = entry.solid;
-                dataset.borderRadius         = 4;
+                dataset.borderRadius = 4;
             });
         }
 
@@ -147,9 +152,13 @@ export default class extends Controller {
         if (parsedData.datasets) {
             parsedData.datasets.forEach((dataset) => {
                 // Color each bar individually by its index in the data array
-                dataset.backgroundColor      = dataset.data.map((_, i) => this.palette[i % this.palette.length].soft);
-                dataset.hoverBackgroundColor = dataset.data.map((_, i) => this.palette[i % this.palette.length].solid);
-                dataset.borderRadius         = 4;
+                dataset.backgroundColor = dataset.data.map(
+                    (_, i) => this.palette[i % this.palette.length].soft
+                );
+                dataset.hoverBackgroundColor = dataset.data.map(
+                    (_, i) => this.palette[i % this.palette.length].solid
+                );
+                dataset.borderRadius = 4;
             });
         }
 
@@ -164,16 +173,16 @@ export default class extends Controller {
      * Fallback
      */
     renderDefaultChart(target) {
-        const parsedData   = this.parseData(target);
-        const chartType    = target.dataset.chartType || 'bar';
+        const parsedData = this.parseData(target);
+        const chartType = target.dataset.chartType || 'bar';
         const isHorizontal = target.dataset.indexAxis === 'y';
 
         if (parsedData.datasets) {
             parsedData.datasets.forEach((dataset, i) => {
                 const entry = this.palette[i % this.palette.length];
-                dataset.backgroundColor      = entry.soft;
+                dataset.backgroundColor = entry.soft;
                 dataset.hoverBackgroundColor = entry.solid;
-                dataset.borderRadius         = 4;
+                dataset.borderRadius = 4;
             });
         }
 
