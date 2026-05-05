@@ -75,10 +75,7 @@ readonly class PortalStatistics
 
     /**
      * Fetch data related to 2FA configuration on the portal
-     * @return array{
-     *      labels: string[],
-     *      datasets: array<int, array<string, mixed>>
-     *  }
+     * @return array<string, mixed>
      * @throws Exception
      */
     public function get2FAStats(DateTime $start, DateTime $end): array
@@ -116,10 +113,7 @@ readonly class PortalStatistics
 
     /**
      * Fetch data related to downloaded profiles devices.
-     * @return array{
-     *      labels: string[],
-     *      datasets: array<int, array<string, mixed>>
-     *  }
+     * @return array<string, mixed>
      * @throws \JsonException
      */
     public function getDevicesStats(DateTime $start, DateTime $end): array
@@ -149,10 +143,7 @@ readonly class PortalStatistics
 
     /**
      * Fetch data related to users created in platform mode - Live/Demo
-     * @return array{
-     *      labels: string[],
-     *      datasets: array<int, array<string, mixed>>
-     *  }
+     * @return array<string, mixed>
      * @throws \Doctrine\DBAL\Exception
      */
     public function getPlatformStatusStats(DateTime $startDate, DateTime $endDate): array
@@ -178,12 +169,10 @@ readonly class PortalStatistics
         return $this->buildChartData($result);
     }
 
+
     /**
      * Fetch data related to verified users
-     * @return array{
-     *      labels: string[],
-     *      datasets: array<int, array<string, mixed>>
-     *  }
+     * @return array<string, mixed>
      */
     public function getUserVerifiedStas(DateTime $startDate, DateTime $endDate): array
     {
@@ -201,6 +190,8 @@ readonly class PortalStatistics
 
     /**
      * Build the standard chart response shape from a result array.
+     * @param array<string, int> $result
+     * @return array<string, mixed>
      */
     private function buildChartData(array $result): array
     {
