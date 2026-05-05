@@ -35,7 +35,7 @@ export default class extends Controller {
             'sms-email':       () => this.renderDoughnutChart(target, 'sms-email'),
             'authentication':  () => this.renderDoughnutChart(target, 'authentication'),
             'devices':         () => this.renderDoughnutChart(target, 'devices'),
-            'platform-status': () => this.renderHorizontalBarChart(target),
+            'platform-status': () => this.renderDoughnutChart(target),
             'users-verified':  () => this.renderHorizontalBarChart(target),
             '2fa':             () => this.renderHorizontalBarChart(target),
         };

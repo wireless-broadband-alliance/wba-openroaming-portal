@@ -168,19 +168,16 @@ readonly class PortalStatistics
 
         foreach ($events as $event) {
             $metadata = $event->getEventMetadata();
-
             if (!isset($metadata['platform'])) {
                 continue;
             }
-
             $platform = $metadata['platform'];
-
             if (isset($result[$platform])) {
                 $result[$platform]++;
             }
         }
 
-        return $this->generateDatasets->generateDatasets($result);
+        return $this->buildChartData($result);
     }
 
     /**
