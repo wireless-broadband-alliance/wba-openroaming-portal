@@ -35,38 +35,17 @@ readonly class PortalStatistics
         $rows = $this->userExternalAuthRepository
             ->findPortalUsers($startDate, $endDate);
 
-        $result = [
-            'Email' => 0,
-            'Phone' => 0,
-        ];
+        $result = ['Email' => 0, 'Phone' => 0];
 
         foreach ($rows as $row) {
             match ($row['provider_id']) {
-                UserProvider::EMAIL->value        => $result['Email'] = (int)$row['count'],
+                UserProvider::EMAIL->value => $result['Email'] = (int)$row['count'],
                 UserProvider::PHONE_NUMBER->value => $result['Phone'] = (int)$row['count'],
                 default => null,
             };
         }
 
-        $total = array_sum($result);
-
-        $legend = [];
-        foreach ($result as $label => $count) {
-            $legend[] = [
-                'label' => $label,
-                'count' => $count,
-                'pct'   => $total > 0 ? round(($count / $total) * 100) : 0,
-            ];
-        }
-
-        $datasets = $this->generateDatasets->generateDatasets($result);
-        $datasets['total'] = $total;
-
-        return [
-            'datasets' => $datasets,
-            'total'    => $total,
-            'legend'   => $legend,
-        ];
+        return $this->buildChartData($result);
     }
 
     /**
@@ -74,23 +53,24 @@ readonly class PortalStatistics
      * @return array<string, mixed>
      * @throws \JsonException
      */
+
     public function getAuthenticationStats(DateTime $startDate, DateTime $endDate): array
     {
         $rows = $this->userExternalAuthRepository
             ->countAuthenticationProviders($startDate, $endDate);
 
         $result = [
+            UserProvider::PORTAL_ACCOUNT->value => 0,
             UserProvider::SAML->value => 0,
             UserProvider::GOOGLE_ACCOUNT->value => 0,
             UserProvider::MICROSOFT_ACCOUNT->value => 0,
-            UserProvider::PORTAL_ACCOUNT->value => 0,
         ];
 
         foreach ($rows as $row) {
             $result[$row['provider']] = (int)$row['count'];
         }
 
-        return $this->generateDatasets->generateDatasets($result);
+        return $this->buildChartData($result);
     }
 
     /**
@@ -225,5 +205,31 @@ readonly class PortalStatistics
         ];
 
         return $this->generateDatasets->generateDatasets($result);
+    }
+
+    /**
+     * Build the standard chart response shape from a result array.
+     */
+    private function buildChartData(array $result): array
+    {
+        $total = array_sum($result);
+
+        $legend = [];
+        foreach ($result as $label => $count) {
+            $legend[] = [
+                'label' => $label,
+                'count' => $count,
+                'pct' => $total > 0 ? round(($count / $total) * 100) : 0,
+            ];
+        }
+
+        $datasets = $this->generateDatasets->generateDatasets($result);
+        $datasets['total'] = $total;
+
+        return [
+            'datasets' => $datasets,
+            'total' => $total,
+            'legend' => $legend,
+        ];
     }
 }

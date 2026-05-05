@@ -99,17 +99,32 @@ class StatisticsController extends AbstractController
         return $this->render('dashboard/statistics/statistics.html.twig', [
             'user' => $currentUser,
             'data' => $data,
-            'SMSEmailDataJson' => json_encode($fetchChartSMSEmail['datasets'], JSON_THROW_ON_ERROR),
-            'SMSEmailTotal' => $fetchChartSMSEmail['total'] ?? 0,
-            'SMSEmailLegend' => $fetchChartSMSEmail['legend'] ?? 0,
-            'authenticationDataJson' => json_encode($fetchChartAuthentication, JSON_THROW_ON_ERROR),
-            'devicesDataJson' => json_encode($fetchChartDevices, JSON_THROW_ON_ERROR),
-            'platformStatusDataJson' => json_encode($fetchChartPlatformStatus, JSON_THROW_ON_ERROR),
-            'usersVerifiedDataJson' => json_encode($fetchChartUserVerified, JSON_THROW_ON_ERROR),
-            'twoFADataJson' => json_encode($fetchChart2FA, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate->format('Y-m-d\TH:i'),
             'selectedEndDate' => $endDate->format('Y-m-d\TH:i'),
             'activePreset' => $activePreset->value,
+            'charts' => [
+                'smsEmail' => $this->prepareChart($fetchChartSMSEmail),
+                'authentication' => $this->prepareChart($fetchChartAuthentication),
+                'devices' => $this->prepareChart($fetchChartDevices),
+                'platformStatus' => $this->prepareChart($fetchChartPlatformStatus),
+                'usersVerified' => $this->prepareChart($fetchChartUserVerified),
+                'twoFA' => $this->prepareChart($fetchChart2FA),
+            ],
         ]);
+    }
+
+    /**
+     * @throws \JsonException
+     */
+    private function prepareChart(array $chart): array
+    {
+        $datasets = $chart['datasets'] ?? $chart;
+        $datasets['total'] = $chart['total'] ?? 0;
+
+        return [
+            'dataJson' => json_encode($datasets, JSON_THROW_ON_ERROR),
+            'total' => $chart['total'] ?? 0,
+            'legend' => $chart['legend'] ?? [],
+        ];
     }
 }

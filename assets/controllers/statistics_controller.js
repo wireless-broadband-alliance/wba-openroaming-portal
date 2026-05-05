@@ -7,15 +7,12 @@ export default class extends Controller {
     // =========================
     // DESIGN SYSTEM
     // =========================
-
-    // Semantic colors (named usage)
     colors = {
         primary: '#7DB928',
         danger:  '#FE4068',
         info:    '#38A2AE',
     };
 
-    // Ordered palette — item[0] = green, item[1] = red, item[2] = teal, etc.
     palette = [
         { solid: '#7DB928', soft: 'rgba(125,185,40,0.15)'  },  // 0 — green
         { solid: '#8A63FF', soft: 'rgba(138,99,255,0.15)'  },  // 1 — purple
@@ -35,16 +32,16 @@ export default class extends Controller {
         const style = target.dataset.chartStyle || '';
 
         const handlers = {
-            'sms-email':       this.renderSmsEmailChart.bind(this),
-            'authentication':  this.renderAuthenticationChart.bind(this),
-            'devices':         this.renderDevicesChart.bind(this),
-            'platform-status': this.renderHorizontalBarChart.bind(this),
-            'users-verified':  this.renderHorizontalBarChart.bind(this),
-            '2fa':             this.renderHorizontalBarChart.bind(this),
+            'sms-email':       () => this.renderDoughnutChart(target, 'sms-email'),
+            'authentication':  () => this.renderDoughnutChart(target, 'authentication'),
+            'devices':         () => this.renderVerticalBarChart(target),
+            'platform-status': () => this.renderHorizontalBarChart(target),
+            'users-verified':  () => this.renderHorizontalBarChart(target),
+            '2fa':             () => this.renderHorizontalBarChart(target),
         };
 
-        const handler = handlers[style] || this.renderDefaultChart.bind(this);
-        handler(target);
+        const handler = handlers[style] || (() => this.renderDefaultChart(target));
+        handler();
     }
 
     // =========================
@@ -52,9 +49,10 @@ export default class extends Controller {
     // =========================
 
     /**
-     * Doughnut chart with center label (SMS & Email card)
+     * Shared doughnut renderer — used by all doughnut cards.
+     * dotPrefix matches the CSS class prefix in Twig e.g. "sms-email" → ".sms-email-dot-0"
      */
-    renderSmsEmailChart(canvas) {
+    renderDoughnutChart(canvas, dotPrefix) {
         canvas.width  = 200;
         canvas.height = 200;
 
@@ -68,14 +66,14 @@ export default class extends Controller {
         const dominantPct   = total > 0 ? Math.round((values[dominantIndex] / total) * 100) : 0;
         const dominantLabel = labels[dominantIndex] ?? '';
 
-        // Paint legend dots using the same palette order
+        // Paint legend dots
         segmentColors.forEach((color, i) => {
-            const dot = document.querySelector(`.sms-email-dot-${i}`);
+            const dot = document.querySelector(`.${dotPrefix}-dot-${i}`);
             if (dot) dot.style.background = color;
         });
 
         const centerLabelPlugin = {
-            id: 'centerLabel',
+            id: `centerLabel-${dotPrefix}`,
             afterDraw(chart) {
                 const { ctx, chartArea: { top, bottom, left, right } } = chart;
                 const cx = (left + right) / 2;
@@ -100,15 +98,17 @@ export default class extends Controller {
                 datasets: [{
                     data: values,
                     backgroundColor: segmentColors,
-                    borderWidth: 0,
-                    borderRadius: 4,
+                    borderWidth: 2,
+                    borderColor: '#fff',
+                    borderRadius: 2,
+                    spacing: 1,
                 }],
             },
             options: {
                 cutout: '75%',
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false },
+                    legend:  { display: false },
                     tooltip: { enabled: false },
                 },
             },
@@ -117,16 +117,8 @@ export default class extends Controller {
     }
 
     /**
-     * Vertical bar charts
+     * Vertical bar chart
      */
-    renderAuthenticationChart(target) {
-        this.renderVerticalBarChart(target);
-    }
-
-    renderDevicesChart(target) {
-        this.renderVerticalBarChart(target);
-    }
-
     renderVerticalBarChart(target) {
         const parsedData = this.parseData(target);
 
@@ -147,7 +139,7 @@ export default class extends Controller {
     }
 
     /**
-     * Horizontal bar charts
+     * Horizontal bar chart
      */
     renderHorizontalBarChart(target) {
         const parsedData = this.parseData(target);
@@ -206,9 +198,7 @@ export default class extends Controller {
                     ticks: { precision: 0 },
                     grid: { color: 'rgba(0,0,0,0.05)' },
                 },
-                x: {
-                    grid: { display: false },
-                },
+                x: { grid: { display: false } },
             },
         };
     }
@@ -225,9 +215,7 @@ export default class extends Controller {
                     ticks: { precision: 0 },
                     grid: { color: 'rgba(0,0,0,0.05)' },
                 },
-                y: {
-                    grid: { display: false },
-                },
+                y: { grid: { display: false } },
             },
         };
     }
