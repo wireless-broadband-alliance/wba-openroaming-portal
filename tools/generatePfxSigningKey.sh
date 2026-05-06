@@ -36,6 +36,8 @@ fi
 # Create the PFX file
 cat ../signing-keys/cert.pem ../signing-keys/ca/ca.pem \
  | openssl pkcs12 -export \
+     -in ../signing-keys/cert.pem \
+     -certfile ../signing-keys/ca/ca.pem \
      -inkey ../signing-keys/privkey.pem \
      -password "pass:" \
      -out ../signing-keys/windowsKey.pfx
