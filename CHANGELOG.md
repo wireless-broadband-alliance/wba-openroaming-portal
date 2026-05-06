@@ -1,5 +1,10 @@
 # Changelog
 
+# Release V1.10.2
+
+- New fallback route `/return-to-app` that redirects to `/app/continue`, to make sure that, users are properly returned
+  back to the app after authentication.
+
 # Release V1.10.1
 
 - New dedicated SAML config for username identifiers (`userExternalAuths`)
