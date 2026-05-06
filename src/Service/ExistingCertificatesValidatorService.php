@@ -47,7 +47,7 @@ class ExistingCertificatesValidatorService
             }
         }
 
-        if (!empty($missing)) {
+        if ($missing !== []) {
             return [
                 'errors' => [sprintf('Missing files: %s', implode(', ', $missing))],
                 'isEv' => false,
@@ -77,8 +77,8 @@ class ExistingCertificatesValidatorService
         }
 
         // Step 4 — sync EV status
-        $isEv = empty($dto->notices);
-        $this->syncEvStatus($dto, $isEv);
+        $isEv = $dto->notices === [];
+        $this->syncEvStatus($dto);
 
         return [
             'errors' => $errors,
@@ -96,7 +96,7 @@ class ExistingCertificatesValidatorService
 
         // WarnIfNotEvCertificate pushes a notice when cert is NOT EV
         // so if notices is empty = cert IS EV, if notices present = cert is NOT EV
-        $isEv = empty($dto->notices);
+        $isEv = $dto->notices === [];
 
         if ($process->isFreeradiusCertEV() === $isEv) {
             return; // nothing changed, skip the flush

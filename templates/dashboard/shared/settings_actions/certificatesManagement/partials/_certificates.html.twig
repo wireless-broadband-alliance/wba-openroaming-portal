@@ -13,7 +13,7 @@
         <span>{{ 'renewCertificates'|trans({}, '_certificates') }}</span>
     </a>
 
-    {{ form_start(validateForm, { attr: { class: 'contents' } }) }}
+    {{ form_start(validateForm, {attr: {class: 'contents'}}) }}
     <button type="submit"
             data-confirm="{{ 'confirmVerifyInstalled'|trans({}, '_certificates') }}"
             class="group inline-flex items-center gap-3 px-8 py-5 rounded-2xl
@@ -27,7 +27,7 @@
         <span>{{ 'validateExistingCertificates'|trans({}, '_certificates') }}</span>
     </button>
     {{ form_row(validateForm._token) }}
-    {{ form_end(validateForm, { render_rest: false }) }}
+    {{ form_end(validateForm, {render_rest: false}) }}
 
 </div>
 
