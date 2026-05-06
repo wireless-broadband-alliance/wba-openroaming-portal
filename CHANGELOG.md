@@ -1,5 +1,9 @@
 # Changelog
 
+# Release V1.10.3
+
+- Fixed EV certificate detection in the manual upload validator
+
 # Release V1.10.2
 
 - New fallback route `/return-to-app` that redirects to `/app/continue`, to make sure that, users are properly returned
