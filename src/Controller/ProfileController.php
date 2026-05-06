@@ -19,6 +19,7 @@ use App\Service\CertificateProcessCheckerService;
 use App\Service\EventActions;
 use App\Service\ExpirationProfileService;
 use App\Service\TwoFAService;
+use App\Service\UserAgentOsDetector;
 use App\Twig\CertificateProcessExtension;
 use App\Utils\CacheUtils;
 use DateTime;
@@ -54,6 +55,7 @@ class ProfileController extends AbstractController
         private readonly RadiusUserRepository $radiusUserRepository,
         private readonly UserRadiusProfileRepository $radiusProfileRepository,
         private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly UserAgentOsDetector $userAgentOsDetector,
     ) {
     }
 
@@ -121,8 +123,10 @@ class ProfileController extends AbstractController
                 $radiusUser->getUsername(),
                 base64_encode((string)$radiusUser->getValue()),
                 (string)$this->settingRepository->findOneBy(['name' => SettingName::DOMAIN_NAME->value])->getValue(),
-                (string)$this->settingRepository->findOneBy(['name' =>
-                    SettingName::RADIUS_TLS_NAME->value])->getValue(),
+                (string)$this->settingRepository->findOneBy([
+                    'name' =>
+                        SettingName::RADIUS_TLS_NAME->value
+                ])->getValue(),
                 (string)$this->settingRepository->findOneBy(['name' => SettingName::DISPLAY_NAME->value])->getValue(),
                 $expirationDate['limitTime']->format('Y-m-d')
             ],
@@ -334,6 +338,7 @@ class ProfileController extends AbstractController
     /**
      * @throws RandomException
      * @throws InvalidArgumentException
+     * @throws Exception
      */
     #[Route('/profile/windows', name: 'profile_windows')]
     #[IsGranted("ROLE_USER")]
@@ -344,19 +349,18 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        // Block Windows profile if FreeRADIUS cert is not EV
-        $currentProcess = $this->certificateProcessCheckerService->getCurrentProcess();
-        if ($currentProcess && !$currentProcess->isFreeradiusCertEV()) {
-            $this->addFlash(
-                'error',
-                $this->translator->trans(
-                    'freeradius_is_not_ev_cert_warning',
-                    [],
-                    'controllers'
-                )
-            );
+        $isWindows10 = $this->userAgentOsDetector->isWindows10OrBelow($request);
 
-            return $this->redirectToRoute('app_landing');
+        // Block Windows 10 profiles if FreeRADIUS cert is not EV
+        if ($isWindows10) {
+            $currentProcess = $this->certificateProcessCheckerService->getCurrentProcess();
+            if ($currentProcess && !$currentProcess->isFreeradiusCertEV()) {
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('freeradius_is_not_ev_cert_warning', [], 'controllers')
+                );
+                return $this->redirectToRoute('app_landing');
+            }
         }
 
         /** @var User $user */
@@ -381,10 +385,16 @@ class ProfileController extends AbstractController
             $this->radiusProfileRepository,
             $this->settingRepository->findOneBy(['name' => SettingName::RADIUS_REALM_NAME->value])->getValue()
         );
-        $profile = file_get_contents('../profile_templates/windows/template.xml');
+
+        $templateFile = $isWindows10
+            ? '../profile_templates/windows/template.xml'
+            : '../profile_templates/windows/template_win11.xml';
+
+        $profile = file_get_contents($templateFile);
         if ($profile === false) {
             throw new RuntimeException('Failed to load Windows template file');
         }
+
         $profile = str_replace([
             '@USERNAME@',
             '@PASSWORD@',
@@ -405,42 +415,60 @@ class ProfileController extends AbstractController
             $this->settingRepository->findOneBy(['name' => SettingName::DISPLAY_NAME->value])->getValue(),
         ], $profile);
 
-        //Windows Specific
+        // Detect key type and set correct SignatureMethod in the XML template.
+        // template_win11.xml hardcodes ecdsa-sha256, but the server may have an RSA key
+        // (e.g. Let's Encrypt R12 issuer) which requires rsa-sha256 instead.
+        $privkeyContents = file_get_contents('/var/www/openroaming/signing-keys/privkey.pem');
+        if ($privkeyContents !== false) {
+            $keyInfo = openssl_pkey_get_private($privkeyContents);
+            if ($keyInfo !== false) {
+                $details = openssl_pkey_get_details($keyInfo);
+                if ($details && $details['type'] === OPENSSL_KEYTYPE_RSA) {
+                    $profile = str_replace(
+                        'http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256',
+                        'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
+                        $profile
+                    );
+                }
+            }
+        }
+
         $randomFactorIdentifier = bin2hex(random_bytes(16));
-        $randomFileName = 'windows_unsigned_' . $randomFactorIdentifier . '.xml';
-        $randomSignedFileName = 'windows_signed_' . $randomFactorIdentifier . '.xml';
-        $signedFilePath = '/tmp/' . $randomSignedFileName;
-        $unSignedFilePath = '/tmp/' . $randomFileName;
+
+        // Both Win10 and Win11 require signing — Win10 uses EV/RSA, Win11 uses LE/ECDSA
+        $unSignedFilePath = '/tmp/windows_unsigned_' . $randomFactorIdentifier . '.xml';
+        $signedFilePath = '/tmp/windows_signed_' . $randomFactorIdentifier . '.xml';
+
         file_put_contents($unSignedFilePath, $profile);
+
         $command = [
             'xmlsec1',
             '--sign',
             '--pkcs12',
             '/var/www/openroaming/signing-keys/windowsKey.pfx',
             '--pwd',
-            "",
+            '',
             '--output',
             $signedFilePath,
             $unSignedFilePath,
         ];
+
         $process = new Process($command);
         try {
             $process->mustRun();
             unlink($unSignedFilePath);
         } catch (ProcessFailedException $exception) {
             throw new RuntimeException(
-                $this->translator->trans(
-                    'signingFailed',
-                    [],
-                    'controllers'
-                ) . $exception->getMessage(),
+                $this->translator->trans('signingFailed', [], 'controllers') . $exception->getMessage(),
                 $exception->getCode(),
                 $exception
             );
         }
-        $uuid = uniqid("", true);
+
         $signedProfileContents = file_get_contents($signedFilePath);
         unlink($signedFilePath);
+
+        $uuid = uniqid('', true);
         $cache = new CacheUtils();
         $cache->write('profile_' . $uuid, $signedProfileContents);
 
@@ -448,8 +476,8 @@ class ProfileController extends AbstractController
             'ip' => $request->getClientIp(),
             'user_agent' => $request->headers->get('User-Agent'),
             'platform' => $this->settingRepository->findOneBy([
-                'name' => [SettingName::PLATFORM_MODE->value
-                ]])->getValue(),
+                'name' => [SettingName::PLATFORM_MODE->value]
+            ])->getValue(),
             'type' => OSType::WINDOWS->value,
         ];
 
@@ -543,18 +571,21 @@ class ProfileController extends AbstractController
 
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
 
-        if (!$radiusProfile) {
-            $radiusProfile = new UserRadiusProfile();
+        $androidLimit = 32;
+        $realmSize = strlen($realmName) + 1;
 
-            $androidLimit = 32;
-            $realmSize = strlen($realmName) + 1;
+        if (!$radiusProfile) {
+            // No active profile exists — create a fresh one (handles new users AND expired/revoked users)
             $username = $this->generateToken($androidLimit - $realmSize) . "@" . $realmName;
             $token = $this->generateToken($androidLimit - $realmSize);
+
+            $radiusProfile = new UserRadiusProfile();
             $radiusProfile->setUser($user);
             $radiusProfile->setRadiusToken($token);
             $radiusProfile->setRadiusUser($username);
             $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE->value);
             $radiusProfile->setIssuedAt(new DateTime());
+
             // Get the expiration date from the service
             $expirationData = $this->expirationProfileService->calculateExpiration(
                 $userExternalAuth->getProvider(),
@@ -571,28 +602,23 @@ class ProfileController extends AbstractController
             $radiusUser->setAttribute('Cleartext-Password');
             $radiusUser->setOp(':=');
             $radiusUser->setValue($token);
+
             $radiusUserRepository->save($radiusUser, true);
             $radiusProfileRepository->save($radiusProfile, true);
         } else {
+            // Active profile exists — ensure radcheck entry is in sync
             $radiusUser = $radiusUserRepository->findOneBy([
                 'username' => $radiusProfile->getRadiusUser(),
             ]);
-            if (!$radiusUser) {
-                /* In cases where we have don't have the profile with a $radiusUser.
-                This logic is also required to not break the portal when the account profiles
-                have been revoked previously */
-                $androidLimit = 32;
-                $realmSize = strlen($realmName) + 1;
-                $username = $this->generateToken($androidLimit - $realmSize) . "@" . $realmName;
-                $token = $this->generateToken($androidLimit - $realmSize);
 
+            if (!$radiusUser) {
+                // radcheck row was manually removed — restore it from the active profile
                 $radiusUser = new RadiusUser();
-                $radiusUser->setUsername($username);
+                $radiusUser->setUsername($radiusProfile->getRadiusUser());
                 $radiusUser->setAttribute('Cleartext-Password');
                 $radiusUser->setOp(':=');
-                $radiusUser->setValue($token);
+                $radiusUser->setValue($radiusProfile->getRadiusToken());
                 $radiusUserRepository->save($radiusUser, true);
-                $radiusProfileRepository->save($radiusProfile, true);
             }
         }
 

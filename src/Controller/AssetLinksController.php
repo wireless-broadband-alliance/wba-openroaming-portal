@@ -38,6 +38,7 @@ class AssetLinksController extends AbstractController
         private readonly SettingsService $settingsService,
         private readonly EntityManagerInterface $entityManager,
         private readonly ReturnAppFingerprintRepository $returnAppFingerprintRepository,
+        private readonly RouterInterface $router,
     ) {
     }
 
@@ -110,7 +111,7 @@ class AssetLinksController extends AbstractController
         $appIds = $appIds ? [$appIds] : [];
 
         // Add the corresponding for the app redirection
-        $path = 'return-to-app';
+        $path = ltrim($this->router->generate('app_return_to_app'), '/');
         $components = [
             [
                 '/' => '/' . $path,
@@ -128,6 +129,46 @@ class AssetLinksController extends AbstractController
                 ],
             ],
         ]);
+    }
+
+    #[Route('/return-to-app', name: 'app_return_to_app')]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function returnToApp(Request $request): Response
+    {
+        $session = $request->getSession();
+        $appReturn = $session->get('app_return');
+
+        // Check if session exists
+        if (!$appReturn) {
+            throw $this->createAccessDeniedException(
+                $this->translator->trans('access_denied_no_session', [], 'controllers')
+            );
+        }
+
+        // Check if RETURN_APPS_ENABLED is true
+        $returnAppsEnabledSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::RETURN_APPS_ENABLED->value
+        ]);
+        $returnAppsEnabled = $returnAppsEnabledSetting?->getValue() ?? OperationMode::OFF->value;
+
+        if ($returnAppsEnabled !== OperationMode::ON->value) {
+            throw $this->createAccessDeniedException(
+                $this->translator->trans('access_denied_feature_disabled', [], 'controllers')
+            );
+        }
+
+        // Check if session is still valid (TTL)
+        $timestamp = $appReturn['timestamp'] ?? 0;
+        $ttl = $appReturn['ttl'] ?? 0;
+        if ((time() - $timestamp) > $ttl) {
+            throw $this->createAccessDeniedException(
+                $this->translator->trans('access_denied_session_expired', [], 'controllers')
+            );
+        }
+
+        $this->addFlash('success', $this->translator->trans('redirectingToApp', [], 'controllers'));
+
+        return $this->redirectToRoute('app_api_landing');
     }
 
     #[Route('/dashboard/settings/returnApps', name: 'admin_dashboard_return_apps')]

@@ -1,5 +1,21 @@
 # Changelog
 
+# Release V1.10.2
+
+- New fallback route `/return-to-app` that redirects to `/app/continue`, to make sure that, users are properly returned
+  back to the app after authentication.
+- Fixed an issue with windows profiles generations for both operating systems (10 & 11)
+- Update generatePfx script for Windows 10 profiles (Path for ca.pem updated and validators for files access and
+  permissions)
+
+# Release V1.10.1
+
+- New dedicated SAML config for username identifiers (`userExternalAuths`)
+- Fixed SAML integration on APIs (broke after the dashboard integration)
+- Fixed SAML account deletion (same root cause)
+- Added fallback when `pgp_public_key` isn't configured
+- Validators now block admins from deleting their own account via the landing page widget
+
 # Release V1.10.0
 
 - Installation Widget implementation (For first time project setup / for later use on the admin page configuration).

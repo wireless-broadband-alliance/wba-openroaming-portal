@@ -198,3 +198,4 @@ invalidPhoneNumber: 'Número de telefone inválido. Por favor, insira um número
 phoneNumberRequired: 'O número de telefone é obrigatório.'
 replyCodeTotp: 'Por favor, aguarde %remainingTime% segundos antes de tentar novamente.'
 tooManyAttempts: "Demasiadas tentativas. Tente novamente em %seconds% segundos."
+redirectingToApp: 'Redirecionado para a aplicação.'
