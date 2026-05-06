@@ -587,7 +587,6 @@ class ProfileController extends AbstractController
 
             $radiusUserRepository->save($radiusUser, true);
             $radiusProfileRepository->save($radiusProfile, true);
-
         } else {
             // Active profile exists — ensure radcheck entry is in sync
             $radiusUser = $radiusUserRepository->findOneBy([
