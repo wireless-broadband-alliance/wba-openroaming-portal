@@ -141,23 +141,19 @@ class AssetLinksController extends AbstractController
         // Check if session exists
         if (!$appReturn) {
             throw $this->createAccessDeniedException(
-                $this->translator->trans(
-                    'access_denied_no_session',
-                    [],
-                    'controllers'
-                )
+                $this->translator->trans('access_denied_no_session', [], 'controllers')
             );
         }
 
         // Check if RETURN_APPS_ENABLED is true
-        $returnAppsEnabled = $data[SettingName::RETURN_APPS_ENABLED->value]['value'] ?? OperationMode::OFF->value;
+        $returnAppsEnabledSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::RETURN_APPS_ENABLED->value
+        ]);
+        $returnAppsEnabled = $returnAppsEnabledSetting?->getValue() ?? OperationMode::OFF->value;
+
         if ($returnAppsEnabled !== OperationMode::ON->value) {
             throw $this->createAccessDeniedException(
-                $this->translator->trans(
-                    'access_denied_feature_disabled',
-                    [],
-                    'controllers'
-                )
+                $this->translator->trans('access_denied_feature_disabled', [], 'controllers')
             );
         }
 
@@ -166,18 +162,11 @@ class AssetLinksController extends AbstractController
         $ttl = $appReturn['ttl'] ?? 0;
         if ((time() - $timestamp) > $ttl) {
             throw $this->createAccessDeniedException(
-                $this->translator->trans(
-                    'access_denied_session_expired',
-                    [],
-                    'controllers'
-                )
+                $this->translator->trans('access_denied_session_expired', [], 'controllers')
             );
         }
 
-        $this->addFlash(
-            'success',
-            $this->translator->trans('redirectingToApp', [], 'controllers')
-        );
+        $this->addFlash('success', $this->translator->trans('redirectingToApp', [], 'controllers'));
 
         return $this->redirectToRoute('app_api_landing');
     }
