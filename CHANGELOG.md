@@ -4,6 +4,9 @@
 
 - New fallback route `/return-to-app` that redirects to `/app/continue`, to make sure that, users are properly returned
   back to the app after authentication.
+- Fixed an issue with windows profiles generations for both operating systems (10 & 11)
+- Update generatePfx script for Windows 10 profiles (Path for ca.pem updated and validators for files access and
+  permissions)
 
 # Release V1.10.1
 
