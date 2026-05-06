@@ -415,6 +415,24 @@ class ProfileController extends AbstractController
             $this->settingRepository->findOneBy(['name' => SettingName::DISPLAY_NAME->value])->getValue(),
         ], $profile);
 
+        // Detect key type and set correct SignatureMethod in the XML template.
+        // template_win11.xml hardcodes ecdsa-sha256, but the server may have an RSA key
+        // (e.g. Let's Encrypt R12 issuer) which requires rsa-sha256 instead.
+        $privkeyContents = file_get_contents('/var/www/openroaming/signing-keys/privkey.pem');
+        if ($privkeyContents !== false) {
+            $keyInfo = openssl_pkey_get_private($privkeyContents);
+            if ($keyInfo !== false) {
+                $details = openssl_pkey_get_details($keyInfo);
+                if ($details && $details['type'] === OPENSSL_KEYTYPE_RSA) {
+                    $profile = str_replace(
+                        'http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256',
+                        'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
+                        $profile
+                    );
+                }
+            }
+        }
+
         $randomFactorIdentifier = bin2hex(random_bytes(16));
 
         // Both Win10 and Win11 require signing — Win10 uses EV/RSA, Win11 uses LE/ECDSA

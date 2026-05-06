@@ -34,13 +34,15 @@ if ! openssl pkey -in ../signing-keys/privkey.pem -noout 2>/dev/null; then
 fi
 
 # Create the PFX file
-cat ../signing-keys/cert.pem ../signing-keys/ca/ca.pem \
- | openssl pkcs12 -export \
-     -in ../signing-keys/cert.pem \
-     -certfile ../signing-keys/ca/ca.pem \
-     -inkey ../signing-keys/privkey.pem \
-     -password "pass:" \
-     -out ../signing-keys/windowsKey.pfx
+openssl pkcs12 -export \
+  -in ../signing-keys/cert.pem \
+  -certfile ../signing-keys/ca/ca.pem \
+  -inkey ../signing-keys/privkey.pem \
+  -password "pass:" \
+  -keypbe AES-256-CBC \
+  -certpbe AES-256-CBC \
+  -macalg SHA256 \
+  -out ../signing-keys/windowsKey.pfx
 
 # Check if the PFX file was created successfully
 if [ ! -f ../signing-keys/windowsKey.pfx ]; then
