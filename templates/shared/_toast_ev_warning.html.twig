@@ -1,0 +1,29 @@
+<div
+        {{ stimulus_controller('toast') }}
+        {{ stimulus_target('toast', 'toast') }}
+>
+    <div class="toast-warning-dashboard">
+        <twig:ux:icon name="wba:info" class="w-5 h-5 inline mr-3 fill-current shrink-0" />
+
+        <span class="font-medium flex-1">
+            {{ 'freeradius_is_not_ev_cert_warning'|trans({}, 'dashboard') }}
+        </span>
+
+        <div class="flex items-center gap-2 ml-3">
+            {# Action button — takes user to the validation page #}
+            <a href="{{ path('admin_dashboard_settings_certs_management') }}"
+               class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg
+          text-xs font-semibold
+          bg-white text-gray-700 border border-gray-200
+          hover:bg-gray-50 transition shrink-0">
+                <twig:ux:icon name="wba:shield-check" class="w-3.5 h-3.5" />
+                <span>{{ 'evWarningValidateNow'|trans({}, 'dashboard') }}</span>
+            </a>
+
+            {# Close button #}
+            <button {{ stimulus_action('toast', 'close') }}>
+                <twig:ux:icon name="wba:cross-circle-rounded" class="w-5 h-auto fill-current" />
+            </button>
+        </div>
+    </div>
+</div>

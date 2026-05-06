@@ -31,9 +31,9 @@ class CertificateFreeradiusUploadManualDTO
     #[Assert\File(
         maxSize: '5M',
         mimeTypes: [
-          'application/x-pem-file',
-          'application/octet-stream',
-          'text/plain',
+            'application/x-pem-file',
+            'application/octet-stream',
+            'text/plain',
         ],
         notFoundMessage: 'nullCert',
         mimeTypesMessage: 'invalidFileTypeCert'
@@ -46,9 +46,9 @@ class CertificateFreeradiusUploadManualDTO
     #[Assert\File(
         maxSize: '5M',
         mimeTypes: [
-          'application/x-pem-file',
-          'application/octet-stream',
-          'text/plain',
+            'application/x-pem-file',
+            'application/octet-stream',
+            'text/plain',
         ],
         notFoundMessage: 'nullChain',
         mimeTypesMessage: 'invalidFileTypeChain'
@@ -60,9 +60,9 @@ class CertificateFreeradiusUploadManualDTO
     #[Assert\File(
         maxSize: '5M',
         mimeTypes: [
-          'application/x-pem-file',
-          'application/octet-stream',
-          'text/plain',
+            'application/x-pem-file',
+            'application/octet-stream',
+            'text/plain',
         ],
         notFoundMessage: 'nullFullChain',
         mimeTypesMessage: 'invalidFileTypeFullChain'
@@ -75,9 +75,9 @@ class CertificateFreeradiusUploadManualDTO
     #[Assert\File(
         maxSize: '5M',
         mimeTypes: [
-          'application/x-pem-file',
-          'application/octet-stream',
-          'text/plain',
+            'application/x-pem-file',
+            'application/octet-stream',
+            'text/plain',
         ],
         notFoundMessage: 'nullKey',
         mimeTypesMessage: 'invalidFileTypeKey'

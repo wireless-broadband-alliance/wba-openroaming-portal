@@ -5,5 +5,13 @@ reinstallPlatform: 'Reinstall Platform'
 lastCompletedCertificates: 'Last execution at: '
 confirmReinstall: "Are you sure you want to reinstall the platform certificates? This process will overwrite its current configuration."
 expiration:
-    warning: "Your certificate will expire soon!"
-    expired: "Your certificate has expired!"
+  warning: "Your certificate will expire soon!"
+  expired: "Your certificate has expired!"
+validateExistingCertificates: "Validate Existing Certificates"
+confirmVerifyInstalled: "This will validate the certificates currently installed on disk. Continue?"
+certValidationSuccess: "All certificates are valid."
+certValidationSuccessDetail: "The installed certificates passed all validation checks."
+certValidationFailed: "Certificate validation failed."
+certValidationSuccessNotEv: "Certificates are valid but not EV certified."
+certValidationSuccessNotEvDetail: "The current FreeRADIUS certificates are not valid EV certificates. Downloading OpenRoaming Windows 10 profiles is disabled because it is not supported."
+certValidationFreeradiusCheck: "Please, make sure that the FreeRADIUS resolver has the exact same certificate files installed and in sync."
