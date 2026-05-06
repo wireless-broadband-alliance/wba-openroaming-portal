@@ -553,18 +553,21 @@ class ProfileController extends AbstractController
 
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
 
-        if (!$radiusProfile) {
-            $radiusProfile = new UserRadiusProfile();
+        $androidLimit = 32;
+        $realmSize = strlen($realmName) + 1;
 
-            $androidLimit = 32;
-            $realmSize = strlen($realmName) + 1;
+        if (!$radiusProfile) {
+            // No active profile exists — create a fresh one (handles new users AND expired/revoked users)
             $username = $this->generateToken($androidLimit - $realmSize) . "@" . $realmName;
             $token = $this->generateToken($androidLimit - $realmSize);
+
+            $radiusProfile = new UserRadiusProfile();
             $radiusProfile->setUser($user);
             $radiusProfile->setRadiusToken($token);
             $radiusProfile->setRadiusUser($username);
             $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE->value);
             $radiusProfile->setIssuedAt(new DateTime());
+
             // Get the expiration date from the service
             $expirationData = $this->expirationProfileService->calculateExpiration(
                 $userExternalAuth->getProvider(),
@@ -581,28 +584,24 @@ class ProfileController extends AbstractController
             $radiusUser->setAttribute('Cleartext-Password');
             $radiusUser->setOp(':=');
             $radiusUser->setValue($token);
+
             $radiusUserRepository->save($radiusUser, true);
             $radiusProfileRepository->save($radiusProfile, true);
+
         } else {
+            // Active profile exists — ensure radcheck entry is in sync
             $radiusUser = $radiusUserRepository->findOneBy([
                 'username' => $radiusProfile->getRadiusUser(),
             ]);
-            if (!$radiusUser) {
-                /* In cases where we have don't have the profile with a $radiusUser.
-                This logic is also required to not break the portal when the account profiles
-                have been revoked previously */
-                $androidLimit = 32;
-                $realmSize = strlen($realmName) + 1;
-                $username = $this->generateToken($androidLimit - $realmSize) . "@" . $realmName;
-                $token = $this->generateToken($androidLimit - $realmSize);
 
+            if (!$radiusUser) {
+                // radcheck row was manually removed — restore it from the active profile
                 $radiusUser = new RadiusUser();
-                $radiusUser->setUsername($username);
+                $radiusUser->setUsername($radiusProfile->getRadiusUser());
                 $radiusUser->setAttribute('Cleartext-Password');
                 $radiusUser->setOp(':=');
-                $radiusUser->setValue($token);
+                $radiusUser->setValue($radiusProfile->getRadiusToken());
                 $radiusUserRepository->save($radiusUser, true);
-                $radiusProfileRepository->save($radiusProfile, true);
             }
         }
 
