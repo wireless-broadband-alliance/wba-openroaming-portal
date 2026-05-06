@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use App\DTO\CertificateFreeradiusUploadManualDTO;
+use App\DTO\CertificateFreeradiusDiskValidationDTO;
 use App\Entity\CertificateSetupProcess;
 use App\Enum\CertificateFileName;
 use App\Repository\CertificateSetupProcessRepository;
@@ -21,14 +21,12 @@ class ExistingCertificatesValidatorService
         'cert' => CertificateFileName::CERT_PEM_FILE,
         'chain' => CertificateFileName::CHAIN_PEM_FILE,
         'fullChain' => CertificateFileName::FULL_CHAIN_PEM_FILE,
-        'privKey' => CertificateFileName::PRIVATE_KEY_PEM_FILE,
     ];
 
     private const array LABEL_MAP = [
         'cert' => CertificateFileName::CERT_PEM,
         'chain' => CertificateFileName::CHAIN_PEM,
         'fullChain' => CertificateFileName::FULL_CHAIN_PEM,
-        'privKey' => CertificateFileName::PRIVATE_KEY_PEM,
     ];
 
     public function __construct(
@@ -57,7 +55,7 @@ class ExistingCertificatesValidatorService
         }
 
         // Step 2 — wrap files in UploadedFile
-        $dto = new CertificateFreeradiusUploadManualDTO();
+        $dto = new CertificateFreeradiusDiskValidationDTO();
         foreach (self::REQUIRED_FILES as $field => $enumCase) {
             $dto->$field = new UploadedFile(
                 path: self::SIGNING_KEYS_PATH . '/' . $enumCase->value,
@@ -88,7 +86,7 @@ class ExistingCertificatesValidatorService
         ];
     }
 
-    private function syncEvStatus(CertificateFreeradiusUploadManualDTO $dto): void
+    private function syncEvStatus(CertificateFreeradiusDiskValidationDTO $dto): void
     {
         $process = $this->certificateSetupProcessRepository->getLatestCompletedProcess();
 
