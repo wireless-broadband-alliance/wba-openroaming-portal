@@ -1,5 +1,16 @@
 # Changelog
 
+# Release V1.10.3
+
+- Fixed EV certificate detection in the manual upload validator
+- Added "Verify Installed Certificates" button to the Certificates Management page that validates certificates currently
+  installed on disk without requiring a re-upload
+- Validation runs all existing certificate constraints (PEM format, RSA, certificate chain, EV detection) against the
+  files present in `signing-keys/`
+- Validation results are displayed inline on the page with three possible states: success (EV), success (non-EV
+  warning), or failure with a per-certificate error list
+- Both success states include a reminder to verify that the FreeRADIUS resolver has the same certificate files in sync
+
 # Release V1.10.2
 
 - New fallback route `/return-to-app` that redirects to `/app/continue`, to make sure that, users are properly returned

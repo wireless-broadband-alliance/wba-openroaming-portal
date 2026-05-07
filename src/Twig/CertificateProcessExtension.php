@@ -22,6 +22,7 @@ class CertificateProcessExtension extends AbstractExtension
     {
         return [
             new TwigFunction('isCertificateAborted', $this->isCertificateAborted(...)),
+            new TwigFunction('isCertificateProcessBlocked', $this->isCertificateProcessBlocked(...)),
         ];
     }
 
@@ -37,5 +38,23 @@ class CertificateProcessExtension extends AbstractExtension
         }
 
         return $currentProcess->getStatus() === ProcessStatusType::ABORTED;
+    }
+
+    /**
+     * Check if the current certificate process is aborted OR invalid
+     * Use this to block profile downloads
+     */
+    public function isCertificateProcessBlocked(): bool
+    {
+        $currentProcess = $this->certificateProcessCheckerService->getCurrentProcess();
+
+        if (!$currentProcess instanceof CertificateSetupProcess) {
+            return false;
+        }
+
+        return in_array($currentProcess->getStatus(), [
+            ProcessStatusType::ABORTED,
+            ProcessStatusType::INVALID,
+        ], strict: true);
     }
 }
