@@ -18,25 +18,30 @@ class CertificateSetupProcessRepository extends ServiceEntityRepository
     }
 
     /**
-     * Get the latest process that is either in progress or aborted.
+     * Get the latest process regardless of status
      */
     public function getLatestProcess(): ?CertificateSetupProcess
     {
         return $this->createQueryBuilder('p')
-            ->orderBy('p.updatedAt', 'DESC')
+            ->orderBy('p.id', 'DESC') // id is always reliable, updatedAt can be equal
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
     }
 
+    /**
+     * Get the latest completed or invalid process
+     * Includes INVALID so the validator service can still find and update it
+     */
     public function getLatestCompletedProcess(): ?CertificateSetupProcess
     {
         return $this->createQueryBuilder('p')
             ->where('p.status IN (:statuses)')
             ->setParameter('statuses', [
                 ProcessStatusType::COMPLETED,
+                ProcessStatusType::INVALID,
             ])
-            ->orderBy('p.updatedAt', 'DESC')
+            ->orderBy('p.id', 'DESC')
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();

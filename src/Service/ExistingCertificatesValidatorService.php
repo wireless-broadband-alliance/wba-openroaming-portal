@@ -7,6 +7,7 @@ namespace App\Service;
 use App\DTO\CertificateFreeradiusDiskValidationDTO;
 use App\Entity\CertificateSetupProcess;
 use App\Enum\CertificateFileName;
+use App\Enum\ProcessStatusType;
 use App\Repository\CertificateSetupProcessRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
@@ -48,6 +49,7 @@ class ExistingCertificatesValidatorService
         }
 
         if ($missing !== []) {
+            $this->markProcessAsInvalid();
             return [
                 'errors' => [sprintf('Missing files: %s', implode(', ', $missing))],
                 'isEv' => false,
@@ -76,9 +78,14 @@ class ExistingCertificatesValidatorService
             $errors[] = sprintf('%s - %s', $certLabel, $violation->getMessage());
         }
 
-        // Step 4 — sync EV status
+        // Step 4 — sync EV status or mark invalid
         $isEv = $dto->notices === [];
-        $this->syncEvStatus($dto);
+
+        if ($errors !== []) {
+            $this->markProcessAsInvalid();
+        } else {
+            $this->syncEvStatus($dto, $isEv);
+        }
 
         return [
             'errors' => $errors,
@@ -86,9 +93,28 @@ class ExistingCertificatesValidatorService
         ];
     }
 
-    private function syncEvStatus(CertificateFreeradiusDiskValidationDTO $dto): void
+    private function markProcessAsInvalid(): void
     {
         $process = $this->certificateSetupProcessRepository->getLatestCompletedProcess();
+
+        if (!$process instanceof CertificateSetupProcess) {
+            return;
+        }
+
+        if ($process->getStatus() === ProcessStatusType::INVALID) {
+            return; // already marked, skip flush
+        }
+
+        $process->setStatus(ProcessStatusType::INVALID);
+        $process->setUpdatedAt(new DateTimeImmutable());
+
+        $this->entityManager->persist($process);
+        $this->entityManager->flush();
+    }
+
+    private function syncEvStatus(CertificateFreeradiusDiskValidationDTO $dto): void
+    {
+        $process = $this->certificateSetupProcessRepository->getLatestProcess();
 
         if (!$process instanceof CertificateSetupProcess) {
             return;
@@ -97,14 +123,25 @@ class ExistingCertificatesValidatorService
         // WarnIfNotEvCertificate pushes a notice when cert is NOT EV
         // so if notices is empty = cert IS EV, if notices present = cert is NOT EV
         $isEv = $dto->notices === [];
+        $needsFlush = false;
 
-        if ($process->isFreeradiusCertEV() === $isEv) {
-            return; // nothing changed, skip the flush
+        // Restore to COMPLETED if it was previously marked as INVALID
+        if ($process->getStatus() === ProcessStatusType::INVALID) {
+            $process->setStatus(ProcessStatusType::COMPLETED);
+            $needsFlush = true;
         }
 
-        $process->setIsFreeradiusCertEV($isEv);
-        $process->setUpdatedAt(new DateTimeImmutable());
+        // Sync EV status if it changed
+        if ($process->isFreeradiusCertEV() !== $isEv) {
+            $process->setIsFreeradiusCertEV($isEv);
+            $needsFlush = true;
+        }
 
+        if (!$needsFlush) {
+            return;
+        }
+
+        $process->setUpdatedAt(new DateTimeImmutable());
         $this->entityManager->persist($process);
         $this->entityManager->flush();
     }

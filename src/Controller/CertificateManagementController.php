@@ -68,7 +68,7 @@ class CertificateManagementController extends AbstractController
     public function settingsCertificatesManagement(Request $request): Response
     {
         $lastCompletedInstallation = $this->installationProgressRepository->getLastCompleted();
-        $lastCompletedCertificate = $this->certificateSetupProcessRepository->getLatestCompletedProcess();
+        $lastCompletedCertificate = $this->certificateSetupProcessRepository->getLatestProcess();
         if ($lastCompletedInstallation instanceof InstallationProgress) {
             $installationDate = $lastCompletedInstallation->getUpdatedAt();
         }
