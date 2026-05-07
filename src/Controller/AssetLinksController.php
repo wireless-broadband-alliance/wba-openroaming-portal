@@ -110,12 +110,10 @@ class AssetLinksController extends AbstractController
 
         $appIds = $appIds ? [$appIds] : [];
 
-        // Add the corresponding for the app redirection
-        $path = ltrim($this->router->generate('app_return_to_app'), '/');
         $components = [
             [
-                '/' => '/' . $path,
-                'comment' => sprintf('Matches any URL whose path starts with %s', $path),
+                '/' => '/return-to-app',
+                'comment' => 'Matches any URL whose path starts with /return-to-app',
             ],
         ];
 
