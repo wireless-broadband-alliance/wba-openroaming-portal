@@ -1,36 +1,94 @@
-{% set bgUrl = data.WALLPAPER_IMAGE.value != '/resources/images/wallpaper.png'
-    ? data.WALLPAPER_IMAGE.value
-    : '/resources/images/background.png' %}
-
 {% extends 'base.html.twig' %}
 
 {% block title %}
-    {{ data.PAGE_TITLE.value }} - {{ status_code }} {{ status_title }}
+    {{ data.PAGE_TITLE.value }}{% if app.request.pathInfo != '/return-to-app' %} - {{ status_code }} {{ status_title }}{% endif %}
 {% endblock %}
 
 {% block body %}
-    <div class="relative min-h-screen px-4 sm:px-6 lg:px-8 bg-center bg-cover"
-         style="background-image: url('{{ bgUrl }}');">
-        <div class="relative w-full h-full p-8 xl:pl-[130px] xl:pr-[150px] xl:pt-[210px] bg-center bg-cover z-10">
+    {% set bgUrl = data.WALLPAPER_IMAGE.value != '/resources/images/wallpaper.png'
+        ? data.WALLPAPER_IMAGE.value
+        : '/resources/images/background.png' %}
 
-            <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-10 text-center mx-auto">
-                <div class="text-left">
-                    {% block language %}
-                        {{ include('shared/_select_language.html.twig', {
-                            currentLocale: app.request.locale,
-                            routeName: 'app_change_language',
-                            warningMessage: false,
-                        }) }}
-                    {% endblock %}
+    <div class="relative min-h-screen bg-center bg-cover flex items-center justify-center px-4 sm:px-6 lg:px-8"
+         style="background-image: url('{{ bgUrl }}');">
+
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-10 text-center" style="color: #3F474D;">
+
+            {# Language selector — always on top #}
+            <div class="text-left mb-6">
+                {% block language %}
+                    {{ include('shared/_select_language.html.twig', {
+                        currentLocale: app.request.locale,
+                        routeName: 'app_change_language',
+                        warningMessage: false,
+                    }) }}
+                {% endblock %}
+            </div>
+
+            {% if app.request.pathInfo == '/return-to-app' %}
+
+                {# Spinner #}
+                <div style="position:relative; display:flex; align-items:center; justify-content:center; width:120px; height:120px; margin: 0 auto 1.75rem;">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:120px;height:120px;">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="#F3F4F6" stroke-width="2" />
+                        <circle
+                                cx="50" cy="50" r="45"
+                                fill="none"
+                                stroke="#7DB928"
+                                stroke-width="4"
+                                stroke-linecap="round"
+                                stroke-dasharray="1 212"
+                                stroke-dashoffset="0"
+                        >
+                            <animate
+                                    attributeName="stroke-dasharray"
+                                    values="1 212; 70 212; 1 212"
+                                    keyTimes="0; 0.5; 1"
+                                    dur="1.6s"
+                                    calcMode="spline"
+                                    keySplines="0.4 0 0.2 1; 0.4 0 0.2 1"
+                                    repeatCount="indefinite"
+                            />
+                            <animate
+                                    attributeName="stroke-dashoffset"
+                                    values="0; -106; -212"
+                                    keyTimes="0; 0.5; 1"
+                                    dur="1.6s"
+                                    calcMode="spline"
+                                    keySplines="0.4 0 0.2 1; 0.4 0 0.2 1"
+                                    repeatCount="indefinite"
+                            />
+                        </circle>
+                    </svg>
+                    <img
+                            src="{{ asset('resources/logos/openroaming-loading-logo.svg') }}"
+                            alt="Loading"
+                            style="position:absolute; width:60px; height:60px; object-fit:contain;"
+                    />
                 </div>
-                {# Icon on top, bigger and centered #}
+
+                <p style="font-size:1.25rem; font-weight:700; margin-bottom:0.75rem;">
+                    {{ 'openingApp'|trans({}, 'error') }}
+                    <span style="display:inline-flex; margin-left:2px;">
+                        <span style="animation: dotPulse 1.2s ease-in-out infinite; animation-delay:0s; opacity:0.3;">.</span>
+                        <span style="animation: dotPulse 1.2s ease-in-out infinite; animation-delay:0.3s; opacity:0.3;">.</span>
+                        <span style="animation: dotPulse 1.2s ease-in-out infinite; animation-delay:0.6s; opacity:0.3;">.</span>
+                    </span>
+                </p>
+
+                <p style="font-size:0.9rem; color:#6b7280; line-height:1.6; margin-bottom:2rem;">
+                    {{ 'finishSetupExplanation'|trans({}, 'error') }}
+                </p>
+
+            {% else %}
+
+                {# Error icon #}
                 <div class="flex justify-center mb-4">
                     <div class="flex items-center justify-center w-48 h-24 rounded-full">
-                        <twig:ux:icon name="wba:info-error" class="text-primary fill-current"/>
+                        <twig:ux:icon name="wba:info-error" class="text-primary fill-current" />
                     </div>
                 </div>
 
-                {# Title with custom colour #}
                 <h1 class="text-3xl font-bold mb-4" style="color: #3F474D;">
                     {{ status_title }} {{ status_code }}
                 </h1>
@@ -44,8 +102,7 @@
                 </p>
 
                 <div class="flex justify-center mb-4">
-                    <a href="{{ path('app_landing') }}"
-                       class="my-6 w-[250px] btn-primary inline-block">
+                    <a href="{{ path('app_landing') }}" class="my-6 w-[250px] btn-primary inline-block">
                         {{ 'returnHomepage'|trans({}, 'error') }}
                     </a>
                 </div>
@@ -62,7 +119,9 @@
                         <img class="h-10 object-contain" src="{{ data.CUSTOMER_LOGO.value }}" alt="Logo">
                     </div>
                 {% endif %}
-            </div>
+
+            {% endif %}
+
         </div>
     </div>
 {% endblock %}

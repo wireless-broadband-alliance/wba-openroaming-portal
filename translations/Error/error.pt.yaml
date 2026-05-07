@@ -2,3 +2,5 @@ somethingWentWrong: 'Ups, parece que algo correu mal!'
 errorGenericMessage: "Por favor, informe-nos o que estava a fazer quando este erro ocorreu. <br> Vamos corrigir o problema o mais rapidamente possível.<br> Pedimos desculpa por qualquer inconveniente causado."
 returnHomepage: 'Voltar à página inicial'
 errorDetails: 'Detalhes do erro'
+openingApp: 'A abrir a aplicação'
+finishSetupExplanation: 'A aplicação deverá abrir automaticamente dentro de momentos. Se nada acontecer, por favor abra a aplicação manualmente.'
