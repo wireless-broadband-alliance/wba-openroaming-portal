@@ -1,7 +1,7 @@
 {
   "type": "project",
   "license": "Apache-2.0",
-  "version": "1.10.2",
+  "version": "1.10.3",
   "minimum-stability": "stable",
   "prefer-stable": true,
   "require": {

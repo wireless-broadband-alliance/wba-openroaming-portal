@@ -5,5 +5,13 @@ reinstallPlatform: 'Reinstalar Plataforma'
 lastCompletedCertificates: 'Última execução em: '
 confirmReinstall: "Tem a certeza que desejas reinstalar os certificados da plataforma? Este processo irá alterar a configuração atual."
 expiration:
-    warning: "O seu certificado vai expirar em breve!"
-    expired: "O seu certificado expirou!"
+  warning: "O seu certificado vai expirar em breve!"
+  expired: "O seu certificado expirou!"
+validateExistingCertificates: "Verificar Certificados Instalados"
+confirmVerifyInstalled: "Isto irá verificar os certificados atualmente instalados. Continuar?"
+certValidationSuccess: "Todos os certificados são válidos."
+certValidationSuccessDetail: "Os certificados instalados passaram em todas as verificações."
+certValidationFailed: "A validação dos certificados falhou."
+certValidationSuccessNotEv: "Certificados válidos mas sem certificação EV."
+certValidationSuccessNotEvDetail: "Os certificados FreeRADIUS atuais não são certificados EV válidos. O download de perfis OpenRoaming para Windows 10 está desativado porque não é suportado."
+certValidationFreeradiusCheck: "Certifique-se também de que o resolver FreeRADIUS tem exatamente os mesmos ficheiros de certificados instalados e sincronizados."

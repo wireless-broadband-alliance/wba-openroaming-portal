@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Twig;
 
 use App\Entity\CertificateSetupProcess;
+use App\Enum\ProcessStatusType;
 use App\Service\CertificateProcessCheckerService;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
@@ -21,6 +22,7 @@ class CertificateEvDetectorExtension extends AbstractExtension
     {
         return [
             new TwigFunction('isFreeradiusCertEV', $this->isFreeradiusCertEV(...)),
+            new TwigFunction('isCertificateProcessInvalid', $this->isCertificateProcessInvalid(...)),
         ];
     }
 
@@ -36,5 +38,19 @@ class CertificateEvDetectorExtension extends AbstractExtension
         }
 
         return $process->isFreeradiusCertEV();
+    }
+
+    /**
+     * Check if the latest certificate process has been marked as invalid
+     */
+    public function isCertificateProcessInvalid(): bool
+    {
+        $process = $this->certificateProcessCheckerService->getCurrentProcess();
+
+        if (!$process instanceof CertificateSetupProcess) {
+            return false;
+        }
+
+        return $process->getStatus() === ProcessStatusType::INVALID;
     }
 }

@@ -16,6 +16,7 @@ use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
 use App\Enum\SettingName;
 use App\Form\CertificateFreeradiusDomainType;
+use App\Form\SimpleSubmitFormType;
 use App\Form\VerifyPasswordType;
 use App\Repository\CertificateSetupProcessRepository;
 use App\Repository\InstallationProgressRepository;
@@ -24,6 +25,7 @@ use App\Service\CertificateFreeradiusInfoService;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateRadsecproxyInfoService;
 use App\Service\EventActions;
+use App\Service\ExistingCertificatesValidatorService;
 use App\Service\GetSettings;
 use App\Service\InstallationService;
 use App\Service\SettingsService;
@@ -54,6 +56,7 @@ class CertificateManagementController extends AbstractController
         private readonly CertificateRadsecproxyInfoService $certificateRadsecproxyInfoService,
         private readonly SettingsService $settingsService,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
+        private readonly ExistingCertificatesValidatorService $existingCertificatesValidatorService,
     ) {
     }
 
@@ -62,10 +65,10 @@ class CertificateManagementController extends AbstractController
      */
     #[Route('/dashboard/settings/certificatesManagement', name: 'admin_dashboard_settings_certs_management')]
     #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_READ)]
-    public function settingsCertificatesManagement(): Response
+    public function settingsCertificatesManagement(Request $request): Response
     {
         $lastCompletedInstallation = $this->installationProgressRepository->getLastCompleted();
-        $lastCompletedCertificate = $this->certificateSetupProcessRepository->getLatestCompletedProcess();
+        $lastCompletedCertificate = $this->certificateSetupProcessRepository->getLatestProcess();
         if ($lastCompletedInstallation instanceof InstallationProgress) {
             $installationDate = $lastCompletedInstallation->getUpdatedAt();
         }
@@ -78,12 +81,53 @@ class CertificateManagementController extends AbstractController
             $certificateSet = array_merge($certificateSetRadsecproxy, $certificateSetFreeradius);
         }
 
+        $validateForm = $this->createForm(SimpleSubmitFormType::class);
+        $validateForm->handleRequest($request);
+
+        if ($validateForm->isSubmitted() && $validateForm->isValid()) {
+            $result = $this->existingCertificatesValidatorService->validate();
+            $errors = $result['errors'];
+            $isEv = $result['isEv'];
+
+            /** @var User $currentUser */
+            $currentUser = $this->getUser();
+
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::CERTIFICATE_VALIDATION_RAN->value,
+                new DateTime(),
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'by' => $currentUser->getUuid(),
+                    'success' => empty($errors),
+                    'isEv' => $isEv,
+                    'errors' => $errors,
+                ]
+            );
+
+            return $this->render('dashboard/shared/settings_actions.html.twig', [
+                'data' => $this->getSettings->getSettings(),
+                'lastCompletedInstallation' => $installationDate ?? null,
+                'certificateSet' => $certificateSet ?? null,
+                'lastCompletedCertificates' => $certificateDate ?? null,
+                'validateForm' => $validateForm,
+                'certValidationErrors' => $errors,
+                'certValidationRan' => true,
+                'certIsEv' => $isEv,
+            ]);
+        }
+
         // Default render
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             'data' => $this->getSettings->getSettings(),
             'lastCompletedInstallation' => $installationDate ?? null,
             'certificateSet' => $certificateSet ?? null,
             'lastCompletedCertificates' => $certificateDate ?? null,
+            'validateForm' => $validateForm,
+            'certValidationErrors' => [],
+            'certValidationRan' => false,
+            'certIsEv' => null,
         ]);
     }
 

@@ -67,7 +67,12 @@ class ProfileController extends AbstractController
     public function profileAndroid(
         Request $request
     ): Response {
-        if ($this->certificateProcessExtension->isCertificateAborted()) {
+        if ($this->certificateProcessExtension->isCertificateProcessBlocked()) {
+            $this->addFlash(
+                'error',
+                $this->translator->trans('certificateProcessBlocked', [], 'controllers')
+            );
+
             return $this->redirectToRoute('app_landing');
         }
 
@@ -185,7 +190,12 @@ class ProfileController extends AbstractController
     public function profileIos(
         Request $request
     ): Response {
-        if ($this->certificateProcessExtension->isCertificateAborted()) {
+        if ($this->certificateProcessExtension->isCertificateProcessBlocked()) {
+            $this->addFlash(
+                'error',
+                $this->translator->trans('certificateProcessBlocked', [], 'controllers')
+            );
+
             return $this->redirectToRoute('app_landing');
         }
 
@@ -345,7 +355,12 @@ class ProfileController extends AbstractController
     public function profileWindows(
         Request $request
     ): Response {
-        if ($this->certificateProcessExtension->isCertificateAborted()) {
+        if ($this->certificateProcessExtension->isCertificateProcessBlocked()) {
+            $this->addFlash(
+                'error',
+                $this->translator->trans('certificateProcessBlocked', [], 'controllers')
+            );
+
             return $this->redirectToRoute('app_landing');
         }
 

@@ -75,7 +75,7 @@ notValidIpOrCidr: 'Forneça um endereço IP válido ou intervalo CIDR (por exemp
 invalidFormat: 'Formato Inválido'
 invalidCertificateType: 'O certificado não é do tipo RSA. Apenas certificados RSA são suportados.'
 notValidWbaChainRadsec: 'O certificado não é assinado pela root confiável da WBA.'
-invalidCertificateChain: "O certificado carregado não pertence à chain.pem fornecida."
+invalidCertificateChain: "O certificado não pertence à chain fornecida."
 incompleteChainMessage: 'A chain de certificados não chega a uma autoridade de confiança.'
 untrustedRootMessage: 'O certificado raiz não é confiável. Podem faltar certificados intermédios ou estar cross-signed.'
 invalidDomainPattern: 'O domínio não é válido. Utilize um domínio exato (exemplo.com), um subdomínio curinga (*.exemplo.com) ou * para todos os domínios.'

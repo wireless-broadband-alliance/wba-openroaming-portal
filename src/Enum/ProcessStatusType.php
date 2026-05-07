@@ -9,4 +9,5 @@ enum ProcessStatusType: int
     case IN_PROGRESS = 0;
     case COMPLETED = 1;
     case ABORTED  = 2;
+    case INVALID = 3;
 }
