@@ -84,7 +84,7 @@ class ExistingCertificatesValidatorService
         if ($errors !== []) {
             $this->markProcessAsInvalid();
         } else {
-            $this->syncEvStatus($dto, $isEv);
+            $this->syncEvStatus($dto);
         }
 
         return [
