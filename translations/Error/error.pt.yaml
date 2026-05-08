@@ -3,4 +3,4 @@ errorGenericMessage: "Por favor, informe-nos o que estava a fazer quando este er
 returnHomepage: 'Voltar à página inicial'
 errorDetails: 'Detalhes do erro'
 openingApp: 'A abrir a aplicação'
-finishSetupExplanation: 'A aplicação deverá abrir automaticamente dentro de momentos. Se nada acontecer, por favor abra a aplicação manualmente.'
+finishSetupExplanation: 'Conclua o processo de registo na aplicação. Se necessário, toque em "Abrir" acima para voltar à aplicação e inicie sessão com as suas credenciais. Se nada acontecer, feche esta janela manualmente e abra a aplicação novamente.'

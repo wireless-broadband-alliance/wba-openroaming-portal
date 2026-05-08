@@ -3,4 +3,4 @@ errorGenericMessage: "Please let us know what you were doing when this error occ
 returnHomepage: 'Return to the Homepage'
 errorDetails: 'Error Details'
 openingApp: 'Opening the app'
-finishSetupExplanation: 'The app should open automatically in a moment. If nothing happens, please open the app manually.'
+finishSetupExplanation: 'Finish the sign-up process in the app. If required, tap "Open" above to return to the app and log in with your credentials. If nothing happens, manually close this window and reopen the app.'
