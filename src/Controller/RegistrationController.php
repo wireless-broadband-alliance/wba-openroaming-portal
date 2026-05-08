@@ -134,7 +134,7 @@ class RegistrationController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $email = (string) $form->get('email')->getData();
-            
+
             if ($this->getParameter('app.block_email_aliases') && str_contains(explode('@', $email)[0], '+')) {
                 $this->addFlash(
                     'error',
