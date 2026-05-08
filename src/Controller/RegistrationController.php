@@ -138,7 +138,11 @@ class RegistrationController extends AbstractController
             if ($this->getParameter('app.block_email_aliases') && str_contains(explode('@', $email)[0], '+')) {
                 $this->addFlash(
                     'error',
-                    'Email aliases are not allowed for registration.'
+                    $this->translator->trans(
+                        'emailAliasesNotAllowed',
+                        [],
+                        'controllers'
+                    )
                 );
                 return $this->redirectToRoute('app_register');
             }

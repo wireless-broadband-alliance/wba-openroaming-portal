@@ -152,7 +152,8 @@ class RegistrationController extends AbstractController
             )->toResponse();
         }
 
-        if ($this->getParameter('app.block_email_aliases') && str_contains(explode('@', (string) $data['email'])[0], '+')) {
+        $blockAliases = $this->getParameter('app.block_email_aliases');
+        if ($blockAliases && str_contains(explode('@', (string) $data['email'])[0], '+')) {
             return new BaseResponse(
                 400,
                 null,
