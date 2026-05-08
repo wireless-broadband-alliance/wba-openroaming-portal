@@ -1,5 +1,9 @@
 # Changelog
 
+# Release V1.10.4
+
+- Prevent usage of email alias
+
 # Release V1.10.3
 
 - Fixed EV certificate detection in the manual upload validator

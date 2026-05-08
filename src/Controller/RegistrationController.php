@@ -133,7 +133,21 @@ class RegistrationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($this->userRepository->findOneBy(['uuid' => $form->get('email')->getData()])) {
+            $email = (string) $form->get('email')->getData();
+
+            if ($this->getParameter('app.block_email_aliases') && str_contains(explode('@', $email)[0], '+')) {
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans(
+                        'emailAliasesNotAllowed',
+                        [],
+                        'controllers'
+                    )
+                );
+                return $this->redirectToRoute('app_register');
+            }
+
+            if ($this->userRepository->findOneBy(['uuid' => $email])) {
                 $this->addFlash(
                     'error',
                     $this->translator->trans(

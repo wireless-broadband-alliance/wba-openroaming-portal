@@ -39,6 +39,8 @@ parameters:
     app.jwt_passphrase: '%env(JWT_PASSPHRASE)%'
     # Default Project URI
     app.default_uri: '%env(string:DEFAULT_URI)%'
+    app.block_email_aliases: '%env(bool:default:block_email_aliases_default:BLOCK_EMAIL_ALIASES)%'
+    block_email_aliases_default: true
 services:
     App\EventListener\CheckDefaultUriListener:
         tags:

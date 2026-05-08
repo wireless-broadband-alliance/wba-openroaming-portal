@@ -200,3 +200,4 @@ replyCodeTotp: 'Por favor, aguarde %remainingTime% segundos antes de tentar nova
 tooManyAttempts: "Demasiadas tentativas. Tente novamente em %seconds% segundos."
 redirectingToApp: 'Redirecionado para a aplicação.'
 certificateProcessBlocked: "Ocorreu um erro de configuração. Por favor contacte a nossa equipa de suporte."
+emailAliasesNotAllowed: 'Não é permitido o uso de aliases de email para o registo.'
