@@ -2,5 +2,5 @@ somethingWentWrong: 'Ups, parece que algo correu mal!'
 errorGenericMessage: "Por favor, informe-nos o que estava a fazer quando este erro ocorreu. <br> Vamos corrigir o problema o mais rapidamente possível.<br> Pedimos desculpa por qualquer inconveniente causado."
 returnHomepage: 'Voltar à página inicial'
 errorDetails: 'Detalhes do erro'
-openingApp: 'A abrir a aplicação'
+openingApp: 'Returnando para a aplicação'
 finishSetupExplanation: 'Conclua o processo de registo na aplicação. Se necessário, toque em "Abrir" acima para voltar à aplicação e inicie sessão com as suas credenciais. Se nada acontecer, feche esta janela manualmente e abra a aplicação novamente.'

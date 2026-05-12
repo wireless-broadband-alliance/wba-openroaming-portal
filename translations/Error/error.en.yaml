@@ -2,5 +2,5 @@ somethingWentWrong: 'Oops, it looks like something went wrong!'
 errorGenericMessage: "Please let us know what you were doing when this error occurred.<br> We'll fix it as soon as possible. Our apologies for any inconvenience caused."
 returnHomepage: 'Return to the Homepage'
 errorDetails: 'Error Details'
-openingApp: 'Opening the app'
+openingApp: 'Return to the app'
 finishSetupExplanation: 'Finish the sign-up process in the app. If required, tap "Open" above to return to the app and log in with your credentials. If nothing happens, manually close this window and reopen the app.'
