@@ -1,5 +1,9 @@
 # Changelog
 
+# Release V1.10.5
+
+- Updated `openingApp` label for return apps landing page
+
 # Release V1.10.4
 
 - Prevent usage of email alias
