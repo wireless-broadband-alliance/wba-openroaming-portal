@@ -152,6 +152,15 @@ class RegistrationController extends AbstractController
             )->toResponse();
         }
 
+        $blockAliases = $this->getParameter('app.block_email_aliases');
+        if ($blockAliases && str_contains(explode('@', (string) $data['email'])[0], '+')) {
+            return new BaseResponse(
+                400,
+                null,
+                'Email aliases are not allowed for registration.'
+            )->toResponse();
+        }
+
         $user = new User();
         $user->setUuid($data['email']);
         $user->setEmail($data['email']);
