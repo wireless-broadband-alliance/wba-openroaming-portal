@@ -1,7 +1,7 @@
 ---
 services:
   web:
-    image: ghcr.io/wireless-broadband-alliance/wba-openroaming-portal:1.10.4
+    image: ghcr.io/wireless-broadband-alliance/wba-openroaming-portal:1.10.5
     env_file:
       - .env
     volumes:
