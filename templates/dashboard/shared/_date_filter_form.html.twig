@@ -1,5 +1,34 @@
 <div data-controller="date-filter"
      data-date-filter-active-preset-value="{{ activePreset }}"
+     data-date-filter-translations-value="{{ {
+         maxRangeError: 'maxRangeError'|trans({}, '_date_filter'),
+         maxRangeHint: 'maxRangeHint'|trans({}, '_date_filter'),
+         selectStart: 'selectStart'|trans({}, '_date_filter'),
+         selectEnd: 'selectEnd'|trans({}, '_date_filter'),
+         selected: 'selected'|trans({}, '_date_filter'),
+         selectedDay: 'selectedDay'|trans({}, '_date_filter'),
+         selectedDays: 'selectedDays'|trans({}, '_date_filter'),
+         pickRange: 'pickRange'|trans({}, '_date_filter'),
+         daySu: 'daySu'|trans({}, '_date_filter'),
+         dayMo: 'dayMo'|trans({}, '_date_filter'),
+         dayTu: 'dayTu'|trans({}, '_date_filter'),
+         dayWe: 'dayWe'|trans({}, '_date_filter'),
+         dayTh: 'dayTh'|trans({}, '_date_filter'),
+         dayFr: 'dayFr'|trans({}, '_date_filter'),
+         daySa: 'daySa'|trans({}, '_date_filter'),
+         monthJan: 'monthJan'|trans({}, '_date_filter'),
+         monthFeb: 'monthFeb'|trans({}, '_date_filter'),
+         monthMar: 'monthMar'|trans({}, '_date_filter'),
+         monthApr: 'monthApr'|trans({}, '_date_filter'),
+         monthMay: 'monthMay'|trans({}, '_date_filter'),
+         monthJun: 'monthJun'|trans({}, '_date_filter'),
+         monthJul: 'monthJul'|trans({}, '_date_filter'),
+         monthAug: 'monthAug'|trans({}, '_date_filter'),
+         monthSep: 'monthSep'|trans({}, '_date_filter'),
+         monthOct: 'monthOct'|trans({}, '_date_filter'),
+         monthNov: 'monthNov'|trans({}, '_date_filter'),
+         monthDec: 'monthDec'|trans({}, '_date_filter'),
+     }|json_encode }}"
      class="flex items-center gap-2 flex-wrap">
 
     {# Hidden inputs — must be outside any hidden element so Stimulus can always find them #}

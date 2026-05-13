@@ -13,7 +13,10 @@ export default class extends Controller {
         'start',
         'end',
     ];
-    static values = { activePreset: String };
+    static values = {
+        activePreset: String,
+        translations: Object,
+    };
 
     #rangeStart = null;
     #rangeEnd = null;
@@ -23,11 +26,10 @@ export default class extends Controller {
     #viewMonth = null;
     #pickerOpen = false;
     #hoverTimer = null;
-    #clickLock = false; // prevents hover re-render from eating the 2nd click
+    #clickLock = false;
 
     connect() {
         const now = new Date();
-        // Start view on the month BEFORE current so current month is on the right
         this.#viewMonth = now.getMonth() === 0 ? 11 : now.getMonth() - 1;
         this.#viewYear = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
 
@@ -39,6 +41,12 @@ export default class extends Controller {
             this.markActive(active);
             if (active === 'custom') this.showCustomPicker();
         }
+    }
+
+    // ── Translation helper ────────────────────────────────────────────────────
+
+    t(key) {
+        return this.translationsValue?.[key] ?? key;
     }
 
     // ── Preset pills ──────────────────────────────────────────────────────────
@@ -148,21 +156,31 @@ export default class extends Controller {
     }
 
     #buildCal(year, month, side) {
-        const DAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-        const MONTHS = [
-            'January',
-            'February',
-            'March',
-            'April',
-            'May',
-            'June',
-            'July',
-            'August',
-            'September',
-            'October',
-            'November',
-            'December',
+        // ← Both arrays now come from translations
+        const DAYS = [
+            this.t('daySu'),
+            this.t('dayMo'),
+            this.t('dayTu'),
+            this.t('dayWe'),
+            this.t('dayTh'),
+            this.t('dayFr'),
+            this.t('daySa'),
         ];
+        const MONTHS = [
+            this.t('monthJan'),
+            this.t('monthFeb'),
+            this.t('monthMar'),
+            this.t('monthApr'),
+            this.t('monthMay'),
+            this.t('monthJun'),
+            this.t('monthJul'),
+            this.t('monthAug'),
+            this.t('monthSep'),
+            this.t('monthOct'),
+            this.t('monthNov'),
+            this.t('monthDec'),
+        ];
+
         const dim = new Date(year, month + 1, 0).getDate();
         const fd = new Date(year, month, 1).getDay();
         const today = new Date();
@@ -238,6 +256,7 @@ export default class extends Controller {
     }
 
     // ── Calendar interactions ─────────────────────────────────────────────────
+
     prevMonth() {
         if (this.#viewMonth === 0) {
             this.#viewMonth = 11;
@@ -258,7 +277,6 @@ export default class extends Controller {
         event.stopPropagation();
         event.preventDefault();
 
-        // Block any queued hover re-render from firing after this click
         clearTimeout(this.#hoverTimer);
         this.#clickLock = true;
         setTimeout(() => {
@@ -284,11 +302,10 @@ export default class extends Controller {
                 end = new Date(date);
             }
 
-            // Block if over 365 days
             const days = Math.round(Math.abs(end - start) / 86400000) + 1;
             if (days > 365) {
-                this.#showWarning('Maximum range is 1 year. Please select a shorter period.');
-                return; // don't commit, let user pick again
+                this.#showWarning(this.t('maxRangeError')); // ← translated
+                return;
             }
 
             this.#rangeStart = start;
@@ -311,11 +328,10 @@ export default class extends Controller {
         if (this.#hoverDay && this.#sameDay(newHover, this.#hoverDay)) return;
         this.#hoverDay = newHover;
 
-        // Show warning hint while hovering over an invalid range
         if (this.#rangeStart) {
             const days = Math.round(Math.abs(newHover - this.#rangeStart) / 86400000) + 1;
             if (days > 365) {
-                this.#showWarning('Maximum range is 1 year.');
+                this.#showWarning(this.t('maxRangeHint')); // ← translated
             } else {
                 this.#clearWarning();
             }
@@ -350,6 +366,7 @@ export default class extends Controller {
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
+
     #sameDay(a, b) {
         return (
             a &&
@@ -372,16 +389,17 @@ export default class extends Controller {
         const eff = this.#selecting && this.#hoverDay ? this.#hoverDay : this.#rangeEnd;
 
         if (!this.#rangeStart) {
-            this.footerSummaryTarget.innerHTML = `<span class="text-gray-400">Select a start date</span>`;
+            this.footerSummaryTarget.innerHTML = `<span class="text-gray-400">${this.t('selectStart')}</span>`; // ← translated
             return;
         }
         if (!eff) {
-            this.footerSummaryTarget.innerHTML = `<span class="text-[#7DB928]">Now select an end date</span>`;
+            this.footerSummaryTarget.innerHTML = `<span class="text-[#7DB928]">${this.t('selectEnd')}</span>`; // ← translated
             return;
         }
 
         const days = Math.round(Math.abs(eff - this.#rangeStart) / 86400000) + 1;
-        this.footerSummaryTarget.innerHTML = `Selected: <strong class="text-gray-800">${days} day${days !== 1 ? 's' : ''}</strong>`;
+        const dayWord = days !== 1 ? this.t('selectedDays') : this.t('selectedDay'); // ← translated
+        this.footerSummaryTarget.innerHTML = `${this.t('selected')}: <strong class="text-gray-800">${days} ${dayWord}</strong>`; // ← translated
     }
 
     #updateTriggerLabel() {
@@ -392,7 +410,7 @@ export default class extends Controller {
                 : '…';
 
         if (!this.#rangeStart) {
-            this.rangeLabelTarget.innerHTML = `<span class="text-gray-400">Pick a range</span>`;
+            this.rangeLabelTarget.innerHTML = `<span class="text-gray-400">${this.t('pickRange')}</span>`; // ← translated
             return;
         }
 
@@ -435,9 +453,8 @@ export default class extends Controller {
             el.className =
                 'flex items-center gap-2 mt-2 px-3 py-2 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs';
             el.innerHTML = `<svg class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 3.5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 4.5zm0 7a.875.875 0 1 1 0-1.75.875.875 0 0 1 0 1.75z"/>
-        </svg><span></span>`;
-            // Insert it above the footer
+                <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 3.5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 4.5zm0 7a.875.875 0 1 1 0-1.75.875.875 0 0 1 0 1.75z"/>
+            </svg><span></span>`;
             const footer = this.pickerDropdownTarget.querySelector(
                 '.flex.items-center.justify-between.border-t'
             );
