@@ -2,6 +2,16 @@
 
 {% block title %}{{ 'adminPageWBA'|trans({}, '_header_admin') }}{% endblock %}
 
+{% set chartTranslations = {
+    accepted: 'accepted'|trans({}, 'freeradius_statistics'),
+    rejected: 'rejected'|trans({}, 'freeradius_statistics'),
+    averageSessionTime: 'averageSessionTime'|trans({}, 'freeradius_statistics'),
+    sessionTime: 'sessionTime'|trans({}, 'freeradius_statistics'),
+    data: 'data'|trans({}, 'freeradius_statistics'),
+    durationHour: 'durationHour'|trans({}, 'freeradius_statistics'),
+    durationMinute: 'durationMinute'|trans({}, 'freeradius_statistics'),
+}|json_encode %}
+
 {% block container %}
 
     {# Main two-column layout wrapper #}
@@ -55,6 +65,7 @@
                         data-controller="freeradius-statistics"
                         data-chart-type="accepted"
                         data-freeradius-statistics-target="chart"
+                        data-freeradius-statistics-translations-value="{{ chartTranslations }}"
                         data-chart-data="{{ authAttemptsJson }}"
                         data-label-accepted="{{ 'accepted'|trans({}, 'freeradius_statistics') }}"
                         data-label-rejected="{{ 'rejected'|trans({}, 'freeradius_statistics') }}"
@@ -74,6 +85,7 @@
                         data-controller="freeradius-statistics"
                         data-chart-type="rejected"
                         data-freeradius-statistics-target="chart"
+                        data-freeradius-statistics-translations-value="{{ chartTranslations }}"
                         data-chart-data="{{ authAttemptsJson }}"
                         data-label-accepted="{{ 'accepted'|trans({}, 'freeradius_statistics') }}"
                         data-label-rejected="{{ 'rejected'|trans({}, 'freeradius_statistics') }}"
@@ -100,6 +112,7 @@
                         data-controller="freeradius-statistics"
                         data-freeradius-statistics-target="chart"
                         data-chart-type="session"
+                        data-freeradius-statistics-translations-value="{{ chartTranslations }}"
                         data-chart-data="{{ sessionTimeJson }}"
                 ></canvas>
             </div>
@@ -120,6 +133,7 @@
                         data-controller="freeradius-statistics"
                         data-freeradius-statistics-target="chart"
                         data-chart-type="sessionTotal"
+                        data-freeradius-statistics-translations-value="{{ chartTranslations }}"
                         data-chart-data="{{ totalTimeJson }}"
                 ></canvas>
             </div>
@@ -274,6 +288,7 @@
                     data-controller="freeradius-statistics"
                     data-freeradius-statistics-target="chart"
                     data-chart-type="wifiTags"
+                    data-freeradius-statistics-translations-value="{{ chartTranslations }}"
                     data-chart-data="{{ wifiTagsJson }}"
             ></canvas>
         </div>

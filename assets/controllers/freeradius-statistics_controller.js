@@ -3,10 +3,15 @@ import { Chart } from 'chart.js';
 
 export default class extends Controller {
     static targets = ['chart'];
+    static values = {
+        translations: Object,
+    };
 
-    // =========================
-    // DESIGN SYSTEM
-    // =========================
+    // ── Translation helper ────────────────────────────────────────────────────
+    t(key) {
+        return this.translationsValue?.[key] ?? key;
+    }
+
     colors = {
         primary: '#7DB928',
         danger: '#FE4068',
@@ -44,7 +49,6 @@ export default class extends Controller {
     // =========================
     // AUTH
     // =========================
-    // ACCEPTED (split top)
     renderAcceptedChart(target) {
         const raw = this.parseData(target);
         const labels = Object.keys(raw).sort();
@@ -55,7 +59,7 @@ export default class extends Controller {
             data: {
                 labels,
                 datasets: [
-                    this.lineDataset(target.dataset.labelAccepted, accepted, 'primary', false),
+                    this.lineDataset(this.t('accepted'), accepted, 'primary', false), // ← translated
                 ],
             },
             options: this.splitChartOptions(),
@@ -65,7 +69,6 @@ export default class extends Controller {
         this.bindSyncedHover(target, 'accepted', 'rejected');
     }
 
-    // REJECTED (split bottom)
     renderRejectedChart(target) {
         const raw = this.parseData(target);
         const labels = Object.keys(raw).sort();
@@ -76,7 +79,7 @@ export default class extends Controller {
             data: {
                 labels,
                 datasets: [
-                    this.lineDataset(target.dataset.labelRejected, rejected, 'danger', false),
+                    this.lineDataset(this.t('rejected'), rejected, 'danger', false), // ← translated
                 ],
             },
             options: this.splitChartOptions(),
@@ -91,18 +94,15 @@ export default class extends Controller {
     // =========================
     renderSessionChart(target) {
         const raw = this.parseData(target);
-
         const labels = Object.keys(raw).sort((a, b) => new Date(a) - new Date(b));
         const values = labels.map((d) => raw[d] ?? 0);
 
-        const data = {
-            labels,
-            datasets: [this.lineDataset('Average Session Time', values, 'info', true)],
-        };
-
         this.createChart(target, {
             type: 'line',
-            data,
+            data: {
+                labels,
+                datasets: [this.lineDataset(this.t('averageSessionTime'), values, 'info', true)], // ← translated
+            },
             options: this.baseOptions({ tension: 0.35, isDuration: true }),
         });
     }
@@ -112,69 +112,55 @@ export default class extends Controller {
     // =========================
     renderSessionTotalChart(target) {
         const raw = this.parseData(target);
-
         const labels = Object.keys(raw).sort((a, b) => new Date(a) - new Date(b));
         const values = labels.map((d) => raw[d] ?? 0);
 
-        const data = {
-            labels,
-            datasets: [this.lineDataset('Total Session Time', values, 'info', true)],
-        };
-
         this.createChart(target, {
             type: 'line',
-            data,
+            data: {
+                labels,
+                datasets: [this.lineDataset(this.t('sessionTime'), values, 'info', true)], // ← translated
+            },
             options: this.baseOptions({ tension: 0.35, isDuration: true }),
         });
     }
 
     // =========================
-    // WIFI Tags
+    // WIFI TAGS
     // =========================
     renderWifiTagsChart(target) {
         const raw = this.parseData(target);
-
         const labels = Object.keys(raw);
         const values = Object.values(raw);
-
         const total = values.reduce((a, b) => a + b, 0);
-
-        const data = {
-            labels,
-            datasets: [
-                {
-                    data: values,
-
-                    backgroundColor: [
-                        this.colors.primary,
-                        this.colors.info,
-                        this.colors.success,
-                        this.colors.danger,
-                    ],
-
-                    hoverOffset: 8,
-                    borderWidth: 2,
-                },
-            ],
-        };
 
         this.createChart(target, {
             type: 'doughnut',
-            data,
+            data: {
+                labels,
+                datasets: [
+                    {
+                        data: values,
+                        backgroundColor: [
+                            this.colors.primary,
+                            this.colors.info,
+                            this.colors.success,
+                            this.colors.danger,
+                        ],
+                        hoverOffset: 8,
+                        borderWidth: 2,
+                    },
+                ],
+            },
             options: {
                 maintainAspectRatio: false,
-
                 plugins: {
-                    legend: {
-                        position: 'bottom',
-                    },
-
+                    legend: { position: 'bottom' },
                     tooltip: {
                         callbacks: {
                             label: (context) => {
                                 const value = context.raw;
                                 const percent = ((value / total) * 100).toFixed(1);
-
                                 return `${context.label}: ${value} (${percent}%)`;
                             },
                         },
@@ -189,18 +175,15 @@ export default class extends Controller {
     // =========================
     renderDefaultChart(target) {
         const raw = this.parseData(target);
-
         const labels = Object.keys(raw);
         const values = Object.values(raw);
 
-        const data = {
-            labels,
-            datasets: [this.barDataset('Data', values, 'primary', false)],
-        };
-
         this.createChart(target, {
             type: 'bar',
-            data,
+            data: {
+                labels,
+                datasets: [this.barDataset(this.t('data'), values, 'primary', false)], // ← translated
+            },
             options: this.baseOptions({ isDuration: false }),
         });
     }
@@ -216,8 +199,8 @@ export default class extends Controller {
             backgroundColor: this.soft[colorKey],
             fill: true,
             borderWidth: 2,
-            pointRadius: 0, // no dots at rest
-            pointHoverRadius: 5, // dot appears on hover
+            pointRadius: 0,
+            pointHoverRadius: 5,
             meta: { isDuration },
         };
     }
@@ -245,9 +228,7 @@ export default class extends Controller {
     }
 
     createChart(target, config) {
-        if (this.chartInstance) {
-            this.chartInstance.destroy();
-        }
+        if (this.chartInstance) this.chartInstance.destroy();
         this.chartInstance = new Chart(target, config);
         return this.chartInstance;
     }
@@ -255,7 +236,8 @@ export default class extends Controller {
     formatDuration(seconds) {
         const hours = Math.floor(seconds / 3600);
         const minutes = Math.floor((seconds % 3600) / 60);
-        return `${hours}h ${minutes}m`;
+        // ← "h" and "m" translated
+        return `${hours}${this.t('durationHour')} ${minutes}${this.t('durationMinute')}`;
     }
 
     bindSyncedHover(target, selfKey, otherKey) {
@@ -288,12 +270,9 @@ export default class extends Controller {
         return {
             maintainAspectRatio: false,
             responsive: true,
-            interaction: {
-                mode: 'index',
-                intersect: false,
-            },
+            interaction: { mode: 'index', intersect: false },
             plugins: {
-                legend: { display: false }, // removes the colored box label only
+                legend: { display: false },
                 tooltip: {
                     callbacks: {
                         label: (context) => `${context.dataset.label}: ${context.raw}`,
@@ -306,74 +285,44 @@ export default class extends Controller {
             },
             scales: {
                 x: {
-                    ticks: {
-                        display: true, // keeps date labels
-                        maxRotation: 0,
-                        autoSkip: true,
-                        maxTicksLimit: 7,
-                    },
+                    ticks: { display: true, maxRotation: 0, autoSkip: true, maxTicksLimit: 7 },
                     grid: { display: false },
                 },
                 y: {
                     beginAtZero: true,
-                    ticks: {
-                        display: true, // keeps number labels
-                        precision: 0,
-                    },
+                    ticks: { display: true, precision: 0 },
                     grid: { color: 'rgba(0,0,0,0.05)' },
                 },
             },
         };
     }
 
-    // =========================
-    // BASE OPTIONS
-    // =========================
     baseOptions({ tension = 0, isDuration = false } = {}) {
         return {
             maintainAspectRatio: false,
             responsive: true,
-
-            interaction: {
-                mode: 'index',
-                intersect: false,
-            },
-
+            interaction: { mode: 'index', intersect: false },
             plugins: {
-                legend: {
-                    display: false,
-                },
-
+                legend: { display: false },
                 tooltip: {
                     callbacks: {
                         label: (context) => {
                             const value = context.raw;
                             const datasetIsDuration =
                                 context.dataset.meta?.isDuration ?? isDuration;
-
                             if (typeof value !== 'number') return value;
-
                             if (datasetIsDuration) {
                                 return `${context.dataset.label}: ${this.formatDuration(value)}`;
                             }
-
                             return `${context.dataset.label}: ${value}`;
                         },
                     },
                 },
             },
-
             elements: {
-                line: {
-                    tension,
-                    borderWidth: 2,
-                },
-                point: {
-                    radius: 2,
-                    hoverRadius: 5,
-                },
+                line: { tension, borderWidth: 2 },
+                point: { radius: 2, hoverRadius: 5 },
             },
-
             scales: {
                 x: {
                     ticks: {
@@ -397,13 +346,8 @@ export default class extends Controller {
                 },
                 y: {
                     beginAtZero: true,
-                    ticks: {
-                        display: false,
-                        precision: 0,
-                    },
-                    grid: {
-                        color: 'rgba(0,0,0,0.05)',
-                    },
+                    ticks: { display: false, precision: 0 },
+                    grid: { color: 'rgba(0,0,0,0.05)' },
                 },
             },
         };
