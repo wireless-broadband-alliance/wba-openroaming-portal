@@ -75,7 +75,7 @@ notValidIpOrCidr: 'Please provide a valid IP addresses or CIDR ranges (e.g. 192.
 invalidFormat: 'Invalid Format'
 invalidCertificateType: 'The certificate is not of type RSA. Only RSA certificates are supported.'
 notValidWbaChainRadsec: 'The certificate is not signed by a trusted WBA root CA'
-invalidCertificateChain: "The uploaded certificate does not belong to the uploaded chain."
+invalidCertificateChain: "The certificate does not belong to the provided chain."
 incompleteChainMessage: 'The certificate chain does not reach a trust anchor.'
 untrustedRootMessage: 'The trust anchor is not trusted. Cross-signed or missing intermediate certificates may be the cause.'
 invalidDomainPattern: 'The domain is not valid. Use an exact domain (example.com), a subdomain wildcard (*.example.com), or * for all domains.'

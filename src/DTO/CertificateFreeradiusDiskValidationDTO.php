@@ -4,30 +4,24 @@ declare(strict_types=1);
 
 namespace App\DTO;
 
+use App\Validator\Constraints as CustomAssert;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
-use App\Validator\Constraints as CustomAssert;
-use Symfony\Component\Validator\Constraints\NotBlank;
 
-// Class level so this validator can access the client/key at the same time
-#[CustomAssert\PemKeyMatchesCertificate(
-    certificateField: 'cert',
-    privateKeyField: 'privKey'
-)]
 #[CustomAssert\ValidCertificateChain(
     certField: 'cert',
     chainField: 'chain',
 )]
-class CertificateFreeradiusUploadManualDTO
+class CertificateFreeradiusDiskValidationDTO
 {
+    // This file is exactly the same of CertificateFreeradiusValidationDTO, but without the privkey
     /**
-     * Notices/Warnings generated during the upload
+     * Notices/Warnings generated during the validation
      * @var list<string>
      */
     public array $notices = [];
 
-
-    #[NotBlank(message: 'nullCert')]
+    #[Assert\NotBlank(message: 'nullCert')]
     #[Assert\File(
         maxSize: '5M',
         mimeTypes: [
@@ -70,17 +64,4 @@ class CertificateFreeradiusUploadManualDTO
     #[CustomAssert\ValidPemCertificate]
     #[CustomAssert\ValidRsaCertificate]
     public ?UploadedFile $fullChain = null;
-
-    #[NotBlank(message: 'nullKey')]
-    #[Assert\File(
-        maxSize: '5M',
-        mimeTypes: [
-            'application/x-pem-file',
-            'application/octet-stream',
-            'text/plain',
-        ],
-        notFoundMessage: 'nullKey',
-        mimeTypesMessage: 'invalidFileTypeKey'
-    )]
-    public ?UploadedFile $privKey = null;
 }

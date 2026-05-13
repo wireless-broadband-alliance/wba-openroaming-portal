@@ -33,12 +33,18 @@
         }) }}
     {% endif %}
 
-    {% if not isFreeradiusCertEV() %}
-        {{ include('shared/_toast.html.twig', {
+    {% if isCertificateProcessInvalid() %}
+        {{ include('shared/_toast_ev_warning.html.twig', {
+            message: 'certProcessInvalid'|trans({}, 'dashboard'),
+            toast_type: 'toast-error-dashboard',
+        }) }}
+    {% elseif not isFreeradiusCertEV() %}
+        {{ include('shared/_toast_ev_warning.html.twig', {
             message: 'freeradius_is_not_ev_cert_warning'|trans({}, 'dashboard'),
             toast_type: 'toast-warning-dashboard',
         }) }}
     {% endif %}
+
     <div class="pt-5 pb-1 text-left space-y-3 rounded-xl bg-white">
         <div class="w-full">
             <div class="sm:w-auto px-5 py-4">
