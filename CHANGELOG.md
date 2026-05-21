@@ -1,5 +1,14 @@
 # Changelog
 
+# Release V1.11.0
+
+- Updated both statistics pages on the dashboard interface
+- Minor improvements with other UI elements
+- Improved date-filtering on both statistics pages
+- Code Optimizations
+
+No migrations & actions are needed for this release
+
 # Release V1.10.5
 
 - Updated `openingApp` label for return apps landing page
