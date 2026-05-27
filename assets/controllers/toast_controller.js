@@ -4,17 +4,16 @@ export default class extends Controller {
     static targets = ['toast'];
 
     connect() {
-        super.connect();
-
-        if (this.hasToastTarget) {
-            console.log(
-                '%c Visibility - Detected for ' + this.toastTarget.name,
-                'background: green; color: black'
-            );
-        }
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                this.toastTarget.style.maxHeight = this.toastTarget.scrollHeight + 'px';
+                this.toastTarget.style.opacity = '1';
+            });
+        });
     }
 
     close() {
-        this.toastTarget.classList.add('hidden');
+        this.toastTarget.style.maxHeight = '0';
+        this.toastTarget.style.opacity = '0';
     }
 }

@@ -1,6 +1,7 @@
-<div class="flex justify-center items-center" name="descriptionCard">
-    <div class="bg-indigo-400 rounded-lg p-2 z-10 m-2 w-3/4 text-center text-white transition transform -translate-y-6 ease-in-out duration-300 absolute hidden"
-            {{ stimulus_target('card', 'info') }}>
+<div class="overflow-hidden transition-all duration-300 ease-in-out mt-4"
+        {{ stimulus_target('card', 'info') }}
+     style="max-height: 0;">
+    <div class="bg-infoBgColor border border-infoTextColor/20 rounded-lg px-3 py-2 mb-4 text-sm text-infoTextColor text-center">
         {{ description }}
     </div>
 </div>

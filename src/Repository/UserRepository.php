@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Enum\AdminRoleType;
 use App\Enum\UserProvider;
 use App\Enum\UserVerificationStatus;
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -62,30 +63,40 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         }
     }
 
-//    /**
-//     * @return User[] Returns an array of User objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('u')
-//            ->andWhere('u.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('u.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * @return User[]
+     */
+    public function findByDateRange(DateTime $start, DateTime $end): array
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.createdAt >= :start')
+            ->andWhere('u.createdAt <= :end')
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->getQuery()
+            ->getResult();
+    }
 
-//    public function findOneBySomeField($value): ?User
-//    {
-//        return $this->createQueryBuilder('u')
-//            ->andWhere('u.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    /**
+     * @return array{verified: int, not_verified: int, banned: int}
+     */
+    public function countUserVerificationStats(DateTime $start, DateTime $end): array
+    {
+        $qb = $this->createQueryBuilder('u');
+
+        return $qb
+            ->select(
+                'SUM(CASE WHEN u.isVerified = true THEN 1 ELSE 0 END) AS verified',
+                'SUM(CASE WHEN u.isVerified = false THEN 1 ELSE 0 END) AS not_verified',
+                'SUM(CASE WHEN u.bannedAt IS NOT NULL THEN 1 ELSE 0 END) AS banned'
+            )
+            ->andWhere('u.createdAt BETWEEN :start AND :end')
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->getQuery()
+            ->getSingleResult();
+    }
+
     /**
      * @return User[]
      */

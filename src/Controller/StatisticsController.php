@@ -3,11 +3,12 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Enum\TimeRangePresetStatistics;
 use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\GetSettings;
-use App\Service\Statistics;
+use App\Service\Statistics\Portal\PortalStatistics;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -23,10 +24,8 @@ class StatisticsController extends AbstractController
 {
     public function __construct(
         private readonly GetSettings $getSettings,
-        private readonly EntityManagerInterface $entityManager,
-        private readonly RadiusAuthsRepository $radiusAuthsRepository,
-        private readonly RadiusAccountingRepository $radiusAccountingRepository,
         private readonly TranslatorInterface $translator,
+        private readonly PortalStatistics $portalStatistics,
     ) {
     }
 
@@ -36,6 +35,7 @@ class StatisticsController extends AbstractController
     /**
      * @throws JsonException
      * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     #[Route('/dashboard/statistics', name: 'admin_dashboard_statistics')]
     #[IsGranted(UserAuthenticationVoter::PORTAL_STATISTICS_READ)]
@@ -67,17 +67,21 @@ class StatisticsController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_statistics');
         }
 
-        $statisticsService = new Statistics(
-            $this->entityManager,
-            $this->radiusAuthsRepository,
-            $this->radiusAccountingRepository
-        );
-        $fetchChartDevices = $statisticsService->fetchChartDevices($startDate, $endDate);
-        $fetchChartAuthentication = $statisticsService->fetchChartAuthentication($startDate, $endDate);
-        $fetchChartPlatformStatus = $statisticsService->fetchChartPlatformStatus($startDate, $endDate);
-        $fetchChartUserVerified = $statisticsService->fetchChartUserVerified($startDate, $endDate);
-        $fetchChartSMSEmail = $statisticsService->fetchChartSMSEmail($startDate, $endDate);
-        $fetchChart2FA = $statisticsService->fetchChart2FA($startDate, $endDate);
+        // After computing $startDate and $endDate, detect which preset was used
+        $activePreset = $request->query->get('preset', '');
+        $activePreset = TimeRangePresetStatistics::fromInput($activePreset);
+
+        // If it resolved to Custom but there are no dates, fall back to default
+        if ($activePreset === TimeRangePresetStatistics::Custom && !$startDateString && !$endDateString) {
+            $activePreset = TimeRangePresetStatistics::default();
+        }
+
+        $fetchChartSMSEmail = $this->portalStatistics->getSMSEmailStats($startDate, $endDate);
+        $fetchChartAuthentication = $this->portalStatistics->getAuthenticationStats($startDate, $endDate);
+        $fetchChartDevices = $this->portalStatistics->getDevicesStats($startDate, $endDate);
+        $fetchChartPlatformStatus = $this->portalStatistics->getPlatformStatusStats($startDate, $endDate);
+        $fetchChartUserVerified = $this->portalStatistics->getUserVerifiedStas($startDate, $endDate);
+        $fetchChart2FA = $this->portalStatistics->get2FAStats($startDate, $endDate);
 
         $memory_before = memory_get_usage();
         $memory_after = memory_get_usage();
@@ -95,14 +99,34 @@ class StatisticsController extends AbstractController
         return $this->render('dashboard/statistics/statistics.html.twig', [
             'user' => $currentUser,
             'data' => $data,
-            'devicesDataJson' => json_encode($fetchChartDevices, JSON_THROW_ON_ERROR),
-            'authenticationDataJson' => json_encode($fetchChartAuthentication, JSON_THROW_ON_ERROR),
-            'platformStatusDataJson' => json_encode($fetchChartPlatformStatus, JSON_THROW_ON_ERROR),
-            'usersVerifiedDataJson' => json_encode($fetchChartUserVerified, JSON_THROW_ON_ERROR),
-            'SMSEmailDataJson' => json_encode($fetchChartSMSEmail, JSON_THROW_ON_ERROR),
-            'twoFADataJson' => json_encode($fetchChart2FA, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate->format('Y-m-d\TH:i'),
             'selectedEndDate' => $endDate->format('Y-m-d\TH:i'),
+            'activePreset' => $activePreset->value,
+            'charts' => [
+                'smsEmail' => $this->prepareChart($fetchChartSMSEmail),
+                'authentication' => $this->prepareChart($fetchChartAuthentication),
+                'devices' => $this->prepareChart($fetchChartDevices),
+                'platformStatus' => $this->prepareChart($fetchChartPlatformStatus),
+                'usersVerified' => $this->prepareChart($fetchChartUserVerified),
+                'twoFA' => $this->prepareChart($fetchChart2FA),
+            ],
         ]);
+    }
+
+    /**
+     * @param array<string, mixed> $chart
+     * @return array<string, mixed>
+     * @throws \JsonException
+     */
+    private function prepareChart(array $chart): array
+    {
+        $datasets          = $chart['datasets'] ?? $chart;
+        $datasets['total'] = $chart['total'] ?? 0;
+
+        return [
+            'dataJson' => json_encode($datasets, JSON_THROW_ON_ERROR),
+            'total'    => $chart['total'] ?? 0,
+            'legend'   => $chart['legend'] ?? [],
+        ];
     }
 }
