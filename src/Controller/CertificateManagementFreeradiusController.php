@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\DTO\CertificateFreeradiusDomainDTO;
 use App\DTO\CertificateFreeradiusUploadManualDTO;
 use App\DTO\CertificatesFreeradiusPasteDTO;
 use App\DTO\CloudflareDTO;
@@ -20,7 +19,6 @@ use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
 use App\Enum\SettingName;
 use App\Exception\FreeradiusTestException;
-use App\Form\CertificateFreeradiusDomainType;
 use App\Form\CertificateFreeradiusUploadManualType;
 use App\Form\CertificatesFreeradiusPasteType;
 use App\Form\CloudflareType;
@@ -619,12 +617,10 @@ class CertificateManagementFreeradiusController extends AbstractController
                 // Store in the array
                 $extractCertificates[CertificateFileName::PRIVATE_KEY_PEM->value] = rtrim($privateKeyPem) . "\n";
 
-                /**
-                 * Convert PEM strings → UploadedFile objects to be saved on the tmp
-                 *
-                 */
+                // Convert PEM strings → UploadedFile objects to be saved on the tmp
+                /** @var array<string, string> $extractCertificates */
                 foreach ($extractCertificates as $type => $pemContent) {
-                    if ($pemContent === '' || $pemContent === '0') {
+                    if (empty($pemContent)) {
                         continue; // skip empty PEMs
                     }
 
