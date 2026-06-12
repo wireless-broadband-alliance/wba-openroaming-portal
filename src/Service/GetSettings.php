@@ -33,7 +33,7 @@ readonly class GetSettings
         // Get the current request from the RequestStack
         $request = $this->requestStack->getCurrentRequest();
         if (!$request instanceof Request) {
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 $this->translator->trans('noRequestAvailable', [], 'GetSettings')
             );
         }
@@ -81,7 +81,6 @@ readonly class GetSettings
 
         // Compare both sets
         $missingInDb = array_diff($expectedSettings, $currentSettingsName);
-        $notInEnum = array_diff($currentSettingsName, $expectedSettings);
 
         // Check if all the settings on the DB are set and valid
         if ($missingInDb !== []) {
@@ -90,16 +89,6 @@ readonly class GetSettings
                 $this->translator->trans(
                     'settingsMissing',
                     ['%missing%' => implode(', ', $missingInDb)],
-                    'GetSettings'
-                )
-            );
-        }
-        if ($notInEnum !== []) {
-            throw new HttpException(
-                500,
-                $this->translator->trans(
-                    'notInEnum',
-                    ['%notInEnum%' => implode(', ', $notInEnum)],
                     'GetSettings'
                 )
             );

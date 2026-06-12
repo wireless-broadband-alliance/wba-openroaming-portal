@@ -8,15 +8,8 @@ use App\Repository\DomainBlacklistRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: DomainBlacklistRepository::class)]
-#[ORM\Table(
-    uniqueConstraints: [
-        new ORM\UniqueConstraint(
-            name: 'uniq_domain_pattern',
-            columns: ['pattern']
-        )
-    ]
-)
-]
+#[ORM\Table]
+#[ORM\UniqueConstraint(name: 'uniq_domain_pattern', columns: ['pattern'])]
 class DomainBlacklist
 {
     #[ORM\Id]
