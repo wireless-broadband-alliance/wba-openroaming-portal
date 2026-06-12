@@ -17,11 +17,11 @@ use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
+use App\Service\EmailGenerator;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\MagicLinkService;
 use App\Service\PasswordResetRequestHandler;
-use App\Service\EmailGenerator;
 use App\Service\SendSMS;
 use DateInterval;
 use DateTime;
@@ -29,18 +29,13 @@ use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Random\RandomException;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\RateLimiter\RateLimiterFactory;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -65,7 +60,7 @@ class ForgotPasswordController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly MagicLinkService $magicLinkService,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
-        private readonly RateLimiterFactory $verifyAccountLimiter,
+        private readonly RateLimiterFactoryInterface $verifyAccountLimiter,
     ) {
     }
 

@@ -44,72 +44,43 @@ class UserExternalAuthRepository extends ServiceEntityRepository
         }
     }
 
+    /**
+     * Fetch platform users counts based on the providerId within a date range.
+     *
+     * @return array<int, array{provider: string, count: int}>
+     * @throws \JsonException
+     */
+    public function countAuthenticationProviders(DateTime $start, DateTime $end): array
+    {
+        return $this->createQueryBuilder('ua')
+            ->select('ua.provider AS provider, COUNT(ua.id) AS count')
+            ->join('ua.user', 'u')
+            ->andWhere('u.createdAt BETWEEN :start AND :end')
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->groupBy('ua.provider')
+            ->getQuery()
+            ->getArrayResult();
+    }
 
     /**
-     * Fetch portal users counts based on the providerId within a date range.
+     * Fetch platform users counts based on the portal type (SMS || Email)
      *
-     * @return array<string, int> Returns counts for 'email' and 'phone_number'
+     * @return array<int, array{provider_id: string, count: int}>
+     * @throws \JsonException
      */
-    public function getPortalUserCounts(string $provider, ?DateTime $startDate, ?DateTime $endDate): array
+    public function findPortalUsers(DateTime $start, DateTime $end): array
     {
-        $qb = $this->createQueryBuilder('uea')
-            ->innerJoin('uea.user', 'u')
-            ->select('uea.provider_id')
-            ->where('uea.provider = :provider')
-            ->setParameter('provider', $provider);
-
-        if ($startDate instanceof DateTime) {
-            $qb->andWhere('u.createdAt >= :startDate')
-                ->setParameter('startDate', $startDate);
-        }
-
-        if ($endDate instanceof DateTime) {
-            $qb->andWhere('u.createdAt <= :endDate')
-                ->setParameter('endDate', $endDate);
-        }
-
-        $results = $qb->getQuery()->getResult();
-
-        // Initialize counts
-        $counts = [
-            UserProvider::PHONE_NUMBER->value => 0,
-            UserProvider::EMAIL->value => 0,
-        ];
-
-        // Count occurrences of each providerId
-        foreach ($results as $result) {
-            $providerId = $result['provider_id'];
-            if ($providerId === UserProvider::EMAIL->value) {
-                $counts[UserProvider::EMAIL->value]++;
-            } elseif ($providerId === UserProvider::PHONE_NUMBER->value) {
-                $counts[UserProvider::PHONE_NUMBER->value]++;
-            }
-        }
-
-        return $counts;
+        return $this->createQueryBuilder('ua')
+            ->select('ua.provider_id AS provider_id, COUNT(ua.id) AS count')
+            ->join('ua.user', 'u')
+            ->andWhere('ua.provider = :provider')
+            ->andWhere('u.createdAt BETWEEN :start AND :end')
+            ->setParameter('provider', UserProvider::PORTAL_ACCOUNT->value)
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->groupBy('ua.provider_id')
+            ->getQuery()
+            ->getArrayResult();
     }
-//    /**
-//     * @return UserExternalAuth[] Returns an array of UserExternalAuth objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('u')
-//            ->andWhere('u.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('u.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?UserExternalAuth
-//    {
-//        return $this->createQueryBuilder('u')
-//            ->andWhere('u.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
 }

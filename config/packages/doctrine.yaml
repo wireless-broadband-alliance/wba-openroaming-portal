@@ -3,10 +3,10 @@ doctrine:
         connections:
             default:
                 url: '%env(resolve:DATABASE_URL)%'
-                server_version: '8.0.39'
+                server_version: '8.0.44'
             freeradius:
                 url: '%env(resolve:DATABASE_FREERADIUS_URL)%'
-                server_version: '8.0.39'
+                server_version: '8.0.44'
         default_connection: default
 
 
@@ -15,7 +15,7 @@ doctrine:
         # server_version: '15'
     orm:
         auto_generate_proxy_classes: true
-        enable_lazy_ghost_objects: true # Enables the new implementation of proxies based on lazy ghosts instead of using the legacy implementation
+        enable_native_lazy_objects: true # Enables the new implementation of proxies based on lazy ghosts instead of using the legacy implementation
         controller_resolver:
             auto_mapping: false # Tells doctrine to automatically map entities in all registered bundles
         default_entity_manager: default

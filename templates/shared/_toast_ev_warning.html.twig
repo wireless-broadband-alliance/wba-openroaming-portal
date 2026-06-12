@@ -1,6 +1,8 @@
 <div
         {{ stimulus_controller('toast') }}
         {{ stimulus_target('toast', 'toast') }}
+        class="overflow-hidden transition-all duration-300 ease-in-out"
+        style="max-height: 0; opacity: 0;"
 >
     <div class="{{ toast_type }}">
         <twig:ux:icon name="wba:info" class="w-5 h-5 inline mr-3 fill-current shrink-0"/>
@@ -19,8 +21,8 @@
             </a>
 
             {# Close button #}
-            <button {{ stimulus_action('toast', 'close') }}>
-                <twig:ux:icon name="wba:cross-circle-rounded" class="w-5 h-auto fill-current"/>
+            <button {{ stimulus_action('toast', 'close') }} class="flex-shrink-0 opacity-60 hover:opacity-100 transition-opacity ml-auto">
+                <twig:ux:icon name="wba:cross-circle-rounded" class="w-4 h-4 fill-current"/>
             </button>
         </div>
     </div>

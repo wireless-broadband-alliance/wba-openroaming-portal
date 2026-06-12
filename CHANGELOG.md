@@ -1,5 +1,15 @@
 # Changelog
 
+# Release V1.11.0
+
+- Updated both statistics pages on the dashboard interface
+- Minor improvements with other UI elements
+- Improved date-filtering on both statistics pages
+- Code Optimizations
+- Updated `DATABASE_URL` and `DATABASE_FREERADIUS_URL` in `.env` to use full MySQL version string (e.g. `serverVersion=8.0.44`) to fix deprecations — please update your `.env` accordingly and follow the `.env.sample`
+
+No migrations are needed for this release
+
 # Release V1.10.5
 
 - Updated `openingApp` label for return apps landing page
