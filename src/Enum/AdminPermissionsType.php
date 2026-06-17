@@ -53,8 +53,36 @@ enum AdminPermissionsType: string
     case DOMAINS_BLACKLIST_READ = 'DOMAINS_BLACKLIST_READ';
     // Portal Statistics page
     case PORTAL_STATISTICS_READ = 'PORTAL_STATISTICS_READ';
-    case PORTAL_STATISTICS_WRITE = 'PORTAL_STATISTICS_WRITE';
     // Connectivity Statistics page
     case CONNECTIVITY_STATISTICS_READ = 'CONNECTIVITY_STATISTICS_READ';
-    case CONNECTIVITY_STATISTICS_WRITE = 'CONNECTIVITY_STATISTICS_WRITE';
+    // Activity Logs page
+    case ACTIVITY_LOGS_READ = 'ACTIVITY_LOGS_READ';
+
+    public function getLabel(): string
+    {
+        return match ($this) {
+            self::USERS_MANAGEMENT_WRITE, self::USERS_MANAGEMENT_READ => 'usersManagement',
+            self::ADMIN_MANAGEMENT_WRITE, self::ADMIN_MANAGEMENT_READ => 'adminManagement',
+            self::PLATFORM_STATUS_WRITE, self::PLATFORM_STATUS_READ => 'platformStatus',
+            self::LANDING_PAGE_CONFIG_WRITE, self::LANDING_PAGE_CONFIG_READ => 'landingPageConfiguration',
+            self::USER_ENGAGEMENT_WRITE, self::USER_ENGAGEMENT_READ => 'userEngagement',
+            self::TERMS_POLICIES_WRITE, self::TERMS_POLICIES_READ => 'termsAndPolicies',
+            self::CRON_SCHEDULE_WRITE, self::CRON_SCHEDULE_READ => 'scheduleAutomation',
+            self::CERTIFICATES_MANAGEMENT_WRITE, self::CERTIFICATES_MANAGEMENT_READ => 'certificatesManagement',
+            self::RETURN_APPS_MANAGEMENT_WRITE, self::RETURN_APPS_MANAGEMENT_READ => 'returnAppsManagement',
+            self::AUTHENTICATION_METHODS_WRITE, self::AUTHENTICATION_METHODS_READ => 'authenticationMethods',
+            self::TWO_FACTOR_AUTH_WRITE, self::TWO_FACTOR_AUTH_READ => 'twoFactorAuthenticator',
+            self::LDAP_SYNCHRONIZATION_WRITE, self::LDAP_SYNCHRONIZATION_READ => 'LDAPSynchronization',
+            self::RADIUS_PROFILE_CONFIG_WRITE, self::RADIUS_PROFILE_CONFIG_READ => 'radiusProfileConfiguration',
+            self::SMS_CONFIG_WRITE, self::SMS_CONFIG_READ => 'SMSConfiguration',
+            self::PORTAL_STATISTICS_READ => 'portalStatistics',
+            self::CONNECTIVITY_STATISTICS_READ => 'connectivityStatistics',
+            self::ACTIVITY_LOGS_READ => 'activityLogs',
+        };
+    }
+
+    public function getLevel(): string
+    {
+        return str_ends_with($this->value, '_WRITE') ? 'WRITE' : 'READ';
+    }
 }
