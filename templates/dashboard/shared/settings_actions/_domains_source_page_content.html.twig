@@ -1,6 +1,8 @@
 {% import 'dashboard/shared/_sort_arrow.html.twig' as sharedSort %}
 
-{{ include('dashboard/shared/_add_source_blacklist.html.twig') }}
+{% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::DOMAINS_BLACKLIST_WRITE')) %}
+     {{ include('dashboard/shared/_add_source_blacklist.html.twig') }}
+{% endif %}
 
 {# Domains Source table #}
 <div class="pt-5 pb-1 text-left space-y-3 rounded-xl bg-white">

@@ -29,7 +29,7 @@
             <span class="pill-error">{{ 'noData'|trans({}, '_blacklist') }}</span>
         {% endif %}
     </td>
-
+    {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::DOMAINS_BLACKLIST_WRITE')) %}
     {# Actions Buttons #}
     <td class="p-4 pl-8 text-right">
         <div class="flex justify-center gap-3">
@@ -63,4 +63,5 @@
             </form>
         </div>
     </td>
+    {% endif %}
 </tr>

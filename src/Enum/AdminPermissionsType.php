@@ -48,6 +48,9 @@ enum AdminPermissionsType: string
     // SMS Configuration page
     case SMS_CONFIG_WRITE = 'SMS_CONFIG_WRITE';
     case SMS_CONFIG_READ = 'SMS_CONFIG_READ';
+    // Domains BlackList management page
+    case DOMAINS_BLACKLIST_WRITE = 'DOMAINS_BLACKLIST_WRITE';
+    case DOMAINS_BLACKLIST_READ = 'DOMAINS_BLACKLIST_READ';
     // Portal Statistics page
     case PORTAL_STATISTICS_READ = 'PORTAL_STATISTICS_READ';
     case PORTAL_STATISTICS_WRITE = 'PORTAL_STATISTICS_WRITE';

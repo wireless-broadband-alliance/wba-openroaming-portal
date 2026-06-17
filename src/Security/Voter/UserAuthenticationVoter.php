@@ -5,6 +5,7 @@ namespace App\Security\Voter;
 use App\Entity\User;
 use App\Enum\AdminPermissionsType;
 use Override;
+use phpDocumentor\Reflection\Types\This;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -55,6 +56,10 @@ final class UserAuthenticationVoter extends Voter
     // SMS Configuration page
     public const string SMS_CONFIG_WRITE = 'SMS_CONFIG_WRITE';
     public const string SMS_CONFIG_READ = 'SMS_CONFIG_READ';
+
+    // Domains BlackList management page
+    public const string DOMAINS_BLACKLIST_WRITE = 'DOMAINS_BLACKLIST_WRITE';
+    public const string DOMAINS_BLACKLIST_READ = 'DOMAINS_BLACKLIST_READ';
     // Portal Statistics page
     public const string PORTAL_STATISTICS_READ = 'PORTAL_STATISTICS_READ';
     // Connectivity Statistics page
@@ -113,6 +118,9 @@ final class UserAuthenticationVoter extends Voter
 
                 self::SMS_CONFIG_WRITE,
                 self::SMS_CONFIG_READ,
+
+                self::DOMAINS_BLACKLIST_WRITE,
+                self::DOMAINS_BLACKLIST_READ,
 
                 self::PORTAL_STATISTICS_READ,
                 self::CONNECTIVITY_STATISTICS_READ,
@@ -236,6 +244,9 @@ final class UserAuthenticationVoter extends Voter
                 $this->hasPermission($user, AdminPermissionsType::SMS_CONFIG_READ)
                 || $this->hasPermission($user, AdminPermissionsType::SMS_CONFIG_WRITE),
 
+            self::DOMAINS_BLACKLIST_WRITE => $this->hasPermission($user, AdminPermissionsType::DOMAINS_BLACKLIST_WRITE),
+            self::DOMAINS_BLACKLIST_READ => $this->hasPermission($user, AdminPermissionsType::DOMAINS_BLACKLIST_READ) || $this->hasPermission($user, AdminPermissionsType::DOMAINS_BLACKLIST_WRITE),
+
             self::PORTAL_STATISTICS_READ =>
             $this->hasPermission($user, AdminPermissionsType::PORTAL_STATISTICS_READ),
 
@@ -297,7 +308,10 @@ final class UserAuthenticationVoter extends Voter
             || $this->hasPermission($user, AdminPermissionsType::RADIUS_PROFILE_CONFIG_WRITE)
 
             || $this->hasPermission($user, AdminPermissionsType::SMS_CONFIG_READ)
-            || $this->hasPermission($user, AdminPermissionsType::SMS_CONFIG_WRITE);
+            || $this->hasPermission($user, AdminPermissionsType::SMS_CONFIG_WRITE)
+
+            || $this->hasPermission($user, AdminPermissionsType::DOMAINS_BLACKLIST_READ)
+            || $this->hasPermission($user, AdminPermissionsType::DOMAINS_BLACKLIST_WRITE);
     }
 
     private function hasPortalStatistics(User $user): bool
