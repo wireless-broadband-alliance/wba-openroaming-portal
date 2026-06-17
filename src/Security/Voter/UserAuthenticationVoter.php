@@ -245,7 +245,9 @@ final class UserAuthenticationVoter extends Voter
                 || $this->hasPermission($user, AdminPermissionsType::SMS_CONFIG_WRITE),
 
             self::DOMAINS_BLACKLIST_WRITE => $this->hasPermission($user, AdminPermissionsType::DOMAINS_BLACKLIST_WRITE),
-            self::DOMAINS_BLACKLIST_READ => $this->hasPermission($user, AdminPermissionsType::DOMAINS_BLACKLIST_READ) || $this->hasPermission($user, AdminPermissionsType::DOMAINS_BLACKLIST_WRITE),
+            self::DOMAINS_BLACKLIST_READ =>
+                $this->hasPermission($user, AdminPermissionsType::DOMAINS_BLACKLIST_READ) ||
+                $this->hasPermission($user, AdminPermissionsType::DOMAINS_BLACKLIST_WRITE),
 
             self::PORTAL_STATISTICS_READ =>
             $this->hasPermission($user, AdminPermissionsType::PORTAL_STATISTICS_READ),
