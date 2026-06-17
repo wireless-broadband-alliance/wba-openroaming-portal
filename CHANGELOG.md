@@ -1,5 +1,10 @@
 # Changelog
 
+# Release V1.11.1
+
+- Added missing write permissions for Portal Statistics and Connectivity Statistics.
+- Fixed dashboard access permission inconsistencies affecting some operations.
+
 # Release V1.11.0
 
 - Updated both statistics pages on the dashboard interface
