@@ -3,6 +3,12 @@
 # Release V1.11.1
 
 - Fix certificate chain validation to support multi-certificate PEM bundles
+- Fixed dashboard access permission inconsistencies affecting some operations.
+- It's required to run the new migrations this will remove the unused settings of freeradius connectivity.
+  - Run the migrations with:
+    ```bash
+    php bin/console doctrine:migrations:migrate
+    ```
 
 # Release V1.11.0
 

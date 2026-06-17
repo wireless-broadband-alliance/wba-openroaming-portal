@@ -8,6 +8,7 @@ use App\DTO\SourceBlacklistDTO;
 use App\Entity\DomainBlacklist;
 use App\Entity\DomainSource;
 use App\Entity\User;
+use App\Enum\AdminPermissionsType;
 use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\DomainMatchType;
@@ -50,7 +51,7 @@ class DomainBlacklistController extends AbstractController
     }
 
     #[Route('/dashboard/settings/domains', name: 'admin_dashboard_settings_domains')]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(AdminPermissionsType::DOMAINS_BLACKLIST_READ->value)]
     public function domainsManagement(
         Request $request,
         #[MapQueryParameter] int $page = 1,
@@ -76,7 +77,13 @@ class DomainBlacklistController extends AbstractController
         $addDomainForm = $this->createForm(DomainBlacklistAddType::class, $addDomainDTO);
         $addDomainForm->handleRequest($request);
 
-        if ($addDomainForm->isSubmitted() && $addDomainForm->isValid()) {
+        if (
+            $addDomainForm->isSubmitted() &&
+            $addDomainForm->isValid()
+        ) {
+            if (!$this->isGranted(AdminPermissionsType::DOMAINS_BLACKLIST_WRITE->value)) {
+                throw $this->createAccessDeniedException();
+            }
             $object = new DomainBlacklist();
             $addDomainDTO->applyToEntity($object);
             $object->setCreatedAt(new DateTimeImmutable());
@@ -111,7 +118,13 @@ class DomainBlacklistController extends AbstractController
         $sourceForm = $this->createForm(SourceBlacklistType::class, $sourceDTO);
         $sourceForm->handleRequest($request);
 
-        if ($sourceForm->isSubmitted() && $sourceForm->isValid()) {
+        if (
+            $sourceForm->isSubmitted() &&
+            $sourceForm->isValid()
+        ) {
+            if (!$this->isGranted(AdminPermissionsType::DOMAINS_BLACKLIST_WRITE->value)) {
+                throw $this->createAccessDeniedException();
+            }
             $source = new DomainSource($sourceDTO->input);
             $source->setActive(true);
             $this->entityManager->persist($source);
@@ -234,7 +247,7 @@ class DomainBlacklistController extends AbstractController
         '/dashboard/settings/domains/edit/{id<\d+>}',
         name: 'admin_dashboard_settings_edit_domains',
     )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(AdminPermissionsType::DOMAINS_BLACKLIST_WRITE->value)]
     public function editDomain(
         DomainBlacklist $domain,
         Request $request
@@ -311,7 +324,7 @@ class DomainBlacklistController extends AbstractController
         name: 'admin_dashboard_blacklist_delete_domain',
         methods: ['POST']
     )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(AdminPermissionsType::DOMAINS_BLACKLIST_WRITE->value)]
     public function deleteDomains(
         int $id,
         Request $request,
@@ -366,7 +379,7 @@ class DomainBlacklistController extends AbstractController
         name: 'admin_domain_source_delete',
         methods: ['POST']
     )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(AdminPermissionsType::DOMAINS_BLACKLIST_WRITE->value)]
     public function deleteDomainsSource(
         int $id,
         Request $request,
@@ -419,7 +432,7 @@ class DomainBlacklistController extends AbstractController
         name: 'admin_domain_source_toggle',
         methods: ['POST']
     )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(AdminPermissionsType::DOMAINS_BLACKLIST_WRITE->value)]
     public function toggleDomainSource(
         int $id,
         Request $request
@@ -483,7 +496,7 @@ class DomainBlacklistController extends AbstractController
         name: 'admin_domain_source_refresh_all',
         methods: ['GET']
     )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(AdminPermissionsType::DOMAINS_BLACKLIST_WRITE->value)]
     public function refreshAllDomainSource(
         Request $request,
         KernelInterface $kernel
@@ -551,7 +564,7 @@ class DomainBlacklistController extends AbstractController
         name: 'admin_domain_source_refresh',
         methods: ['POST']
     )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(AdminPermissionsType::DOMAINS_BLACKLIST_WRITE->value)]
     public function refreshDomainSource(
         int $id,
         Request $request,
