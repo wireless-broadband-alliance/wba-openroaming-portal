@@ -2,6 +2,7 @@
 
 # Release V1.11.1
 
+- Fix certificate chain validation to support multi-certificate PEM bundles
 - Added missing write permissions for Portal Statistics and Connectivity Statistics.
 - Fixed dashboard access permission inconsistencies affecting some operations.
 

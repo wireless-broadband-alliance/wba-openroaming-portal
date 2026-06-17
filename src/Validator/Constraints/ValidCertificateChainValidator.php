@@ -33,24 +33,56 @@ class ValidCertificateChainValidator extends ConstraintValidator
         }
 
         $cert = @openssl_x509_read($certContent);
-        $chain = @openssl_x509_read($chainContent);
-
-        if (!$cert || !$chain) {
-            return; // Already validated elsewhere
-        }
-
-        $certData = openssl_x509_parse($cert);
-        $chainData = openssl_x509_parse($chain);
-
-        if (!$certData || !$chainData || !isset($certData['issuer'], $chainData['subject'])) {
+        if (!$cert) {
             return;
         }
 
-        // Compare issuer of certificate with subject of chain
-        if ($certData['issuer'] !== $chainData['subject']) {
+        $certData = openssl_x509_parse($cert);
+        if (!$certData || !isset($certData['issuer'])) {
+            return;
+        }
+
+        // Extract ALL certs from the chain PEM file
+        $chainCerts = $this->parsePemBundle($chainContent);
+        if ($chainCerts === []) {
+            return;
+        }
+
+        // Check if ANY cert in the chain has a subject matching the leaf's issuer
+        $issuerFound = false;
+        foreach ($chainCerts as $chainCertPem) {
+            $chainCert = @openssl_x509_read($chainCertPem);
+            if (!$chainCert) {
+                continue;
+            }
+
+            $chainData = openssl_x509_parse($chainCert);
+            if (!$chainData || !isset($chainData['subject'])) {
+                continue;
+            }
+
+            if ($certData['issuer'] === $chainData['subject']) {
+                $issuerFound = true;
+                break;
+            }
+        }
+
+        if (!$issuerFound) {
             $this->context->buildViolation($constraint->message)
                 ->atPath($constraint->chainField)
                 ->addViolation();
         }
+    }
+
+    /** @return list<string> */
+    private function parsePemBundle(string $content): array
+    {
+        preg_match_all(
+            '/-----BEGIN CERTIFICATE-----.*?-----END CERTIFICATE-----/s',
+            $content,
+            $matches
+        );
+
+        return $matches[0];
     }
 }
