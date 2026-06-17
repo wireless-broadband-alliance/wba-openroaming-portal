@@ -83,6 +83,6 @@ class ValidCertificateChainValidator extends ConstraintValidator
             $matches
         );
 
-        return $matches[0] ?? [];
+        return $matches[0];
     }
 }
