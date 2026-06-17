@@ -62,6 +62,9 @@ readonly class AdminPermissionsFormBuilder
         ]);
     }
 
+    /**
+     * @return array<string, PermissionLevel>
+     */
     private function getPermissionChoices(string $field): array
     {
         $choices = [
