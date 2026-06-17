@@ -75,6 +75,7 @@ enum AdminPermissionsType: string
             self::LDAP_SYNCHRONIZATION_WRITE, self::LDAP_SYNCHRONIZATION_READ => 'LDAPSynchronization',
             self::RADIUS_PROFILE_CONFIG_WRITE, self::RADIUS_PROFILE_CONFIG_READ => 'radiusProfileConfiguration',
             self::SMS_CONFIG_WRITE, self::SMS_CONFIG_READ => 'SMSConfiguration',
+            self::DOMAINS_BLACKLIST_READ, self::DOMAINS_BLACKLIST_WRITE => 'domainsBlacklist',
             self::PORTAL_STATISTICS_READ => 'portalStatistics',
             self::CONNECTIVITY_STATISTICS_READ => 'connectivityStatistics',
             self::ACTIVITY_LOGS_READ => 'activityLogs',
