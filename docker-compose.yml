@@ -1,7 +1,7 @@
 ---
 services:
   web:
-    image: ghcr.io/wireless-broadband-alliance/wba-openroaming-portal:1.11.0
+    image: ghcr.io/wireless-broadband-alliance/wba-openroaming-portal:1.11.1
     env_file:
       - .env
     volumes:
@@ -9,7 +9,7 @@ services:
       - ./pgp_public_key/:/var/www/openroaming/pgp_public_key/
       - ./signing-keys/:/var/www/openroaming/signing-keys/
       - ./var/certs/:/var/www/openroaming/var/certs/
-      - geoLiteDB:/var/www/openroaming/geoLiteDB
+      - ./geoLiteDB/:/var/www/openroaming/geoLiteDB/
       - uploads:/var/www/openroaming/public/resources/uploaded
       - ./service-config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./service-config/nginx/sites:/etc/nginx/conf.d:ro
