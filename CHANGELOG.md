@@ -1,5 +1,9 @@
 # Changelog
 
+# Release V1.11.1
+
+- Fix certificate chain validation to support multi-certificate PEM bundles
+
 # Release V1.11.0
 
 - Updated both statistics pages on the dashboard interface
