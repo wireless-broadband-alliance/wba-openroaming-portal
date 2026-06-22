@@ -90,6 +90,19 @@ These are some of the most important tools used on the development of this proje
 - Docker compose (responsible for managing multiple containers)
 - Git (optional, if the user prefers to clone the repository)
 
+# Support Policy
+
+Technical support is strictly limited to deployments that follow baseline deployment:
+
+* **Supported Environments Only:** Assistance is exclusively provided for environments meeting the
+   specified [Prerequisites](#prerequisites). Deployments on unsupported, custom, or undocumented environments are
+   strictly out of scope.
+* **Latest Production Release:** Support is only provided for the most recent stable version of the portal. Legacy
+   or outdated versions will not receive troubleshooting, bug fixes, or patch assistance.
+* **Zero Core Code Modifications:** The application must run on standard repository code. Any custom modifications,
+   changes, or rewrites to the source code—excluding the documented environment variable configurations—will
+   completely void support eligibility.
+
 ## How to get the Project
 
 There are two options to retrieve the project:
