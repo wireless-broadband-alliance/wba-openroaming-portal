@@ -1,5 +1,10 @@
 # Changelog
 
+# Release V1.11.2
+
+- Eliminate external CDN dependency on `rsms.me``assets/fonts/inter/`
+- Remove unversioned external font CDN links without Subresource Integrity (SRI) from base twig template
+    
 # Release V1.11.1
 
 - Fix certificate chain validation to support multi-certificate PEM bundles
