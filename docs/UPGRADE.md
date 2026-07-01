@@ -127,6 +127,47 @@ Use the following checklist before starting the upgrade process:
 
 ## Step-by-Step Procedure
 
+Follow these steps for every upgrade, regardless of version:
+
+1. **Pull the latest code**
+
+```bash
+git pull origin master
+```
+
+2. **Pull the latest Docker images**
+
+```bash
+docker compose pull
+```
+
+3. **Restart the containers with the new images**
+
+```bash
+docker compose up -d
+```
+
+4. **Run any version-specific commands**  
+   Check the [Upgrade Path Matrix](#upgrade-path-matrix) for your current version and run any required commands inside
+   the container. Example:
+
+```bash
+docker compose exec web php bin/console doctrine:migrations:migrate
+```
+
+5. **Clear the cache**
+
+```bash
+docker compose exec web php bin/console cache:clear
+```
+
+6. **Verify the portal is running correctly**  
+   Check logs for errors:
+
+```bash
+docker compose logs -f web
+```
+
 ---
 
 ## Release-Specific Notes: Version 1.8.1
