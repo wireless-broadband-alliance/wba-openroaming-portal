@@ -127,9 +127,9 @@ Use the following checklist before starting the upgrade process:
 
 ## Step-by-Step Procedure
 
-Follow these steps for every upgrade, regardless of version:
+Follow these steps generic steps updating the portal:
 
-1. **Pull the latest code**
+1. **Pull the latest version**
 
 ```bash
 git pull origin master
@@ -141,7 +141,7 @@ git pull origin master
 docker compose pull
 ```
 
-3. **Restart the containers with the new images**
+3. **Restart the containers**
 
 ```bash
 docker compose up -d
