@@ -99,6 +99,9 @@ Upgrading your system requires caution and preparation. Follow these general gui
 | 1.9.0           | 1.9.1          | Minor patch release — no commands required.                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | 1.9.1           | 1.10.0         | Run `php bin/console doctrine:migrations:migrate`. After upgrading, run `php bin/console prepare-release:v1100` **once** to migrate existing administrator permissions to the new Super Admin role hierarchy. Then fix VichUploader cache permissions: `chown -R www-data:www-data /var/www/openroaming/var/cache/prod/vich_uploader && chmod -R 777 /var/www/openroaming/var/cache/prod/vich_uploader`. All actions should be performed while the portal is **offline or restricted**. |
 | 1.10.x          | 1.11.0         | No migrations required. Update `.env` file: change `serverVersion=8` to `serverVersion=8.0.44` (or your actual MySQL version) in both `DATABASE_URL` and `DATABASE_FREERADIUS_URL`. Refer to `.env.sample` for reference.                                                                                                                                                                                                                                                               |
+| 1.11.0          | 1.11.1         | Run `php bin/console doctrine:migrations:migrate`. To remove outdated settings from the database.                                                                                                                                                                                                                                                                                                                                                                                       |
+| 1.11.1          | 1.11.2         | No migrations required. Font files for Inter are now self-hosted under `public/fonts/inter/`. No additional steps required.                                                                                                                                                                                                                                                                                                                                                             |
+
 Use this table to determine the exact upgrade steps based on your current version.
 
 ## Upgrade Checklist
@@ -123,6 +126,52 @@ Use the following checklist before starting the upgrade process:
 ---
 
 ## Step-by-Step Procedure
+
+Follow these steps generic steps updating the portal:
+
+1. **Navigate to the project folder and pull the latest version**
+
+   Navigate to the directory where the portal is installed on your server, then pull the latest version:
+
+```bash
+   cd /path/to/your/portal
+   git pull
+```
+
+> **Note:** Replace `/path/to/your/portal` with the actual path where the portal is installed on your server
+
+2. **Pull the latest Docker images**
+
+```bash
+docker compose pull
+```
+
+3. **Restart the containers**
+
+```bash
+docker compose up -d
+```
+
+4. **Run any version-specific commands**  
+   Check the [Upgrade Path Matrix](#upgrade-path-matrix) for your current version and run any required commands inside
+   the container. Example:
+
+```bash
+docker compose exec web php bin/console doctrine:migrations:migrate
+```
+
+5. **Clear the cache**
+
+```bash
+docker compose exec web php bin/console cache:clear
+```
+
+6. **Verify the portal is running correctly**  
+   Check logs for errors:
+
+```bash
+docker compose logs -f web
+```
 
 ---
 
