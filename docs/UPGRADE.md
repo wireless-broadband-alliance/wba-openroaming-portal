@@ -129,11 +129,16 @@ Use the following checklist before starting the upgrade process:
 
 Follow these steps generic steps updating the portal:
 
-1. **Pull the latest version**
+1. **Navigate to the project folder and pull the latest version**
+
+   Navigate to the directory where the portal is installed on your server, then pull the latest version:
 
 ```bash
-git pull origin master
+   cd /path/to/your/portal
+   git pull origin master
 ```
+
+> **Note:** Replace `/path/to/your/portal` with the actual path where the portal is installed on your server
 
 2. **Pull the latest Docker images**
 
