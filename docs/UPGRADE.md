@@ -135,7 +135,7 @@ Follow these steps generic steps updating the portal:
 
 ```bash
    cd /path/to/your/portal
-   git pull origin master
+   git pull
 ```
 
 > **Note:** Replace `/path/to/your/portal` with the actual path where the portal is installed on your server
