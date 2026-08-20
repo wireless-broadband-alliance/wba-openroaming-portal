@@ -107,8 +107,12 @@ test-phpstan:
     - echo "memory_limit=2G" > /usr/local/etc/php/conf.d/memory.ini || true
     - COMPOSER_CACHE_DIR=composer-cache composer install
   script:
+    - php -d memory_limit=4G vendor/bin/phpstan analyse --error-format=gitlab --no-progress . > gl-code-quality-report.json || true
     - php -d memory_limit=4G vendor/bin/phpstan analyse .
-
+  artifacts:
+    when: always
+    reports:
+      codequality: gl-code-quality-report.json
   stage: test
 
 eslint:
@@ -170,4 +174,3 @@ include:
   - template: Jobs/Dependency-Scanning.gitlab-ci.yml
   - template: Jobs/Secret-Detection.gitlab-ci.yml
   - template: Jobs/SAST.gitlab-ci.yml
-  - template: Jobs/Code-Quality.gitlab-ci.yml
