@@ -3,7 +3,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile-dev
+      dockerfile: DockerfileDev
     env_file:
       - .env
     volumes:

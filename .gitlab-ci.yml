@@ -24,9 +24,9 @@ build_test_image:
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
-    - docker pull $CI_REGISTRY_IMAGE:tests-latest || true
-    - docker build --cache-from $CI_REGISTRY_IMAGE:tests-latest -t $CI_REGISTRY_IMAGE:tests-latest -f DockerfileTests .
-    - docker push $CI_REGISTRY_IMAGE:tests-latest
+    - docker pull $CI_REGISTRY_IMAGE:cra-tests || true
+    - docker build --cache-from $CI_REGISTRY_IMAGE:cra-tests -t $CI_REGISTRY_IMAGE:cra-tests -f DockerfileTests .
+    - docker push $CI_REGISTRY_IMAGE:cra-tests
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       changes:
@@ -68,7 +68,7 @@ yamllint:
 
 
 test-rector:
-  image: "$CI_REGISTRY_IMAGE:tests-latest"
+  image: "$CI_REGISTRY_IMAGE:cra-tests"
   allow_failure: false
   before_script:
     - cp .env.sample .env
@@ -78,7 +78,7 @@ test-rector:
   stage: test
 
 test-twig:
-  image: "$CI_REGISTRY_IMAGE:tests-latest"
+  image: "$CI_REGISTRY_IMAGE:cra-tests"
   allow_failure: false
   before_script:
     - cp .env.sample .env
@@ -88,7 +88,7 @@ test-twig:
   stage: test
 
 test-phpstan:
-  image: "$CI_REGISTRY_IMAGE:tests-latest"
+  image: "$CI_REGISTRY_IMAGE:cra-tests"
   allow_failure: false
   before_script:
     - cp .env.sample .env
