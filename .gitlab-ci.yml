@@ -70,8 +70,11 @@ yamllint:
 test-rector:
   image: "$CI_REGISTRY_IMAGE:cra-tests"
   allow_failure: false
+  variables:
+    COMPOSER_MEMORY_LIMIT: "-1"
   before_script:
     - cp .env.sample .env
+    - echo "memory_limit=2G" > /usr/local/etc/php/conf.d/memory.ini || true
     - COMPOSER_CACHE_DIR=composer-cache composer install
   script:
     - vendor/bin/rector process src --dry-run
@@ -80,8 +83,11 @@ test-rector:
 test-twig:
   image: "$CI_REGISTRY_IMAGE:cra-tests"
   allow_failure: false
+  variables:
+    COMPOSER_MEMORY_LIMIT: "-1"
   before_script:
     - cp .env.sample .env
+    - echo "memory_limit=2G" > /usr/local/etc/php/conf.d/memory.ini || true
     - COMPOSER_CACHE_DIR=composer-cache composer install
   script:
     - vendor/bin/twig-cs-fixer lint ./templates
@@ -90,8 +96,11 @@ test-twig:
 test-phpstan:
   image: "$CI_REGISTRY_IMAGE:cra-tests"
   allow_failure: false
+  variables:
+    COMPOSER_MEMORY_LIMIT: "-1"
   before_script:
     - cp .env.sample .env
+    - echo "memory_limit=2G" > /usr/local/etc/php/conf.d/memory.ini || true
     - COMPOSER_CACHE_DIR=composer-cache composer install
   script:
     - php -d memory_limit=4G vendor/bin/phpstan analyse .

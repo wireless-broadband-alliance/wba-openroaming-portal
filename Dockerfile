@@ -8,7 +8,7 @@ WORKDIR /app
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 
-# Install build dependencies and required PHP extensions
+# Install build dependencies and compile all PHP extensions
 RUN apk add --no-cache \
     git \
     zip \
@@ -59,9 +59,11 @@ ENV TZ=UTC
 WORKDIR /var/www/openroaming
 ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 
-COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
+# Align www-data UID/GID to 33:33 for non-root execution
+RUN sed -i -E 's/www-data:x:82:82/www-data:x:33:33/' /etc/passwd \
+ && sed -i -E 's/www-data:x:82/www-data:x:33/' /etc/group
 
-# Install runtime tools, CLI packages, and PHP extensions
+# Install runtime tools, shared libraries, and utilities
 RUN apk add --no-cache \
     nginx \
     supervisor \
@@ -74,33 +76,37 @@ RUN apk add --no-cache \
     gnupg \
     gpgme \
     libgpg-error \
+    libpng \
+    libjpeg-turbo \
+    freetype \
+    libavif \
+    libwebp \
+    libxpm \
+    zlib \
+    icu-libs \
+    libstdc++ \
+    libgcc \
+    libzip \
+    openldap \
+    libmemcached-libs \
+    cyrus-sasl \
+    libxml2 \
+    libxslt \
+    sqlite-libs \
+    yaml \
+    libcap \
     python3 \
     py3-pip \
  && (wget --no-check-certificate -O /usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt https://tetrapi.pt/gp/PaloAlto_SSLInspection_ForwardTrust.crt 2>/dev/null && update-ca-certificates || true) \
  && python3 -m venv /opt/certbot \
  && /opt/certbot/bin/pip install --no-cache-dir certbot certbot-nginx certbot-dns-cloudflare certbot-dns-google \
  && ln -s /opt/certbot/bin/certbot /usr/local/bin/certbot \
- && install-php-extensions \
-    intl \
-    zip \
-    bcmath \
-    mbstring \
-    pdo \
-    pdo_mysql \
-    pdo_sqlite \
-    soap \
-    gd \
-    dom \
-    exif \
-    opcache \
-    ldap \
-    memcached-3.2.0 \
- && apk add --no-cache --virtual .gnupg-build-deps $PHPIZE_DEPS gpgme-dev libgpg-error-dev \
- && pecl install gnupg-1.5.0 \
- && docker-php-ext-enable gnupg \
- && apk del .gnupg-build-deps \
- && update-ca-certificates \
- && rm -f /usr/local/bin/install-php-extensions
+ && setcap 'cap_net_bind_service=+ep' /usr/sbin/nginx \
+ && update-ca-certificates
+
+# Copy compiled PHP extensions and configurations directly from vendor stage
+COPY --from=vendor /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
+COPY --from=vendor /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
 
 # Set PHP memory limit and error reporting
 RUN echo "memory_limit=1024M" > /usr/local/etc/php/conf.d/memory.ini \
@@ -122,9 +128,12 @@ COPY service-config/nginx/mime.types /etc/nginx/mime.types
 COPY service-config/nginx/fastcgi_params /etc/nginx/fastcgi_params
 COPY service-config/nginx/sites /etc/nginx/conf.d/
 
-# Setup directories and permissions
-RUN mkdir -p /run/nginx /run/php /usr/share/nginx/modules /var/log/supervisor /var/log/nginx /var/www/openroaming/var \
- && chown -R www-data:www-data /var/www/openroaming /run/nginx /run/php /var/log/nginx /var/log/supervisor
+# Setup directories and permissions for www-data (uid=33)
+RUN mkdir -p /run/nginx /run/php /usr/share/nginx/modules /var/log/supervisor /var/log/nginx /var/lib/nginx /var/www/openroaming/var \
+ && chown -R www-data:www-data /var/www/openroaming /run/nginx /run/php /var/log/nginx /var/log/supervisor /var/lib/nginx /opt/certbot /etc/supervisor
+
+# Explicit non-root privilege drop
+USER www-data
 
 EXPOSE 80
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

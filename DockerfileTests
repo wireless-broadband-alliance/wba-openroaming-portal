@@ -40,6 +40,7 @@ RUN apk add --no-cache \
  && pecl install gnupg-1.5.0 \
  && docker-php-ext-enable gnupg \
  && apk del .gnupg-build-deps \
+ && echo "memory_limit=2G" > /usr/local/etc/php/conf.d/memory.ini \
  && echo "error_reporting=E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED" > /usr/local/etc/php/conf.d/error_reporting.ini \
  && rm -f /usr/local/bin/install-php-extensions
 
