@@ -8,6 +8,10 @@ stages:
   - build
   - scan
 
+variables:
+  DS_MAX_DEPTH: "-1"
+  DS_EXCLUDED_PATHS: "vendor, node_modules, var, public"
+
 
 workflow:
   rules:
