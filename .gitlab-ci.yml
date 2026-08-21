@@ -146,8 +146,10 @@ trivy-scan:
     TRIVY_NO_PROGRESS: "true"
   before_script:
     - export TRIVY_VERSION=$(wget -qO - "https://api.github.com/repos/aquasecurity/trivy/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
-    - echo $TRIVY_VERSION
+    - echo "Trivy version: $TRIVY_VERSION"
     - wget --no-verbose https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz -O - | tar -zxvf -
+    # Install Syft for Container SBOM generation
+    - wget -qO - https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
     # Login to Docker registry using GitLab credentials
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
   script:
@@ -157,9 +159,14 @@ trivy-scan:
       echo "Scanning Docker image: $IMAGE"
       ./trivy image --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --ignore-status will_not_fix,fix_deferred,fixed --format template --template "@contrib/gitlab.tpl" -o trivy-image-report.json "$IMAGE"
       ./trivy image --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --ignore-status will_not_fix,fix_deferred,fixed --format table "$IMAGE"
-    # Scan CycloneDX SBOM (Dependency & License Scanning)
-    - echo "Generating CycloneDX SBOM and License Scanning Report"
-    - ./trivy fs --scanners vuln,license --format cyclonedx -o gl-sbom-report.cdx.json .
+    # Syft: Generate container SBOM targeting final Docker image layers
+    - echo "Generating Container SBOM for $IMAGE using Syft"
+    - syft "$IMAGE" -o cyclonedx-json=gl-sbom-image.cdx.json
+    - syft "$IMAGE" -o spdx-json=sbom-image.spdx.json
+    - syft "$IMAGE" -o table
+    # Filesystem CycloneDX SBOM scan (Source dependencies & License Scanning)
+    - echo "Generating Filesystem CycloneDX SBOM and License Scanning Report"
+    - ./trivy fs --scanners vuln,license --format cyclonedx -o gl-sbom-fs.cdx.json .
     # Scan do Dockerfile
     - echo "Scanning Dockerfile"
     - ./trivy config --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --format template --template "@contrib/gitlab.tpl" -o trivy-dockerfile-report.json ./Dockerfile
@@ -168,11 +175,15 @@ trivy-scan:
     paths:
       - trivy-image-report.json
       - trivy-dockerfile-report.json
-      - gl-sbom-report.cdx.json
+      - gl-sbom-image.cdx.json
+      - gl-sbom-fs.cdx.json
+      - sbom-image.spdx.json
     expire_in: 1 hour
     reports:
       container_scanning: trivy-image-report.json
-      cyclonedx: gl-sbom-report.cdx.json
+      cyclonedx:
+        - gl-sbom-image.cdx.json
+        - gl-sbom-fs.cdx.json
 
 
 include:
