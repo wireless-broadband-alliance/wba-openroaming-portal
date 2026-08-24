@@ -44,14 +44,10 @@ class InstallationProgress
     private ?string $emailAdmin = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $passwordAdmin = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
     private ?string $confirmCodeAdmin = null;
 
-    #[ORM\Column]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?bool $adminConfirmation = false;
+    #[ORM\Column(type: Types::BOOLEAN)]
+    private bool $adminConfirmed = false;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $updatedAt = null;
@@ -163,18 +159,6 @@ class InstallationProgress
         return $this;
     }
 
-    public function getPasswordAdmin(): ?string
-    {
-        return $this->passwordAdmin;
-    }
-
-    public function setPasswordAdmin(?string $passwordAdmin): static
-    {
-        $this->passwordAdmin = $passwordAdmin;
-
-        return $this;
-    }
-
     public function getConfirmCodeAdmin(): ?string
     {
         return $this->confirmCodeAdmin;
@@ -185,14 +169,16 @@ class InstallationProgress
         $this->confirmCodeAdmin = $confirmCodeAdmin;
     }
 
-    public function getAdminConfirmation(): ?bool
+    public function isAdminConfirmed(): bool
     {
-        return $this->adminConfirmation;
+        return $this->adminConfirmed;
     }
 
-    public function setAdminConfirmation(?bool $adminConfirmation): void
+    public function setAdminConfirmed(bool $adminConfirmed): static
     {
-        $this->adminConfirmation = $adminConfirmation;
+        $this->adminConfirmed = $adminConfirmed;
+
+        return $this;
     }
 
     public function getUpdatedAt(): ?\DateTimeInterface

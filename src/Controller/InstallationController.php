@@ -585,9 +585,10 @@ class InstallationController extends AbstractController
 
             if ($adminUser instanceof User) {
                 $hashedPassword = $this->userPasswordHasher->hashPassword($adminUser, $adminPassword);
+                $adminUser->setPassword($hashedPassword);
+                $this->entityManager->persist($adminUser);
                 $lastInstallation->setUpdatedAt(new DateTime());
                 $lastInstallation->setEmailAdmin($adminEmail);
-                $lastInstallation->setPasswordAdmin($hashedPassword);
                 $lastInstallation->setInstallationState(ProcessStatusType::IN_PROGRESS);
                 $this->entityManager->persist($lastInstallation);
                 $this->entityManager->flush();
@@ -712,10 +713,11 @@ class InstallationController extends AbstractController
 
             if ($code === $lastInstallation->getConfirmCodeAdmin()) {
                 $adminUser = $this->userRepository->findSuperAdmin();
-                $lastInstallation->setAdminConfirmation(true);
+
+                $lastInstallation->setAdminConfirmed(true);
+
                 if ($adminUser instanceof User) {
                     $adminUser->setEmail($lastInstallation->getEmailAdmin());
-                    $adminUser->setPassword($lastInstallation->getPasswordAdmin());
                     $adminUser->setUuid($lastInstallation->getEmailAdmin());
                 }
 

@@ -83,16 +83,10 @@ readonly class InstallationService
                             if ($jwtPassphrase) {
                                 $installationProgress->setJwtPassphrase($jwtPassphrase);
 
-                                $jwtPassphrase = $this->parameterBag->get('app.jwt_passphrase');
-                                if ($jwtPassphrase) {
-                                    $installationProgress->setJwtPassphrase($jwtPassphrase);
-
-                                    $superAdmin = $this->userRepository->findSuperAdmin();
-                                    if ($superAdmin && $superAdmin->getEmail() !== DefaultUser::ADMIN->value) {
-                                        $installationProgress->setEmailAdmin($superAdmin->getEmail());
-                                        $installationProgress->setPasswordAdmin($superAdmin->getPassword());
-                                        $installationProgress->setAdminConfirmation(true);
-                                    }
+                                $superAdmin = $this->userRepository->findSuperAdmin();
+                                if ($superAdmin && $superAdmin->getEmail() !== DefaultUser::ADMIN->value) {
+                                    $installationProgress->setEmailAdmin($superAdmin->getEmail());
+                                    $installationProgress->setAdminConfirmed(true);
                                 }
                             }
                         }
@@ -125,15 +119,13 @@ readonly class InstallationService
 
     public function getStep(InstallationProgress $installationProgress): string
     {
-
         if (
             $installationProgress->getDbOpenRoaming() &&
             $installationProgress->getDbFreeradius()
         ) {
             if (
                 $installationProgress->getEmailAdmin() &&
-                $installationProgress->getPasswordAdmin() &&
-                $installationProgress->getAdminConfirmation()
+                $installationProgress->isAdminConfirmed()
             ) {
                 if (
                     $this->checkDatabaseSettings($installationProgress) &&
@@ -426,7 +418,6 @@ readonly class InstallationService
             $adminUser = $this->userRepository->findSuperAdmin();
             if ($adminUser instanceof User) {
                 $adminUser->setEmail($lastCompleted->getEmailAdmin());
-                $adminUser->setPassword($lastCompleted->getPasswordAdmin());
                 $this->entityManager->persist($adminUser);
                 $this->entityManager->flush();
             }
