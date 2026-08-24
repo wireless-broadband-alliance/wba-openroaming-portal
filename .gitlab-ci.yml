@@ -146,7 +146,7 @@ trivy-scan:
     TRIVY_NO_PROGRESS: "true"
   before_script:
     - export TRIVY_VERSION=$(wget -qO - "https://api.github.com/repos/aquasecurity/trivy/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
-    - echo "Trivy version: $TRIVY_VERSION"
+    - 'echo "Trivy version: $TRIVY_VERSION"'
     - wget --no-verbose https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz -O - | tar -zxvf -
     # Install Syft for Container SBOM generation
     - wget -qO - https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
