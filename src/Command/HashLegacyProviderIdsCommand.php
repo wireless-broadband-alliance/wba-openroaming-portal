@@ -63,7 +63,6 @@ class HashLegacyProviderIdsCommand extends Command
             foreach ($auths as $row) {
                 $originalValue = $row['provider_id'];
 
-                // Ignora se já for uma hash (64 caracteres hexadecimais)
                 if (preg_match('/^[a-f0-9]{64}$/i', $originalValue)) {
                     continue;
                 }
