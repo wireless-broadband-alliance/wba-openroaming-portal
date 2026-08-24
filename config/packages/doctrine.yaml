@@ -3,6 +3,7 @@ doctrine:
         types:
             revisor_geometry: App\Doctrine\Type\MySQLGeometryType
             point: App\Doctrine\Type\PointType
+            encrypted_string: App\Doctrine\Type\EncryptedStringType
         connections:
             default:
                 url: '%env(resolve:DATABASE_URL)%'
