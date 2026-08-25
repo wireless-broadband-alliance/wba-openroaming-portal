@@ -34,7 +34,7 @@ class RsaEncryptionService
 
             $encryptedData = '';
 
-            // SECURITY FIX: Explicitly use OAEP padding. 
+            // SECURITY FIX: Explicitly use OAEP padding.
             $success = openssl_public_encrypt(
                 $data,
                 $encryptedData,
