@@ -37,7 +37,10 @@ class EncryptLegacySmsParamsCommand extends Command
     {
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
-            $question = new ConfirmationQuestion('This action will encrypt all legacy plain-text SMS Provider Params. [y/N] ', false);
+            $question = new ConfirmationQuestion(
+                'This action will encrypt all legacy plain-text SMS Provider Params. [y/N] ',
+                false
+            );
             /** @var QuestionHelper $helper */
             if (!$helper->ask($input, $output, $question)) {
                 $output->writeln('Command aborted.');
