@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Enum\CertificateFileName;
 use App\Exception\FreeradiusTestException;
 use RuntimeException;
+use Symfony\Component\Process\Process;
 use Throwable;
 
 final class FreeradiusCertificateValidatorService
@@ -126,20 +127,30 @@ final class FreeradiusCertificateValidatorService
 
     private function validateChainFromUser(string $userPem, string $caPath): void
     {
-        $tmp = tempnam(sys_get_temp_dir(), 'cert_');
-        file_put_contents($tmp, $userPem);
+        $realCaPath = realpath($caPath);
 
-        $cmd = sprintf(
-            'openssl verify -CAfile %s %s 2>&1',
-            escapeshellarg($caPath),
-            escapeshellarg($tmp)
-        );
-
-        exec($cmd, $output, $code);
-        unlink($tmp);
-
-        if ($code !== 0) {
+        if ($realCaPath === false || !is_file($realCaPath) || !is_readable($realCaPath)) {
             throw FreeradiusTestException::invalidCertificateChain();
+        }
+
+        $tmp = tempnam(sys_get_temp_dir(), 'cert_');
+        if ($tmp === false) {
+            throw new RuntimeException('Unable to create temporary certificate file.');
+        }
+
+        try {
+            file_put_contents($tmp, $userPem);
+
+            $process = new Process(['/usr/bin/openssl', 'verify', '-CAfile', $realCaPath, $tmp]);
+            $process->run();
+
+            if (!$process->isSuccessful()) {
+                throw FreeradiusTestException::invalidCertificateChain();
+            }
+        } finally {
+            if (file_exists($tmp)) {
+                unlink($tmp);
+            }
         }
     }
 }
