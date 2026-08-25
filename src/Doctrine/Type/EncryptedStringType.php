@@ -11,7 +11,7 @@ class EncryptedStringType extends Type
 
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
-        $column['length'] = $column['length'] ?? 512;
+        $column['length'] ??= 512;
 
         return $platform->getStringTypeDeclarationSQL($column);
     }
