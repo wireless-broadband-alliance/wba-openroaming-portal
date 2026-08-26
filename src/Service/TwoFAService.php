@@ -105,9 +105,10 @@ readonly class TwoFAService
     }
 
     /**
+     * @return string[] Returns an array of plaintext codes for one-time display
      * @throws RandomException
      */
-    public function generateOTPCodes(User $user): void
+    public function generateOTPCodes(User $user): array
     {
         // Remove existing codes
         foreach ($user->getOTPcodes() as $code) {
@@ -115,28 +116,38 @@ readonly class TwoFAService
         }
 
         $nCodes = 12; // Number of codes generated.
+        $plainTextCodes = []; // Store plaintext codes to return to the controller
 
         for ($i = 0; $i < $nCodes; $i++) {
-            $code = $this->generateMixedCode();
+            // Generate the plaintext code and save it for the return array
+            $plainCode = $this->generateMixedCode();
+            $plainTextCodes[] = $plainCode;
+
+            // Hash the code using Argon2id
+            $hashedCode = password_hash($plainCode, PASSWORD_ARGON2ID);
+
             $otpCode = new OTPcode();
-            $otpCode->setCode($code);
+            $otpCode->setCode($hashedCode); // Store ONLY the hash in the DB
             $otpCode->setUser($user);
             $otpCode->setActive(false);
             $otpCode->setCreatedAt(new DateTime());
+
             $user->addOTPcode($otpCode);
             $this->entityManager->persist($otpCode);
         }
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();
+
+        return $plainTextCodes;
     }
 
     public function validateOTPCodes(User $user, string $formCode): bool
     {
         $twoFACodes = $user->getOTPcodes();
         foreach ($twoFACodes as $code) {
-            // Verify if the code exists and if this code is valid
-            if ($code->getCode() === $formCode && $code->isActive()) {
+            // Verify if the code is active and matches the Argon2id hash
+            if ($code->isActive() && password_verify($formCode, $code->getCode())) {
                 // As we can only use the code once, we have to deactivate it after it is used.
                 $code->setActive(false);
                 $this->entityManager->persist($code);

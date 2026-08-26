@@ -641,12 +641,17 @@ class TwoFAController extends AbstractController
             }
             return $this->redirectToRoute('app_landing');
         }
-        if ($user->getOTPcodes()->isEmpty()) {
-            $this->twoFAService->generateOTPCodes($user);
+
+        $plainTextCodes = $session->get('pending_otp_codes');
+
+        if (!$plainTextCodes || $user->getOTPcodes()->isEmpty()) {
+            $plainTextCodes = $this->twoFAService->generateOTPCodes($user);
+            $session->set('pending_otp_codes', $plainTextCodes);
         }
+
         return $this->render('landing/twoFAAuthentication/otpCodes.html.twig', [
             'data' => $data,
-            'codes' => $user->getOTPcodes(),
+            'codes' => $plainTextCodes,
             'user' => $user,
             'context' => $context
         ]);

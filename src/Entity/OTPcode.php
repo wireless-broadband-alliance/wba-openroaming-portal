@@ -20,12 +20,10 @@ class OTPcode
     #[ORM\JoinColumn(nullable: false)]
     private User $user;
 
-    #[ORM\Column(length: 10)]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\Column(length: 255)]
     private string $code;
 
     #[ORM\Column]
-    #[ORM\JoinColumn(nullable: false)]
     private bool $active;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
