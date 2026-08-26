@@ -59,7 +59,9 @@ readonly class TwoFAService
         if ($diff >= $timeToExpireCode) {
             return false;
         }
-        if ($user->getTwoFACode() === $formCode) {
+        $hashedFormCode = hash('sha256', $formCode);
+        $savedCode = $user->getTwoFACode();
+        if ($savedCode && hash_equals($savedCode, $hashedFormCode)) {
             $user->setTwoFAcodeIsActive(false);
             return true;
         }
@@ -73,12 +75,15 @@ readonly class TwoFAService
     {
         // Generate a random verification code with 6 digits
         $verificationCode = (string)random_int(100000, 999999);
-        $user->setTwoFACode($verificationCode);
+
+        $hashedCode = hash('sha256', $verificationCode);
+
+        $user->setTwoFACode($hashedCode);
         $user->setTwoFACodeGeneratedAt(new DateTime());
         $user->setTwoFAcodeIsActive(true);
         $this->userRepository->save($user, true);
 
-        return $user->getTwoFAcode();
+        return $verificationCode;
     }
 
     public function generate2FACode(
