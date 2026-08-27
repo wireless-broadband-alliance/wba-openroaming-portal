@@ -58,6 +58,15 @@ readonly class Schedule implements ScheduleProviderInterface
             );
         }
 
+        if ($this->isEnabled(SettingName::CLEANUP_EXPIRED_DATA_CRON_ENABLED)) {
+            $schedule->add(
+                RecurringMessage::cron(
+                    $this->getRequiredSetting(SettingName::CLEANUP_EXPIRED_DATA_CRON->value),
+                    new RunCommandMessage('app:cleanup-expired-data --yes')
+                )
+            );
+        }
+
         // Executes once a week on Sunday at 03:30
         $schedule->add(
             RecurringMessage::cron(

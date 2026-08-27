@@ -169,6 +169,15 @@ class ScheduleSettingType extends AbstractType
                 'required' => true,
             ]);
         }
+
+        if ($settingName === SettingName::CLEANUP_EXPIRED_DATA_CRON->value) {
+            $builder->add('userRetentionDays', IntegerType::class, [
+                'required' => true,
+            ]);
+            $builder->add('otpExpirationHours', IntegerType::class, [
+                'required' => true,
+            ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void

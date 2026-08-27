@@ -87,3 +87,5 @@ DELETE_UNCONFIRMED_USERS_CRON_ENABLED: 'Ativa ou desativa a tarefa agendada de e
 USERS_WHEN_PROFILE_EXPIRES_CRON_ENABLED: 'Ativa ou desativa a tarefa agendada de notificação automática de utilizadores cujo perfil está prestes a expirar.'
 LDAP_SYNC_CRON_ENABLED: 'Ativa ou desativa a tarefa agendada de sincronização automática com o LDAP.'
 DOMAIN_BLACKLIST_IMPORT_CRON_ENABLED: 'Ativa ou desativa a tarefa agendada de importação e sincronização automática de domínios bloqueados.'
+USER_RETENTION_DAYS: 'Número de dias que os utilizadores na lixeira (soft-deleted) são mantidos antes de serem eliminados permanentemente da base de dados.'
+OTP_EXPIRATION_HOURS: 'Número de horas durante as quais um código de autenticação (OTP) permanece válido até ser limpo do sistema.'

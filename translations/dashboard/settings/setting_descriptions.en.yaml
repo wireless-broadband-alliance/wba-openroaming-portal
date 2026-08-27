@@ -87,3 +87,5 @@ DELETE_UNCONFIRMED_USERS_CRON_ENABLED: 'Enables or disables the automatic deleti
 USERS_WHEN_PROFILE_EXPIRES_CRON_ENABLED: 'Enables or disables the automatic notification cron job for users whose profile is about to expire.'
 LDAP_SYNC_CRON_ENABLED: 'Enables or disables the automatic LDAP synchronization cron job.'
 DOMAIN_BLACKLIST_IMPORT_CRON_ENABLED: 'Enables or disables the automatic domain blacklist import and synchronization cron job.'
+USER_RETENTION_DAYS: 'Number of days soft-deleted users are kept before being permanently purged from the database.'
+OTP_EXPIRATION_HOURS: 'Number of hours a two-factor authentication code (OTP) remains valid before being cleared from the system.'

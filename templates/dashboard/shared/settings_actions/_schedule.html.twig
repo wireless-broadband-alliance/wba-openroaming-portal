@@ -63,6 +63,14 @@
                 enabled_field: form.domain_blacklist_import_enabled,
                 field_name: 'domain_blacklist_import_enabled',
             }) }}
+
+            {{ include('dashboard/shared/settings_actions/schedule/card.html.twig', {
+                label: 'cleanupExpiredDataCronLabel'|trans({}, 'schedule'),
+                description: 'cleanupExpiredDataCronDescription'|trans({}, 'schedule'),
+                field: form.cleanup_expired_data_cron,
+                enabled_field: form.cleanup_expired_data_enabled,
+                field_name: 'cleanup_expired_data_enabled',
+            }) }}
         </div>
 
         <div class="alert-block my-4 p-2 {{ form.use_advanced_mode.vars.data != default_use_advanced_mode ? '' : 'hidden' }}">

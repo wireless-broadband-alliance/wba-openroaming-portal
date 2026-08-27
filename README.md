@@ -549,6 +549,10 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 92. `MAP_CENTER_LATITUDE`: Default latitude used to center the coverage map.
 93. `MAP_CENTER_LONGITUDE`: Default longitude used to center the coverage map.
 94. `MAP_CENTER_ZOOM`: Default zoom level used for the coverage map.
+95. `CLEANUP_EXPIRED_DATA_CRON`: Permanently purges soft-deleted users and clears expired OTP tokens in compliance with data retention policies.
+96. `CLEANUP_EXPIRED_DATA_CRON_ENABLED`: Enables or disables the Cleanup expired data cron.
+97. `USER_RETENTION_DAYS`: Number of days soft-deleted users are kept before being permanently purged from the database.
+98. `OTP_EXPIRATION_HOURS`: Number of hours a two-factor authentication code (OTP) remains valid before being cleared from the system.
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 

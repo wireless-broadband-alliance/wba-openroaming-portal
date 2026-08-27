@@ -90,6 +90,34 @@ class ScheduleAutomationController extends AbstractController
                 $this->entityManager->persist($notificationTime);
             }
 
+            $newUserRetentionDays = $scheduleDTO->cleanup_expired_data_cron->userRetentionDays;
+            $userRetentionSetting = $this->settingRepository->findOneBy(['name' => SettingName::USER_RETENTION_DAYS->value]);
+
+            if ($userRetentionSetting) {
+                if ($userRetentionSetting->getValue() !== (string)$newUserRetentionDays) {
+                    $changeset[SettingName::USER_RETENTION_DAYS->value] = [
+                        EventMetadataKeysType::OLD_DATA->value => $userRetentionSetting->getValue(),
+                        EventMetadataKeysType::NEW_DATA->value => (string)$newUserRetentionDays,
+                    ];
+                }
+                $userRetentionSetting->setValue((string)$newUserRetentionDays);
+                $this->entityManager->persist($userRetentionSetting);
+            }
+
+            $newOtpExpirationHours = $scheduleDTO->cleanup_expired_data_cron->otpExpirationHours;
+            $otpExpirationSetting = $this->settingRepository->findOneBy(['name' => SettingName::OTP_EXPIRATION_HOURS->value]);
+
+            if ($otpExpirationSetting) {
+                if ($otpExpirationSetting->getValue() !== (string)$newOtpExpirationHours) {
+                    $changeset[SettingName::OTP_EXPIRATION_HOURS->value] = [
+                        EventMetadataKeysType::OLD_DATA->value => $otpExpirationSetting->getValue(),
+                        EventMetadataKeysType::NEW_DATA->value => (string)$newOtpExpirationHours,
+                    ];
+                }
+                $otpExpirationSetting->setValue((string)$newOtpExpirationHours);
+                $this->entityManager->persist($otpExpirationSetting);
+            }
+
             // Track enablement changes
             $enablementSettings = [
                 SettingName::DELETE_UNCONFIRMED_USERS_CRON_ENABLED->value =>
@@ -100,6 +128,8 @@ class ScheduleAutomationController extends AbstractController
                     $scheduleDTO->ldap_sync_enabled,
                 SettingName::DOMAIN_BLACKLIST_IMPORT_CRON_ENABLED->value =>
                     $scheduleDTO->domain_blacklist_import_enabled,
+                SettingName::CLEANUP_EXPIRED_DATA_CRON_ENABLED->value =>
+                    $scheduleDTO->cleanup_expired_data_enabled
             ];
 
             foreach ($enablementSettings as $settingName => $newEnabledValue) {
