@@ -22,7 +22,8 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
     name: 'app:cleanup-expired-data',
-    description: 'Purges soft-deleted users older than retention period and clears expired OTP tokens to comply with CRA.',
+    description: 'Purges soft-deleted users older than retention period 
+    and clears expired OTP tokens to comply with CRA.',
 )]
 class CleanupExpiredDataCommand extends Command
 {
@@ -44,16 +45,27 @@ class CleanupExpiredDataCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $userRetentionSetting = $this->settingRepository->findOneBy(['name' => SettingName::USER_RETENTION_DAYS->value]);
-        $userRetentionDays = $userRetentionSetting ? (int) $userRetentionSetting->getValue() : self::USER_RETENTION_DAYS;
+        $userRetentionSetting = $this->settingRepository->findOneBy(
+            ['name' => SettingName::USER_RETENTION_DAYS->value]
+        );
+        $userRetentionDays = $userRetentionSetting ?
+            (int) $userRetentionSetting->getValue() : self::USER_RETENTION_DAYS;
 
-        $otpExpirationSetting = $this->settingRepository->findOneBy(['name' => SettingName::OTP_EXPIRATION_HOURS->value]);
-        $otpExpirationHours = $otpExpirationSetting ? (int) $otpExpirationSetting->getValue() : self::OTP_EXPIRATION_HOURS;
+        $otpExpirationSetting = $this->settingRepository->findOneBy(
+            ['name' => SettingName::OTP_EXPIRATION_HOURS->value]
+        );
+        $otpExpirationHours = $otpExpirationSetting ?
+            (int) $otpExpirationSetting->getValue() : self::OTP_EXPIRATION_HOURS;
 
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
             $question = new ConfirmationQuestion(
-                sprintf('This action will permanently purge soft-deleted users older than %d days and clear expired OTP tokens older than %d hour(s). [y/N] ', $userRetentionDays, $otpExpirationHours),
+                sprintf(
+                    'This action will permanently purge soft-deleted users 
+                    older than %d days and clear expired OTP tokens older than %d hour(s). [y/N] ',
+                    $userRetentionDays,
+                    $otpExpirationHours
+                ),
                 false
             );
             /** @var QuestionHelper $helper */

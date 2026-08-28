@@ -36,7 +36,10 @@ class EncryptTwoFASecretsCommand extends Command
     {
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
-            $question = new ConfirmationQuestion('This action will encrypt all legacy plain-text TOTP secrets. [y/N] ', false);
+            $question = new ConfirmationQuestion(
+                'This action will encrypt all legacy plain-text TOTP secrets. [y/N] ',
+                false
+            );
             /** @var QuestionHelper $helper */
             if (!$helper->ask($input, $output, $question)) {
                 $output->writeln('Command aborted.');
@@ -50,7 +53,10 @@ class EncryptTwoFASecretsCommand extends Command
         $connection->beginTransaction();
 
         try {
-            $sql = sprintf('SELECT id, twoFAsecret FROM %s WHERE twoFAsecret IS NOT NULL AND twoFAsecret != \'\'', $tableName);
+            $sql = sprintf(
+                'SELECT id, twoFAsecret FROM %s WHERE twoFAsecret IS NOT NULL AND twoFAsecret != \'\'',
+                $tableName
+            );
             $users = $connection->fetchAllAssociative($sql);
 
             /** @var EncryptedStringType $type */
@@ -79,7 +85,10 @@ class EncryptTwoFASecretsCommand extends Command
 
             $connection->commit();
 
-            $output->writeln(sprintf('<info>Success:</info> %d legacy TOTP secrets were securely encrypted.', $updatedCount));
+            $output->writeln(sprintf(
+                '<info>Success:</info> %d legacy TOTP secrets were securely encrypted.',
+                $updatedCount
+            ));
         } catch (Exception $e) {
             $connection->rollBack();
             $output->writeln('<error>An error occurred:</error> ' . $e->getMessage());

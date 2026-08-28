@@ -91,7 +91,9 @@ class ScheduleAutomationController extends AbstractController
             }
 
             $newUserRetentionDays = $scheduleDTO->cleanup_expired_data_cron->userRetentionDays;
-            $userRetentionSetting = $this->settingRepository->findOneBy(['name' => SettingName::USER_RETENTION_DAYS->value]);
+            $userRetentionSetting = $this->settingRepository->findOneBy([
+                'name' => SettingName::USER_RETENTION_DAYS->value
+            ]);
 
             if ($userRetentionSetting) {
                 if ($userRetentionSetting->getValue() !== (string)$newUserRetentionDays) {
@@ -105,7 +107,9 @@ class ScheduleAutomationController extends AbstractController
             }
 
             $newOtpExpirationHours = $scheduleDTO->cleanup_expired_data_cron->otpExpirationHours;
-            $otpExpirationSetting = $this->settingRepository->findOneBy(['name' => SettingName::OTP_EXPIRATION_HOURS->value]);
+            $otpExpirationSetting = $this->settingRepository->findOneBy([
+                'name' => SettingName::OTP_EXPIRATION_HOURS->value
+            ]);
 
             if ($otpExpirationSetting) {
                 if ($otpExpirationSetting->getValue() !== (string)$newOtpExpirationHours) {
