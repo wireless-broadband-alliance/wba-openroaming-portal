@@ -27,15 +27,17 @@ security:
             pattern: ^/api/v1/auth
             stateless: true
             security: true
+            provider: user_provider
             login_throttling:
-                limiter: login_api_limiter
+                limiter: limiter.login_api
 
-            auth_v2:
-                pattern: ^/api/v2/auth
-                stateless: true
-                security: true
-                login_throttling:
-                    limiter: login_api_limiter
+        auth_v2:
+            pattern: ^/api/v2/auth
+            stateless: true
+            security: true
+            provider: user_provider
+            login_throttling:
+                limiter: limiter.login_api
         api:
             pattern: ^/api/
             stateless: true
