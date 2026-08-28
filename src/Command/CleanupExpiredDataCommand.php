@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Command;
 
 use App\Entity\Event;
@@ -27,8 +29,8 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 )]
 class CleanupExpiredDataCommand extends Command
 {
-    private const USER_RETENTION_DAYS = 30;
-    private const OTP_EXPIRATION_HOURS = 1;
+    private const int USER_RETENTION_DAYS = 30;
+    private const int OTP_EXPIRATION_HOURS = 1;
 
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
@@ -78,7 +80,7 @@ class CleanupExpiredDataCommand extends Command
         try {
             $userRepo = $this->entityManager->getRepository(User::class);
 
-            $userThresholdDate = (new DateTimeImmutable())->modify(sprintf('-%d days', $userRetentionDays));
+            $userThresholdDate = new DateTimeImmutable()->modify(sprintf('-%d days', $userRetentionDays));
 
             $usersToPurge = $userRepo->createQueryBuilder('u')
                 ->select('u.id')
@@ -89,7 +91,7 @@ class CleanupExpiredDataCommand extends Command
 
             $deletedUsersCount = 0;
 
-            if (!empty($usersToPurge)) {
+            if ($usersToPurge !== []) {
                 $this->entityManager->createQueryBuilder()
                     ->delete(Event::class, 'e')
                     ->where('e.user IN (:userIds)')
@@ -126,7 +128,7 @@ class CleanupExpiredDataCommand extends Command
                     ->execute();
             }
 
-            $otpThresholdDate = (new DateTimeImmutable())->modify(sprintf('-%d hours', $otpExpirationHours));
+            $otpThresholdDate = new DateTimeImmutable()->modify(sprintf('-%d hours', $otpExpirationHours));
 
             $clearedOtpCount = $userRepo->createQueryBuilder('u')
                 ->update()
