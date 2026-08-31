@@ -529,9 +529,11 @@ The client must send the current valid JWT in the request body as "current_token
             'last_name' => 'Doe',
             'turnstile_token' => 'valid_test_token'
         ],
-        'description' => 'This endpoint registers a new user using their email and password, 
-                with CAPTCHA validation via the Turnstile token. It handles user creation, password hashing, 
-                and CAPTCHA verification. If the user already exists, it returns a conflict error.',
+        'description' => 'This endpoint registers a new user using their email and password. 
+            The request is validated using the UserEmailRegistrationDTO and protected by CAPTCHA 
+            validation when Turnstile is enabled. The password must meet the configured length, 
+            strength, and compromised-password requirements. If the user already exists, the 
+            endpoint returns a generic successful response to prevent user enumeration.',
         'responses' => [
             200 => [
                 json_decode(
@@ -547,11 +549,22 @@ The client must send the current valid JWT in the request body as "current_token
                 )
             ],
             400 => [
-                'Invalid email format.',
                 'Invalid JSON format',
-                'Missing required fields: email, password or turnstile_token',
-                'CAPTCHA validation failed'
+                'Invalid data.',
+                'CAPTCHA validation failed',
+                'This field cannot be blank',
+                'Invalid email format.',
+                'This field cannot be shorter than 16 characters',
+                'This field cannot be longer than 255 characters',
+                'The password strength is too low. Please use a stronger password.',
+                'This password has been leaked in a data breach, it must not be used. Please use another password.'
             ],
+            403 => [
+                'Your email domain is not allowed to use this platform.'
+            ],
+            500 => [
+                'Missing settings: TURNSTILE_CHECKER not found'
+            ]
         ]
     ],
     'api_v2_auth_local_reset' => [
@@ -598,8 +611,12 @@ The client must send the current valid JWT in the request body as "current_token
             'last_name' => 'Doe',
             'turnstile_token' => 'valid_test_token'
         ],
-        'description' => 'This endpoint registers a new user using their phone number and validates the
-                 request with a CAPTCHA token.',
+        'description' => 'This endpoint registers a new user using their phone number and password. 
+            The request is validated using the UserSMSRegistrationDTO, including phone number, 
+            country code, and password validation. The request is also protected by CAPTCHA 
+            validation when Turnstile is enabled. A verification code is generated and sent 
+            to the registered phone number. If the phone number is already registered, the 
+            endpoint returns a generic successful response to prevent user enumeration.',
         'responses' => [
             200 => [
                 json_decode(
@@ -615,14 +632,22 @@ The client must send the current valid JWT in the request body as "current_token
                 )
             ],
             400 => [
+                'Invalid JSON format',
+                'Invalid data.',
                 'CAPTCHA validation failed',
-                'Missing required fields: country code, phone number, password, or turnstile_token',
+                'This field cannot be blank',
+                'Invalid country code.',
+                'Invalid phone number format.',
                 'Invalid phone number format or country code.',
-                'Invalid json format',
+                'This field cannot be shorter than 16 characters',
+                'This field cannot be longer than 255 characters',
+                'The password strength is too low. Please use a stronger password.',
+                'This password has been leaked in a data breach, it must not be used. Please use another password.'
             ],
             500 => [
+                'Missing settings: TURNSTILE_CHECKER not found',
                 'Failed to send SMS',
-                'User registered but SMS could not be sent.',
+                'User registered but SMS could not be sent.'
             ]
         ]
     ],

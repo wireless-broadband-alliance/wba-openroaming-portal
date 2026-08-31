@@ -3,6 +3,8 @@
 namespace App\Api\V2\Controller;
 
 use App\Api\V2\BaseResponse;
+use App\DTO\Api\UserEmailRegistrationDTO;
+use App\DTO\Api\UserSMSRegistrationDTO;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
@@ -17,8 +19,8 @@ use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
-use App\Service\EventActions;
 use App\Service\EmailGenerator;
+use App\Service\EventActions;
 use App\Service\SendSMS;
 use App\Service\UserStatusChecker;
 use DateInterval;
@@ -85,7 +87,31 @@ class RegistrationController extends AbstractController
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException) {
-            return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); // Invalid Json
+            return new BaseResponse(400, null, 'Invalid JSON format')->toResponse();
+        }
+
+        $dto = new UserEmailRegistrationDTO();
+        $dto->email = $data['email'] ?? null;
+        $dto->password = $data['password'] ?? null;
+        $dto->firstName = $data['first_name'] ?? null;
+        $dto->lastName = $data['last_name'] ?? null;
+        $dto->turnstileToken = $data['turnstile_token'] ?? null;
+
+        $violations = $this->validator->validate($dto);
+
+        if (count($violations) > 0) {
+            $errors = [];
+
+            foreach ($violations as $violation) {
+                $propertyPath = $violation->getPropertyPath();
+                $errors[$propertyPath][] = $violation->getMessage();
+            }
+
+            return new BaseResponse(
+                400,
+                $errors,
+                'Invalid data.'
+            )->toResponse();
         }
 
         $turnstileSetting = $this->settingRepository->findOneBy([
@@ -96,18 +122,27 @@ class RegistrationController extends AbstractController
         }
 
         if ($turnstileSetting === OperationMode::ON->value) {
-            if (!isset($data['turnstile_token'])) {
-                return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+            if (!$dto->turnstileToken) {
+                return new BaseResponse(
+                    400,
+                    null,
+                    'CAPTCHA validation failed'
+                )->toResponse();
             }
 
             $turnstileValidation = $this->captchaValidator->validate(
-                $data['turnstile_token'],
+                $dto->turnstileToken,
                 $request->getClientIp()
             );
 
             if (!$turnstileValidation['success']) {
                 $errorMessage = $turnstileValidation['error'] ?? 'CAPTCHA validation failed';
-                return new BaseResponse(400, null, $errorMessage)->toResponse();
+
+                return new BaseResponse(
+                    400,
+                    null,
+                    $errorMessage
+                )->toResponse();
             }
         }
 
@@ -435,54 +470,72 @@ class RegistrationController extends AbstractController
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse();
         }
 
+        $dto = new UserSMSRegistrationDTO();
+        $dto->phoneNumber = $data['phone_number'] ?? null;
+        $dto->countryCode = $data['country_code'] ?? null;
+        $dto->password = $data['password'] ?? null;
+        $dto->firstName = $data['first_name'] ?? null;
+        $dto->lastName = $data['last_name'] ?? null;
+        $dto->turnstileToken = $data['turnstile_token'] ?? null;
+
+        $violations = $this->validator->validate($dto);
+
+        if (count($violations) > 0) {
+            $errors = [];
+
+            foreach ($violations as $violation) {
+                $propertyPath = $violation->getPropertyPath();
+
+                $errors[$propertyPath][] = $violation->getMessage();
+            }
+
+            return new BaseResponse(
+                400,
+                $errors,
+                'Invalid data.'
+            )->toResponse();
+        }
+
         $turnstileSetting = $this->settingRepository->findOneBy([
             'name' => SettingName::TURNSTILE_CHECKER->value
         ])->getValue();
+
         if (!$turnstileSetting) {
             throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
 
         if ($turnstileSetting === OperationMode::ON->value) {
-            if (!isset($data['turnstile_token'])) {
-                return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+            if (!$dto->turnstileToken) {
+                return new BaseResponse(
+                    400,
+                    null,
+                    'CAPTCHA validation failed'
+                )->toResponse();
             }
 
             $turnstileValidation = $this->captchaValidator->validate(
-                $data['turnstile_token'],
+                $dto->turnstileToken,
                 $request->getClientIp()
             );
 
             if (!$turnstileValidation['success']) {
                 $errorMessage = $turnstileValidation['error'] ?? 'CAPTCHA validation failed';
-                return new BaseResponse(400, null, $errorMessage)->toResponse();
-            }
-        }
 
-        // Check for missing fields and add them to the array errors
-        $errors = [];
-        if (empty($data['phone_number'])) {
-            $errors[] = 'phone_number';
-        }
-        if (empty($data['password'])) {
-            $errors[] = 'password';
-        }
-        if (empty($data['country_code'])) {
-            $errors[] = 'country_code';
-        }
-        if ($errors !== []) {
-            return new BaseResponse(
-                400,
-                ['missing_fields' => $errors],
-                'Invalid data: Missing required fields.'
-            )->toResponse();
+                return new BaseResponse(
+                    400,
+                    null,
+                    $errorMessage
+                )->toResponse();
+            }
         }
 
         // Validate phone number with country code
         try {
             $parsedPhoneNumber = $this->phoneNumberUtil->parse(
-                $data['phone_number'],
-                strtoupper((string)$data['country_code'])
+                $dto->phoneNumber,
+                strtoupper($dto->countryCode)
             );
+
             if (!$this->phoneNumberUtil->isValidNumber($parsedPhoneNumber)) {
                 return new BaseResponse(
                     400,
@@ -499,26 +552,39 @@ class RegistrationController extends AbstractController
         }
 
         // Check for existing user with the same phone number
-        $formattedPhoneNumber = $this->phoneNumberUtil->format($parsedPhoneNumber, PhoneNumberFormat::E164);
+        $formattedPhoneNumber = $this->phoneNumberUtil->format(
+            $parsedPhoneNumber,
+            PhoneNumberFormat::E164
+        );
+
         if ($this->userRepository->findOneBy(['uuid' => $formattedPhoneNumber])) {
-            return new BaseResponse(200, [
-                'message' => 'SMS User Account Registered Successfully.' .
-                    ' A verification code has been sent to your phone.'
-            ])->toResponse(); // False success for RGPD policies
+            return new BaseResponse(
+                200,
+                [
+                    'message' =>
+                        'SMS User Account Registered Successfully.'
+                        . ' A verification code has been sent to your phone.'
+                ]
+            )->toResponse(); // False success for RGPD policies
         }
 
         // Create and populate the new user entity
         $user = new User();
-        $user->setUuid($formattedPhoneNumber);  // Store formatted phone number in UUID field
-        $user->setPhoneNumber($parsedPhoneNumber);  // Set the PhoneNumber object directly
-        $hashedPassword = $this->userPasswordHasher->hashPassword($user, $data['password']);
+        $user->setUuid($formattedPhoneNumber);
+        $user->setPhoneNumber($parsedPhoneNumber);
+
+        $hashedPassword = $this->userPasswordHasher->hashPassword(
+            $user,
+            $dto->password
+        );
+
         $user->setPassword($hashedPassword);
         $user->setIsVerified(false);
         $user->setTwoFAcode((string)random_int(100000, 999999));
         $user->setTwoFAcodeIsActive(true);
         $user->setTwoFAcodeGeneratedAt(new DateTime());
-        $user->setFirstName($data['first_name'] ?? null);
-        $user->setLastName($data['last_name'] ?? null);
+        $user->setFirstName($dto->firstName);
+        $user->setLastName($dto->lastName);
         $user->setCreatedAt(new DateTime());
 
         $userExternalAuth = new UserExternalAuth();
@@ -551,27 +617,40 @@ class RegistrationController extends AbstractController
         // Send SMS
         try {
             $message = "Your account password is: "
-                . $data['password'] . "%0A" . "Verification code is: "
+                . $dto->password
+                . "%0A"
+                . "Verification code is: "
                 . $user->getTwoFAcode();
-            $result = $this->sendSMSService->sendSmsNoValidation($user, $message);
+
+            $result = $this->sendSMSService->sendSmsNoValidation(
+                $user,
+                $message
+            );
 
             if ($result !== '' && $result !== '0') {
                 return new BaseResponse(
                     200,
                     [
                         'message' =>
-                            'SMS User Account Registered Successfully. A verification code has been sent to your phone.'
+                            'SMS User Account Registered Successfully. '
+                            . 'A verification code has been sent to your phone.'
                     ]
                 )->toResponse();
             }
         } catch (\RuntimeException) {
-            return new BaseResponse(500, null, 'Failed to send SMS')->toResponse(); // Internal Server Error
+            return new BaseResponse(
+                500,
+                null,
+                'Failed to send SMS'
+            )->toResponse();
         }
 
-        // Return fallback response
-        return new BaseResponse(500, null, 'User registered but SMS could not be sent.')->toResponse();
+        return new BaseResponse(
+            500,
+            null,
+            'User registered but SMS could not be sent.'
+        )->toResponse();
     }
-
 
     /**
      * @throws ClientExceptionInterface
