@@ -110,3 +110,5 @@ coordinateDegreeBetween180: 'The longitude must be a numerical value between -18
 invalidGeometryFormat: 'Invalid geometry format.'
 valueMustBeBetween: 'O valor deve estar entre {{ min }} e {{ max }}.'
 invalidSerialNumberFormat: "The serial number format is invalid."
+passwordCannotBeLongerThan: 'The password cannot be longer than {{ limit }} characters'
+passwordCannotBeShorterThan: 'The password cannot be shorter than {{ limit }} characters'

@@ -36,7 +36,7 @@ class UserAddDTO
 
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
     #[Assert\Length(
-        min: 8,
+        min: 16,
         max: 255,
         minMessage: 'fieldCannotBeShorterThan',
         maxMessage: 'fieldCannotBeLongerThan'

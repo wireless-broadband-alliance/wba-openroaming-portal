@@ -15,11 +15,11 @@ class AdminConfigDTO
     public ?string $email = null;
 
     #[Assert\NotBlank(message: 'fieldNotBlank')]
-    #[Assert\Length(min: 8, max: 100, minMessage: 'minCharacters', maxMessage: 'maxCharacters')]
+    #[Assert\Length(min: 16, max: 100, minMessage: 'minCharacters', maxMessage: 'maxCharacters')]
     public ?string $password = null;
 
     #[Assert\NotBlank(message: 'fieldNotBlank')]
-    #[Assert\Length(min: 8, max: 100, minMessage: 'minCharacters', maxMessage: 'maxCharacters')]
+    #[Assert\Length(min: 16, max: 100, minMessage: 'minCharacters', maxMessage: 'maxCharacters')]
     #[Assert\Expression(
         expression: "this.password == this.confirmPassword",
         message: 'passwordNotMatch',

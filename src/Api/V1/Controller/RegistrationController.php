@@ -3,6 +3,8 @@
 namespace App\Api\V1\Controller;
 
 use App\Api\V1\BaseResponse;
+use App\DTO\Api\UserEmailRegistrationDTO;
+use App\DTO\Api\UserSMSRegistrationDTO;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
@@ -18,8 +20,8 @@ use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
-use App\Service\EventActions;
 use App\Service\EmailGenerator;
+use App\Service\EventActions;
 use App\Service\SendSMS;
 use App\Service\UserStatusChecker;
 use DateInterval;
@@ -80,67 +82,82 @@ class RegistrationController extends AbstractController
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException) {
-            return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); // Invalid Json
+            return new BaseResponse(
+                400,
+                null,
+                'Invalid JSON format'
+            )->toResponse();
         }
 
+        $registration = new UserEmailRegistrationDTO();
+        $registration->email = $data['email'] ?? null;
+        $registration->password = $data['password'] ?? null;
+        $registration->firstName = $data['first_name'] ?? null;
+        $registration->lastName = $data['last_name'] ?? null;
+        $registration->turnstileToken = $data['turnstile_token'] ?? null;
+
+        $violations = $this->validator->validate($registration);
+
+        if (count($violations) > 0) {
+            return new BaseResponse(
+                400,
+                null,
+                $violations[0]->getMessage()
+            )->toResponse();
+        }
+
+        // CAPTCHA validation
         $turnstileSetting = $this->settingRepository->findOneBy([
             'name' => SettingName::TURNSTILE_CHECKER->value
-        ])->getValue();
+        ])?->getValue();
+
         if (!$turnstileSetting) {
-            throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
+            throw new \RuntimeException(
+                'Missing settings: TURNSTILE_CHECKER not found'
+            );
         }
 
         if ($turnstileSetting === OperationMode::ON->value) {
-            if (!isset($data['turnstile_token'])) {
-                return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+            if (!$registration->turnstileToken) {
+                return new BaseResponse(
+                    400,
+                    null,
+                    'CAPTCHA validation failed'
+                )->toResponse();
             }
 
             $turnstileValidation = $this->captchaValidator->validate(
-                $data['turnstile_token'],
+                $registration->turnstileToken,
                 $request->getClientIp()
             );
 
             if (!$turnstileValidation['success']) {
-                $errorMessage = $turnstileValidation['error'] ?? 'CAPTCHA validation failed';
-                return new BaseResponse(400, null, $errorMessage)->toResponse();
+                $errorMessage = $turnstileValidation['error']
+                    ?? 'CAPTCHA validation failed';
+
+                return new BaseResponse(
+                    400,
+                    null,
+                    $errorMessage
+                )->toResponse();
             }
         }
 
-        $errors = [];
-        // Check for missing fields and add them to the array errors
-        if (empty($data['email'])) {
-            $errors[] = 'email';
-        }
-        if (empty($data['password'])) {
-            $errors[] = 'password';
-        }
-        if ($errors !== []) {
+        // Prevent user enumeration
+        if ($this->userRepository->findOneBy([
+            'email' => $registration->email
+        ])) {
             return new BaseResponse(
-                400,
-                ['missing_fields' => $errors],
-                'Invalid data: Missing required fields.'
+                200,
+                [
+                    'message' =>
+                        'Registration successful. Please check your email for further instructions'
+                ]
             )->toResponse();
         }
 
-        $emailConstraint = new Assert\Email();
-        $emailConstraint->message = 'Invalid email format.';
-
-        $emailViolations = $this->validator->validate($data['email'], $emailConstraint);
-
-        if (count($emailViolations) > 0) {
-            $errorMessage = $emailViolations[0]->getMessage();
-            return new BaseResponse(400, null, $errorMessage)->toResponse();
-        }
-
-        if ($this->userRepository->findOneBy(['email' => $data['email']])) {
-            return new BaseResponse(
-                200,
-                ['message' => 'Registration successful. Please check your email for further instructions']
-            )->toResponse(); // False success for RGPD policies
-        }
-
-        // Check if the email is valid
-        if (!$this->userStatusChecker->isValidEmail($data['email'])) {
+        // Check if the email domain is allowed
+        if (!$this->userStatusChecker->isValidEmail($registration->email)) {
             return new BaseResponse(
                 403,
                 null,
@@ -148,8 +165,16 @@ class RegistrationController extends AbstractController
             )->toResponse();
         }
 
+        // Check email aliases
         $blockAliases = $this->getParameter('app.block_email_aliases');
-        if ($blockAliases && str_contains(explode('@', (string) $data['email'])[0], '+')) {
+
+        if (
+            $blockAliases &&
+            str_contains(
+                explode('@', $registration->email)[0],
+                '+'
+            )
+        ) {
             return new BaseResponse(
                 400,
                 null,
@@ -157,38 +182,59 @@ class RegistrationController extends AbstractController
             )->toResponse();
         }
 
+        // Create user
         $user = new User();
-        $user->setUuid($data['email']);
-        $user->setEmail($data['email']);
-        $hashedPassword = $this->userPasswordHasher->hashPassword($user, $data['password']);
+        $user->setUuid($registration->email);
+        $user->setEmail($registration->email);
+
+        $hashedPassword = $this->userPasswordHasher->hashPassword(
+            $user,
+            $registration->password
+        );
+
         $user->setPassword($hashedPassword);
         $user->setIsVerified(false);
         $user->setCreatedAt(new DateTime());
         $user->setTwoFAcode((string)random_int(100000, 999999));
         $user->setTwoFACodeGeneratedAt(new DateTime());
         $user->setTwoFAcodeIsActive(true);
-        $user->setFirstName($data['first_name'] ?? null);
-        $user->setLastName($data['last_name'] ?? null);
+        $user->setFirstName($registration->firstName);
+        $user->setLastName($registration->lastName);
 
+        // Create external authentication
         $userExternalAuth = new UserExternalAuth();
         $userExternalAuth->setUser($user);
-        $userExternalAuth->setProvider(UserProvider::PORTAL_ACCOUNT->value);
-        $userExternalAuth->setProviderId(UserProvider::EMAIL->value);
+        $userExternalAuth->setProvider(
+            UserProvider::PORTAL_ACCOUNT->value
+        );
+        $userExternalAuth->setProviderId(
+            UserProvider::EMAIL->value
+        );
 
         $this->entityManager->persist($user);
         $this->entityManager->persist($userExternalAuth);
         $this->entityManager->flush();
 
-        $this->emailGenerator->sendRegistrationEmail($user, $data['password'], true);
+        // Send registration email
+        $this->emailGenerator->sendRegistrationEmail(
+            $user,
+            $registration->password,
+            true
+        );
 
+        // Save user creation event
         $eventMetaData = [
             EventMetadataKeysType::IP->value => $request->getClientIp(),
-            EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-            EventMetadataKeysType::UUID->value => $user->getUuid(),
-            EventMetadataKeysType::PLATFORM->value => $this->settingRepository->findOneBy(
-                ['name' => SettingName::PLATFORM_MODE->value]
-            )->getValue(),
-            EventMetadataKeysType::REGISTRATION_TYPE->value => UserProvider::EMAIL->value,
+            EventMetadataKeysType::USER_AGENT->value =>
+                $request->headers->get('User-Agent'),
+            EventMetadataKeysType::UUID->value =>
+                $user->getUuid(),
+            EventMetadataKeysType::PLATFORM->value =>
+                $this->settingRepository->findOneBy(
+                    ['name' => SettingName::PLATFORM_MODE->value]
+                )->getValue(),
+            EventMetadataKeysType::REGISTRATION_TYPE->value =>
+                UserProvider::EMAIL->value,
         ];
 
         $this->eventActions->saveEvent(
@@ -200,7 +246,10 @@ class RegistrationController extends AbstractController
 
         return new BaseResponse(
             200,
-            ['message' => 'Registration successful. Please check your email for further instructions']
+            [
+                'message' =>
+                    'Registration successful. Please check your email for further instructions'
+            ]
         )->toResponse();
     }
 
@@ -401,62 +450,97 @@ class RegistrationController extends AbstractController
      */
     #[Route('/auth/sms/register', name: 'api_v1_auth_sms_register', methods: ['POST'])]
     public function smsRegister(
-        Request $request
+        Request $request,
     ): JsonResponse {
         try {
-            $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+            $data = json_decode(
+                $request->getContent(),
+                true,
+                512,
+                JSON_THROW_ON_ERROR
+            );
         } catch (\JsonException) {
-            return new BaseResponse(400, null, 'Invalid JSON format')->toResponse();
+            return new BaseResponse(
+                400,
+                null,
+                'Invalid JSON format'
+            )->toResponse();
         }
 
+        $dto = new UserSMSRegistrationDTO();
+
+        $dto->phoneNumber = $data['phone_number'] ?? null;
+        $dto->password = $data['password'] ?? null;
+        $dto->firstName = $data['first_name'] ?? null;
+        $dto->lastName = $data['last_name'] ?? null;
+        $dto->countryCode = isset($data['country_code'])
+            ? strtoupper((string) $data['country_code'])
+            : null;
+        $dto->turnstileToken = $data['turnstile_token'] ?? null;
+
+        $violations = $this->validator->validate($dto);
+
+        if (count($violations) > 0) {
+            $errors = [];
+
+            foreach ($violations as $violation) {
+                $propertyPath = $violation->getPropertyPath();
+
+                $errors[$propertyPath][] = $violation->getMessage();
+            }
+
+            return new BaseResponse(
+                400,
+                ['errors' => $errors],
+                'Invalid data.'
+            )->toResponse();
+        }
+
+        /*
+         * CAPTCHA validation
+         */
         $turnstileSetting = $this->settingRepository->findOneBy([
-            'name' => SettingName::TURNSTILE_CHECKER->value
-        ])->getValue();
+            'name' => SettingName::TURNSTILE_CHECKER->value,
+        ])?->getValue();
+
         if (!$turnstileSetting) {
-            throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
+            throw new \RuntimeException(
+                'Missing settings: TURNSTILE_CHECKER not found'
+            );
         }
 
         if ($turnstileSetting === OperationMode::ON->value) {
-            if (!isset($data['turnstile_token'])) {
-                return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+            if (!$dto->turnstileToken) {
+                return new BaseResponse(
+                    400,
+                    null,
+                    'CAPTCHA validation failed'
+                )->toResponse();
             }
 
             $turnstileValidation = $this->captchaValidator->validate(
-                $data['turnstile_token'],
+                $dto->turnstileToken,
                 $request->getClientIp()
             );
 
             if (!$turnstileValidation['success']) {
-                $errorMessage = $turnstileValidation['error'] ?? 'CAPTCHA validation failed';
-                return new BaseResponse(400, null, $errorMessage)->toResponse();
+                return new BaseResponse(
+                    400,
+                    null,
+                    $turnstileValidation['error'] ?? 'CAPTCHA validation failed'
+                )->toResponse();
             }
         }
 
-        // Check for missing fields and add them to the array errors
-        $errors = [];
-        if (empty($data['phone_number'])) {
-            $errors[] = 'phone_number';
-        }
-        if (empty($data['password'])) {
-            $errors[] = 'password';
-        }
-        if (empty($data['country_code'])) {
-            $errors[] = 'country_code';
-        }
-        if ($errors !== []) {
-            return new BaseResponse(
-                400,
-                ['missing_fields' => $errors],
-                'Invalid data: Missing required fields.'
-            )->toResponse();
-        }
-
-        // Validate phone number with country code
+        /*
+         * Parse and normalize phone number
+         */
         try {
             $parsedPhoneNumber = $this->phoneNumberUtil->parse(
-                $data['phone_number'],
-                strtoupper((string)$data['country_code'])
+                $dto->phoneNumber,
+                $dto->countryCode
             );
+
             if (!$this->phoneNumberUtil->isValidNumber($parsedPhoneNumber)) {
                 return new BaseResponse(
                     400,
@@ -472,47 +556,86 @@ class RegistrationController extends AbstractController
             )->toResponse();
         }
 
-        // Check for existing user with the same phone number
-        $formattedPhoneNumber = $this->phoneNumberUtil->format($parsedPhoneNumber, PhoneNumberFormat::E164);
-        if ($this->userRepository->findOneBy(['uuid' => $formattedPhoneNumber])) {
-            return new BaseResponse(200, [
-                'message' => 'SMS User Account Registered Successfully.' .
-                    ' A verification code has been sent to your phone.'
-            ])->toResponse(); // False success for RGPD policies
+        $formattedPhoneNumber = $this->phoneNumberUtil->format(
+            $parsedPhoneNumber,
+            PhoneNumberFormat::E164
+        );
+
+        /*
+         * Check if the user already exists
+         */
+        if ($this->userRepository->findOneBy([
+            'uuid' => $formattedPhoneNumber,
+        ])) {
+            return new BaseResponse(
+                200,
+                [
+                    'message' =>
+                        'SMS User Account Registered Successfully. ' .
+                        'A verification code has been sent to your phone.',
+                ]
+            )->toResponse();
         }
 
-        // Create and populate the new user entity
+        /*
+         * Create user
+         */
         $user = new User();
-        $user->setUuid($formattedPhoneNumber);  // Store formatted phone number in UUID field
-        $user->setPhoneNumber($parsedPhoneNumber);  // Set the PhoneNumber object directly
-        $hashedPassword = $this->userPasswordHasher->hashPassword($user, $data['password']);
+
+        $user->setUuid($formattedPhoneNumber); // Store formatted phone number in UUID field
+        $user->setPhoneNumber($parsedPhoneNumber); // Set the PhoneNumber object directly
+
+        $hashedPassword = $this->userPasswordHasher->hashPassword(
+            $user,
+            $dto->password
+        );
+
         $user->setPassword($hashedPassword);
         $user->setIsVerified(false);
         $user->setCreatedAt(new DateTime());
-        $user->setTwoFAcode((string)random_int(100000, 999999));
+
+        $user->setTwoFAcode(
+            (string) random_int(100000, 999999)
+        );
+
         $user->setTwoFACodeGeneratedAt(new DateTime());
         $user->setTwoFAcodeIsActive(true);
-        $user->setFirstName($data['first_name'] ?? null);
-        $user->setLastName($data['last_name'] ?? null);
 
+        $user->setFirstName($dto->firstName);
+        $user->setLastName($dto->lastName);
+
+        /*
+         * Create external authentication record
+         */
         $userExternalAuth = new UserExternalAuth();
+
         $userExternalAuth->setUser($user);
-        $userExternalAuth->setProvider(UserProvider::PORTAL_ACCOUNT->value);
-        $userExternalAuth->setProviderId(UserProvider::PHONE_NUMBER->value);
+        $userExternalAuth->setProvider(
+            UserProvider::PORTAL_ACCOUNT->value
+        );
+        $userExternalAuth->setProviderId(
+            UserProvider::PHONE_NUMBER->value
+        );
 
         $this->entityManager->persist($user);
         $this->entityManager->persist($userExternalAuth);
+
         $this->entityManager->flush();
 
-        // Save user creation event
+        /*
+         * Save user creation event
+         */
         $eventMetaData = [
             EventMetadataKeysType::IP->value => $request->getClientIp(),
             EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
             EventMetadataKeysType::UUID->value => $user->getUuid(),
-            EventMetadataKeysType::PLATFORM->value => $this->settingRepository->findOneBy(
-                ['name' => SettingName::PLATFORM_MODE->value]
-            )->getValue(),
-            EventMetadataKeysType::REGISTRATION_TYPE->value => UserProvider::PHONE_NUMBER->value
+            EventMetadataKeysType::PLATFORM->value => $this->settingRepository
+                ->findOneBy([
+                    'name' => SettingName::PLATFORM_MODE->value,
+                ])
+                ->getValue(),
+            EventMetadataKeysType::REGISTRATION_TYPE->value =>
+                UserProvider::PHONE_NUMBER->value,
         ];
 
         $this->eventActions->saveEvent(
@@ -522,19 +645,31 @@ class RegistrationController extends AbstractController
             $eventMetaData
         );
 
-        // Send SMS
+        /*
+         * Send SMS
+         */
         try {
-            $message = "Your account password is: "
-                . $data['password'] . "%0A" . "Verification code is: "
-                . $user->getTwoFAcode();
-            $result = $this->sendSMSService->sendSmsNoValidation($user, $message);
+            $message = sprintf(
+                "Your account password is: %s\nVerification code is: %s",
+                $dto->password,
+                $user->getTwoFAcode()
+            );
+
+            $result = $this->sendSMSService->sendSmsNoValidation(
+                $user,
+                $message
+            );
 
             if ($result === SMSResponse::SMS_SUCCESS_LINK->value) {
-                $messageAPI = 'SMS User Account Registered Successfully. A link has been sent to your phone.';
+                $messageAPI =
+                    'SMS User Account Registered Successfully. ' .
+                    'A link has been sent to your phone.';
             } else {
-                $messageAPI = 'SMS User Account Registered Successfully. 
-                A verification code has been sent to your phone.';
+                $messageAPI =
+                    'SMS User Account Registered Successfully. ' .
+                    'A verification code has been sent to your phone.';
             }
+
             return new BaseResponse(
                 200,
                 [
@@ -542,10 +677,13 @@ class RegistrationController extends AbstractController
                 ]
             )->toResponse();
         } catch (\RuntimeException) {
-            return new BaseResponse(500, null, 'Failed to send SMS')->toResponse(); // Internal Server Error
+            return new BaseResponse(
+                500,
+                null,
+                'Failed to send SMS'
+            )->toResponse();
         }
     }
-
 
     /**
      * @throws ClientExceptionInterface
