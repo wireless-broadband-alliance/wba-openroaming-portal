@@ -46,7 +46,16 @@ class MetricsController extends AbstractController
 
         $clientIp = $request->getClientIp();
         $allowedIps = $this->params->get('app.metrics_allowed_ips');
-        $allowedIps = $allowedIps ?: '0.0.0.0/0';
+
+        if (trim($allowedIps) === '') {
+            $this->logger->error('Metrics endpoint is enabled but no allowed IPs are configured.');
+
+            return new Response(
+                'Metrics access is not configured',
+                Response::HTTP_FORBIDDEN
+            );
+        }
+
         $isIpAllowed = $this->isIpAllowed($clientIp, $allowedIps);
 
         if (!$isIpAllowed) {
@@ -100,11 +109,13 @@ class MetricsController extends AbstractController
      */
     private function isIpAllowed(string $ip, string $allowedIps): bool
     {
-        if (in_array($allowedIps, ['', '0', '0.0.0.0/0'], true)) {
-            return true;
-        }
+        $allowedIpList = array_filter(
+            array_map(trim(...), explode(',', $allowedIps))
+        );
 
-        $allowedIpList = array_map(trim(...), explode(',', $allowedIps));
+        if ($allowedIpList === []) {
+            return false;
+        }
 
         if (in_array($ip, $allowedIpList, true)) {
             return true;
@@ -112,7 +123,9 @@ class MetricsController extends AbstractController
 
         return array_any(
             $allowedIpList,
-            fn($allowedIp) => str_contains((string) $allowedIp, '/') && $this->ipInCidrRange($ip, $allowedIp)
+            fn(string $allowedIp): bool => $allowedIp !== '0.0.0.0/0'
+                && str_contains($allowedIp, '/')
+                && $this->ipInCidrRange($ip, $allowedIp)
         );
     }
 
