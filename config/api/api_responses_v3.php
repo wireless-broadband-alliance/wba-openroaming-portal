@@ -183,6 +183,7 @@ The client must send the current valid JWT in the request body as "current_token
             ],
             401 => [
                 'Invalid token',
+                'Refresh window expired. Please re-authenticate.'
             ],
             500 => [
                 'Token generation failed',
