@@ -46,7 +46,8 @@ class AuthRefreshController extends AbstractController
 
         if (!$exp || (time() - $exp) > $refreshGracePeriod) {
             return new BaseResponse(
-                401, null,
+                401,
+                null,
                 'Refresh window expired. Please re-authenticate.'
             )->toResponse();
         }
