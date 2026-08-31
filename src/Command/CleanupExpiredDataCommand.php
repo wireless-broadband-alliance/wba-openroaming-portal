@@ -23,7 +23,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
-    name: 'app:cleanup-expired-data',
+    name: 'clear:cleanup-expired-data',
     description: 'Purges soft-deleted users older than retention period 
     and clears expired OTP tokens to comply with CRA.',
 )]
