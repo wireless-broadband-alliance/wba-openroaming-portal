@@ -529,11 +529,11 @@ The client must send the current valid JWT in the request body as "current_token
             'last_name' => 'Doe',
             'turnstile_token' => 'valid_test_token'
         ],
-        'description' => 'This endpoint registers a new user using their email and password. 
-            The request is validated using the UserEmailRegistrationDTO and protected by CAPTCHA 
-            validation when Turnstile is enabled. The password must meet the configured length, 
-            strength, and compromised-password requirements. If the user already exists, the 
-            endpoint returns a generic successful response to prevent user enumeration.',
+        'description' => 'This endpoint registers a new user using their email address and password.
+The request is protected by CAPTCHA validation when Turnstile is enabled.
+The email address and password are validated before the user account is created.
+If the email address is already registered, the endpoint returns a generic successful
+response to prevent user enumeration. A registration email is sent to newly created users.',
         'responses' => [
             200 => [
                 json_decode(
@@ -552,15 +552,16 @@ The client must send the current valid JWT in the request body as "current_token
                 'Invalid JSON format',
                 'Invalid data.',
                 'CAPTCHA validation failed',
-                'This field cannot be blank',
                 'Invalid email format.',
                 'This field cannot be shorter than 16 characters',
-                'This field cannot be longer than 255 characters',
                 'The password strength is too low. Please use a stronger password.',
-                'This password has been leaked in a data breach, it must not be used. Please use another password.'
+                'This password has been leaked in a data breach, it must not be used. Please use another password.',
+                'Email is required.',
+                'Password is required.'
             ],
             403 => [
-                'Your email domain is not allowed to use this platform.'
+                'Your email domain is not allowed to use this platform.',
+                'Email aliases are not allowed for registration.'
             ],
             500 => [
                 'Missing settings: TURNSTILE_CHECKER not found'
@@ -571,13 +572,13 @@ The client must send the current valid JWT in the request body as "current_token
         'routePrefix' => '/api/v2/auth/local/reset',
         'section' => 'Auth',
         'requestBody' => [
-            'email' => 'user@example.com',
+            'email' => 'test@example.com',
             'turnstile_token' => 'valid_test_token'
         ],
         'description' => 'This endpoint triggers a password reset for a local auth account. 
-                The user must provide their email and a CAPTCHA validation token. The endpoint verifies if the 
-                user has an external auth with "PortalAccount" and "EMAIL" providerId, then proceeds with the 
-                password reset if the conditions are met.',
+                The user must provide their email and a CAPTCHA validation token. The endpoint verifies if the user 
+                has an external auth with "PortalAccount" and "EMAIL" providerId, then proceeds with the password 
+                reset if the conditions are met.',
         'responses' => [
             200 => [
                 json_decode(
@@ -611,12 +612,11 @@ The client must send the current valid JWT in the request body as "current_token
             'last_name' => 'Doe',
             'turnstile_token' => 'valid_test_token'
         ],
-        'description' => 'This endpoint registers a new user using their phone number and password. 
-            The request is validated using the UserSMSRegistrationDTO, including phone number, 
-            country code, and password validation. The request is also protected by CAPTCHA 
-            validation when Turnstile is enabled. A verification code is generated and sent 
-            to the registered phone number. If the phone number is already registered, the 
-            endpoint returns a generic successful response to prevent user enumeration.',
+        'description' => 'This endpoint registers a new user using their phone number and password.
+The phone number is validated using the provided country code and the request is protected
+by CAPTCHA validation when Turnstile is enabled. A verification code is generated and sent
+to the registered phone number. If the phone number is already registered, the endpoint
+returns a generic successful response to prevent user enumeration.',
         'responses' => [
             200 => [
                 json_decode(
@@ -635,19 +635,15 @@ The client must send the current valid JWT in the request body as "current_token
                 'Invalid JSON format',
                 'Invalid data.',
                 'CAPTCHA validation failed',
-                'This field cannot be blank',
-                'Invalid country code.',
                 'Invalid phone number format.',
                 'Invalid phone number format or country code.',
                 'This field cannot be shorter than 16 characters',
-                'This field cannot be longer than 255 characters',
                 'The password strength is too low. Please use a stronger password.',
                 'This password has been leaked in a data breach, it must not be used. Please use another password.'
             ],
             500 => [
                 'Missing settings: TURNSTILE_CHECKER not found',
-                'Failed to send SMS',
-                'User registered but SMS could not be sent.'
+                'Failed to send SMS'
             ]
         ]
     ],
