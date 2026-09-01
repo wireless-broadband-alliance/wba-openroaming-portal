@@ -11,10 +11,7 @@ After you have obtained the project, make sure to update your environment
 variables. A sample file named `.env.sample` is provided in the project root directory. Duplicate the sample file and
 rename it to `.env`. You can then modify the environment variables to match your specific configuration.
 
-**Note**: When updating the database credentials in the `.env` file, make sure they **match the credentials specified in
-the docker-compose.yml** file.
-Failure to match the credentials will result in the application being unable to connect to
-the database.
+**Note**: Setting `MYSQL_ROOT_PASSWORD` and `MYSQL_PASSWORD` in your `.env` file is mandatory. Docker Compose will fail startup immediately if these variables are unset or empty. Additionally, set `SUPERADMIN_PASSWORD` in `.env` before initializing fixtures or super admin user setup.
 
 ## 2. **Start Services**
 

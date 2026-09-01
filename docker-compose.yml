@@ -21,12 +21,12 @@ services:
   mysql:
     image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: openroaming
-      MYSQL_USER: openroaming
-      MYSQL_PASSWORD: openroaming
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-openroaming}
+      MYSQL_USER: ${MYSQL_USER:-openroaming}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - "3306:3306"
+      - "127.0.0.1:3306:3306"
     volumes:
       - mysql:/var/lib/mysql
   memcached:
