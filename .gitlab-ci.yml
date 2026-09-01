@@ -149,6 +149,8 @@ trivy-scan:
       export TRIVY_VERSION=$(wget -qO - "https://api.github.com/repos/aquasecurity/trivy/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
       echo "Trivy version: $TRIVY_VERSION"
       wget --no-verbose "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" -O - | tar -zxvf -
+      echo "Installing Syft..."
+      wget -qO- https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b .
       echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
   script:
     - if [ -z "$CI_COMMIT_TAG" ]; then CI_COMMIT_TAG=$CI_COMMIT_SHORT_SHA; fi
@@ -159,9 +161,9 @@ trivy-scan:
       ./trivy image --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --ignore-status will_not_fix,fix_deferred,fixed --format table "$IMAGE"
     # Syft: Generate container SBOM targeting final Docker image layers
     - echo "Generating Container SBOM for $IMAGE using Syft"
-    - syft "$IMAGE" -o cyclonedx-json=gl-sbom-image.cdx.json
-    - syft "$IMAGE" -o spdx-json=sbom-image.spdx.json
-    - syft "$IMAGE" -o table
+    - ./syft "$IMAGE" -o cyclonedx-json=gl-sbom-image.cdx.json
+    - ./syft "$IMAGE" -o spdx-json=sbom-image.spdx.json
+    - ./syft "$IMAGE" -o table
     # Filesystem CycloneDX SBOM scan (Source dependencies & License Scanning)
     - echo "Generating Filesystem CycloneDX SBOM and License Scanning Report"
     - ./trivy fs --scanners vuln,license --format cyclonedx -o gl-sbom-fs.cdx.json .
