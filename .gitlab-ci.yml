@@ -2,14 +2,7 @@ image: docker:latest
 services:
   - docker:dind
 
-# ==============================================================================
-# PIPELINE STAGES DEFINITION
-# ==============================================================================
-# 1. prepare  : Rebuilds the test environment container image if dependencies change.
-# 2. test     : Runs all code quality linters, static analysis, and code style checks in parallel.
-# 3. security : Runs dedicated security, vulnerability, SAST, secret, and IaC misconfiguration scanners.
-# 4. build    : Compiles and pushes the final production Docker image and runs final security gates (ONLY if tests pass).
-# ==============================================================================
+# Pipeline Stages
 stages:
   - prepare
   - test
@@ -28,12 +21,10 @@ workflow:
     - if: '$CI_PIPELINE_SOURCE == "web"'
 
 # ==============================================================================
-# STAGE 1: prepare
-# PURPOSE: Rebuilds and caches the test Docker image whenever DockerfileTests
-#          or composer.lock is updated, making sure all test tools have required dependencies.
+# STAGE 1: prepare - Build and cache test Docker container
 # ==============================================================================
 
-# Rebuilds the Docker test environment image with PHP extensions and Composer dependencies when configuration changes.
+# Rebuilds the Docker test environment image when DockerfileTests or composer.lock is updated
 build_test_image:
   stage: prepare
   image: docker:latest
@@ -59,12 +50,10 @@ build_test_image:
     - if: '$CI_PIPELINE_SOURCE == "web"'
 
 # ==============================================================================
-# STAGE 2: test
-# PURPOSE: Runs automated code style linters (PSR-12, YAML, ESLint, Prettier, ShellCheck)
-#          and static code analysis tools (Rector, Twig CS Fixer, PHPStan) in parallel.
+# STAGE 2: test - Code quality linters, formatting, and static analysis
 # ==============================================================================
 
-# Checks PHP source code against PSR-12 coding standards using PHP_CodeSniffer.
+# Checks PHP source code against PSR-12 coding standards using PHP_CodeSniffer
 linting-psr12:
   stage: test
   image: registry.gitlab.com/pipeline-components/php-codesniffer:latest
@@ -76,7 +65,7 @@ linting-psr12:
     - if: '$CI_COMMIT_BRANCH'
     - if: '$CI_COMMIT_TAG'
 
-# Validates syntax and formatting of all YAML configuration files.
+# Validates syntax and formatting of YAML configuration files
 yamllint:
   stage: test
   image: registry.gitlab.com/pipeline-components/yamllint:latest
@@ -89,7 +78,7 @@ yamllint:
     - if: '$CI_COMMIT_BRANCH'
     - if: '$CI_COMMIT_TAG'
 
-# Lints JavaScript controllers and assets using ESLint.
+# Lints JavaScript controllers and assets using ESLint
 eslint:
   stage: test
   image: node:latest
@@ -106,7 +95,7 @@ eslint:
     - if: '$CI_COMMIT_BRANCH'
     - if: '$CI_COMMIT_TAG'
 
-# Checks JavaScript code formatting against Prettier style guidelines.
+# Checks JavaScript formatting against Prettier guidelines
 prettier:
   stage: test
   image: node:latest
@@ -123,7 +112,7 @@ prettier:
     - if: '$CI_COMMIT_BRANCH'
     - if: '$CI_COMMIT_TAG'
 
-# Performs static analysis and linting on shell scripts in scripts/ and tools/.
+# Lints shell scripts in scripts/ and tools/ using ShellCheck
 shellcheck:
   stage: test
   image: koalaman/shellcheck-alpine:latest
@@ -135,7 +124,7 @@ shellcheck:
     - if: '$CI_COMMIT_BRANCH'
     - if: '$CI_COMMIT_TAG'
 
-# Runs Rector in dry-run mode to check for PHP code upgrades and deprecations.
+# Runs Rector in dry-run mode to check for PHP code upgrades and deprecations
 test-rector:
   stage: test
   image: "$CI_REGISTRY_IMAGE:cra-tests"
@@ -158,7 +147,7 @@ test-rector:
     - if: '$CI_COMMIT_BRANCH'
     - if: '$CI_COMMIT_TAG'
 
-# Checks Twig template syntax and code formatting standards.
+# Checks Twig template syntax and code formatting standards
 test-twig:
   stage: test
   image: "$CI_REGISTRY_IMAGE:cra-tests"
@@ -181,7 +170,7 @@ test-twig:
     - if: '$CI_COMMIT_BRANCH'
     - if: '$CI_COMMIT_TAG'
 
-# Performs static type analysis and code quality checks on PHP codebase using PHPStan.
+# Performs static type analysis on PHP codebase using PHPStan
 test-phpstan:
   stage: test
   image: "$CI_REGISTRY_IMAGE:cra-tests"
@@ -210,12 +199,10 @@ test-phpstan:
     - if: '$CI_COMMIT_TAG'
 
 # ==============================================================================
-# STAGE 3: security
-# PURPOSE: Scans composer dependencies for CVEs (php-security-checker), checks IaC & container
-#          configs (Trivy), and runs GitLab SAST, Secret Detection, and Dependency Scanning.
+# STAGE 3: security - Dedicated Security Scans & Static Analysis
 # ==============================================================================
 
-# Checks composer.lock for known security vulnerabilities in third-party PHP packages.
+# Checks composer.lock for known security vulnerabilities in PHP packages
 php-security-checker:
   stage: security
   image: registry.gitlab.com/pipeline-components/php-security-checker:latest
@@ -227,15 +214,18 @@ php-security-checker:
     - if: '$CI_COMMIT_BRANCH'
     - if: '$CI_COMMIT_TAG'
 
-# Scans Dockerfile, docker-compose, and server configs for security misconfigurations using Trivy.
+# Scans Dockerfile, docker-compose, and server configs for security misconfigurations using Trivy
 iac-config-scan:
   stage: security
   image:
     name: aquasec/trivy:latest
     entrypoint: [""]
   needs: []
+  before_script:
+    - mkdir -p contrib
+    - wget -qO contrib/gitlab.tpl https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/gitlab.tpl || true
   script:
-    - trivy config --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --format template --template "@contrib/gitlab.tpl" -o trivy-iac-report.json .
+    - if [ -f contrib/gitlab.tpl ]; then trivy config --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --format template --template "@contrib/gitlab.tpl" -o trivy-iac-report.json . ; else trivy config --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --format json -o trivy-iac-report.json . ; fi
     - trivy config --exit-code 0 --severity HIGH,CRITICAL,MEDIUM .
   artifacts:
     when: always
@@ -246,6 +236,7 @@ iac-config-scan:
     - if: '$CI_COMMIT_BRANCH'
     - if: '$CI_COMMIT_TAG'
 
+# Include GitLab template security scanners
 include:
   - template: Jobs/Dependency-Scanning.gitlab-ci.yml
   - template: Jobs/Secret-Detection.gitlab-ci.yml
@@ -263,28 +254,26 @@ include:
   stage: security
   needs: []
 
-# Scans source code for hardcoded secrets, keys, and tokens.
+# Scans source code for hardcoded secrets, keys, and tokens
 secret_detection:
   stage: security
   needs: []
 
-# Runs Static Application Security Testing (SAST) on source code.
+# Runs Static Application Security Testing (SAST) on source code
 sast:
   stage: security
   needs: []
 
-# Analyzes project dependencies for known security vulnerabilities.
+# Analyzes project dependencies for known security vulnerabilities
 dependency_scanning:
   stage: security
   needs: []
 
 # ==============================================================================
-# STAGE 4: build (Gated Production Deployment & Final Vulnerability Check)
-# PURPOSE: Builds and pushes the production Docker image ONLY if all previous test and
-#          security stages pass. Generates SBOMs and verifies zero critical vulnerabilities.
+# STAGE 4: build - Production Docker image compilation & final container scanning
 # ==============================================================================
 
-# Compiles and pushes the production Docker image to the registry (runs ONLY if test and security stages pass).
+# Compiles and pushes the production Docker image (only runs after test and security stages pass)
 build_image:
   stage: build
   script:
@@ -293,7 +282,7 @@ build_image:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
 
-# Scans the production Docker image for vulnerabilities, generates SBOMs, and enforces critical security gates.
+# Scans the production Docker image for vulnerabilities, generates SBOMs, and enforces critical security gates
 trivy-scan:
   stage: build
   needs: ["build_image"]
@@ -316,7 +305,7 @@ trivy-scan:
       echo "Scanning Docker image: $IMAGE"
       ./trivy image --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --ignore-status will_not_fix,fix_deferred,fixed --format template --template "@contrib/gitlab.tpl" -o trivy-image-report.json "$IMAGE"
       ./trivy image --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --ignore-status will_not_fix,fix_deferred,fixed --format table "$IMAGE"
-      # Vulnerability Gate: Fail build if CRITICAL unmitigated vulnerabilities are present
+      # Fail build if CRITICAL unmitigated vulnerabilities are present
       ./trivy image --exit-code 1 --severity CRITICAL --ignore-status will_not_fix,fix_deferred,fixed "$IMAGE"
     # Syft: Generate container SBOM targeting final Docker image layers
     - echo "Generating Container SBOM for $IMAGE using Syft"
