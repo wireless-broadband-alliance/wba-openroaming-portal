@@ -1,5 +1,49 @@
 # Changelog
 
+# Release V1.13.2
+
+- **OAuth `provider_id` Encryption (CRA Annex I §1.3, §1.5)**: Google and Microsoft `provider_id` values are now
+  hashed (HMAC-SHA256) via a new `ProviderIdHasher` service before being persisted, instead of being stored in
+  plaintext.
+  - **Required one-time action:** Run the new `app:auth:hash-legacy-ids` command to hash any existing legacy
+    plaintext `provider_id` values for Google and Microsoft accounts. This command is idempotent and safe to
+    re-run.
+
+```bash
+    php bin/console app:auth:hash-legacy-ids
+```
+
+- **JWT TTL Reduced (CRA Annex I §1.2)**: Reduced the `lexik_jwt_authentication.yaml` token TTL from 3600s (1 hour)
+  to 900s (15 minutes) for the privileged IAM API, and implemented token refresh endpoints. API static docs and the
+  auth refresh documentation were updated to reflect the new 900s TTL and the new error response messages.
+- **Metrics Endpoint Access Restricted (CRA Annex I §1.7)**: Fixed the `.env.sample` default for
+  `METRICS_ALLOWED_IPS`, which previously defaulted to `0.0.0.0/0`, allowing any IP to query Prometheus metrics
+  data if the metrics endpoint was enabled.
+
+### Other CRA compliance fixes in this release
+
+- InstallationService no longer stores the password hash inside the Progress object
+- `Setting.value` secrets are no longer stored unencrypted
+- Removed raw `exec()` usage vulnerable to command injection and path traversal
+- Certbot no longer hardcodes RSA-2048 keys
+- RSA now uses OAEP padding instead of PKCS#1 v1.5
+- SMS provider API keys are no longer stored in plaintext
+- RADIUS tokens are no longer stored in plaintext
+- Magic-link and 2FA email tokens are no longer stored in plaintext
+- OTP backup codes are no longer stored in plaintext
+- TOTP 2FA secrets are no longer stored in plaintext
+- Automated data retention & PII cleanup routine implemented
+- Enforced web server request payload caps and connection rate limiting
+- Enforced non-zero exit code checks in container vulnerability scanning
+- Machine-readable CycloneDX SBOM generation added to CI/CD
+- Configured strict session cookie protection flags
+- Remediated bypassed security firewalls on API routes
+- Enforced mandatory TLS (HSTS & database `sslmode=verify-full`)
+- Externalized database secrets and bound services to localhost in Docker Compose
+- Hardened web server security headers and eliminated permissive CSP
+- Applied secure defaults across the platform
+- Enforced non-root process execution and purged build tooling from container runtime
+
 # Release V1.13.1
 
 - Added a toggle to enable/disable the Coverage Map feature from the admin dashboard (Map Settings)
