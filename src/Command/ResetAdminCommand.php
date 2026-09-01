@@ -77,7 +77,10 @@ class ResetAdminCommand extends Command
             ?? null;
 
         if (empty($password)) {
-            $output->writeln('<error>Error:</error> Super Admin password is required. Specify --password option or set SUPERADMIN_PASSWORD in .env file.');
+            $output->writeln(
+                '<error>Error:</error> Super Admin password is required. ' .
+                'Specify --password option or set SUPERADMIN_PASSWORD in .env file.'
+            );
             return Command::FAILURE;
         }
 

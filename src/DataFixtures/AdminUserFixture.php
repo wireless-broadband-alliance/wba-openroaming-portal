@@ -28,7 +28,9 @@ class AdminUserFixture extends Fixture
         $email = $_ENV['SUPERADMIN_EMAIL'] ?? $_SERVER['SUPERADMIN_EMAIL'] ?? DefaultUser::ADMIN->value;
         $password = $_ENV['SUPERADMIN_PASSWORD'] ?? $_SERVER['SUPERADMIN_PASSWORD'] ?? null;
         if (empty($password)) {
-            throw new \RuntimeException('SUPERADMIN_PASSWORD environment variable is required and must be set in .env before running fixtures.');
+            throw new \RuntimeException(
+                'SUPERADMIN_PASSWORD environment variable is required and must be set in .env before running fixtures.'
+            );
         }
 
         $admin = new User();
