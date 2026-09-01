@@ -38,6 +38,15 @@ security:
             provider: user_provider
             login_throttling:
                 limiter: limiter.login_api
+
+        auth_v3:
+            pattern: ^/api/v3/auth
+            stateless: true
+            security: true
+            provider: user_provider
+            login_throttling:
+                limiter: limiter.login_api
+
         api:
             pattern: ^/api/
             stateless: true
@@ -119,9 +128,11 @@ security:
     access_control:
         - { path: ^/api/v1/auth, roles: PUBLIC_ACCESS }
         - { path: ^/api/v2/auth, roles: PUBLIC_ACCESS }
+        - { path: ^/api/v3/auth, roles: PUBLIC_ACCESS }
         - { path: ^/saml/(metadata|login|acs), roles: PUBLIC_ACCESS }
         - { path: ^/api/v1/user, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/api/v2/user, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/v3/user, roles: IS_AUTHENTICATED_FULLY }
 when@test:
     security:
         password_hashers:
