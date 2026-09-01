@@ -32,6 +32,7 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - mysql:/var/lib/mysql
+      - ./service-config/mysql/ssl.cnf:/etc/mysql/conf.d/ssl.cnf:ro
   memcached:
     image: memcached:1.6
     security_opt:

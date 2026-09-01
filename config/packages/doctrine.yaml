@@ -7,12 +7,16 @@ doctrine:
             default:
                 url: '%env(resolve:DATABASE_URL)%'
                 server_version: '8.0.44'
+                options:
+                    !php/const PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT: false
                 mapping_types:
                     geometry: revisor_geometry
                     point: point
             freeradius:
                 url: '%env(resolve:DATABASE_FREERADIUS_URL)%'
                 server_version: '8.0.44'
+                options:
+                    !php/const PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT: false
         default_connection: default
 
 

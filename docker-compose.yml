@@ -33,6 +33,7 @@ services:
       - "127.0.0.1:3306:3306"
     volumes:
       - mysql:/var/lib/mysql
+      - ./service-config/mysql/ssl.cnf:/etc/mysql/conf.d/ssl.cnf:ro
   memcached:
     image: memcached:1.6
     security_opt:

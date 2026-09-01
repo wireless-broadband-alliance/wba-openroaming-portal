@@ -1,0 +1,3 @@
+[mysqld]
+ssl=1
+auto_generate_certs=1
