@@ -15,6 +15,7 @@ use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
+use App\Service\ProviderIdHasher;
 use App\Service\UserStatusChecker;
 use DateTime;
 use DateTimeInterface;
@@ -56,6 +57,7 @@ class GoogleController extends AbstractController
         private readonly TranslatorInterface $translator,
         private readonly CsrfTokenManagerInterface $csrfTokenManager,
         private readonly SettingRepository $settingRepository,
+        private readonly ProviderIdHasher $providerIdHasher,
     ) {
     }
 
@@ -73,22 +75,14 @@ class GoogleController extends AbstractController
         if ($data[SettingName::PLATFORM_MODE->value]['value'] === PlatformMode::DEMO->value) {
             $this->addFlash(
                 'error',
-                $this->translator->trans(
-                    'portalInDemoMode',
-                    [],
-                    'controllers'
-                )
+                $this->translator->trans('portalInDemoMode', [], 'controllers')
             );
             return $this->redirectToRoute('app_landing');
         }
         if ($data[SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value]['value'] === "false") {
             $this->addFlash(
                 'error',
-                $this->translator->trans(
-                    'authenticationMethodNotEnabled',
-                    [],
-                    'controllers'
-                )
+                $this->translator->trans('authenticationMethodNotEnabled', [], 'controllers')
             );
             return $this->redirectToRoute('app_landing');
         }
@@ -148,11 +142,7 @@ class GoogleController extends AbstractController
         if ($code === null) {
             $this->addFlash(
                 'error',
-                $this->translator->trans(
-                    'authenticationProcessCancelled',
-                    [],
-                    'controllers'
-                )
+                $this->translator->trans('authenticationProcessCancelled', [], 'controllers')
             );
             return $this->redirectToRoute('app_landing');
         }
@@ -184,11 +174,7 @@ class GoogleController extends AbstractController
         if (!$this->userStatusChecker->isValidEmail($email, UserProvider::GOOGLE_ACCOUNT->value)) {
             $this->addFlash(
                 'error',
-                $this->translator->trans(
-                    'emailDomainNotAllowed',
-                    [],
-                    'controllers'
-                )
+                $this->translator->trans('emailDomainNotAllowed', [], 'controllers')
             );
             return $this->redirectToRoute('app_landing');
         }
@@ -205,11 +191,7 @@ class GoogleController extends AbstractController
         if ($user->getBannedAt() instanceof DateTimeInterface) {
             $this->addFlash(
                 'error',
-                $this->translator->trans(
-                    'accountBanned',
-                    [],
-                    'controllers'
-                )
+                $this->translator->trans('accountBanned', [], 'controllers')
             );
             return $this->redirectToRoute('app_landing');
         }
@@ -248,7 +230,8 @@ class GoogleController extends AbstractController
 
         if ($userGoogle !== null) {
             $existingUserAuth = $this->userExternalAuthRepository->findOneBy([
-                'user' => $userGoogle
+                'user' => $userGoogle,
+                'provider' => UserProvider::GOOGLE_ACCOUNT->value,
             ]);
 
             if (
@@ -260,11 +243,7 @@ class GoogleController extends AbstractController
 
             $this->addFlash(
                 'error',
-                $this->translator->trans(
-                    'emailIsAlreadyInUse',
-                    [],
-                    'controllers'
-                )
+                $this->translator->trans('emailIsAlreadyInUse', [], 'controllers')
             );
 
             return null;
@@ -282,9 +261,9 @@ class GoogleController extends AbstractController
         $userAuth = new UserExternalAuth();
         $userAuth->setUser($user)
             ->setProvider(UserProvider::GOOGLE_ACCOUNT->value)
-            ->setProviderId($googleUserId);
+            ->setProviderId($this->providerIdHasher->hash($googleUserId));
 
-        $randomPassword = bin2hex(random_bytes(8));
+        $randomPassword = bin2hex(random_bytes(16));
         $hashedPassword = $this->passwordEncoder->hashPassword($user, $randomPassword);
         $user->setPassword($hashedPassword);
 
@@ -336,7 +315,11 @@ class GoogleController extends AbstractController
             // Create a new token with the authenticated user
             $token = new UsernamePasswordToken($user, $firewallName, $user->getRoles());
 
-            // Set the new token in the token storage
+            if ($request && $request->hasSession()) {
+                $session = $request->getSession();
+                $session->set('_security_' . $firewallName, serialize($token));
+            }
+
             $this->tokenStorage->setToken($token);
 
             // Dispatch an interactive login event

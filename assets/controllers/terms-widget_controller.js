@@ -29,13 +29,13 @@ export default class extends Controller {
         fetch(isChecked ? '/accept-terms' : '/reject-terms', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            keepalive: true,
         })
-            .then((res) => res.json())
-            .then((data) => {
-                console.log(data.message);
-            });
+          .then((res) => res.json())
+          .then((data) => {
+              console.log(data.message);
+          });
 
-        // Show/Hide warning widget based on the checkbox state if the user clicks any of the authentication methods
         if (isChecked) this.closeConfirmationModal();
 
         this.toggleSubmitButtons();
