@@ -2,6 +2,8 @@
 services:
   web:
     image: ghcr.io/wireless-broadband-alliance/wba-openroaming-portal:1.13.1
+    security_opt:
+      - no-new-privileges:true
     env_file:
       - .env
     volumes:
@@ -22,6 +24,8 @@ services:
       - "443:443"
   mysql:
     image: mysql:8.0
+    security_opt:
+      - no-new-privileges:true
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-openroaming}
@@ -33,6 +37,8 @@ services:
       - mysql:/var/lib/mysql
   memcached:
     image: memcached:1.6
+    security_opt:
+      - no-new-privileges:true
 
 volumes:
   uploads:

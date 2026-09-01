@@ -4,6 +4,8 @@ services:
     build:
       context: .
       dockerfile: DockerfileDev
+    security_opt:
+      - no-new-privileges:true
     env_file:
       - .env
     volumes:
@@ -18,6 +20,8 @@ services:
       - "80:80"
   mysql:
     image: mysql:8.0
+    security_opt:
+      - no-new-privileges:true
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-openroaming}
@@ -29,6 +33,8 @@ services:
       - mysql:/var/lib/mysql
   memcached:
     image: memcached:1.6
+    security_opt:
+      - no-new-privileges:true
 
 volumes:
   mysql:
