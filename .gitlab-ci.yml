@@ -1,17 +1,24 @@
 image: docker:latest
 services:
   - docker:dind
+
+# ==============================================================================
+# PIPELINE STAGES DEFINITION
+# ==============================================================================
+# 1. prepare  : Rebuilds the test environment container image if dependencies change.
+# 2. test     : Runs all code quality linters, static analysis, and code style checks in parallel.
+# 3. security : Runs dedicated security, vulnerability, SAST, secret, and IaC misconfiguration scanners.
+# 4. build    : Compiles and pushes the final production Docker image and runs final security gates (ONLY if tests pass).
+# ==============================================================================
 stages:
   - prepare
-  - lint
   - test
+  - security
   - build
-  - scan
 
 variables:
   DS_MAX_DEPTH: "-1"
   DS_EXCLUDED_PATHS: "vendor, node_modules, var, public"
-
 
 workflow:
   rules:
@@ -20,6 +27,13 @@ workflow:
     - if: '$CI_COMMIT_TAG'
     - if: '$CI_PIPELINE_SOURCE == "web"'
 
+# ==============================================================================
+# STAGE 1: prepare
+# PURPOSE: Rebuilds and caches the test Docker image whenever DockerfileTests
+#          or composer.lock is updated, making sure all test tools have required dependencies.
+# ==============================================================================
+
+# Rebuilds the Docker test environment image with PHP extensions and Composer dependencies when configuration changes.
 build_test_image:
   stage: prepare
   image: docker:latest
@@ -40,40 +54,97 @@ build_test_image:
       changes:
         - DockerfileTests
         - composer.lock
+    - if: '$CI_COMMIT_TAG'
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
     - if: '$CI_PIPELINE_SOURCE == "web"'
 
+# ==============================================================================
+# STAGE 2: test
+# PURPOSE: Runs automated code style linters (PSR-12, YAML, ESLint, Prettier, ShellCheck)
+#          and static code analysis tools (Rector, Twig CS Fixer, PHPStan) in parallel.
+# ==============================================================================
+
+# Checks PHP source code against PSR-12 coding standards using PHP_CodeSniffer.
 linting-psr12:
-  stage: lint
+  stage: test
   image: registry.gitlab.com/pipeline-components/php-codesniffer:latest
+  needs: []
   script:
     - phpcs -s -p --colors --extensions=php --standard=PSR12 src/
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_COMMIT_TAG'
 
-php-security-checker:
-  stage: test
-  image: registry.gitlab.com/pipeline-components/php-security-checker:latest
-  script:
-    - cd ${COMPOSER_LOCATION:-.} && security-checker security:check composer.lock
-
+# Validates syntax and formatting of all YAML configuration files.
 yamllint:
+  stage: test
   image: registry.gitlab.com/pipeline-components/yamllint:latest
   allow_failure: false
+  needs: []
   script:
     - yamllint -f colored -c yamllint.yaml .
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: always
     - if: '$CI_COMMIT_BRANCH'
-      when: always
     - if: '$CI_COMMIT_TAG'
-      when: never
-    - when: never
-  stage: lint
 
+# Lints JavaScript controllers and assets using ESLint.
+eslint:
+  stage: test
+  image: node:latest
+  needs: []
+  cache:
+    key: "${CI_COMMIT_REF_SLUG}-npm"
+    paths:
+      - .npm/
+  script:
+    - npm ci --cache .npm --prefer-offline || npm install
+    - npx eslint assets/controllers/
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_COMMIT_TAG'
 
+# Checks JavaScript code formatting against Prettier style guidelines.
+prettier:
+  stage: test
+  image: node:latest
+  needs: []
+  cache:
+    key: "${CI_COMMIT_REF_SLUG}-npm"
+    paths:
+      - .npm/
+  script:
+    - npm ci --cache .npm --prefer-offline || npm install
+    - npx prettier --check assets/controllers/
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_COMMIT_TAG'
+
+# Performs static analysis and linting on shell scripts in scripts/ and tools/.
+shellcheck:
+  stage: test
+  image: koalaman/shellcheck-alpine:latest
+  needs: []
+  script:
+    - shellcheck scripts/*.sh tools/*.sh || true
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_COMMIT_TAG'
+
+# Runs Rector in dry-run mode to check for PHP code upgrades and deprecations.
 test-rector:
+  stage: test
   image: "$CI_REGISTRY_IMAGE:cra-tests"
   allow_failure: false
+  needs: [{ job: build_test_image, optional: true }]
+  cache:
+    key: "${CI_COMMIT_REF_SLUG}-composer"
+    paths:
+      - composer-cache/
   variables:
     COMPOSER_MEMORY_LIMIT: "-1"
   before_script:
@@ -82,11 +153,21 @@ test-rector:
     - COMPOSER_CACHE_DIR=composer-cache composer install
   script:
     - vendor/bin/rector process src --dry-run
-  stage: test
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_COMMIT_TAG'
 
+# Checks Twig template syntax and code formatting standards.
 test-twig:
+  stage: test
   image: "$CI_REGISTRY_IMAGE:cra-tests"
   allow_failure: false
+  needs: [{ job: build_test_image, optional: true }]
+  cache:
+    key: "${CI_COMMIT_REF_SLUG}-composer"
+    paths:
+      - composer-cache/
   variables:
     COMPOSER_MEMORY_LIMIT: "-1"
   before_script:
@@ -95,11 +176,21 @@ test-twig:
     - COMPOSER_CACHE_DIR=composer-cache composer install
   script:
     - vendor/bin/twig-cs-fixer lint ./templates
-  stage: test
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_COMMIT_TAG'
 
+# Performs static type analysis and code quality checks on PHP codebase using PHPStan.
 test-phpstan:
+  stage: test
   image: "$CI_REGISTRY_IMAGE:cra-tests"
   allow_failure: false
+  needs: [{ job: build_test_image, optional: true }]
+  cache:
+    key: "${CI_COMMIT_REF_SLUG}-composer"
+    paths:
+      - composer-cache/
   variables:
     COMPOSER_MEMORY_LIMIT: "-1"
   before_script:
@@ -113,23 +204,87 @@ test-phpstan:
     when: always
     reports:
       codequality: gl-code-quality-report.json
-  stage: test
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_COMMIT_TAG'
 
-eslint:
-  image: node:latest
+# ==============================================================================
+# STAGE 3: security
+# PURPOSE: Scans composer dependencies for CVEs (php-security-checker), checks IaC & container
+#          configs (Trivy), and runs GitLab SAST, Secret Detection, and Dependency Scanning.
+# ==============================================================================
+
+# Checks composer.lock for known security vulnerabilities in third-party PHP packages.
+php-security-checker:
+  stage: security
+  image: registry.gitlab.com/pipeline-components/php-security-checker:latest
+  needs: []
   script:
-    - npm install
-    - npx eslint assets/controllers/
-  stage: test
+    - cd ${COMPOSER_LOCATION:-.} && security-checker security:check composer.lock
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_COMMIT_TAG'
 
-
-prettier:
-  image: node:latest
+# Scans Dockerfile, docker-compose, and server configs for security misconfigurations using Trivy.
+iac-config-scan:
+  stage: security
+  image:
+    name: aquasec/trivy:latest
+    entrypoint: [""]
+  needs: []
   script:
-    - npm install
-    - npx prettier --check assets/controllers/
-  stage: test
+    - trivy config --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --format template --template "@contrib/gitlab.tpl" -o trivy-iac-report.json .
+    - trivy config --exit-code 0 --severity HIGH,CRITICAL,MEDIUM .
+  artifacts:
+    when: always
+    paths:
+      - trivy-iac-report.json
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_COMMIT_TAG'
 
+include:
+  - template: Jobs/Dependency-Scanning.gitlab-ci.yml
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+  - template: Jobs/SAST.gitlab-ci.yml
+
+.sast-analyzer:
+  stage: security
+  needs: []
+
+.secret-analyzer:
+  stage: security
+  needs: []
+
+.dependency-scanning-analyzer:
+  stage: security
+  needs: []
+
+# Scans source code for hardcoded secrets, keys, and tokens.
+secret_detection:
+  stage: security
+  needs: []
+
+# Runs Static Application Security Testing (SAST) on source code.
+sast:
+  stage: security
+  needs: []
+
+# Analyzes project dependencies for known security vulnerabilities.
+dependency_scanning:
+  stage: security
+  needs: []
+
+# ==============================================================================
+# STAGE 4: build (Gated Production Deployment & Final Vulnerability Check)
+# PURPOSE: Builds and pushes the production Docker image ONLY if all previous test and
+#          security stages pass. Generates SBOMs and verifies zero critical vulnerabilities.
+# ==============================================================================
+
+# Compiles and pushes the production Docker image to the registry (runs ONLY if test and security stages pass).
 build_image:
   stage: build
   script:
@@ -138,8 +293,10 @@ build_image:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
 
+# Scans the production Docker image for vulnerabilities, generates SBOMs, and enforces critical security gates.
 trivy-scan:
-  stage: scan
+  stage: build
+  needs: ["build_image"]
   allow_failure: false
   variables:
     DOCKER_DRIVER: overlay2
@@ -159,6 +316,8 @@ trivy-scan:
       echo "Scanning Docker image: $IMAGE"
       ./trivy image --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --ignore-status will_not_fix,fix_deferred,fixed --format template --template "@contrib/gitlab.tpl" -o trivy-image-report.json "$IMAGE"
       ./trivy image --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --ignore-status will_not_fix,fix_deferred,fixed --format table "$IMAGE"
+      # Vulnerability Gate: Fail build if CRITICAL unmitigated vulnerabilities are present
+      ./trivy image --exit-code 1 --severity CRITICAL --ignore-status will_not_fix,fix_deferred,fixed "$IMAGE"
     # Syft: Generate container SBOM targeting final Docker image layers
     - echo "Generating Container SBOM for $IMAGE using Syft"
     - ./syft "$IMAGE" -o cyclonedx-json=gl-sbom-image.cdx.json
@@ -167,7 +326,7 @@ trivy-scan:
     # Filesystem CycloneDX SBOM scan (Source dependencies & License Scanning)
     - echo "Generating Filesystem CycloneDX SBOM and License Scanning Report"
     - ./trivy fs --scanners vuln,license --format cyclonedx -o gl-sbom-fs.cdx.json .
-    # Scan do Dockerfile
+    # Scan Dockerfile
     - echo "Scanning Dockerfile"
     - ./trivy config --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --format template --template "@contrib/gitlab.tpl" -o trivy-dockerfile-report.json ./Dockerfile
     - ./trivy config --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --format table ./Dockerfile
@@ -184,9 +343,3 @@ trivy-scan:
       cyclonedx:
         - gl-sbom-image.cdx.json
         - gl-sbom-fs.cdx.json
-
-
-include:
-  - template: Jobs/Dependency-Scanning.gitlab-ci.yml
-  - template: Jobs/Secret-Detection.gitlab-ci.yml
-  - template: Jobs/SAST.gitlab-ci.yml
