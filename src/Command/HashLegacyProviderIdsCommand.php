@@ -2,9 +2,10 @@
 
 namespace App\Command;
 
-use App\Doctrine\Type\HmacStringType;
 use App\Entity\UserExternalAuth;
-use Doctrine\DBAL\Types\Type;
+use App\Enum\UserProvider;
+use App\Service\ProviderIdHasher;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -17,12 +18,13 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
     name: 'app:auth:hash-legacy-ids',
-    description: 'Hashes legacy plain-text OAuth provider IDs to comply with CRA.',
+    description: 'Hashes legacy plain-text OAuth provider IDs for Google and Microsoft accounts to comply with CRA.',
 )]
 class HashLegacyProviderIdsCommand extends Command
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
+        private readonly ProviderIdHasher $providerIdHasher,
     ) {
         parent::__construct();
     }
@@ -30,15 +32,23 @@ class HashLegacyProviderIdsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the hashing process');
+            ->addOption(
+                'yes',
+                'y',
+                InputOption::VALUE_NONE,
+                'Automatically confirm the hashing process'
+            );
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
             $question = new ConfirmationQuestion(
-                'This action will hash all legacy plain-text provider IDs. [y/N] ',
+                'This action will hash all legacy plain-text Google/Microsoft provider IDs. [y/N] ',
                 false
             );
             /** @var QuestionHelper $helper */
@@ -54,12 +64,15 @@ class HashLegacyProviderIdsCommand extends Command
         $connection->beginTransaction();
 
         try {
-            $sql = sprintf('SELECT id, provider_id FROM %s WHERE provider_id IS NOT NULL', $tableName);
-            $auths = $connection->fetchAllAssociative($sql);
-
-            /** @var HmacStringType $type */
-            $type = Type::getType(HmacStringType::NAME);
-            $platform = $connection->getDatabasePlatform();
+            $sql = sprintf(
+                'SELECT id, provider_id FROM %s WHERE provider_id IS NOT NULL AND provider IN (:providers)',
+                $tableName
+            );
+            $auths = $connection->fetchAllAssociative(
+                $sql,
+                ['providers' => [UserProvider::GOOGLE_ACCOUNT->value, UserProvider::MICROSOFT_ACCOUNT->value]],
+                ['providers' => ArrayParameterType::STRING]
+            );
 
             $updatedCount = 0;
 
@@ -70,7 +83,7 @@ class HashLegacyProviderIdsCommand extends Command
                     continue;
                 }
 
-                $hashedValue = $type->convertToDatabaseValue($originalValue, $platform);
+                $hashedValue = $this->providerIdHasher->hash($originalValue);
 
                 $updateSql = sprintf('UPDATE %s SET provider_id = :provider_id WHERE id = :id', $tableName);
                 $connection->executeStatement(
@@ -85,7 +98,7 @@ class HashLegacyProviderIdsCommand extends Command
 
             $message = <<<EOL
 
-<info>Success:</info> $updatedCount legacy provider IDs have been successfully hashed.
+<info>Success:</info> $updatedCount legacy Google/Microsoft provider IDs have been successfully hashed.
 <comment>Note:</comment> All external authentications are now compliant with CRA Annex I §1.3 and §1.5.
 EOL;
 
