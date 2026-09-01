@@ -117,8 +117,8 @@ COPY service-config/nginx/fastcgi_params /etc/nginx/fastcgi_params
 COPY service-config/nginx/sites /etc/nginx/conf.d/
 
 # Setup directories and permissions
-RUN mkdir -p /run/nginx /run/php /usr/share/nginx/modules /var/log/supervisor /var/log/nginx /var/www/openroaming/var \
- && chown -R www-data:www-data /var/www/openroaming /run/nginx /run/php /var/log/nginx /var/log/supervisor
+RUN mkdir -p /run/nginx /run/php /usr/share/nginx/modules /var/log/supervisor /var/log/nginx /var/lib/nginx /var/www/openroaming/var \
+ && chown -R www-data:www-data /var/www/openroaming /run/nginx /run/php /var/log/nginx /var/log/supervisor /var/lib/nginx
 
 EXPOSE 80
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
