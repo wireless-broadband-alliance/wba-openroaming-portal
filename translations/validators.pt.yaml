@@ -112,3 +112,5 @@ valueMustBeBetween: 'The value must be between {{ min }} and {{ max }}.'
 invalidSerialNumberFormat: "O formato do número de série é inválido."
 passwordCannotBeLongerThan: 'A palavra-passe não pode ter mais de {{ limit }} caracteres'
 passwordCannotBeShorterThan: 'A palavra-passe não pode ter menos de {{ limit }} caracteres.'
+passwordIsCompromised: 'Esta palavra-passe foi exposta numa fuga de dados e não pode ser utilizada.'
+passwordIsTooWeak: 'A palavra-passe é demasiado fraca. Por favor, utilize uma combinação de caracteres mais forte.'

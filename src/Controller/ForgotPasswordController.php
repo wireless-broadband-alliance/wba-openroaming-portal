@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\DTO\NewPasswordAccountDTO;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
@@ -645,31 +646,21 @@ class ForgotPasswordController extends AbstractController
             );
         }
 
+        $passwordDTO = new NewPasswordAccountDTO();
         $form = $this->createForm(
             NewPasswordAccountType::class,
-            $currentUser,
-            ['require_current_password' => false]
+            $passwordDTO,
+            [
+                'require_current_password' => false,
+            ]
         );
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($form->get('newPassword')->getData() !== $form->get('confirmPassword')->getData()) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('typeTheSamePasswordBothFields', [], 'controllers')
-                );
-
-                return $this->redirectToRoute(
-                    $context === FirewallType::DASHBOARD->value
-                        ? 'admin_page'
-                        : 'app_landing'
-                );
-            }
-
             $currentUser->setPassword(
                 $this->userPasswordHasher->hashPassword(
                     $currentUser,
-                    $form->get('newPassword')->getData()
+                    $passwordDTO->newPassword
                 )
             );
             $currentUser->setForgotPasswordRequest(false);

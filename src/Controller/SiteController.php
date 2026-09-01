@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\DTO\NewPasswordAccountDTO;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
@@ -244,8 +245,15 @@ class SiteController extends AbstractController
         $actionName = $request->attributes->get('_route');
 
         // Prepare Forms before any action
-        $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
-        $formPassword = $this->createForm(NewPasswordAccountType::class, $this->getUser());
+        $form = $this->createForm(AccountUserUpdateLandingType::class, $currentUser);
+
+        $passwordDTO = new NewPasswordAccountDTO();
+
+        $formPassword = $this->createForm(
+            NewPasswordAccountType::class,
+            $passwordDTO
+        );
+
         $formRegistrationDemo = $this->createForm(RegistrationFormType::class, $this->getUser());
         $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $this->getUser());
         $formTOS = $this->createForm(TOSType::class);
@@ -511,7 +519,14 @@ class SiteController extends AbstractController
 
         // Prepare forms
         $form = $this->createForm(AccountUserUpdateLandingType::class, $currentUser);
-        $formPassword = $this->createForm(NewPasswordAccountType::class, $currentUser);
+
+        $passwordDTO = new NewPasswordAccountDTO();
+
+        $formPassword = $this->createForm(
+            NewPasswordAccountType::class,
+            $passwordDTO
+        );
+
         $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $currentUser);
 
         return $this->render('landing/authUser/landing_api_auth_user.html.twig', [
@@ -606,7 +621,13 @@ class SiteController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        $formPassword = $this->createForm(NewPasswordAccountType::class, $this->getUser());
+        $passwordDTO = new NewPasswordAccountDTO();
+
+        $formPassword = $this->createForm(
+            NewPasswordAccountType::class,
+            $passwordDTO
+        );
+
         $formPassword->handleRequest($request);
 
         if ($formPassword->isSubmitted() && $formPassword->isValid()) {
@@ -616,32 +637,40 @@ class SiteController extends AbstractController
             $currentPasswordDB = $user->getPassword();
             $typedPassword = $formPassword->get('password')->getData();
 
-            // Compare the typed password with the hashed password from the database
+            // Verify the current password.
             if (!password_verify((string)$typedPassword, $currentPasswordDB)) {
                 $this->addFlash(
                     'error',
                     $this->translator->trans('passwordInvalid', [], 'controllers')
                 );
+
                 return $this->redirectToRoute('app_landing');
             }
 
-            if ($formPassword->get('newPassword')->getData() !== $formPassword->get('confirmPassword')->getData()) {
+            // Verify that the new password and confirmation match.
+            if ($passwordDTO->newPassword !== $passwordDTO->confirmPassword) {
                 $this->addFlash(
                     'error',
-                    $this->translator->trans('typeTheSamePasswordBothFields', [], 'controllers')
+                    $this->translator->trans(
+                        'typeTheSamePasswordBothFields',
+                        [],
+                        'controllers'
+                    )
                 );
+
                 return $this->redirectToRoute('app_landing');
             }
 
             $user->setPassword(
                 $this->userPasswordEncoder->hashPassword(
                     $user,
-                    $formPassword->get('newPassword')->getData()
+                    $passwordDTO->newPassword
                 )
             );
             $session = $request->getSession();
 
-            // Check and kill the dashboard session if the admin is logged at both firewalls at the same time
+            // Check and kill the dashboard session if the admin is logged
+            // at both firewalls at the same time.
             if ($session->has('_security_dashboard')) {
                 $session->remove('_security_dashboard');
             }
@@ -663,7 +692,11 @@ class SiteController extends AbstractController
 
             $this->addFlash(
                 'success',
-                $this->translator->trans('passwordUpdatedSuccessfully', [], 'controllers')
+                $this->translator->trans(
+                    'passwordUpdatedSuccessfully',
+                    [],
+                    'controllers'
+                )
             );
         }
 
