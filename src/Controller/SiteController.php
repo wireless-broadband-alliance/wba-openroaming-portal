@@ -541,7 +541,7 @@ class SiteController extends AbstractController
     /**
      * Widget with data about the account of the user / upload new password
      *
-     * @return RedirectResponse
+     * @return RedirectResponse|Response
      * @throws Exception
      */
     #[Route('/account/user', name: 'app_landing_account_user', methods: ['POST'])]
@@ -553,7 +553,7 @@ class SiteController extends AbstractController
         $oldFirstName = $user->getFirstName();
         $oldLastName = $user->getLastName();
 
-        $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $this->getUser());
+        $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $user);
         $formRevokeProfiles->handleRequest($request);
 
         if ($formRevokeProfiles->isSubmitted() && $formRevokeProfiles->isValid()) {
@@ -588,7 +588,7 @@ class SiteController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
+        $form = $this->createForm(AccountUserUpdateLandingType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -617,50 +617,17 @@ class SiteController extends AbstractController
                 $this->translator->trans('accountInformationUpdated', [], 'controllers')
             );
 
-            // Redirect the user upon successful form submission
             return $this->redirectToRoute('app_landing');
         }
 
         $passwordDTO = new NewPasswordAccountDTO();
-
         $formPassword = $this->createForm(
             NewPasswordAccountType::class,
             $passwordDTO
         );
-
         $formPassword->handleRequest($request);
 
         if ($formPassword->isSubmitted() && $formPassword->isValid()) {
-            /** @var User $user */
-            $user = $this->getUser();
-
-            $currentPasswordDB = $user->getPassword();
-            $typedPassword = $formPassword->get('password')->getData();
-
-            // Verify the current password.
-            if (!password_verify((string)$typedPassword, $currentPasswordDB)) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('passwordInvalid', [], 'controllers')
-                );
-
-                return $this->redirectToRoute('app_landing');
-            }
-
-            // Verify that the new password and confirmation match.
-            if ($passwordDTO->newPassword !== $passwordDTO->confirmPassword) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans(
-                        'typeTheSamePasswordBothFields',
-                        [],
-                        'controllers'
-                    )
-                );
-
-                return $this->redirectToRoute('app_landing');
-            }
-
             $user->setPassword(
                 $this->userPasswordEncoder->hashPassword(
                     $user,
@@ -669,8 +636,6 @@ class SiteController extends AbstractController
             );
             $session = $request->getSession();
 
-            // Check and kill the dashboard session if the admin is logged
-            // at both firewalls at the same time.
             if ($session->has('_security_dashboard')) {
                 $session->remove('_security_dashboard');
             }
@@ -698,8 +663,31 @@ class SiteController extends AbstractController
                     'controllers'
                 )
             );
+
+            // Redirect upon successful password update
+            return $this->redirectToRoute('app_landing');
         }
 
-        return $this->redirectToRoute('app_landing');
+        // Populate required template data ($data['os']) before rendering validation errors
+        /** @var array<string, mixed> $data */
+        $data = $this->getSettings->getSettings();
+        $userAgent = $request->headers->get('User-Agent');
+        $data['os'] = [
+            'selected' => $this->OSDetectionService->detectDevice($userAgent),
+            'items' => [
+                OSType::WINDOWS->value => ['alt' => 'Windows Logo'],
+                OSType::IOS->value => ['alt' => 'Apple Logo'],
+                OSType::ANDROID->value => ['alt' => 'Android Logo']
+            ]
+        ];
+
+        return $this->render('landing/authUser/landing_auth_user.html.twig', [
+            'form' => $form->createView(),
+            'formPassword' => $formPassword->createView(),
+            'formRevokeProfiles' => $formRevokeProfiles->createView(),
+            'data' => $data,
+            'user' => $user,
+            'context' => FirewallType::LANDING->value,
+        ], new Response(null, Response::HTTP_UNPROCESSABLE_ENTITY));
     }
 }

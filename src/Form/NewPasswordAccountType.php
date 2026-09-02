@@ -12,6 +12,7 @@ use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -30,7 +31,7 @@ class NewPasswordAccountType extends AbstractType
     {
         $turnstileCheckerValue = $this->settingRepository->findOneBy(
             ['name' => SettingName::TURNSTILE_CHECKER->value]
-        )->getValue();
+        )?->getValue();
 
         if ($options['require_current_password']) {
             $builder->add('password', PasswordType::class, [
@@ -40,7 +41,7 @@ class NewPasswordAccountType extends AbstractType
                     'NewPasswordAccountType'
                 ),
                 'required' => true,
-                'mapped' => false,
+                // FIX 1: Removed 'mapped' => false so $passwordDTO->password gets populated!
             ]);
         }
 
@@ -85,8 +86,14 @@ class NewPasswordAccountType extends AbstractType
         $resolver->setDefaults([
             'data_class' => NewPasswordAccountDTO::class,
             'require_current_password' => true,
+            'validation_groups' => function (FormInterface $form) {
+                $options = $form->getConfig()->getOptions();
+                $groups = ['Default'];
+                if ($options['require_current_password']) {
+                    $groups[] = 'current_password_required';
+                }
+                return $groups;
+            },
         ]);
-
-        $resolver->setAllowedTypes('require_current_password', 'bool');
     }
 }
