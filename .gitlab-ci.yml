@@ -1,4 +1,4 @@
 include:
   - project: 'tcs/tatrapi-sa/ci-templates'
     file: '/php/symfony/.gitlab-ci.yml'
-    #ref: 'v1.0.0'
+    # ref: 'v1.0.0'
