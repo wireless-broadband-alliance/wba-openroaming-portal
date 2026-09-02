@@ -34,33 +34,37 @@
                 </div>
 
                 {# IP & Port Row #}
-                <div class="grid grid-cols-3 gap-3">
-                    <div class="col-span-2 space-y-1">
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="sm:col-span-2 flex flex-col justify-between">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">
                             {{ 'dbOpenRoamingIP'|trans({}, 'data_base') }}
                         </label>
-                        {{ form_widget(form.dbOpenRoamingIp, {
-                            attr: {
-                                class: 'form-widget',
-                                'wire:model.debounce.500ms': 'dbSetupDTO.dbOpenRoaming',
-                                placeholder: '127.0.0.1'
-                            }
-                        }) }}
-                        <div class="text-xs text-red-500 mt-1">{{ form_errors(form.dbOpenRoamingIp) }}</div>
+                        <div>
+                            {{ form_widget(form.dbOpenRoamingIp, {
+                                attr: {
+                                    class: 'form-widget',
+                                    'wire:model.debounce.500ms': 'dbSetupDTO.dbOpenRoaming',
+                                    placeholder: '127.0.0.1'
+                                }
+                            }) }}
+                            <div class="text-xs text-red-500 mt-1">{{ form_errors(form.dbOpenRoamingIp) }}</div>
+                        </div>
                     </div>
 
-                    <div class="space-y-1">
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600">
+                    <div class="flex flex-col justify-between">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">
                             {{ 'dbOpenRoamingPort'|trans({}, 'data_base') }}
                         </label>
-                        {{ form_widget(form.dbOpenRoamingPort, {
-                            attr: {
-                                class: 'form-widget',
-                                'wire:model.debounce.500ms': 'dbSetupDTO.dbOpenRoaming',
-                                placeholder: '3306'
-                            }
-                        }) }}
-                        <div class="text-xs text-red-500 mt-1">{{ form_errors(form.dbOpenRoamingPort) }}</div>
+                        <div>
+                            {{ form_widget(form.dbOpenRoamingPort, {
+                                attr: {
+                                    class: 'form-widget',
+                                    'wire:model.debounce.500ms': 'dbSetupDTO.dbOpenRoaming',
+                                    placeholder: '3306'
+                                }
+                            }) }}
+                            <div class="text-xs text-red-500 mt-1">{{ form_errors(form.dbOpenRoamingPort) }}</div>
+                        </div>
                     </div>
                 </div>
 
@@ -81,31 +85,35 @@
 
                 {# Username & Password Row #}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-100">
-                    <div class="space-y-1">
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600">
+                    <div class="flex flex-col justify-between">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">
                             {{ 'dbOpenRoamingUserName'|trans({}, 'data_base') }}
                         </label>
-                        {{ form_widget(form.dbOpenRoamingUserName, {
-                            attr: {
-                                class: 'form-widget',
-                                'wire:model.debounce.500ms': 'dbSetupDTO.dbOpenRoaming',
-                                placeholder: 'db_user'
-                            }
-                        }) }}
-                        <div class="text-xs text-red-500 mt-1">{{ form_errors(form.dbOpenRoamingUserName) }}</div>
+                        <div>
+                            {{ form_widget(form.dbOpenRoamingUserName, {
+                                attr: {
+                                    class: 'form-widget',
+                                    'wire:model.debounce.500ms': 'dbSetupDTO.dbOpenRoaming',
+                                    placeholder: 'db_user'
+                                }
+                            }) }}
+                            <div class="text-xs text-red-500 mt-1">{{ form_errors(form.dbOpenRoamingUserName) }}</div>
+                        </div>
                     </div>
 
-                    <div class="space-y-1">
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600">
+                    <div class="flex flex-col justify-between">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">
                             {{ 'dbOpenRoamingPassword'|trans({}, 'data_base') }}
                         </label>
-                        {{ form_widget(form.dbOpenRoamingPassword, {
-                            attr: {
-                                class: 'form-widget',
-                                placeholder: '••••••••'
-                            }
-                        }) }}
-                        <div class="text-xs text-red-500 mt-1">{{ form_errors(form.dbOpenRoamingPassword) }}</div>
+                        <div>
+                            {{ form_widget(form.dbOpenRoamingPassword, {
+                                attr: {
+                                    class: 'form-widget',
+                                    placeholder: '••••••••'
+                                }
+                            }) }}
+                            <div class="text-xs text-red-500 mt-1">{{ form_errors(form.dbOpenRoamingPassword) }}</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -122,33 +130,37 @@
                 </div>
 
                 {# IP & Port Row #}
-                <div class="grid grid-cols-3 gap-3">
-                    <div class="col-span-2 space-y-1">
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="sm:col-span-2 flex flex-col justify-between">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">
                             {{ 'dbFreeradiusIP'|trans({}, 'data_base') }}
                         </label>
-                        {{ form_widget(form.dbFreeradiusIp, {
-                            attr: {
-                                class: 'form-widget',
-                                'wire:model.debounce.500ms': 'dbSetupDTO.dbFreeradius',
-                                placeholder: '127.0.0.1'
-                            }
-                        }) }}
-                        <div class="text-xs text-red-500 mt-1">{{ form_errors(form.dbFreeradiusIp) }}</div>
+                        <div>
+                            {{ form_widget(form.dbFreeradiusIp, {
+                                attr: {
+                                    class: 'form-widget',
+                                    'wire:model.debounce.500ms': 'dbSetupDTO.dbFreeradius',
+                                    placeholder: '127.0.0.1'
+                                }
+                            }) }}
+                            <div class="text-xs text-red-500 mt-1">{{ form_errors(form.dbFreeradiusIp) }}</div>
+                        </div>
                     </div>
 
-                    <div class="space-y-1">
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600">
+                    <div class="flex flex-col justify-between">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">
                             {{ 'dbFreeradiusPort'|trans({}, 'data_base') }}
                         </label>
-                        {{ form_widget(form.dbFreeradiusPort, {
-                            attr: {
-                                class: 'form-widget',
-                                'wire:model.debounce.500ms': 'dbSetupDTO.dbFreeradius',
-                                placeholder: '3306'
-                            }
-                        }) }}
-                        <div class="text-xs text-red-500 mt-1">{{ form_errors(form.dbFreeradiusPort) }}</div>
+                        <div>
+                            {{ form_widget(form.dbFreeradiusPort, {
+                                attr: {
+                                    class: 'form-widget',
+                                    'wire:model.debounce.500ms': 'dbSetupDTO.dbFreeradius',
+                                    placeholder: '3306'
+                                }
+                            }) }}
+                            <div class="text-xs text-red-500 mt-1">{{ form_errors(form.dbFreeradiusPort) }}</div>
+                        </div>
                     </div>
                 </div>
 
@@ -169,31 +181,35 @@
 
                 {# Username & Password Row #}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-100">
-                    <div class="space-y-1">
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600">
+                    <div class="flex flex-col justify-between">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">
                             {{ 'dbFreeradiusUserName'|trans({}, 'data_base') }}
                         </label>
-                        {{ form_widget(form.dbFreeradiusUserName, {
-                            attr: {
-                                class: 'form-widget',
-                                'wire:model.debounce.500ms': 'dbSetupDTO.dbFreeradius',
-                                placeholder: 'db_user'
-                            }
-                        }) }}
-                        <div class="text-xs text-red-500 mt-1">{{ form_errors(form.dbFreeradiusUserName) }}</div>
+                        <div>
+                            {{ form_widget(form.dbFreeradiusUserName, {
+                                attr: {
+                                    class: 'form-widget',
+                                    'wire:model.debounce.500ms': 'dbSetupDTO.dbFreeradius',
+                                    placeholder: 'db_user'
+                                }
+                            }) }}
+                            <div class="text-xs text-red-500 mt-1">{{ form_errors(form.dbFreeradiusUserName) }}</div>
+                        </div>
                     </div>
 
-                    <div class="space-y-1">
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600">
+                    <div class="flex flex-col justify-between">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">
                             {{ 'dbFreeradiusPassword'|trans({}, 'data_base') }}
                         </label>
-                        {{ form_widget(form.dbFreeradiusPassword, {
-                            attr: {
-                                class: 'form-widget',
-                                placeholder: '••••••••'
-                            }
-                        }) }}
-                        <div class="text-xs text-red-500 mt-1">{{ form_errors(form.dbFreeradiusPassword) }}</div>
+                        <div>
+                            {{ form_widget(form.dbFreeradiusPassword, {
+                                attr: {
+                                    class: 'form-widget',
+                                    placeholder: '••••••••'
+                                }
+                            }) }}
+                            <div class="text-xs text-red-500 mt-1">{{ form_errors(form.dbFreeradiusPassword) }}</div>
+                        </div>
                     </div>
                 </div>
             </div>
