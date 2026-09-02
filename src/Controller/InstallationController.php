@@ -29,6 +29,7 @@ use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
 use App\Service\DatabaseConnectionService;
 use App\Service\EventActions;
+use App\Service\ExternalIdentifierHasher;
 use App\Service\GetSettings;
 use App\Service\InstallationService;
 use App\Service\TwoFAService;
@@ -70,6 +71,7 @@ class InstallationController extends AbstractController
         private readonly CaptchaValidator $captchaValidator,
         private readonly KernelInterface $kernel,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
+        private readonly ExternalIdentifierHasher $externalIdentifierHasher,
     ) {
     }
 
@@ -100,10 +102,15 @@ class InstallationController extends AbstractController
 
         $dbDTO = new DbSetupDTO();
 
-        $dbDTO->dbOpenRoamingDbName = 'openroaming';
-        $dbDTO->dbFreeradiusDbName = 'radius';
+        $dbDTO->dbOpenRoamingUserName = 'openroaming';
+        $dbDTO->dbOpenRoamingIp = '127.0.0.1';
         $dbDTO->dbOpenRoamingPort = 3306;
+        $dbDTO->dbOpenRoamingDbName = 'openroaming';
+
+        $dbDTO->dbFreeradiusUserName = 'root';
+        $dbDTO->dbFreeradiusIp = '127.0.0.1';
         $dbDTO->dbFreeradiusPort = 3306;
+        $dbDTO->dbFreeradiusDbName = 'radius';
 
         $form = $this->createForm(DbSetupType::class, $dbDTO);
         $form->handleRequest($request);
@@ -159,10 +166,15 @@ class InstallationController extends AbstractController
                 $lastInstallation->setCreatedAt(new DateTime());
             }
 
+            // Hash the connection strings before storing in the database
+            $hashedOpenRoamingDb = $this->externalIdentifierHasher->hash($openRoamingDb);
+            $hashedFreeradiusDb = $this->externalIdentifierHasher->hash($freeradiusDb);
+
             $lastInstallation->setUpdatedAt(new DateTime());
-            $lastInstallation->setDbOpenRoaming($openRoamingDb);
-            $lastInstallation->setDbFreeradius($freeradiusDb);
+            $lastInstallation->setDbOpenRoaming($hashedOpenRoamingDb);
+            $lastInstallation->setDbFreeradius($hashedFreeradiusDb);
             $lastInstallation->setInstallationState(ProcessStatusType::IN_PROGRESS);
+
             $this->entityManager->persist($lastInstallation);
             $this->entityManager->flush();
 
