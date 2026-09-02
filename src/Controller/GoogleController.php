@@ -263,9 +263,7 @@ class GoogleController extends AbstractController
             ->setProvider(UserProvider::GOOGLE_ACCOUNT->value)
             ->setProviderId($this->providerIdHasher->hash($googleUserId));
 
-        $randomPassword = bin2hex(random_bytes(16));
-        $hashedPassword = $this->passwordEncoder->hashPassword($user, $randomPassword);
-        $user->setPassword($hashedPassword);
+        $user->setPassword('notused');
 
         $this->entityManager->persist($user);
         $this->entityManager->persist($userAuth);
