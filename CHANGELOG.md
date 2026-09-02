@@ -19,6 +19,8 @@
 - **Metrics Endpoint Access Restricted (CRA Annex I §1.7)**: Fixed the `.env.sample` default for
   `METRICS_ALLOWED_IPS`, which previously defaulted to `0.0.0.0/0`, allowing any IP to query Prometheus metrics
   data if the metrics endpoint was enabled.
+- **Database Installation Interface Rework**: Database configuration template layout reviewed
+  with responsive grid for OpenRoaming and FreeRADIUS details during the installation process.
 
 ### Other CRA compliance fixes in this release
 
