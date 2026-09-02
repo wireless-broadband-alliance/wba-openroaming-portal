@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace App\Form;
 
-use App\Entity\User;
+use App\DTO\ResetPasswordDTO;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * @extends AbstractType<User>
+ * @extends AbstractType<ResetPasswordDTO>
  */
 class ResetPasswordType extends AbstractType
 {
@@ -30,16 +29,7 @@ class ResetPasswordType extends AbstractType
                 'hidden_label' => null,
                 'visible_label' => null,
                 'attr' => [
-                    'mapped' => false,
                     'placeholder' => $this->translator->trans('enterNewPassword', [], 'ResetPasswordType'),
-                ],
-                'constraints' => [
-                    new Length(
-                        min: 16,
-                        max: 255,
-                        minMessage: $this->translator->trans('fieldCannotBeShorterThan', [], 'ResetPasswordType'),
-                        maxMessage: $this->translator->trans('fieldCannotBeLongerThan', [], 'ResetPasswordType')
-                    ),
                 ],
             ])
             ->add('confirmPassword', PasswordType::class, [
@@ -47,7 +37,6 @@ class ResetPasswordType extends AbstractType
                 'toggle' => true,
                 'hidden_label' => null,
                 'visible_label' => null,
-                'mapped' => false,
                 'attr' => [
                     'placeholder' => $this->translator->trans('enterTheConfirmation', [], 'ResetPasswordType'),
                 ],
@@ -57,7 +46,7 @@ class ResetPasswordType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => User::class,
+            'data_class' => ResetPasswordDTO::class,
         ]);
     }
 }

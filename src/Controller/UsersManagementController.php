@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\DTO\ResetPasswordDTO;
 use App\DTO\UserAddDTO;
 use App\DTO\UserUpdateDTO;
 use App\Entity\User;
@@ -10,7 +11,6 @@ use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\FirewallType;
-use App\Enum\OperationMode;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserTwoFactorAuthenticationStatus;
@@ -579,24 +579,14 @@ class UsersManagementController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        $formReset = $this->createForm(ResetPasswordType::class, $user);
+        $resetPasswordDTO = new ResetPasswordDTO();
+        $formReset = $this->createForm(ResetPasswordType::class, $resetPasswordDTO);
         $formReset->handleRequest($request);
 
         if ($formReset->isSubmitted() && $formReset->isValid()) {
-            $newPassword = $formReset->get('password')->getData();
-            $confirmPassword = $formReset->get('confirmPassword')->getData();
-
-            if ($newPassword !== $confirmPassword) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('PasswordPasswordConfirmationMustMatch', [], 'controllers')
-                );
-                return $this->redirectToRoute('admin_dashboard_user_edit', ['id' => $user->getId()]);
-            }
-
             $flashes = $this->passwordResetDashboardService->resetPassword(
                 $user,
-                $newPassword,
+                $resetPasswordDTO->password,
                 $request->getClientIp(),
                 $request->headers->get('User-Agent'),
                 $currentUser

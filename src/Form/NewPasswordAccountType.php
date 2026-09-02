@@ -41,7 +41,6 @@ class NewPasswordAccountType extends AbstractType
                     'NewPasswordAccountType'
                 ),
                 'required' => true,
-                // FIX 1: Removed 'mapped' => false so $passwordDTO->password gets populated!
             ]);
         }
 
