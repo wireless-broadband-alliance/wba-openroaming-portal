@@ -43,6 +43,7 @@
 - Hardened web server security headers and eliminated permissive CSP
 - Applied secure defaults across the platform
 - Enforced non-root process execution and purged build tooling from container runtime
+- Only allow reset of password only for actual portal accounts created on the portal
 
 # Release V1.13.1
 
