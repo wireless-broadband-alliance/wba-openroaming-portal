@@ -4,7 +4,7 @@ export default class extends Controller {
     static targets = ['modal'];
     static values = {
         hasErrors: Boolean,
-    }
+    };
 
     connect() {
         // Force open modal if validation errors are passed from Symfony

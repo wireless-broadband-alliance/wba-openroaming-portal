@@ -31,10 +31,10 @@ export default class extends Controller {
             headers: { 'Content-Type': 'application/json' },
             keepalive: true,
         })
-          .then((res) => res.json())
-          .then((data) => {
-              console.log(data.message);
-          });
+            .then((res) => res.json())
+            .then((data) => {
+                console.log(data.message);
+            });
 
         if (isChecked) this.closeConfirmationModal();
 
