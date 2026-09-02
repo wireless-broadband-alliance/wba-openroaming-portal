@@ -15,7 +15,7 @@ use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
-use App\Service\ProviderIdHasher;
+use App\Service\ExternalIdentifierHasher;
 use App\Service\UserStatusChecker;
 use DateTime;
 use DateTimeInterface;
@@ -58,7 +58,7 @@ class MicrosoftController extends AbstractController
         private readonly TranslatorInterface $translator,
         private readonly CsrfTokenManagerInterface $csrfTokenManager,
         private readonly SettingRepository $settingRepository,
-        private readonly ProviderIdHasher $providerIdHasher,
+        private readonly ExternalIdentifierHasher $providerIdHasher,
     ) {
     }
 

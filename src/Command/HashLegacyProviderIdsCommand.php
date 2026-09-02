@@ -4,7 +4,7 @@ namespace App\Command;
 
 use App\Entity\UserExternalAuth;
 use App\Enum\UserProvider;
-use App\Service\ProviderIdHasher;
+use App\Service\ExternalIdentifierHasher;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -24,7 +24,7 @@ class HashLegacyProviderIdsCommand extends Command
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
-        private readonly ProviderIdHasher $providerIdHasher,
+        private readonly ExternalIdentifierHasher $providerIdHasher,
     ) {
         parent::__construct();
     }
