@@ -144,9 +144,11 @@ class RegistrationController extends AbstractController
         }
 
         // Prevent user enumeration
-        if ($this->userRepository->findOneBy([
+        if (
+            $this->userRepository->findOneBy([
             'email' => $registration->email
-        ])) {
+            ])
+        ) {
             return new BaseResponse(
                 200,
                 [
@@ -564,9 +566,11 @@ class RegistrationController extends AbstractController
         /*
          * Check if the user already exists
          */
-        if ($this->userRepository->findOneBy([
+        if (
+            $this->userRepository->findOneBy([
             'uuid' => $formattedPhoneNumber,
-        ])) {
+            ])
+        ) {
             return new BaseResponse(
                 200,
                 [
