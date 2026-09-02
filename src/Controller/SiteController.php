@@ -541,7 +541,6 @@ class SiteController extends AbstractController
     /**
      * Widget with data about the account of the user / upload new password
      *
-     * @return RedirectResponse|Response
      * @throws Exception
      */
     #[Route('/account/user', name: 'app_landing_account_user', methods: ['POST'])]

@@ -46,7 +46,6 @@ class MicrosoftController extends AbstractController
     public function __construct(
         private readonly ClientRegistry $clientRegistry,
         private readonly EntityManagerInterface $entityManager,
-        private readonly UserPasswordHasherInterface $passwordEncoder,
         private readonly TokenStorageInterface $tokenStorage,
         private readonly RequestStack $requestStack,
         private readonly EventDispatcherInterface $eventDispatcher,

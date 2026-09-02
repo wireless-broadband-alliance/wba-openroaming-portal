@@ -45,7 +45,6 @@ class GoogleController extends AbstractController
     public function __construct(
         private readonly ClientRegistry $clientRegistry,
         private readonly EntityManagerInterface $entityManager,
-        private readonly UserPasswordHasherInterface $passwordEncoder,
         private readonly RequestStack $requestStack,
         private readonly TokenStorageInterface $tokenStorage,
         private readonly EventDispatcherInterface $eventDispatcher,
