@@ -234,3 +234,4 @@ importErrorValidation: 'Importação cancelada. Reveja os erros abaixo e reenvie
 mapSettingsAppliedSuccessfully: 'Configuração do mapa aplicada com sucesso!'
 importErrorInvalidMimeType: 'O conteúdo do ficheiro não é um CSV válido (MIME type incorreto).'
 coverageMapDisabled: 'O mapa de cobertura está desativado no momento.'
+cannotResetExternalAuthProviderPassword: "A redefinição de palavra-passe só é permitida para Contas Portal."

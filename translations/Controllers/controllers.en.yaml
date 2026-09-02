@@ -236,3 +236,4 @@ sms_provider_test:
   invalid_phone_number: "That phone number doesn't look valid."
   unreachable_provider: "Could not reach BudgetSMS: %error%"
 coverageMapDisabled: 'The coverage map is currently disabled.'
+cannotResetExternalAuthProviderPassword: "Password reset is only allowed for Portal Accounts."

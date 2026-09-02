@@ -579,6 +579,19 @@ class UsersManagementController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
+        // Verify user is a Portal Account
+        $externalAuth = $user->getUserExternalAuths()[0] ?? null;
+        $isPortalAccount = $externalAuth && $externalAuth->getProvider() === UserProvider::PORTAL_ACCOUNT->value;
+
+        if (!$isPortalAccount) {
+            $this->addFlash(
+                'error',
+                $this->translator->trans('cannotResetExternalAuthProviderPassword', [], 'controllers')
+            );
+
+            return $this->redirectToRoute('admin_dashboard_user_show', ['id' => $user->getId()]);
+        }
+
         $resetPasswordDTO = new ResetPasswordDTO();
         $formReset = $this->createForm(ResetPasswordType::class, $resetPasswordDTO);
         $formReset->handleRequest($request);
