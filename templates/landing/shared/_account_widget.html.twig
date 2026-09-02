@@ -27,7 +27,7 @@
                     {{ form_widget(form.firstName, {attr: {
                         class: 'form-widget ' ~ (has_first_name_errors ? '!border-red-500 focus:!ring-red-500 focus:!border-red-500' : ''),
                         'data-fields-target': 'input',
-                        'data-action': 'fields#input_changed'
+                        'data-action': 'fields#input_changed',
                     }}) }}
                 </div>
 
@@ -37,7 +37,7 @@
                     {{ form_widget(form.lastName, {attr: {
                         class: 'form-widget ' ~ (has_last_name_errors ? '!border-red-500 focus:!ring-red-500 focus:!border-red-500' : ''),
                         'data-fields-target': 'input',
-                        'data-action': 'fields#input_changed'
+                        'data-action': 'fields#input_changed',
                     }}) }}
                 </div>
             </div>
@@ -104,7 +104,7 @@
                                 {{ form_widget(formPassword.password, {attr: {
                                     class: 'form-widget ' ~ (has_current_pass_errors ? '!border-red-500 focus:!ring-red-500 focus:!border-red-500' : ''),
                                     'data-fields-target': 'input',
-                                    'data-action': 'fields#input_changed'
+                                    'data-action': 'fields#input_changed',
                                 }}) }}
                             </div>
 
@@ -119,7 +119,7 @@
                                     class: 'form-widget ' ~ (has_new_pass_errors ? '!border-red-500 focus:!ring-red-500 focus:!border-red-500' : ''),
                                     minlength: 7,
                                     'data-fields-target': 'input',
-                                    'data-action': 'fields#input_changed'
+                                    'data-action': 'fields#input_changed',
                                 }}) }}
                             </div>
 
@@ -130,7 +130,7 @@
                                     class: 'form-widget ' ~ (has_confirm_pass_errors ? '!border-red-500 focus:!ring-red-500 focus:!border-red-500' : ''),
                                     minlength: 7,
                                     'data-fields-target': 'input',
-                                    'data-action': 'fields#input_changed'
+                                    'data-action': 'fields#input_changed',
                                 }}) }}
                             </div>
                         </div>
