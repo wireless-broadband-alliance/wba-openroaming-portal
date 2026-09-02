@@ -22,7 +22,7 @@ class NewPasswordAccountDTO
         message: 'fieldCannotBeBlank'
     )]
     #[Assert\Length(
-        min: 8,
+        min: 16,
         max: 255,
         minMessage: 'passwordCannotBeShorterThan',
         maxMessage: 'passwordCannotBeLongerThan'
