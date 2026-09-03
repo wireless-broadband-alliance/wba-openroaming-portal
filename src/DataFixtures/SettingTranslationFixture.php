@@ -121,6 +121,22 @@ class SettingTranslationFixture extends Fixture
                 ],
             ],
             [
+                'name' => SettingName::LOGIN_WITH_UUID_ONLY_LABEL->value,
+                'value' => 'Login with Magic Link',
+                'translations' => [
+                    LanguageType::EN->value => 'Login with Magic Link',
+                    LanguageType::PT->value => 'Entrar com Link Mágico',
+                ],
+            ],
+            [
+                'name' => SettingName::LOGIN_WITH_UUID_ONLY_DESCRIPTION->value,
+                'value' => 'No password required. Enter your email or phone number to receive an instant login link.',
+                'translations' => [
+                    LanguageType::EN->value => 'No password required. Enter your email or phone number to receive an instant login link.',
+                    LanguageType::PT->value => 'Sem necessidade de palavra-passe. Insira o seu email ou número de telefone para receber um link de acesso instantâneo.',
+                ],
+            ],
+            [
                 'name' => SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value,
                 'value' => 'Create Account with Phone Number',
                 'translations' => [

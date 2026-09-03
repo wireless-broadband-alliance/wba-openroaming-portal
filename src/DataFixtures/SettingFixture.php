@@ -94,6 +94,11 @@ class SettingFixture extends Fixture
                 'value' => 'Already have an account? Login then'
             ],
             ['name' => SettingName::LOGIN_WITH_UUID_ONLY->value, 'value' => 'OFF'],
+            ['name' => SettingName::LOGIN_WITH_UUID_ONLY_LABEL->value, 'value' => 'Login with Magic Link'],
+            [
+                'name' => SettingName::LOGIN_WITH_UUID_ONLY_DESCRIPTION->value,
+                'value' => 'No password required. Enter your email or phone number to receive an instant login link.'
+            ],
             ['name' => SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value, 'value' => 'false'],
             [
                 'name' => SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value,
