@@ -13,23 +13,31 @@ class AuthSettingsTypeDTO
     #[Assert\Choice(choices: ['true', 'false'], message: 'invalidChoice')]
     public ?string $authMethodSamlEnabled = null;
 
-    #[Assert\Length(min: 3, max: 50, minMessage: 'fieldCannotBeShorterThan', maxMessage: 'fieldCannotBeLongerThan')]
+    #[Assert\Length(
+        min: 3,
+        max: 50,
+        minMessage: 'fieldCannotBeShorterThan',
+        maxMessage: 'fieldCannotBeLongerThan'
+    )]
     #[Assert\Expression(
-        expression: "this.authMethodSamlEnabled != 'true' or (this.authMethodSamlEnabled == 'true' and value != '')",
-        message: "fieldCannotBeBlank"
+        expression: "this.authMethodSamlEnabled != 'true'"
+        . " or (this.authMethodSamlEnabled == 'true' and value != '')",
+        message: 'fieldCannotBeBlank'
     )]
     public ?string $authMethodSamlLabel = null;
 
     #[Assert\Length(max: 100, maxMessage: 'fieldCannotBeLongerThan')]
     #[Assert\Expression(
-        expression: "this.authMethodSamlEnabled != 'true' or (this.authMethodSamlEnabled == 'true' and value != '')",
-        message: "fieldCannotBeBlank"
+        expression: "this.authMethodSamlEnabled != 'true'"
+        . " or (this.authMethodSamlEnabled == 'true' and value != '')",
+        message: 'fieldCannotBeBlank'
     )]
     public ?string $authMethodSamlDescription = null;
 
     #[Assert\Expression(
-        expression: "this.authMethodSamlEnabled != 'true' or (this.authMethodSamlEnabled == 'true' and value != '')",
-        message: "fieldCannotBeBlank"
+        expression: "this.authMethodSamlEnabled != 'true'"
+        . " or (this.authMethodSamlEnabled == 'true' and value != '')",
+        message: 'fieldCannotBeBlank'
     )]
     #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
     public ?int $profileLimitDateSaml = null;
@@ -38,17 +46,24 @@ class AuthSettingsTypeDTO
     #[Assert\Choice(choices: ['true', 'false'], message: 'invalidChoice')]
     public ?string $authMethodGOOGLELoginEnabled = null;
 
-    #[Assert\Length(min: 3, max: 50, minMessage: 'fieldCannotBeShorterThan', maxMessage: 'fieldCannotBeLongerThan')]
+    #[Assert\Length(
+        min: 3,
+        max: 50,
+        minMessage: 'fieldCannotBeShorterThan',
+        maxMessage: 'fieldCannotBeLongerThan'
+    )]
     #[Assert\Expression(
-        expression: "this.authMethodGOOGLELoginEnabled != 'true' or (this.authMethodGOOGLELoginEnabled == 'true' and value != '')",
-        message: "fieldCannotBeBlank"
+        expression: "this.authMethodGOOGLELoginEnabled != 'true'"
+        . " or (this.authMethodGOOGLELoginEnabled == 'true' and value != '')",
+        message: 'fieldCannotBeBlank'
     )]
     public ?string $authMethodGOOGLELoginLabel = null;
 
     #[Assert\Length(max: 100, maxMessage: 'fieldCannotBeLongerThan')]
     #[Assert\Expression(
-        expression: "this.authMethodGOOGLELoginEnabled != 'true' or (this.authMethodGOOGLELoginEnabled == 'true' and value != '')",
-        message: "fieldCannotBeBlank"
+        expression: "this.authMethodGOOGLELoginEnabled != 'true'"
+        . " or (this.authMethodGOOGLELoginEnabled == 'true' and value != '')",
+        message: 'fieldCannotBeBlank'
     )]
     public ?string $authMethodGOOGLELoginDescription = null;
 
@@ -56,8 +71,9 @@ class AuthSettingsTypeDTO
     public ?string $validDomainsGOOGLELogin = null;
 
     #[Assert\Expression(
-        expression: "this.authMethodGOOGLELoginEnabled != 'true' or (this.authMethodGOOGLELoginEnabled == 'true' and value != '')",
-        message: "fieldCannotBeBlank"
+        expression: "this.authMethodGOOGLELoginEnabled != 'true'"
+        . " or (this.authMethodGOOGLELoginEnabled == 'true' and value != '')",
+        message: 'fieldCannotBeBlank'
     )]
     #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
     public ?int $profileLimitDateGOOGLE = null;
@@ -66,17 +82,24 @@ class AuthSettingsTypeDTO
     #[Assert\Choice(choices: ['true', 'false'], message: 'invalidChoice')]
     public ?string $authMethodMICROSOFTLoginEnabled = null;
 
-    #[Assert\Length(min: 3, max: 50, minMessage: 'fieldCannotBeShorterThan', maxMessage: 'fieldCannotBeLongerThan')]
+    #[Assert\Length(
+        min: 3,
+        max: 50,
+        minMessage: 'fieldCannotBeShorterThan',
+        maxMessage: 'fieldCannotBeLongerThan'
+    )]
     #[Assert\Expression(
-        expression: "this.authMethodMICROSOFTLoginEnabled != 'true' or (this.authMethodMICROSOFTLoginEnabled == 'true' and value != '')",
-        message: "fieldCannotBeBlank"
+        expression: "this.authMethodMICROSOFTLoginEnabled != 'true'"
+        . " or (this.authMethodMICROSOFTLoginEnabled == 'true' and value != '')",
+        message: 'fieldCannotBeBlank'
     )]
     public ?string $authMethodMICROSOFTLoginLabel = null;
 
     #[Assert\Length(max: 100, maxMessage: 'fieldCannotBeLongerThan')]
     #[Assert\Expression(
-        expression: "this.authMethodMICROSOFTLoginEnabled != 'true' or (this.authMethodMICROSOFTLoginEnabled == 'true' and value != '')",
-        message: "fieldCannotBeBlank"
+        expression: "this.authMethodMICROSOFTLoginEnabled != 'true'"
+        . " or (this.authMethodMICROSOFTLoginEnabled == 'true' and value != '')",
+        message: 'fieldCannotBeBlank'
     )]
     public ?string $authMethodMICROSOFTLoginDescription = null;
 
@@ -84,8 +107,9 @@ class AuthSettingsTypeDTO
     public ?string $validDomainsMICROSOFTLogin = null;
 
     #[Assert\Expression(
-        expression: "this.authMethodMICROSOFTLoginEnabled != 'true' or (this.authMethodMICROSOFTLoginEnabled == 'true' and value != '')",
-        message: "fieldCannotBeBlank"
+        expression: "this.authMethodMICROSOFTLoginEnabled != 'true'"
+        . " or (this.authMethodMICROSOFTLoginEnabled == 'true' and value != '')",
+        message: 'fieldCannotBeBlank'
     )]
     #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
     public ?int $profileLimitDateMICROSOFT = null;
@@ -94,23 +118,31 @@ class AuthSettingsTypeDTO
     #[Assert\Choice(choices: ['true', 'false'], message: 'invalidChoice')]
     public ?string $authMethodRegisterEnabled = null;
 
-    #[Assert\Length(min: 3, max: 50, minMessage: 'fieldCannotBeShorterThan', maxMessage: 'fieldCannotBeLongerThan')]
+    #[Assert\Length(
+        min: 3,
+        max: 50,
+        minMessage: 'fieldCannotBeShorterThan',
+        maxMessage: 'fieldCannotBeLongerThan'
+    )]
     #[Assert\Expression(
-        expression: "this.authMethodRegisterEnabled != 'true' or (this.authMethodRegisterEnabled == 'true' and value != '')",
-        message: "fieldCannotBeBlank"
+        expression: "this.authMethodRegisterEnabled != 'true'"
+        . " or (this.authMethodRegisterEnabled == 'true' and value != '')",
+        message: 'fieldCannotBeBlank'
     )]
     public ?string $authMethodRegisterLabel = null;
 
     #[Assert\Length(max: 100, maxMessage: 'fieldCannotBeLongerThan')]
     #[Assert\Expression(
-        expression: "this.authMethodRegisterEnabled != 'true' or (this.authMethodRegisterEnabled == 'true' and value != '')",
-        message: "fieldCannotBeBlank"
+        expression: "this.authMethodRegisterEnabled != 'true'"
+        . " or (this.authMethodRegisterEnabled == 'true' and value != '')",
+        message: 'fieldCannotBeBlank'
     )]
     public ?string $authMethodRegisterDescription = null;
 
     #[Assert\Expression(
-        expression: "this.authMethodRegisterEnabled != 'true' or (this.authMethodRegisterEnabled == 'true' and value != '')",
-        message: "fieldCannotBeBlank"
+        expression: "this.authMethodRegisterEnabled != 'true'"
+        . " or (this.authMethodRegisterEnabled == 'true' and value != '')",
+        message: 'fieldCannotBeBlank'
     )]
     #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
     public ?int $profileLimitDateEmail = null;
@@ -118,16 +150,18 @@ class AuthSettingsTypeDTO
     #[Assert\Length(max: 3, maxMessage: 'fieldCannotBeLongerThan')]
     #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
     #[Assert\Expression(
-        expression: "this.authMethodRegisterEnabled != 'true' or (this.authMethodRegisterEnabled == 'true' and value != '')",
-        message: "fieldCannotBeBlank"
+        expression: "this.authMethodRegisterEnabled != 'true'"
+        . " or (this.authMethodRegisterEnabled == 'true' and value != '')",
+        message: 'fieldCannotBeBlank'
     )]
     public ?int $emailTimerResend = null;
 
     #[Assert\Length(max: 3, maxMessage: 'fieldCannotBeLongerThan')]
     #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
     #[Assert\Expression(
-        expression: "this.authMethodRegisterEnabled != 'true' or (this.authMethodRegisterEnabled == 'true' and value != '')",
-        message: "fieldCannotBeBlank"
+        expression: "this.authMethodRegisterEnabled != 'true'"
+        . " or (this.authMethodRegisterEnabled == 'true' and value != '')",
+        message: 'fieldCannotBeBlank'
     )]
     public ?int $linkValidity = null;
 
@@ -135,17 +169,24 @@ class AuthSettingsTypeDTO
     #[Assert\Choice(choices: ['true', 'false'], message: 'invalidChoice')]
     public ?string $authMethodLoginTraditionalEnabled = null;
 
-    #[Assert\Length(min: 3, max: 50, minMessage: 'fieldCannotBeShorterThan', maxMessage: 'fieldCannotBeLongerThan')]
+    #[Assert\Length(
+        min: 3,
+        max: 50,
+        minMessage: 'fieldCannotBeShorterThan',
+        maxMessage: 'fieldCannotBeLongerThan'
+    )]
     #[Assert\Expression(
-        expression: "this.authMethodLoginTraditionalEnabled != 'true' or (this.authMethodLoginTraditionalEnabled == 'true' and value != '')",
-        message: "fieldCannotBeBlank"
+        expression: "this.authMethodLoginTraditionalEnabled != 'true'"
+        . " or (this.authMethodLoginTraditionalEnabled == 'true' and value != '')",
+        message: 'fieldCannotBeBlank'
     )]
     public ?string $authMethodLoginTraditionalLabel = null;
 
     #[Assert\Length(max: 100, maxMessage: 'fieldCannotBeLongerThan')]
     #[Assert\Expression(
-        expression: "this.authMethodLoginTraditionalEnabled != 'true' or (this.authMethodLoginTraditionalEnabled == 'true' and value != '')",
-        message: "fieldCannotBeBlank"
+        expression: "this.authMethodLoginTraditionalEnabled != 'true'"
+        . " or (this.authMethodLoginTraditionalEnabled == 'true' and value != '')",
+        message: 'fieldCannotBeBlank'
     )]
     public ?string $authMethodLoginTraditionalDescription = null;
 
@@ -153,17 +194,24 @@ class AuthSettingsTypeDTO
     #[Assert\Choice(choices: ['true', 'false'], message: 'invalidChoice')]
     public ?string $loginWithUUIDOnly = null;
 
-    #[Assert\Length(min: 3, max: 50, minMessage: 'fieldCannotBeShorterThan', maxMessage: 'fieldCannotBeLongerThan')]
+    #[Assert\Length(
+        min: 3,
+        max: 50,
+        minMessage: 'fieldCannotBeShorterThan',
+        maxMessage: 'fieldCannotBeLongerThan'
+    )]
     #[Assert\Expression(
-        expression: "this.loginWithUUIDOnly != 'true' or (this.loginWithUUIDOnly == 'true' and value != '')",
-        message: "fieldCannotBeBlank"
+        expression: "this.loginWithUUIDOnly != 'true'"
+        . " or (this.loginWithUUIDOnly == 'true' and value != '')",
+        message: 'fieldCannotBeBlank'
     )]
     public ?string $loginWithUUIDOnlyLabel = null;
 
     #[Assert\Length(max: 100, maxMessage: 'fieldCannotBeLongerThan')]
     #[Assert\Expression(
-        expression: "this.loginWithUUIDOnly != 'true' or (this.loginWithUUIDOnly == 'true' and value != '')",
-        message: "fieldCannotBeBlank"
+        expression: "this.loginWithUUIDOnly != 'true'"
+        . " or (this.loginWithUUIDOnly == 'true' and value != '')",
+        message: 'fieldCannotBeBlank'
     )]
     public ?string $loginWithUUIDOnlyDescription = null;
 
@@ -171,23 +219,31 @@ class AuthSettingsTypeDTO
     #[Assert\Choice(choices: ['true', 'false'], message: 'invalidChoice')]
     public ?string $authMethodSMSRegisterEnabled = null;
 
-    #[Assert\Length(min: 3, max: 50, minMessage: 'fieldCannotBeShorterThan', maxMessage: 'fieldCannotBeLongerThan')]
+    #[Assert\Length(
+        min: 3,
+        max: 50,
+        minMessage: 'fieldCannotBeShorterThan',
+        maxMessage: 'fieldCannotBeLongerThan'
+    )]
     #[Assert\Expression(
-        expression: "this.authMethodSMSRegisterEnabled != 'true' or (this.authMethodSMSRegisterEnabled == 'true' and value != '')",
-        message: "fieldCannotBeBlank"
+        expression: "this.authMethodSMSRegisterEnabled != 'true'"
+        . " or (this.authMethodSMSRegisterEnabled == 'true' and value != '')",
+        message: 'fieldCannotBeBlank'
     )]
     public ?string $authMethodSMSRegisterLabel = null;
 
     #[Assert\Length(max: 100, maxMessage: 'fieldCannotBeLongerThan')]
     #[Assert\Expression(
-        expression: "this.authMethodSMSRegisterEnabled != 'true' or (this.authMethodSMSRegisterEnabled == 'true' and value != '')",
-        message: "fieldCannotBeBlank"
+        expression: "this.authMethodSMSRegisterEnabled != 'true'"
+        . " or (this.authMethodSMSRegisterEnabled == 'true' and value != '')",
+        message: 'fieldCannotBeBlank'
     )]
     public ?string $authMethodSMSRegisterDescription = null;
 
     #[Assert\Expression(
-        expression: "this.authMethodSMSRegisterEnabled != 'true' or (this.authMethodSMSRegisterEnabled == 'true' and value != '')",
-        message: "fieldCannotBeBlank"
+        expression: "this.authMethodSMSRegisterEnabled != 'true'"
+        . " or (this.authMethodSMSRegisterEnabled == 'true' and value != '')",
+        message: 'fieldCannotBeBlank'
     )]
     #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
     public ?int $profileLimitDateSMS = null;
@@ -202,42 +258,79 @@ class AuthSettingsTypeDTO
         public ?int $profileLimitDate = 0,
         public ?string $humanReadableExpirationDate = null
     ) {
-        $this->authMethodSamlEnabled = $data[SettingName::AUTH_METHOD_SAML_ENABLED->value]['value'] ?? null;
-        $this->authMethodSamlLabel = $data[SettingName::AUTH_METHOD_SAML_LABEL->value]['value'] ?? null;
-        $this->authMethodSamlDescription = $data[SettingName::AUTH_METHOD_SAML_DESCRIPTION->value]['value'] ?? null;
-        $this->profileLimitDateSaml = (int) ($data[SettingName::PROFILE_LIMIT_DATE_SAML->value]['value'] ?? null);
+        $this->authMethodSamlEnabled =
+            $data[SettingName::AUTH_METHOD_SAML_ENABLED->value]['value'] ?? null;
+        $this->authMethodSamlLabel =
+            $data[SettingName::AUTH_METHOD_SAML_LABEL->value]['value'] ?? null;
+        $this->authMethodSamlDescription =
+            $data[SettingName::AUTH_METHOD_SAML_DESCRIPTION->value]['value'] ?? null;
+        $this->profileLimitDateSaml = (int)(
+            $data[SettingName::PROFILE_LIMIT_DATE_SAML->value]['value'] ?? null
+        );
 
-        $this->authMethodGOOGLELoginEnabled = $data[SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value]['value'] ?? null;
-        $this->authMethodGOOGLELoginLabel = $data[SettingName::AUTH_METHOD_GOOGLE_LOGIN_LABEL->value]['value'] ?? null;
-        $this->authMethodGOOGLELoginDescription = $data[SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value]['value'] ?? null;
-        $this->validDomainsGOOGLELogin = $data[SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value]['value'] ?? null;
-        $this->profileLimitDateGOOGLE = (int) ($data[SettingName::PROFILE_LIMIT_DATE_GOOGLE->value]['value'] ?? null);
+        $this->authMethodGOOGLELoginEnabled =
+            $data[SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value]['value'] ?? null;
+        $this->authMethodGOOGLELoginLabel =
+            $data[SettingName::AUTH_METHOD_GOOGLE_LOGIN_LABEL->value]['value'] ?? null;
+        $this->authMethodGOOGLELoginDescription =
+            $data[SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value]['value'] ?? null;
+        $this->validDomainsGOOGLELogin =
+            $data[SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value]['value'] ?? null;
+        $this->profileLimitDateGOOGLE = (int)(
+            $data[SettingName::PROFILE_LIMIT_DATE_GOOGLE->value]['value'] ?? null
+        );
 
-        $this->authMethodMICROSOFTLoginEnabled = $data[SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value]['value'] ?? null;
-        $this->authMethodMICROSOFTLoginLabel = $data[SettingName::AUTH_METHOD_MICROSOFT_LOGIN_LABEL->value]['value'] ?? null;
-        $this->authMethodMICROSOFTLoginDescription = $data[SettingName::AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION->value]['value'] ?? null;
-        $this->validDomainsMICROSOFTLogin = $data[SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value]['value'] ?? null;
-        $this->profileLimitDateMICROSOFT = (int)($data[SettingName::PROFILE_LIMIT_DATE_MICROSOFT->value]['value'] ?? null);
+        $this->authMethodMICROSOFTLoginEnabled =
+            $data[SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value]['value'] ?? null;
+        $this->authMethodMICROSOFTLoginLabel =
+            $data[SettingName::AUTH_METHOD_MICROSOFT_LOGIN_LABEL->value]['value'] ?? null;
+        $this->authMethodMICROSOFTLoginDescription =
+            $data[SettingName::AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION->value]['value'] ?? null;
+        $this->validDomainsMICROSOFTLogin =
+            $data[SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value]['value'] ?? null;
+        $this->profileLimitDateMICROSOFT = (int)(
+            $data[SettingName::PROFILE_LIMIT_DATE_MICROSOFT->value]['value'] ?? null
+        );
 
-        $this->authMethodRegisterEnabled = $data[SettingName::AUTH_METHOD_REGISTER_ENABLED->value]['value'] ?? null;
-        $this->authMethodRegisterLabel = $data[SettingName::AUTH_METHOD_REGISTER_LABEL->value]['value'] ?? null;
-        $this->authMethodRegisterDescription = $data[SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value]['value'] ?? null;
-        $this->profileLimitDateEmail = (int) ($data[SettingName::PROFILE_LIMIT_DATE_EMAIL->value]['value'] ?? null);
-        $this->emailTimerResend = (int) ($data[SettingName::EMAIL_TIMER_RESEND->value]['value'] ?? null);
-        $this->linkValidity = (int) ($data[SettingName::LINK_VALIDITY->value]['value'] ?? null);
+        $this->authMethodRegisterEnabled =
+            $data[SettingName::AUTH_METHOD_REGISTER_ENABLED->value]['value'] ?? null;
+        $this->authMethodRegisterLabel =
+            $data[SettingName::AUTH_METHOD_REGISTER_LABEL->value]['value'] ?? null;
+        $this->authMethodRegisterDescription =
+            $data[SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value]['value'] ?? null;
+        $this->profileLimitDateEmail = (int)(
+            $data[SettingName::PROFILE_LIMIT_DATE_EMAIL->value]['value'] ?? null
+        );
+        $this->emailTimerResend = (int)(
+            $data[SettingName::EMAIL_TIMER_RESEND->value]['value'] ?? null
+        );
+        $this->linkValidity = (int)(
+            $data[SettingName::LINK_VALIDITY->value]['value'] ?? null
+        );
 
-        $this->authMethodLoginTraditionalEnabled = $data[SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value]['value'] ?? null;
-        $this->authMethodLoginTraditionalLabel = $data[SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value]['value'] ?? null;
-        $this->authMethodLoginTraditionalDescription = $data[SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value]['value'] ?? null;
+        $this->authMethodLoginTraditionalEnabled =
+            $data[SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value]['value'] ?? null;
+        $this->authMethodLoginTraditionalLabel =
+            $data[SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value]['value'] ?? null;
+        $this->authMethodLoginTraditionalDescription =
+            $data[SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value]['value'] ?? null;
 
-        $this->loginWithUUIDOnly = $data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] ?? null;
-        $this->loginWithUUIDOnlyLabel = $data[SettingName::LOGIN_WITH_UUID_ONLY_LABEL->value]['value'] ?? null;
-        $this->loginWithUUIDOnlyDescription = $data[SettingName::LOGIN_WITH_UUID_ONLY_DESCRIPTION->value]['value'] ?? null;
+        $this->loginWithUUIDOnly =
+            $data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] ?? null;
+        $this->loginWithUUIDOnlyLabel =
+            $data[SettingName::LOGIN_WITH_UUID_ONLY_LABEL->value]['value'] ?? null;
+        $this->loginWithUUIDOnlyDescription =
+            $data[SettingName::LOGIN_WITH_UUID_ONLY_DESCRIPTION->value]['value'] ?? null;
 
-        $this->authMethodSMSRegisterEnabled = $data[SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value]['value'] ?? null;
-        $this->authMethodSMSRegisterLabel = $data[SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value]['value'] ?? null;
-        $this->authMethodSMSRegisterDescription = $data[SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value]['value'] ?? null;
-        $this->profileLimitDateSMS = (int) ($data[SettingName::PROFILE_LIMIT_DATE_SMS->value]['value'] ?? null);
+        $this->authMethodSMSRegisterEnabled =
+            $data[SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value]['value'] ?? null;
+        $this->authMethodSMSRegisterLabel =
+            $data[SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value]['value'] ?? null;
+        $this->authMethodSMSRegisterDescription =
+            $data[SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value]['value'] ?? null;
+        $this->profileLimitDateSMS = (int)(
+            $data[SettingName::PROFILE_LIMIT_DATE_SMS->value]['value'] ?? null
+        );
     }
 
     /**
@@ -248,42 +341,102 @@ class AuthSettingsTypeDTO
     public function toArray(): array
     {
         return [
-            SettingName::AUTH_METHOD_SAML_ENABLED->value => ['value' => $this->authMethodSamlEnabled],
-            SettingName::AUTH_METHOD_SAML_LABEL->value => ['value' => $this->authMethodSamlLabel],
-            SettingName::AUTH_METHOD_SAML_DESCRIPTION->value => ['value' => $this->authMethodSamlDescription],
-            SettingName::PROFILE_LIMIT_DATE_SAML->value => ['value' => $this->profileLimitDateSaml],
+            SettingName::AUTH_METHOD_SAML_ENABLED->value => [
+                'value' => $this->authMethodSamlEnabled,
+            ],
+            SettingName::AUTH_METHOD_SAML_LABEL->value => [
+                'value' => $this->authMethodSamlLabel,
+            ],
+            SettingName::AUTH_METHOD_SAML_DESCRIPTION->value => [
+                'value' => $this->authMethodSamlDescription,
+            ],
+            SettingName::PROFILE_LIMIT_DATE_SAML->value => [
+                'value' => $this->profileLimitDateSaml,
+            ],
 
-            SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value => ['value' => $this->authMethodGOOGLELoginEnabled],
-            SettingName::AUTH_METHOD_GOOGLE_LOGIN_LABEL->value => ['value' => $this->authMethodGOOGLELoginLabel],
-            SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value => ['value' => $this->authMethodGOOGLELoginDescription],
-            SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value => ['value' => $this->validDomainsGOOGLELogin],
-            SettingName::PROFILE_LIMIT_DATE_GOOGLE->value => ['value' => $this->profileLimitDateGOOGLE],
+            SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value => [
+                'value' => $this->authMethodGOOGLELoginEnabled,
+            ],
+            SettingName::AUTH_METHOD_GOOGLE_LOGIN_LABEL->value => [
+                'value' => $this->authMethodGOOGLELoginLabel,
+            ],
+            SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value => [
+                'value' => $this->authMethodGOOGLELoginDescription,
+            ],
+            SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value => [
+                'value' => $this->validDomainsGOOGLELogin,
+            ],
+            SettingName::PROFILE_LIMIT_DATE_GOOGLE->value => [
+                'value' => $this->profileLimitDateGOOGLE,
+            ],
 
-            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value => ['value' => $this->authMethodMICROSOFTLoginEnabled],
-            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_LABEL->value => ['value' => $this->authMethodMICROSOFTLoginLabel],
-            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION->value => ['value' => $this->authMethodMICROSOFTLoginDescription],
-            SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value => ['value' => $this->validDomainsMICROSOFTLogin],
-            SettingName::PROFILE_LIMIT_DATE_MICROSOFT->value => ['value' => $this->profileLimitDateMICROSOFT],
+            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value => [
+                'value' => $this->authMethodMICROSOFTLoginEnabled,
+            ],
+            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_LABEL->value => [
+                'value' => $this->authMethodMICROSOFTLoginLabel,
+            ],
+            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION->value => [
+                'value' => $this->authMethodMICROSOFTLoginDescription,
+            ],
+            SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value => [
+                'value' => $this->validDomainsMICROSOFTLogin,
+            ],
+            SettingName::PROFILE_LIMIT_DATE_MICROSOFT->value => [
+                'value' => $this->profileLimitDateMICROSOFT,
+            ],
 
-            SettingName::AUTH_METHOD_REGISTER_ENABLED->value => ['value' => $this->authMethodRegisterEnabled],
-            SettingName::AUTH_METHOD_REGISTER_LABEL->value => ['value' => $this->authMethodRegisterLabel],
-            SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value => ['value' => $this->authMethodRegisterDescription],
-            SettingName::PROFILE_LIMIT_DATE_EMAIL->value => ['value' => $this->profileLimitDateEmail],
-            SettingName::EMAIL_TIMER_RESEND->value => ['value' => $this->emailTimerResend],
-            SettingName::LINK_VALIDITY->value => ['value' => $this->linkValidity],
+            SettingName::AUTH_METHOD_REGISTER_ENABLED->value => [
+                'value' => $this->authMethodRegisterEnabled,
+            ],
+            SettingName::AUTH_METHOD_REGISTER_LABEL->value => [
+                'value' => $this->authMethodRegisterLabel,
+            ],
+            SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value => [
+                'value' => $this->authMethodRegisterDescription,
+            ],
+            SettingName::PROFILE_LIMIT_DATE_EMAIL->value => [
+                'value' => $this->profileLimitDateEmail,
+            ],
+            SettingName::EMAIL_TIMER_RESEND->value => [
+                'value' => $this->emailTimerResend,
+            ],
+            SettingName::LINK_VALIDITY->value => [
+                'value' => $this->linkValidity,
+            ],
 
-            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value => ['value' => $this->authMethodLoginTraditionalEnabled],
-            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value => ['value' => $this->authMethodLoginTraditionalLabel],
-            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value => ['value' => $this->authMethodLoginTraditionalDescription],
+            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value => [
+                'value' => $this->authMethodLoginTraditionalEnabled,
+            ],
+            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value => [
+                'value' => $this->authMethodLoginTraditionalLabel,
+            ],
+            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value => [
+                'value' => $this->authMethodLoginTraditionalDescription,
+            ],
 
-            SettingName::LOGIN_WITH_UUID_ONLY->value => ['value' => $this->loginWithUUIDOnly],
-            SettingName::LOGIN_WITH_UUID_ONLY_LABEL->value => ['value' => $this->loginWithUUIDOnlyLabel],
-            SettingName::LOGIN_WITH_UUID_ONLY_DESCRIPTION->value => ['value' => $this->loginWithUUIDOnlyDescription],
+            SettingName::LOGIN_WITH_UUID_ONLY->value => [
+                'value' => $this->loginWithUUIDOnly,
+            ],
+            SettingName::LOGIN_WITH_UUID_ONLY_LABEL->value => [
+                'value' => $this->loginWithUUIDOnlyLabel,
+            ],
+            SettingName::LOGIN_WITH_UUID_ONLY_DESCRIPTION->value => [
+                'value' => $this->loginWithUUIDOnlyDescription,
+            ],
 
-            SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value => ['value' => $this->authMethodSMSRegisterEnabled],
-            SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value => ['value' => $this->authMethodSMSRegisterLabel],
-            SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value => ['value' => $this->authMethodSMSRegisterDescription],
-            SettingName::PROFILE_LIMIT_DATE_SMS->value => ['value' => $this->profileLimitDateSMS],
+            SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value => [
+                'value' => $this->authMethodSMSRegisterEnabled,
+            ],
+            SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value => [
+                'value' => $this->authMethodSMSRegisterLabel,
+            ],
+            SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value => [
+                'value' => $this->authMethodSMSRegisterDescription,
+            ],
+            SettingName::PROFILE_LIMIT_DATE_SMS->value => [
+                'value' => $this->profileLimitDateSMS,
+            ],
         ];
     }
 
@@ -291,8 +444,8 @@ class AuthSettingsTypeDTO
     public function timeLimitValidate(ExecutionContextInterface $context): void
     {
         if (
-            $this->authMethodSamlEnabled === "true" &&
-            $this->profileLimitDate < $this->profileLimitDateSaml
+            $this->authMethodSamlEnabled === 'true'
+            && $this->profileLimitDate < $this->profileLimitDateSaml
         ) {
             $context->buildViolation('profileLimitMessage')
                 ->atPath('profileLimitDateSaml')
@@ -300,9 +453,10 @@ class AuthSettingsTypeDTO
                 ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
                 ->addViolation();
         }
+
         if (
-            $this->authMethodGOOGLELoginEnabled === "true" &&
-            $this->profileLimitDate < $this->profileLimitDateGOOGLE
+            $this->authMethodGOOGLELoginEnabled === 'true'
+            && $this->profileLimitDate < $this->profileLimitDateGOOGLE
         ) {
             $context->buildViolation('profileLimitMessage')
                 ->atPath('profileLimitDateGOOGLE')
@@ -310,9 +464,10 @@ class AuthSettingsTypeDTO
                 ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
                 ->addViolation();
         }
+
         if (
-            $this->authMethodMICROSOFTLoginEnabled === "true" &&
-            $this->profileLimitDate < $this->profileLimitDateMICROSOFT
+            $this->authMethodMICROSOFTLoginEnabled === 'true'
+            && $this->profileLimitDate < $this->profileLimitDateMICROSOFT
         ) {
             $context->buildViolation('profileLimitMessage')
                 ->atPath('profileLimitDateMICROSOFT')
@@ -320,9 +475,10 @@ class AuthSettingsTypeDTO
                 ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
                 ->addViolation();
         }
+
         if (
-            $this->authMethodRegisterEnabled === "true" &&
-            $this->profileLimitDate < $this->profileLimitDateEmail
+            $this->authMethodRegisterEnabled === 'true'
+            && $this->profileLimitDate < $this->profileLimitDateEmail
         ) {
             $context->buildViolation('profileLimitMessage')
                 ->atPath('profileLimitDateEmail')
@@ -330,9 +486,10 @@ class AuthSettingsTypeDTO
                 ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
                 ->addViolation();
         }
+
         if (
-            $this->authMethodSMSRegisterEnabled === "true" &&
-            $this->profileLimitDate < $this->profileLimitDateSMS
+            $this->authMethodSMSRegisterEnabled === 'true'
+            && $this->profileLimitDate < $this->profileLimitDateSMS
         ) {
             $context->buildViolation('profileLimitMessage')
                 ->atPath('profileLimitDateSMS')
