@@ -87,3 +87,5 @@ DELETE_UNCONFIRMED_USERS_CRON_ENABLED: 'Ativa ou desativa a tarefa agendada de e
 USERS_WHEN_PROFILE_EXPIRES_CRON_ENABLED: 'Ativa ou desativa a tarefa agendada de notificação automática de utilizadores cujo perfil está prestes a expirar.'
 LDAP_SYNC_CRON_ENABLED: 'Ativa ou desativa a tarefa agendada de sincronização automática com o LDAP.'
 DOMAIN_BLACKLIST_IMPORT_CRON_ENABLED: 'Ativa ou desativa a tarefa agendada de importação e sincronização automática de domínios bloqueados.'
+LOGIN_WITH_UUID_ONLY_LABEL: 'O rótulo do botão de autenticação por Magic Link (apenas UUID) na página de início de sessão.'
+LOGIN_WITH_UUID_ONLY_DESCRIPTION: 'O texto descritivo apresentado na página de início de sessão que explica o método de autenticação por Magic Link aos utilizadores.'

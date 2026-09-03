@@ -87,3 +87,5 @@ DELETE_UNCONFIRMED_USERS_CRON_ENABLED: 'Enables or disables the automatic deleti
 USERS_WHEN_PROFILE_EXPIRES_CRON_ENABLED: 'Enables or disables the automatic notification cron job for users whose profile is about to expire.'
 LDAP_SYNC_CRON_ENABLED: 'Enables or disables the automatic LDAP synchronization cron job.'
 DOMAIN_BLACKLIST_IMPORT_CRON_ENABLED: 'Enables or disables the automatic domain blacklist import and synchronization cron job.'
+LOGIN_WITH_UUID_ONLY_LABEL: 'The label for the Magic Link (UUID-only) authentication button on the login page.'
+LOGIN_WITH_UUID_ONLY_DESCRIPTION: 'The description text displayed on the login page explaining the Magic Link authentication method to users.'

@@ -1,5 +1,21 @@
 # Changelog
 
+# Release V1.13.2
+
+- **Landing Page Authentication Rework**: Refactored landing page authentication buttons, adding dedicated support for
+  Magic Link login alongside traditional authentication methods.
+- **Dashboard UI & Stimulus Fix**: Reworked the Authentication Methods management UI to distinctly separate Traditional
+  Login and Magic Link (UUID-only) configuration.
+
+Please make sure to execute the new migration to update and use the new required Settings details for this new usage of
+the LOGIN_WITH_UUID_ONLY setting.
+
+- Run the migrations with:
+
+```bash
+  php bin/console doctrine:migrations:migrate
+```
+
 # Release V1.13.1
 
 - Added a toggle to enable/disable the Coverage Map feature from the admin dashboard (Map Settings)
