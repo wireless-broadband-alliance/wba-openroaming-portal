@@ -10,7 +10,7 @@
     {{ macros.radio_card(
         form.authMethodSMSRegisterEnabled,
         'mode'|trans({}, 'auths_providers'),
-        data.AUTH_METHOD_SMS_REGISTER_ENABLED.description
+        data.AUTH_METHOD_SMS_REGISTER_ENABLED.description,
     ) }}
 
     {# Label Input #}
@@ -18,7 +18,7 @@
         form.authMethodSMSRegisterLabel,
         'label'|trans({}, 'auths_providers'),
         data.AUTH_METHOD_SMS_REGISTER_LABEL.description,
-        'dto.authMethodSMSRegisterLabel'
+        'dto.authMethodSMSRegisterLabel',
     ) }}
 
     {# Description Input #}
@@ -26,7 +26,7 @@
         form.authMethodSMSRegisterDescription,
         'description'|trans({}, 'auths_providers'),
         data.AUTH_METHOD_SMS_REGISTER_DESCRIPTION.description,
-        'dto.authMethodSMSRegisterDescription'
+        'dto.authMethodSMSRegisterDescription',
     ) }}
 
     {# Profile Limit Date Card (Custom button behavior preserved) #}

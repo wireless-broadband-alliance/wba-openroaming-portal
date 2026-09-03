@@ -10,7 +10,7 @@
     {{ macros.radio_card(
         form.authMethodGOOGLELoginEnabled,
         'mode'|trans({}, 'auths_providers'),
-        data.AUTH_METHOD_GOOGLE_LOGIN_ENABLED.description
+        data.AUTH_METHOD_GOOGLE_LOGIN_ENABLED.description,
     ) }}
 
     {# Label Input #}
@@ -18,7 +18,7 @@
         form.authMethodGOOGLELoginLabel,
         'label'|trans({}, 'auths_providers'),
         data.AUTH_METHOD_GOOGLE_LOGIN_LABEL.description,
-        'dto.authMethodGOOGLELoginLabel'
+        'dto.authMethodGOOGLELoginLabel',
     ) }}
 
     {# Description Input #}
@@ -26,7 +26,7 @@
         form.authMethodGOOGLELoginDescription,
         'description'|trans({}, 'auths_providers'),
         data.AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION.description,
-        'dto.authMethodGOOGLELoginDescription'
+        'dto.authMethodGOOGLELoginDescription',
     ) }}
 
     {# Google Valid Domains Input #}
@@ -34,7 +34,7 @@
         form.validDomainsGOOGLELogin,
         'googleDomains'|trans({}, 'auths_providers'),
         data.VALID_DOMAINS_GOOGLE_LOGIN.description,
-        'dto.validDomainsGOOGLELogin'
+        'dto.validDomainsGOOGLELogin',
     ) }}
 
     {# Profile Limit Date Card #}

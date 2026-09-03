@@ -10,7 +10,7 @@
     {{ macros.radio_card(
         form.authMethodRegisterEnabled,
         'mode'|trans({}, 'auths_providers'),
-        data.AUTH_METHOD_REGISTER_ENABLED.description
+        data.AUTH_METHOD_REGISTER_ENABLED.description,
     ) }}
 
     {# Label Input #}
@@ -18,7 +18,7 @@
         form.authMethodRegisterLabel,
         'label'|trans({}, 'auths_providers'),
         data.AUTH_METHOD_REGISTER_LABEL.description,
-        'dto.authMethodRegisterLabel'
+        'dto.authMethodRegisterLabel',
     ) }}
 
     {# Description Input #}
@@ -26,7 +26,7 @@
         form.authMethodRegisterDescription,
         'description'|trans({}, 'auths_providers'),
         data.AUTH_METHOD_REGISTER_DESCRIPTION.description,
-        'dto.authMethodRegisterDescription'
+        'dto.authMethodRegisterDescription',
     ) }}
 
     {# Profile Limit Date Card #}
@@ -78,14 +78,14 @@
     {{ macros.input_card(
         form.emailTimerResend,
         'emailTimerResend'|trans({}, 'auths_providers'),
-        data.EMAIL_TIMER_RESEND.description
+        data.EMAIL_TIMER_RESEND.description,
     ) }}
 
     {# Link Validity Period #}
     {{ macros.input_card(
         form.linkValidity,
         'linkValidity'|trans({}, 'auths_providers'),
-        data.LINK_VALIDITY.description
+        data.LINK_VALIDITY.description,
     ) }}
 
 </div>

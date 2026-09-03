@@ -10,7 +10,7 @@
     {{ macros.radio_card(
         form.authMethodMICROSOFTLoginEnabled,
         'mode'|trans({}, 'auths_providers'),
-        data.AUTH_METHOD_MICROSOFT_LOGIN_ENABLED.description
+        data.AUTH_METHOD_MICROSOFT_LOGIN_ENABLED.description,
     ) }}
 
     {# Label Input #}
@@ -18,7 +18,7 @@
         form.authMethodMICROSOFTLoginLabel,
         'label'|trans({}, 'auths_providers'),
         data.AUTH_METHOD_MICROSOFT_LOGIN_LABEL.description,
-        'dto.authMethodMICROSOFTLoginLabel'
+        'dto.authMethodMICROSOFTLoginLabel',
     ) }}
 
     {# Description Input #}
@@ -26,7 +26,7 @@
         form.authMethodMICROSOFTLoginDescription,
         'description'|trans({}, 'auths_providers'),
         data.AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION.description,
-        'dto.authMethodMICROSOFTLoginDescription'
+        'dto.authMethodMICROSOFTLoginDescription',
     ) }}
 
     {# Microsoft Valid Domains Input #}
@@ -34,7 +34,7 @@
         form.validDomainsMICROSOFTLogin,
         'microsoftDomains'|trans({}, 'auths_providers'),
         data.VALID_DOMAINS_MICROSOFT_LOGIN.description,
-        'dto.validDomainsMICROSOFTLogin'
+        'dto.validDomainsMICROSOFTLogin',
     ) }}
 
     {# Profile Limit Date Card #}
