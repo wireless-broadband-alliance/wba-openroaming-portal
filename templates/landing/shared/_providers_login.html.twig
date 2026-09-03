@@ -92,19 +92,38 @@
 </div>
 
 {# Portal Login #}
-{% if data.AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED.value == 'true' %}
-    <div class="w-full">
-        <a href="{{ path('app_login') }}"
-           class="terms-widget__link"
-           data-action="click->terms-widget#showModal">
-            <button {{ stimulus_target('terms-widget', 'button') }}
-                    type="button"
-                    class="w-full h-12 btn-secondary btn-secondary-disabled">
-                {{ data.AUTH_METHOD_LOGIN_TRADITIONAL_LABEL.value }}
-            </button>
-        </a>
-        <p class="text-xs md:my-1 my-2 text-center text-gray-600">
-            {{ data.AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION.value }}
-        </p>
-    </div>
-{% endif %}
+<div class="grid grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3">
+    {% if data.AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED.value == 'true' %}
+        <div class="w-full">
+            <a href="{{ path('app_login') }}"
+               class="terms-widget__link"
+               data-action="click->terms-widget#showModal">
+                <button {{ stimulus_target('terms-widget', 'button') }}
+                        type="button"
+                        class="w-full h-12 btn-secondary btn-secondary-disabled">
+                    {{ data.AUTH_METHOD_LOGIN_TRADITIONAL_LABEL.value }}
+                </button>
+            </a>
+            <p class="text-xs md:my-1 my-2 text-center text-gray-600">
+                {{ data.AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION.value }}
+            </p>
+        </div>
+    {% endif %}
+
+    {% if data.LOGIN_WITH_UUID_ONLY.value == 'true' %}
+        <div class="w-full">
+            <a href="{{ path('app_login_magic') }}"
+               class="terms-widget__link"
+               data-action="click->terms-widget#showModal">
+                <button {{ stimulus_target('terms-widget', 'button') }}
+                        type="button"
+                        class="w-full h-12 btn-secondary btn-secondary-disabled">
+                    {{ data.LOGIN_WITH_UUID_ONLY_LABEL.value }}
+                </button>
+            </a>
+            <p class="text-xs md:my-1 my-2 text-center text-gray-600">
+                {{ data.LOGIN_WITH_UUID_ONLY_DESCRIPTION.value }}
+            </p>
+        </div>
+    {% endif %}
+</div>
