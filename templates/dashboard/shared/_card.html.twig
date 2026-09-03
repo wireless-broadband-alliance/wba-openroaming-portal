@@ -1,0 +1,30 @@
+{% set setting = form[name] %}
+
+<div name="customCards" {{ stimulus_controller('card') }}
+     class="bg-white w-full flex flex-col px-5 py-3">
+
+    <div class="flex justify-between">
+        <h1 class="text-lg font-medium">{{ displayName }}</h1>
+        <label class="flex items-center bg-opacity-40">
+            <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                 src="{{ asset('resources/logos/info_icon.svg') }}"
+                 alt="info_icon"/>
+        </label>
+    </div>
+
+    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
+
+    {% if settingType == 'text' %}
+        <div class="mt-5 mb-1">
+            {{ form_widget(setting, {attr: {class: 'form-widget', rows: 3}}) }}
+        </div>
+    {% elseif settingType == 'choice' %}
+        <div class="mt-5 mb-1">
+            {{ form_widget(setting, {attr: {class: 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
+        </div>
+    {% endif %}
+
+    <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+        {{ form_errors(setting) }}
+    </div>
+</div>

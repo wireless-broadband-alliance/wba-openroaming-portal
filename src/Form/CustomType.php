@@ -7,6 +7,7 @@ use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -44,18 +45,14 @@ class CustomType extends AbstractType
             SettingName::WELCOME_TEXT->value => [
                 'type' => QuillType::class,
                 'constraints' => [
-                    new Assert\NotBlank(
-                        message: $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType')
-                    ),
+                    new Assert\NotBlank(message: $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType')),
                 ]
             ],
             SettingName::WELCOME_DESCRIPTION->value => QuillType::class,
             SettingName::PAGE_TITLE->value => [
                 'type' => TextType::class,
                 'constraints' => [
-                    new Assert\NotBlank(
-                        message: $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType')
-                    ),
+                    new Assert\NotBlank(message: $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType')),
                     new Length(
                         max: 255,
                         maxMessage: $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType')
@@ -88,9 +85,23 @@ class CustomType extends AbstractType
             ],
         ];
 
-        $uploadMaxFilesize = ini_get('upload_max_filesize') ?: '2M';
-        $postMaxSize = ini_get('post_max_size') ?: '8M';
-        $maxSize = min($uploadMaxFilesize, $postMaxSize);
+        $imageSettingNames = [
+            SettingName::CUSTOMER_LOGO->value,
+            SettingName::OPENROAMING_LOGO->value,
+            SettingName::WALLPAPER_IMAGE->value,
+        ];
+
+        foreach ($imageSettingNames as $imageSettingName) {
+            $builder->add($imageSettingName . '_REMOVE', CheckboxType::class, [
+                'mapped' => false,
+                'required' => false,
+                'disabled' => $this->disabled,
+            ]);
+        }
+
+        $uploadMaxFilesize = ini_get('upload_max_filesize');
+        $postMaxSize = ini_get('post_max_size');
+        $maxSize = (string)min($uploadMaxFilesize, $postMaxSize);
 
         foreach ($allowedSettings as $settingName => $config) {
             $formFieldOptions = [

@@ -224,4 +224,34 @@
 
         {% endif %}
     {% endif %}
+
+    {# ===================================================================== #}
+    {# PREVIEW MODE: Blocks all interactive actions #}
+    {# ===================================================================== #}
+    {% if isPreview|default(false) %}
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            // 1. Block all clicks on links, buttons, and inputs.
+            // The 'true' at the end (capture phase) ensures this script acts
+            // BEFORE Stimulus or any inline "onchange" or "onclick" events.
+            document.body.addEventListener('click', function(e) {
+              if (e.target.closest('a, button, input, select, form')) {
+                e.preventDefault();
+                e.stopPropagation();
+              }
+            }, true);
+
+            // 2. Block all form submissions (e.g., pressing Enter)
+            document.body.addEventListener('submit', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+            }, true);
+          });
+        </script>
+
+        {# Small floating badge to let the user know it's a Preview #}
+        <div class="fixed bottom-5 right-5 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-xl z-[9999] opacity-80 pointer-events-none">
+            <p class="text-sm font-semibold">{{ 'previewMode'|trans({}, 'landing') }}</p>
+        </div>
+    {% endif %}
 {% endblock %}
