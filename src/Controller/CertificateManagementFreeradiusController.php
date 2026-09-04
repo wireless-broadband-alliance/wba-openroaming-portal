@@ -570,8 +570,7 @@ class CertificateManagementFreeradiusController extends AbstractController
 
                 // Validate required certificates
                 if (
-                    empty($extractCertificates[CertificateFileName::CA_PEM->value]) ||
-                    empty($extractCertificates[CertificateFileName::CERT_PEM->value])
+                    empty($extractCertificates[CertificateFileName::CA_PEM->value])
                 ) {
                     throw new RuntimeException('Missing required certificates');
                 }
