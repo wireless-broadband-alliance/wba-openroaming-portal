@@ -125,7 +125,7 @@ class AuthController extends AbstractController
         $isLoginWithUUIDOnly = $this->settingRepository->findOneBy([
             'name' => SettingName::LOGIN_WITH_UUID_ONLY->value
         ])->getValue();
-        if ($isLoginWithUUIDOnly === OperationMode::OFF->value && empty($data['password'])) {
+        if ($isLoginWithUUIDOnly === 'false' && empty($data['password'])) {
             $errors[] = 'password';
         }
 
