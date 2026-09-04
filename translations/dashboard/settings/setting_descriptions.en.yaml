@@ -89,3 +89,6 @@ LDAP_SYNC_CRON_ENABLED: 'Enables or disables the automatic LDAP synchronization 
 DOMAIN_BLACKLIST_IMPORT_CRON_ENABLED: 'Enables or disables the automatic domain blacklist import and synchronization cron job.'
 LOGIN_WITH_UUID_ONLY_LABEL: 'The label for the Magic Link (UUID-only) authentication button on the login page.'
 LOGIN_WITH_UUID_ONLY_DESCRIPTION: 'The description text displayed on the login page explaining the Magic Link authentication method to users.'
+EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS: 'Time interval in seconds required between consecutive password reset email requests'
+EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS: 'Time in minutes to reset the count of password reset email attempts'
+EMAIL_ATTEMPTS_NUMBER: 'Maximum number of password reset email attempts allowed within the reset time window'
