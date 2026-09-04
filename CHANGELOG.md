@@ -8,6 +8,7 @@
   Login and Magic Link (UUID-only) configuration.
 - Fix bug with attribute mapping during the cloudflareHttps request certs properties association with the portal. This
   happens during the certificate management wizard update.
+- Added customizable footer image support with display toggle and improved layout for the Landing Page Configuration.
 
 Please make sure to execute the new migration to update and use the new required Settings details for this new usage of
 the LOGIN_WITH_UUID_ONLY setting.

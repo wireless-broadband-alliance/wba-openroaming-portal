@@ -151,11 +151,13 @@ class CustomType extends AbstractType
             $formFieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
 
             // Specific logic for ON/OFF toggle settings
-            if (in_array(
-                $settingName,
-                [SettingName::CUSTOMER_LOGO_ENABLED->value, SettingName::FOOTER_IMAGE_ENABLED->value],
-                true
-            )) {
+            if (
+                in_array(
+                    $settingName,
+                    [SettingName::CUSTOMER_LOGO_ENABLED->value, SettingName::FOOTER_IMAGE_ENABLED->value],
+                    true
+                )
+            ) {
                 $formFieldOptions['choices'] = [
                     OperationMode::ON->value => OperationMode::ON->value,
                     OperationMode::OFF->value => OperationMode::OFF->value,

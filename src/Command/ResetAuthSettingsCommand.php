@@ -200,8 +200,10 @@ class ResetAuthSettingsCommand extends Command
                 'name' => SettingName::LOGIN_WITH_UUID_ONLY_DESCRIPTION->value,
                 'value' => 'No password required. Enter your email or phone number to receive an instant login link.',
                 'translations' => [
-                    LanguageType::EN->value => 'No password required. Enter your email or phone number to receive an instant login link.',
-                    LanguageType::PT->value => 'Sem necessidade de palavra-passe. Insira o seu email ou número de telefone para receber um link de acesso instantâneo.',
+                    LanguageType::EN->value => 'No password required. Enter your email or phone number ' .
+                        'to receive an instant login link.',
+                    LanguageType::PT->value => 'Sem necessidade de palavra-passe. Insira o seu email ' .
+                        'ou número de telefone para receber um link de acesso instantâneo.',
                 ],
             ],
             [

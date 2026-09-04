@@ -190,13 +190,13 @@ class LandingPageConfigController extends AbstractController
 
                         if ($currentValue) {
                             $uploadedDirectory = $this->getParameter(
-                                    'kernel.project_dir'
-                                ) . '/public/resources/uploaded';
+                                'kernel.project_dir'
+                            ) . '/public/resources/uploaded';
                             $realUploadedDirectory = realpath($uploadedDirectory);
 
                             $absolutePath = $this->getParameter(
-                                    'kernel.project_dir'
-                                ) . '/public' . $currentValue;
+                                'kernel.project_dir'
+                            ) . '/public' . $currentValue;
                             $realAbsolutePath = realpath($absolutePath);
 
                             if (
