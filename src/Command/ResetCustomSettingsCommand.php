@@ -60,6 +60,7 @@ class ResetCustomSettingsCommand extends Command
             ['name' => SettingName::CUSTOMER_LOGO->value, 'value' => '/resources/logos/WBA_Logo.png'],
             ['name' => SettingName::OPENROAMING_LOGO->value, 'value' => '/resources/logos/openroaming.svg'],
             ['name' => SettingName::WALLPAPER_IMAGE->value, 'value' => '/resources/images/background.png'],
+            ['name' => SettingName::FOOTER_IMAGE_ENABLED->value, 'value' => 'ON'],
             ['name' => SettingName::FOOTER_IMAGE->value, 'value' => '/resources/images/footer.png'],
             ['name' => SettingName::WELCOME_TEXT->value, 'value' => 'Welcome to OpenRoaming Provisioning Service'],
             [
