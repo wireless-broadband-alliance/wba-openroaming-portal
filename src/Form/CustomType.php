@@ -42,6 +42,8 @@ class CustomType extends AbstractType
             SettingName::CUSTOMER_LOGO->value => FileType::class,
             SettingName::OPENROAMING_LOGO->value => FileType::class,
             SettingName::WALLPAPER_IMAGE->value => FileType::class,
+            SettingName::FOOTER_IMAGE_ENABLED->value => ChoiceType::class,
+            SettingName::FOOTER_IMAGE->value => FileType::class,
             SettingName::WELCOME_TEXT->value => [
                 'type' => QuillType::class,
                 'constraints' => [
@@ -89,6 +91,7 @@ class CustomType extends AbstractType
             SettingName::CUSTOMER_LOGO->value,
             SettingName::OPENROAMING_LOGO->value,
             SettingName::WALLPAPER_IMAGE->value,
+            SettingName::FOOTER_IMAGE->value,
         ];
 
         foreach ($imageSettingNames as $imageSettingName) {
@@ -147,8 +150,12 @@ class CustomType extends AbstractType
             // GetSettings service retrieves each description
             $formFieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
 
-            // Specific logic for CUSTOMER_LOGO_ENABLED
-            if ($settingName === SettingName::CUSTOMER_LOGO_ENABLED->value) {
+            // Specific logic for ON/OFF toggle settings
+            if (in_array(
+                $settingName,
+                [SettingName::CUSTOMER_LOGO_ENABLED->value, SettingName::FOOTER_IMAGE_ENABLED->value],
+                true
+            )) {
                 $formFieldOptions['choices'] = [
                     OperationMode::ON->value => OperationMode::ON->value,
                     OperationMode::OFF->value => OperationMode::OFF->value,

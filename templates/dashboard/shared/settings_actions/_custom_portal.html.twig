@@ -20,6 +20,13 @@
         ? asset(data[constant('App\\Enum\\SettingName::WALLPAPER_IMAGE').value].value)
         : null,
     },
+    {
+        name: constant('App\\Enum\\SettingName::FOOTER_IMAGE').value,
+        displayName: 'footerImage'|trans({}, '_custom_portal'),
+        imagePath: data[constant('App\\Enum\\SettingName::FOOTER_IMAGE').value].value
+        ? asset(data[constant('App\\Enum\\SettingName::FOOTER_IMAGE').value].value)
+        : null,
+    },
 ] %}
 
 {% set textSettings = [
@@ -54,7 +61,7 @@
 
     <div class="flex flex-col gap-6 z-0 justify-start">
 
-        {# Branding Section: logos, wallpaper, and the customer-logo toggle grouped together #}
+        {# Branding Section: logos, wallpaper, footer image, and toggles #}
         <div class="bg-white rounded-lg shadow p-6">
             <h2 class="text-lg font-semibold text-primary">
                 {{ 'branding'|trans({}, '_custom_portal') }}
@@ -63,17 +70,25 @@
                 {{ 'brandingDescription'|trans({}, '_custom_portal') }}
             </p>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6">
                 {% for imgSetting in imageSettings %}
                     {{ include('/dashboard/shared/_card_image.html.twig', imgSetting) }}
                 {% endfor %}
             </div>
 
-            <div class="mt-6 pt-4 border-t border-gray-100">
-                {{ include('/dashboard/shared/_card_toogle.html.twig', {
-                    setting: form.CUSTOMER_LOGO_ENABLED,
-                    displayName: 'showCustomerLogo'|trans({}, '_custom_portal'),
-                }) }}
+            <div class="mt-6 pt-4 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+                <div>
+                    {{ include('/dashboard/shared/_card_toogle.html.twig', {
+                        setting: form.CUSTOMER_LOGO_ENABLED,
+                        displayName: 'showCustomerLogo'|trans({}, '_custom_portal'),
+                    }) }}
+                </div>
+                <div class="xl:col-start-4">
+                    {{ include('/dashboard/shared/_card_toogle.html.twig', {
+                        setting: form.FOOTER_IMAGE_ENABLED,
+                        displayName: 'showFooterImage'|trans({}, '_custom_portal'),
+                    }) }}
+                </div>
             </div>
         </div>
 

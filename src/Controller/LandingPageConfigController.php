@@ -95,7 +95,8 @@ class LandingPageConfigController extends AbstractController
                         SettingName::WELCOME_DESCRIPTION->value,
                         SettingName::ADDITIONAL_LABEL->value,
                         SettingName::CONTACT_EMAIL->value,
-                        SettingName::CUSTOMER_LOGO_ENABLED->value
+                        SettingName::CUSTOMER_LOGO_ENABLED->value,
+                        SettingName::FOOTER_IMAGE_ENABLED->value,
                     ], true)
                 ) {
                     if (in_array($settingName, $this->getSettings->arraySettingsToTranslate(), true)) {
@@ -157,7 +158,8 @@ class LandingPageConfigController extends AbstractController
                         [
                             SettingName::CUSTOMER_LOGO->value,
                             SettingName::OPENROAMING_LOGO->value,
-                            SettingName::WALLPAPER_IMAGE->value
+                            SettingName::WALLPAPER_IMAGE->value,
+                            SettingName::FOOTER_IMAGE->value,
                         ],
                         true
                     )
@@ -305,7 +307,8 @@ class LandingPageConfigController extends AbstractController
                 SettingName::WELCOME_DESCRIPTION->value,
                 SettingName::ADDITIONAL_LABEL->value,
                 SettingName::CONTACT_EMAIL->value,
-                SettingName::CUSTOMER_LOGO_ENABLED->value
+                SettingName::CUSTOMER_LOGO_ENABLED->value,
+                SettingName::FOOTER_IMAGE_ENABLED->value,
             ];
 
             foreach ($textSettings as $settingName) {
@@ -325,7 +328,8 @@ class LandingPageConfigController extends AbstractController
             $imageSettings = [
                 SettingName::CUSTOMER_LOGO->value,
                 SettingName::OPENROAMING_LOGO->value,
-                SettingName::WALLPAPER_IMAGE->value
+                SettingName::WALLPAPER_IMAGE->value,
+                SettingName::FOOTER_IMAGE->value,
             ];
 
             foreach ($imageSettings as $settingName) {

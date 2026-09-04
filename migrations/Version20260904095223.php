@@ -23,7 +23,7 @@ final class Version20260904095223 extends AbstractMigration
         $this->addSql(
             "
             INSERT INTO Setting (name, value) VALUES
-            ('FOOTER_IMAGE_ENABLED', 'ON'),
+            ('FOOTER_IMAGE_ENABLED', 'OFF'),
             ('FOOTER_IMAGE', '/resources/images/footer.png')
         "
         );

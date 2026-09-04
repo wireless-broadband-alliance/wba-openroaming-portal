@@ -29,6 +29,14 @@ class CustomTypeDTO
     )]
     public ?UploadedFile $WALLPAPER_IMAGE = null;
 
+    public ?string $FOOTER_IMAGE_ENABLED = null;
+
+    #[Assert\File(
+        mimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
+        mimeTypesMessage: 'uploadValidFormat'
+    )]
+    public ?UploadedFile $FOOTER_IMAGE = null;
+
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
     public ?string $WELCOME_TEXT = null;
 
