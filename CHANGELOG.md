@@ -6,6 +6,8 @@
   Magic Link login alongside traditional authentication methods.
 - **Dashboard UI & Stimulus Fix**: Reworked the Authentication Methods management UI to distinctly separate Traditional
   Login and Magic Link (UUID-only) configuration.
+- Fix bug with attribute mapping during the cloudflareHttps request certs properties association with the portal. This
+  happens during the certificate management wizard update.
 
 Please make sure to execute the new migration to update and use the new required Settings details for this new usage of
 the LOGIN_WITH_UUID_ONLY setting.
