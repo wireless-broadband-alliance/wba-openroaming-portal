@@ -83,7 +83,7 @@
 
             {{ form_row(registrationFormDemo._token) }}
 
-            {# Return and pass dummby OSType just to skip demo mode account creation #}
+            {# Return and pass dummy OSType just to skip demo mode account creation #}
             <input type="hidden" id="radio-os" name="radio-os" value="{{ 'Android' }}"/>
             <input type="hidden" id="detected-os" name="detected-os" value="{{ 'Android' }}"/>
 
@@ -109,7 +109,7 @@
             {# Divider #}
             <div class="my-[25px] divider"></div>
 
-            {# Addicional Label #}
+            {# Additional Label #}
             <p class="text-sm">{{ data.ADDITIONAL_LABEL.value }}</p>
         {% endif %}
     {% else %}
@@ -147,7 +147,6 @@
                 </div>
 
                 {% if app.user.isVerified %}
-
                     {# Widget User Settings #}
                     <div {{ stimulus_target('widget', 'modal') }}
                             class="hidden fixed top-0 left-0 w-full h-full bg-[#090B2F] bg-opacity-70 z-20 ">
@@ -226,7 +225,7 @@
     {% endif %}
 
     {# ===================================================================== #}
-    {# PREVIEW MODE: Blocks all interactive actions #}
+    {# PREVIEW MODE: Blocks all interactive actions                          #}
     {# ===================================================================== #}
     {% if isPreview|default(false) %}
         <script>
