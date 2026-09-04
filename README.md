@@ -554,6 +554,9 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 95. `MAP_CENTER_LONGITUDE`: Default longitude used to center the coverage map.
 96. `MAP_CENTER_ZOOM`: Default zoom level used for the coverage map.
 
+97. `FOOTER_IMAGE_ENABLED`: Shows the footer image on the landing page.
+98. `FOOTER_IMAGE`: The resource path or URL to the footer image
+
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 
 ## Contact Information?
