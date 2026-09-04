@@ -16,3 +16,4 @@ generalSettingsDescription: 'Configure the page title and contact information sh
 pageContent: 'Page Content'
 pageContentDescription: 'Configure the welcome text and additional messaging shown on the landing page.'
 showFooterImage: 'Show Footer Image'
+footerImage: 'Footer Image'

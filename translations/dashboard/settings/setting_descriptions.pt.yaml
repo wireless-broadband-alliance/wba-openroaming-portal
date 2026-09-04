@@ -92,3 +92,5 @@ LOGIN_WITH_UUID_ONLY_DESCRIPTION: 'O texto descritivo apresentado na página de 
 EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS: 'Tempo de espera mínimo (em segundos) entre pedidos consecutivos de e-mail'
 EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS: 'Janela de tempo (em minutos) após a qual o contador de tentativas de pedidos de e-mail é reiniciado'
 EMAIL_ATTEMPTS_NUMBER: 'Número máximo de pedidos permitidos dentro da janela de tempo definida'
+FOOTER_IMAGE_ENABLED: 'Mostra a imagem de rodapé na página inicial.'
+FOOTER_IMAGE: "O caminho do recurso ou URL para a imagem de rodapé"

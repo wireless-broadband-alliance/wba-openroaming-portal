@@ -16,3 +16,4 @@ generalSettingsDescription: 'Configure o título da página e a informação de 
 pageContent: 'Conteúdo da Página'
 pageContentDescription: 'Configure o texto de boas-vindas e as mensagens adicionais apresentadas na página de destino.'
 showFooterImage: 'Mostra o Rodapé'
+footerImage: 'Image de Rodapé'

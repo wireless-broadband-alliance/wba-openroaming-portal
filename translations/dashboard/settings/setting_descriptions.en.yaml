@@ -92,3 +92,5 @@ LOGIN_WITH_UUID_ONLY_DESCRIPTION: 'The description text displayed on the login p
 EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS: 'Minimum cooldown (in seconds) between consecutive email requests'
 EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS: 'Time window (in minutes) after which the email request attempts counter is reset'
 EMAIL_ATTEMPTS_NUMBER: 'Maximum number of allowed requests within the defined time window'
+FOOTER_IMAGE_ENABLED: 'Shows the footer image on the landing page.'
+FOOTER_IMAGE: "The resource path or URL to the footer image"
