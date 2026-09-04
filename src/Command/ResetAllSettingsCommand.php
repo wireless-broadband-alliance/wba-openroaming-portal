@@ -124,7 +124,12 @@ class ResetAllSettingsCommand extends Command
                 'name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value,
                 'value' => 'Already have an account? Login then'
             ],
-            ['name' => SettingName::LOGIN_WITH_UUID_ONLY->value, 'value' => 'OFF'],
+            ['name' => SettingName::LOGIN_WITH_UUID_ONLY->value, 'value' => 'false'],
+            ['name' => SettingName::LOGIN_WITH_UUID_ONLY_LABEL->value, 'value' => 'Login with Magic Link'],
+            [
+                'name' => SettingName::LOGIN_WITH_UUID_ONLY_DESCRIPTION->value,
+                'value' => 'No password required. Enter your email or phone number to receive an instant login link.'
+            ],
             ['name' => SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value, 'value' => 'false'],
             [
                 'name' => SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value,
@@ -219,7 +224,7 @@ class ResetAllSettingsCommand extends Command
                 'value' => 'This portal allows you to download and install an OpenRoaming profile tailored to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
                 'translations' => [
                     LanguageType::EN->value => 'This portal allows you to download and install an OpenRoaming profile tailored to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
-                    LanguageType::PT->value => 'Este portal permite-lhe descarregar e instalar um perfil OpenRoaming adaptado ao seu dispositivo, permitindo-lhe ligar-se automaticamente às redes OpenRoaming Wi-Fi em todo o mundo.',
+                    LanguageType::PT->value => 'Este portal permite que você faça o download e instale um perfil OpenRoaming adaptado ao seu dispositivo, permitindo-lhe conectar-se automaticamente às redes OpenRoaming Wi-Fi em todo o mundo.',
                 ],
             ],
             [
@@ -307,7 +312,23 @@ class ResetAllSettingsCommand extends Command
                 'value' => 'Already have an account? Login then',
                 'translations' => [
                     LanguageType::EN->value => 'Already have an account? Login then',
-                    LanguageType::PT->value => 'Já tem uma conta? Então inicie sessão.',
+                    LanguageType::PT->value => 'Já tem uma conta? Faça login então',
+                ],
+            ],
+            [
+                'name' => SettingName::LOGIN_WITH_UUID_ONLY_LABEL->value,
+                'value' => 'Login with Magic Link',
+                'translations' => [
+                    LanguageType::EN->value => 'Login with Magic Link',
+                    LanguageType::PT->value => 'Entrar com Link Mágico',
+                ],
+            ],
+            [
+                'name' => SettingName::LOGIN_WITH_UUID_ONLY_DESCRIPTION->value,
+                'value' => 'No password required. Enter your email or phone number to receive an instant login link.',
+                'translations' => [
+                    LanguageType::EN->value => 'No password required. Enter your email or phone number to receive an instant login link.',
+                    LanguageType::PT->value => 'Sem necessidade de palavra-passe. Insira o seu email ou número de telefone para receber um link de acesso instantâneo.',
                 ],
             ],
             [
