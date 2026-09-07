@@ -12,7 +12,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
- * @extends AbstractType<null>
+ * @extends AbstractType<AuthSettingsTypeDTO>
  */
 class AuthSettingsType extends AbstractType
 {
@@ -123,7 +123,7 @@ class AuthSettingsType extends AbstractType
                 'required' => false,
                 'disabled' => $this->disabled,
             ])
-            // Login
+            // Login Traditional
             ->add('authMethodLoginTraditionalEnabled', ChoiceType::class, [
                 'choices' => [
                     OperationMode::ON->value => 'true',
@@ -143,9 +143,17 @@ class AuthSettingsType extends AbstractType
             // Login with UUID only
             ->add('loginWithUUIDOnly', ChoiceType::class, [
                 'choices' => [
-                    OperationMode::ON->value => OperationMode::ON->value,
-                    OperationMode::OFF->value => OperationMode::OFF->value,
+                    OperationMode::ON->value => 'true',
+                    OperationMode::OFF->value => 'false',
                 ],
+                'required' => false,
+                'disabled' => $this->disabled,
+            ])
+            ->add('loginWithUUIDOnlyLabel', TextType::class, [
+                'required' => false,
+                'disabled' => $this->disabled,
+            ])
+            ->add('loginWithUUIDOnlyDescription', TextType::class, [
                 'required' => false,
                 'disabled' => $this->disabled,
             ])

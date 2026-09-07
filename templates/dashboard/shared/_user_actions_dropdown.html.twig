@@ -3,12 +3,22 @@
     ? is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE'))
     : is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::USERS_MANAGEMENT_WRITE')) %}
 
-<ul class="p-2 text-gray-700 gap-y-2">
+{% set canRead = isAdmin
+    ? is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::ADMIN_MANAGEMENT_READ'))
+    : is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::USERS_MANAGEMENT_READ')) %}
+
+{# Shared row styling: consistent padding/size, background+text hover for stronger affordance,
+   and a visible focus ring for keyboard users #}
+{% set itemClass = 'flex flex-row items-center px-3 py-2 rounded-md duration-100 cursor-pointer hover:bg-gray-50 hover:text-lightGreen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lightGreen/50' %}
+{% set dangerItemClass = 'flex flex-row items-center px-3 py-2 rounded-md duration-100 cursor-pointer hover:bg-red-50 hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/50' %}
+
+<ul class="p-2 text-gray-700 gap-y-1 w-64">
+
     {% if showMoreDetails is not defined or showMoreDetails %}
         <li>
             <a href="{{ path('admin_dashboard_user_show', {id: user.id}) }}"
-               class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
-                <twig:ux:icon name="wba:user-account" class="w-5 mr-3 fill-none stroke-current" />
+               class="{{ itemClass }}">
+                <twig:ux:icon name="wba:user-account" class="w-5 h-5 mr-3 shrink-0 fill-none stroke-current" />
                 {{ 'moreDetails'|trans({}, '_user') }}
             </a>
         </li>
@@ -16,9 +26,13 @@
 
     {% if canWrite %}
         <li>
+            <hr class="my-1 border-gray-100">
+        </li>
+
+        <li>
             <a href="{{ path('admin_dashboard_user_edit', {id: user.id}) }}"
-               class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
-                <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3 fill-none stroke-current" />
+               class="{{ itemClass }}">
+                <twig:ux:icon name="wba:pencil-edit" class="w-5 h-5 mr-3 shrink-0 fill-none stroke-current" />
                 {{ 'edit'|trans({}, '_user') }}
             </a>
         </li>
@@ -33,6 +47,10 @@
             </li>
         {% endif %}
 
+        <li>
+            <hr class="my-1 border-gray-100">
+        </li>
+
         {% if delete_users === true %}
             <li {{ stimulus_controller('alert') }}>
                 <form action="{{ path('admin_dashboard_user_delete', {id: user.id}) }}"
@@ -44,8 +62,8 @@
                        data-user-actions-confirm-delete="{{ 'confirm_delete'|trans({'%uuid%': user.uuid}, '_user') }}"
                             {{ stimulus_action('alert', 'delete_user') }}
                             {{ stimulus_target('alert', 'button') }}
-                       class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-red-400">
-                        <twig:ux:icon name="wba:trash" class="w-5 mr-3 fill-none stroke-current" />
+                       class="{{ dangerItemClass }} text-red-500">
+                        <twig:ux:icon name="wba:trash" class="w-5 h-5 mr-3 shrink-0 fill-none stroke-current" />
                         {{ 'delete'|trans({}, '_user') }}
                     </a>
                 </form>
@@ -60,7 +78,7 @@
                 {{ form_errors(formRevokeProfiles) }}
                 <input type="hidden" name="_method" value="REVOKE">
                 <a href="javascript:void(0)"
-                   class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen"
+                   class="{{ dangerItemClass }}"
                    data-user-actions-confirm-revoke="{{ 'confirm_revoke'|trans({'%uuid%': user.uuid}, '_user') }}"
                         {{ stimulus_action('alert', 'revoke_profiles') }}
                         {{ stimulus_target('alert', 'button') }}
@@ -73,7 +91,7 @@
                            {% endif %}
                        {% endfor %}
                    {% endif %}">
-                    <twig:ux:icon name="wba:return" class="w-6 mr-3 full-current" />
+                    <twig:ux:icon name="wba:return" class="w-5 h-5 mr-3 shrink-0 fill-none stroke-current" />
                     {{ 'revoke'|trans({}, '_user') }}
                 </a>
 
@@ -84,9 +102,13 @@
 
         {% if isAdmin and currentUser is defined and currentUser.id != user.id %}
             <li>
+                <hr class="my-1 border-gray-100">
+            </li>
+            <li>
                 <a href="{{ path('admin_dashboard_remove_user_permissions', {id: user.id}) }}"
-                   class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
-                    <twig:ux:icon name="wba:cross-circle-rounded" class="w-5 mr-3 fill-current" />
+                   class="{{ dangerItemClass }}">
+                    <twig:ux:icon name="wba:cross-circle-rounded"
+                                  class="w-5 h-5 mr-3 shrink-0 fill-none stroke-current" />
                     {{ 'removeAdminPerm'|trans({}, '_user') }}
                 </a>
             </li>
@@ -96,9 +118,12 @@
     {% if not isAdmin and (constant('App\\Enum\\AdminRoleType::ROLE_SUPER_ADMIN').value in app.user.roles or
         is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE'))) %}
         <li>
+            <hr class="my-1 border-gray-100">
+        </li>
+        <li>
             <a href="{{ path('admin_dashboard_add_admin_permissions', {id: user.id}) }}"
-               class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
-                <twig:ux:icon name="wba:add" class="w-5 mr-3 fill-current" />
+               class="{{ itemClass }}">
+                <twig:ux:icon name="wba:add" class="w-5 h-5 mr-3 shrink-0 fill-current stroke-none" />
                 {{ 'addAdminPerm'|trans({}, '_user') }}
             </a>
         </li>

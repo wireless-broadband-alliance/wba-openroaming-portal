@@ -89,3 +89,10 @@ LDAP_SYNC_CRON_ENABLED: 'Enables or disables the automatic LDAP synchronization 
 DOMAIN_BLACKLIST_IMPORT_CRON_ENABLED: 'Enables or disables the automatic domain blacklist import and synchronization cron job.'
 USER_RETENTION_DAYS: 'Number of days soft-deleted users are kept before being permanently purged from the database.'
 OTP_EXPIRATION_HOURS: 'Number of hours a two-factor authentication code (OTP) remains valid before being cleared from the system.'
+LOGIN_WITH_UUID_ONLY_LABEL: 'The label for the Magic Link (UUID-only) authentication button on the login page.'
+LOGIN_WITH_UUID_ONLY_DESCRIPTION: 'The description text displayed on the login page explaining the Magic Link authentication method to users.'
+EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS: 'Minimum cooldown (in seconds) between consecutive email requests'
+EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS: 'Time window (in minutes) after which the email request attempts counter is reset'
+EMAIL_ATTEMPTS_NUMBER: 'Maximum number of allowed requests within the defined time window'
+FOOTER_IMAGE_ENABLED: 'Shows the footer image on the landing page.'
+FOOTER_IMAGE: "The resource path or URL to the footer image"

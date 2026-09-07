@@ -95,7 +95,7 @@ class UserAccountDeletionController extends AbstractController
 
         $loginWithUuidOnly = false;
         if (is_array($data) && isset($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'])) {
-            $loginWithUuidOnly = $data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::ON->value;
+            $loginWithUuidOnly = $data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === 'true';
         }
 
         if (

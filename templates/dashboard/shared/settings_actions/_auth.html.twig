@@ -14,48 +14,66 @@
     {{ form_start(form) }}
     {{ form_row(form._token) }}
 
-    {# SAML #}
-    <div>
-        {{ include('dashboard/shared/settings_actions/auths_providers/_saml_Auth.html.twig') }}
-    </div>
+    <div class="space-y-8 pb-20">
+        {# SECTION 1: Standard Portal Login #}
+        <section class="space-y-4">
+            <div class="border-b border-gray-200 pt-2">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-gray-500">
+                    {{ 'standardLoginMethods'|trans({}, 'auths_providers') }}
+                </h2>
+            </div>
+            <div>
+                {{ include('dashboard/shared/settings_actions/auths_providers/_login_portal_Auth.html.twig') }}
+            </div>
+            <div>
+                {{ include('dashboard/shared/settings_actions/auths_providers/_login_magic_link_Auth.html.twig') }}
+            </div>
+        </section>
 
-    {# Google #}
-    <div>
-        {{ include('dashboard/shared/settings_actions/auths_providers/_google_Auth.html.twig') }}
-    </div>
+        {# SECTION 2: Single Sign-On (SSO) Providers #}
+        <section class="space-y-4">
+            <div class="border-b border-gray-200 pt-4">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-gray-500">
+                    {{ 'ssoIdentityProviders'|trans({}, 'auths_providers') }}
+                </h2>
+            </div>
+            <div>
+                {{ include('dashboard/shared/settings_actions/auths_providers/_saml_Auth.html.twig') }}
+            </div>
+            <div>
+                {{ include('dashboard/shared/settings_actions/auths_providers/_google_Auth.html.twig') }}
+            </div>
+            <div>
+                {{ include('dashboard/shared/settings_actions/auths_providers/_microsoft_Auth.html.twig') }}
+            </div>
+        </section>
 
-    {# Microsoft #}
-    <div>
-        {{ include('dashboard/shared/settings_actions/auths_providers/_microsoft_Auth.html.twig') }}
+        {# SECTION 3: Registration Channels #}
+        <section class="space-y-4">
+            <div class="border-b border-gray-200 pt-4">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-gray-500">
+                    {{ 'selfRegistrationChannels'|trans({}, 'auths_providers') }}
+                </h2>
+            </div>
+            <div>
+                {{ include('dashboard/shared/settings_actions/auths_providers/_email_register_Auth.html.twig') }}
+            </div>
+            <div>
+                {{ include('dashboard/shared/settings_actions/auths_providers/_sms_register_Auth.html.twig') }}
+            </div>
+        </section>
     </div>
-
-    {# EMAIL Register #}
-    <div>
-        {{ include('dashboard/shared/settings_actions/auths_providers/_email_register_Auth.html.twig') }}
-    </div>
-
-    {# SMS REGISTER #}
-    <div>
-        {{ include('dashboard/shared/settings_actions/auths_providers/_sms_register_Auth.html.twig') }}
-    </div>
-
-    {# Login #}
-    <div>
-        {{ include('dashboard/shared/settings_actions/auths_providers/_login_portal_Auth.html.twig') }}
-    </div>
-
-    <div class="mt-8 divider-solid"></div>
 
     {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::AUTHENTICATION_METHODS_WRITE')) %}
-    <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
-        <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingAUTH'}) }}"
-           data-confirm="{{ 'resetMessage'|trans({}, 'settings_actions_general')|e('html_attr') }}"
-           class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
-            {{ 'reset'|trans({}, 'settings_actions_general') }}
-        </a>
+        <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
+            <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingAUTH'}) }}"
+               data-confirm="{{ 'resetMessage'|trans({}, 'settings_actions_general')|e('html_attr') }}"
+               class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
+                {{ 'reset'|trans({}, 'settings_actions_general') }}
+            </a>
 
             <button class="btn-primary"
-                    onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general') }}')"
+                    onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general')|e('js') }}')"
                     type="submit">{{ 'saveChanges'|trans({}, 'settings_actions_general') }}
             </button>
         </div>

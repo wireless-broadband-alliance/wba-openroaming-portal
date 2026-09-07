@@ -83,7 +83,7 @@
 
             {{ form_row(registrationFormDemo._token) }}
 
-            {# Return and pass dummby OSType just to skip demo mode account creation #}
+            {# Return and pass dummy OSType just to skip demo mode account creation #}
             <input type="hidden" id="radio-os" name="radio-os" value="{{ 'Android' }}"/>
             <input type="hidden" id="detected-os" name="detected-os" value="{{ 'Android' }}"/>
 
@@ -109,7 +109,7 @@
             {# Divider #}
             <div class="my-[25px] divider"></div>
 
-            {# Addicional Label #}
+            {# Additional Label #}
             <p class="text-sm">{{ data.ADDITIONAL_LABEL.value }}</p>
         {% endif %}
     {% else %}
@@ -147,7 +147,6 @@
                 </div>
 
                 {% if app.user.isVerified %}
-
                     {# Widget User Settings #}
                     <div {{ stimulus_target('widget', 'modal') }}
                             class="hidden fixed top-0 left-0 w-full h-full bg-[#090B2F] bg-opacity-70 z-20 ">
@@ -223,5 +222,35 @@
             <p class="text-sm">{{ data.ADDITIONAL_LABEL.value|raw }}</p>
 
         {% endif %}
+    {% endif %}
+
+    {# ===================================================================== #}
+    {# PREVIEW MODE: Blocks all interactive actions #}
+    {# ===================================================================== #}
+    {% if isPreview|default(false) %}
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            // 1. Block all clicks on links, buttons, and inputs.
+            // The 'true' at the end (capture phase) ensures this script acts
+            // BEFORE Stimulus or any inline "onchange" or "onclick" events.
+            document.body.addEventListener('click', function(e) {
+              if (e.target.closest('a, button, input, select, form')) {
+                e.preventDefault();
+                e.stopPropagation();
+              }
+            }, true);
+
+            // 2. Block all form submissions (e.g., pressing Enter)
+            document.body.addEventListener('submit', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+            }, true);
+          });
+        </script>
+
+        {# Small floating badge to let the user know it's a Preview #}
+        <div class="fixed bottom-5 right-5 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-xl z-[9999] opacity-80 pointer-events-none">
+            <p class="text-sm font-semibold">{{ 'previewMode'|trans({}, 'landing') }}</p>
+        </div>
     {% endif %}
 {% endblock %}

@@ -65,3 +65,4 @@ coverageMap:
     clickHint: "Clique numa área de cobertura para ver mais detalhes sobre esse local."
     backToPortal: "Voltar ao Portal"
 viewCoverageMap: "Ver Mapa de Cobertura"
+previewMode: 'Modo de pré-visualização'

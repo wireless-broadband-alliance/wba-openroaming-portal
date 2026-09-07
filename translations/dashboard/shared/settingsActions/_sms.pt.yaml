@@ -12,7 +12,7 @@ sms_provider_notice: 'Isto é para o fornecedor
 timeIntervalBetweenRequests: 'Intervalo entre pedidos'
 timeIntervalToResetAttempts: 'Tempo para reiniciar tentativas'
 attemptsNumber: 'Número de tentativas'
-newProvider: 'Novo Fornecedor'
+newConfiguration: 'Nova Configuração'
 sms_providers_notice: 'Apenas um fornecedor de SMS pode estar ativo de cada vez. O fornecedor ativo é utilizado em todos os SMS enviados, incluindo códigos de autenticação de dois fatores.'
 noProvidersConfigured: 'Ainda não existem fornecedores de SMS configurados.'
 noProvidersFoundWith: 'Nenhum fornecedor encontrado para'

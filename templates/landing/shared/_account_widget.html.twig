@@ -9,11 +9,7 @@
         </button>
     </div>
 
-    {# Personal Data Form #}
-    {% set has_first_name_errors = form.firstName.vars.errors|length > 0 %}
-    {% set has_last_name_errors = form.lastName.vars.errors|length > 0 %}
-    {% set has_personal_errors = has_first_name_errors or has_last_name_errors or form.vars.errors|length > 0 %}
-
+    {# Personal Data Section #}
     <div {{ stimulus_controller('fields') }}>
         <h1 class="text-lg mb-8 mt-10">{{ 'personalData.title'|trans({}, '_account_widget') }}</h1>
 
@@ -80,15 +76,9 @@
     </div>
 
     {% if data.PLATFORM_MODE.value == constant('App\\Enum\\PlatformMode::LIVE').value %}
-        {# Divider between sections #}
-        <div class="divider my-8"></div>
-
-        {% if data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::OFF').value %}
-            {# Form Password Section #}
-            {% set has_current_pass_errors = formPassword.password.vars.errors|length > 0 %}
-            {% set has_new_pass_errors = formPassword.newPassword.vars.errors|length > 0 %}
-            {% set has_confirm_pass_errors = formPassword.confirmPassword.vars.errors|length > 0 %}
-            {% set has_password_errors = has_current_pass_errors or has_new_pass_errors or has_confirm_pass_errors or formPassword.vars.errors|length > 0 %}
+        {# Change Password Section (Only when NOT using Magic Link / UUID only) #}
+        {% if data.LOGIN_WITH_UUID_ONLY.value == 'false' %}
+            <div class="divider my-8"></div>
 
             <div {{ stimulus_controller('fields') }}>
                 <h1 class="text-lg mb-8 mt-10">{{ 'changePassword.title'|trans({}, '_account_widget') }}</h1>
@@ -188,36 +178,29 @@
                 {{ form_end(formPassword) }}
             </div>
         {% endif %}
-    {% endif %}
 
-    {% if data.PLATFORM_MODE.value == constant('App\\Enum\\PlatformMode::LIVE').value %}
-        {# Divider between sections #}
+        {# 2FA Section (Always shown on LIVE mode) #}
         <div class="divider my-8"></div>
-        {% if data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::OFF').value or
-            user.userExternalAuths[0].provider != constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value %}
 
-            <h1 class="text-lg mb-8 mt-10">
-                {{ 'twoFactorAuth.title'|trans({}, '_account_widget') }}
-            </h1>
+        <h1 class="text-lg mb-8 mt-10">
+            {{ 'twoFactorAuth.title'|trans({}, '_account_widget') }}
+        </h1>
 
-            <div class="grid {% if user.twoFAtype != constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}grid-cols-2{% else %}grid-cols-1{% endif %} space-x-2">
-                <a href="{{ path('app_configure2FA') }}" class="btn-secondary md:text-base text-sm">
-                    {{ 'twoFactorAuth.configure'|trans({}, '_account_widget') }}
+        <div class="grid {% if user.twoFAtype != constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}grid-cols-2{% else %}grid-cols-1{% endif %} space-x-2">
+            <a href="{{ path('app_configure2FA') }}" class="btn-secondary md:text-base text-sm">
+                {{ 'twoFactorAuth.configure'|trans({}, '_account_widget') }}
+            </a>
+            {% if user.twoFAtype != constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}
+                <a href="{{ path('app_disable2FA', {context: context}) }}" class="btn-logout">
+                    {{ 'twoFactorAuth.disable'|trans({}, '_account_widget') }}
                 </a>
-                {% if user.twoFAtype != constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}
-                    <a href="{{ path('app_disable2FA', {context: context}) }}" class="btn-logout">
-                        {{ 'twoFactorAuth.disable'|trans({}, '_account_widget') }}
-                    </a>
-                {% endif %}
-            </div>
-
-        {% endif %}
+            {% endif %}
+        </div>
     {% endif %}
 
     {# Revoke Account Profile Section #}
     {% set has_revoke_errors = formRevokeProfiles.vars.errors|length > 0 %}
     <div {{ stimulus_controller('alert') }}>
-        {# Divider between sections #}
         <div class="divider my-8"></div>
 
         <h1 class="text-lg mb-8 mt-10">
@@ -268,12 +251,11 @@
     </div>
 
     {% if data.PLATFORM_MODE.value == constant('App\\Enum\\PlatformMode::LIVE').value %}
-        {# Divider between sections #}
-        <div class="divider my-8"></div>
-
-        {# Additional Option: Danger Zone for Account Deletion #}
+        {# Danger Zone Section #}
         {% if user.email is not null or user.phoneNumber is not null %}
             {% if not is_granted(constant('App\\Enum\\AdminRoleType::ROLE_ADMIN').value) %}
+                <div class="divider my-8"></div>
+
                 <h1 class="text-lg mb-8 mt-10 !text-red-600 font-bold uppercase">
                     {{ 'dangerZone.title'|trans({}, '_account_widget') }}
                 </h1>

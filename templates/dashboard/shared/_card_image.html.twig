@@ -1,0 +1,54 @@
+{% set setting = form[name] %}
+{% set removeSetting = form[name ~ '_REMOVE'] %}
+
+<div class="flex flex-col" {{ stimulus_controller('card img') }}>
+    <div class="flex justify-between items-center">
+        <h3 class="text-sm font-semibold text-gray-800">{{ displayName }}</h3>
+        <label class="flex items-center bg-opacity-40">
+            <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                 src="{{ asset('resources/logos/info_icon.svg') }}"
+                 alt="info_icon" />
+        </label>
+    </div>
+
+    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
+
+    <div class="relative w-full mt-2">
+        {# Filled state — hidden via class when there's no image #}
+        <div class="{{ imagePath ? '' : 'hidden' }}" {{ stimulus_target('img', 'filledState') }}>
+            <img src="{{ imagePath ?? '' }}" alt="CustomizationImages"
+                 class="w-full h-24 p-3 border border-gray-200 rounded-md object-contain bg-gray-50"
+                    {{ stimulus_target('img', 'preview') }}>
+
+            <button type="button"
+                    class="absolute top-2 right-2 bg-white rounded-md p-1.5 shadow hover:bg-red-50 transition"
+                    {{ stimulus_action('img', 'remove', 'click') }}>
+                <twig:ux:icon name="wba:trash" class="w-5 h-5 fill-none stroke-current text-red-500" />
+            </button>
+        </div>
+
+        {# Empty state — hidden via class when there IS an image #}
+        <div class="{{ imagePath ? 'hidden' : '' }} w-full h-24 flex flex-col items-center justify-center gap-1 border border-dashed border-gray-300 rounded-md bg-gray-50"
+                {{ stimulus_target('img', 'emptyState') }}>
+            <twig:ux:icon name="wba:image" class="w-6 h-6 fill-none stroke-current text-gray-300" />
+            <p class="text-xs text-gray-400 text-center px-2">
+                {{ acceptHint|default('Supports PNG, SVG up to 2MB') }}
+            </p>
+        </div>
+    </div>
+
+    <div class="hidden">
+        {{ form_widget(removeSetting, {attr: {'data-img-target': 'removeFlag'}}) }}
+    </div>
+
+    <button class="btn-primary !rounded-md !px-2 !py-1 text-base flex flex-row items-center gap-1 relative cursor-pointer md:w-1/2 w-full mt-3"
+            {{ stimulus_action('img', 'update', 'change') }}>
+        {{ form_widget(setting, {attr: {class: 'w-full h-full opacity-0 absolute top-0 left-0 cursor-pointer', 'data-img-target': 'input'}}) }}
+        <twig:ux:icon name="wba:cloud-upload" class="w-3.5 h-3.5 fill-none stroke-current" />
+        {{ 'uploadNewImage'|trans({}, 'settings_actions_general') }}
+    </button>
+
+    <div class="mt-1 text-center text-red-500 text-sm">
+        {{ form_errors(setting) }}
+    </div>
+</div>

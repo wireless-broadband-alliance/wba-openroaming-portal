@@ -924,21 +924,19 @@ class SettingsController extends AbstractController
         $form = $this->createForm(AuthSettingsType::class, $authSettingsTypeDTO, ['disabled' => !$canWrite]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
-            $changeset =
-                $this->settingsService->updateAuthSettingsToTranslateFromArray(
-                    $authSettingsTypeDTO->toArray(),
-                    $language
-                );
+        if ($canWrite && $form->isSubmitted() && $form->isValid()) {
+            $changeset = $this->settingsService->updateAuthSettingsToTranslateFromArray(
+                $authSettingsTypeDTO->toArray(),
+                $language
+            );
 
             $this->settingsService->flush();
-
 
             $eventMetadata = [
                 EventMetadataKeysType::IP->value => $request->getClientIp(),
                 EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
                 EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
-                EventMetadataKeysType::CHANGESET->value  => $changeset,
+                EventMetadataKeysType::CHANGESET->value => $changeset,
             ];
 
             $this->eventActions->saveEvent(

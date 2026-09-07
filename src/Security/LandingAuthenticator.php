@@ -171,11 +171,11 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         }
 
         $loginModeSetting = $this->settingRepository->findOneBy(['name' => SettingName::LOGIN_WITH_UUID_ONLY->value]);
-        $mode = OperationMode::from($loginModeSetting?->getValue() ?? OperationMode::OFF->value);
+        $value = $loginModeSetting?->getValue();
 
-        $eventType = match ($mode) {
-            OperationMode::ON => AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE,
-            OperationMode::OFF => AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST,
+        $eventType = match ($value) {
+            'true' => AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE,
+            default => AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST,
         };
 
         if (

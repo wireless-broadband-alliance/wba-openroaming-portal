@@ -12,6 +12,7 @@ use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Form\RegistrationFormSMSType;
 use App\Form\RegistrationFormType;
+use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\EmailGenerator;
 use App\Service\EventActions;
@@ -72,6 +73,7 @@ class RegistrationController extends AbstractController
         private readonly EventDispatcherInterface $eventDispatcher,
         private readonly PhoneNumberUtil $phoneNumberUtil,
         private readonly RateLimiterFactoryInterface $verifyAccountLimiter,
+        private readonly SettingRepository $settingRepository
     ) {
     }
 
@@ -116,7 +118,7 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::ON->value) {
+        if ($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === 'true') {
             $this->addFlash(
                 'error',
                 $this->translator->trans(
@@ -234,7 +236,7 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::ON->value) {
+        if ($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === 'true') {
             $this->addFlash(
                 'error',
                 $this->translator->trans(
@@ -361,8 +363,14 @@ class RegistrationController extends AbstractController
         // Get the user with the matching email, excluding admin users
         $user = $this->userRepository->findOneByUUIDExcludingAdmin($uuid);
 
-        // Check if the user has been previously verified
-        if ($user && $user->isVerified() && !$user->isForgotPasswordRequest()) {
+        $loginUuidOnlySetting = $this->settingRepository->findOneBy(
+            ['name' => SettingName::LOGIN_WITH_UUID_ONLY->value]
+        );
+
+        $isUuidOnly = filter_var($loginUuidOnlySetting?->getValue(), FILTER_VALIDATE_BOOLEAN);
+
+        // Check if the user has been previously verified only with UUID login OFF
+        if (!$isUuidOnly && $user && $user->isVerified() && !$user->isForgotPasswordRequest()) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('accountAlreadyVerified', [], 'controllers')
