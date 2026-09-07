@@ -7,117 +7,118 @@
 {% block installation_content %}
 
     <div class="mt-6 leading-7">
-        <p class="font-bold text-base sm:text-lg md:text-xl lg:text-2xl">
+        <p class="font-bold text-base sm:text-lg md:text-xl lg:text-2xl text-gray-900">
             {{ 'adminConfigTitle'|trans({}, 'admin_config') }}
         </p>
-        <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
+        <p class="mt-2 text-sm sm:text-base text-gray-600">
             {{ 'adminConfigDescription'|trans({}, 'admin_config') }}
         </p>
     </div>
 
-    <div class="my-[25px] divider"></div>
+    <div class="my-6 border-t border-gray-200"></div>
 
     {{ form_start(form, {attr: {autocomplete: 'off'}}) }}
 
-    <div class="grid gap-6 lg:grid-cols-2 xl:grid-cols-3 p-2">
+    <div class="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
 
         {# --- Email Card --- #}
-        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"{{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}>
-            <div class="flex flex-row justify-between">
-                <div class="text-base font-medium text-center break-normal md:break-all pt-1">
-                    <h1 class="text-base md:text-lg whitespace-nowrap">
+        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div>
+                <div class="flex flex-row justify-between items-center mb-3">
+                    <h1 class="text-base font-semibold text-gray-800">
                         {{ 'emailLabel'|trans({}, 'admin_config') }}
                     </h1>
+                    <label class="flex items-center">
+                        <img class="w-5 h-5 cursor-pointer opacity-60 hover:opacity-100 transition-opacity"
+                                {{ stimulus_target('card', 'button') }}
+                                {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                             src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon" />
+                    </label>
                 </div>
-                <label class="flex items-center bg-opacity-40">
-                    <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
-                            {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
-                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon" />
-                </label>
+
+                {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                    description: 'emailDescription'|trans({}, 'admin_config'),
+                }) }}
             </div>
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
-                description: 'emailDescription'|trans({}, 'admin_config'),
-            }) }}
+            <div class="mt-6 space-y-2">
+                <p class="text-xs text-gray-500">
+                    {{ 'emailWarning'|trans({}, 'admin_config') }}
+                </p>
 
-            <div class="flex items-center space-x-2 mt-5">
                 {{ form_widget(form.email, {
                     attr: {
                         class: 'form-widget mt-1 block w-full rounded-md border-gray-200 p-2',
                     },
                 }) }}
-            </div>
 
-            <div>
-                <p class="mt-3 text-xs sm:text-sm text-gray-400">
-                    {{ 'emailWarning'|trans({}, 'admin_config') }}
-                </p>
-            </div>
-
-            <div class="mt-2 text-center text-red-500 text-base">
-                {{ form_errors(form.email) }}
+                {% if form_errors(form.email) %}
+                    <div class="text-xs text-red-500 font-medium mt-1">
+                        {{ form_errors(form.email) }}
+                    </div>
+                {% endif %}
             </div>
         </div>
 
         {# --- Password Card --- #}
-        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full">
-            <div class="flex flex-row justify-between">
-                <div class="text-base font-medium text-center break-normal md:break-all">
-                    <h1 class="text-base md:text-lg whitespace-nowrap">
-                        {{ 'passwordLabel'|trans({}, 'admin_config') }}
-                    </h1>
-                </div>
+        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div>
+                <h1 class="text-base font-semibold text-gray-800 mb-3">
+                    {{ 'passwordLabel'|trans({}, 'admin_config') }}
+                </h1>
             </div>
 
-            <div class="relative mt-[32px]">
+            <div class="mt-6 space-y-2">
                 {{ form_widget(form.password, {
                     attr: {
                         class: 'form-widget mt-1 block w-full rounded-md border-gray-200 p-2',
                     },
                 }) }}
-            </div>
 
-            <div class="mt-2 text-center text-red-500 text-base">
-                {{ form_errors(form.password) }}
+                {% if form_errors(form.password) %}
+                    <div class="text-xs text-red-500 font-medium mt-1">
+                        {{ form_errors(form.password) }}
+                    </div>
+                {% endif %}
             </div>
         </div>
 
-        {# --- Password confirmation Card --- #}
-        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full">
-            <div class="flex flex-row justify-between">
-                <div class="text-base font-medium text-center break-normal md:break-all">
-                    <h1 class="text-base md:text-lg whitespace-nowrap">
-                        {{ 'passwordConfirmLabel'|trans({}, 'admin_config') }}
-                    </h1>
-                </div>
+        {# --- Confirm Password Card --- #}
+        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div>
+                <h1 class="text-base font-semibold text-gray-800 mb-3">
+                    {{ 'passwordConfirmLabel'|trans({}, 'admin_config') }}
+                </h1>
             </div>
 
-            <div class="relative mt-[32px]">
+            <div class="mt-6 space-y-2">
                 {{ form_widget(form.confirmPassword, {
                     attr: {
                         class: 'form-widget mt-1 block w-full rounded-md border-gray-200 p-2',
                     },
                 }) }}
-            </div>
 
-            <div class="mt-2 text-center text-red-500 text-base">
-                {{ form_errors(form.confirmPassword) }}
+                {% if form_errors(form.confirmPassword) %}
+                    <div class="text-xs text-red-500 font-medium mt-1">
+                        {{ form_errors(form.confirmPassword) }}
+                    </div>
+                {% endif %}
             </div>
         </div>
 
     </div>
 
-    <div class="mt-8 divider-solid"></div>
+    <div class="my-8 border-t border-gray-200"></div>
 
-    <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
-
-        <button type="submit" class="btn-primary"
+    <div class="flex justify-end">
+        <button type="submit"
+                class="px-6 py-2.5 bg-lime-600 hover:bg-lime-700 text-white font-medium text-sm rounded-lg shadow transition-all cursor-pointer"
                 onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'admin_config') }}')">
             {{ 'databaseApplyBtn'|trans({}, 'admin_config') }}
         </button>
     </div>
 
     {{ form_row(form._token) }}
+    {{ form_end(form, {render_rest: false}) }}
 
-    {{ form_end(form) }}
 {% endblock %}
