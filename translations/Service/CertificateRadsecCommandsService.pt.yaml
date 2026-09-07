@@ -8,3 +8,4 @@ rebuild_and_start_container: 'Reconstruir a imagem do radsecproxy sem utilizar c
 verify_container: 'Verificar se o container radsecproxy está em execução.'
 check_logs: 'Verificar os registos mais recentes do radsecproxy para confirmar o arranque bem-sucedido.'
 navigate_project_directory: 'Navegue até ao diretório do container de destino'
+generate_chain_pem: 'Reconstruir o ficheiro chain.pem com o certificado de cliente renovado e a respetiva cadeia de CAs da WBA.'
