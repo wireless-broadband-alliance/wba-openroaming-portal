@@ -8,7 +8,7 @@ NAI_REALM: 'The realm used for Network Access Identifier (NAI)'
 RADIUS_TRUSTED_ROOT_CA_SHA1_HASH: "The SHA1 hash of your RADIUS server's trusted root CA (Defaults to LetsEncrypt CA)"
 PLATFORM_MODE: 'Live || Demo. When demo, only "demo login" is displayed, and SAML and other login methods are disabled regardless of other settings. A demo warning will also be displayed.'
 API_STATUS: 'Defines whether the API is enabled or disabled.'
-LOGIN_WITH_UUID_ONLY: 'Defines whether authentication is performed using a confirmation code sent to the user or a tradicional uuid & password. This feature when is set to "OFF" will send a reset password email for all the users portal accounts.'
+LOGIN_WITH_UUID_ONLY: 'Defines whether authentication is performed using a confirmation code sent to the user or a tradicional uuid & password.'
 USER_VERIFICATION: "ON || OFF. When it's ON it activates the verification system. This system requires all the users to verify is own account before they download any profile"
 TURNSTILE_CHECKER: 'The Turnstile checker is a validation step to between genuine users and bots. This can be used in Live or Demo modes.'
 TWO_FACTOR_AUTH_STATUS: 'The status of two factor authentication when users log in to the platform'
