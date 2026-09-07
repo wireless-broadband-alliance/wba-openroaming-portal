@@ -14,13 +14,11 @@ use App\Repository\InstallationProgressRepository;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\InstallationService;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
-use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[AsEventListener(event: InteractiveLoginEvent::class)]
@@ -98,7 +96,6 @@ readonly class FirstSystemResetRequestListener
 
         $completedCertificates = $this->certificateSetupProcessRepository->getLatestProcess();
         if (!$completedCertificates instanceof CertificateSetupProcess) {
-            $session->set('2fa_verified_dashboard', true);
             $session->set(
                 SessionStatus::SYSTEM_RESET_REQUEST->value,
                 'admin_dashboard_settings_certs_radsecproxy_upload'
@@ -117,7 +114,6 @@ readonly class FirstSystemResetRequestListener
         }
 
         if ($completedCertificates->getFreeradiusTestResult() !== CertificateTestResult::PASSED) {
-            $session->set('2fa_verified_dashboard', true);
             $session->set(
                 SessionStatus::SYSTEM_RESET_REQUEST->value,
                 'admin_dashboard_settings_certs_radsecproxy_upload'
@@ -138,6 +134,7 @@ readonly class FirstSystemResetRequestListener
         // All checks are valid, remove session flags
         $session->remove(SessionStatus::INSTALLATION_STARTED->value);
         $session->remove(SessionStatus::CERTIFICATE_STARTED->value);
+        $session->remove('2fa_verified_dashboard'); // force re-check now that installation is done
     }
 
     /**
@@ -146,21 +143,16 @@ readonly class FirstSystemResetRequestListener
     private function handleRedirect(
         InteractiveLoginEvent $event,
         SessionInterface $session,
-        string $flashMessage,
+        string $message,
         string $routeName
     ): void {
-        // All checks are valid, remove session flags
+        // Add the translated message to the flash bag
+        $event->getRequest()->getSession()->getFlashBag()->add('danger', $message);
+
         $session->set(SessionStatus::INSTALLATION_STARTED->value, true);
         $session->set(SessionStatus::INSTALLATION_VERIFICATION->value, true);
         $session->set(SessionStatus::CERTIFICATE_STARTED->value, true);
         $session->set(SessionStatus::CERTIFICATE_VERIFICATION->value, true);
-        if ($session instanceof Session) {
-            $session->getFlashBag()->add('success', $flashMessage);
-        } else {
-            /** @var FlashBagInterface $flashBag */
-            $flashBag = $event->getRequest()->getSession()->getBag('flashes');
-            $flashBag->add('success', $flashMessage);
-        }
 
         $url = $this->urlGenerator->generate($routeName);
         $response = new RedirectResponse($url);

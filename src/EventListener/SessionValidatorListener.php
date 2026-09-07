@@ -11,7 +11,6 @@ use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use App\Service\TwoFAService;
-use DateTime;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -31,7 +30,7 @@ readonly class SessionValidatorListener
     ) {
     }
 
-    #[AsEventListener(event: KernelEvents::REQUEST)]
+    #[AsEventListener(event: KernelEvents::REQUEST, priority: 10)]
     public function onKernelRequest(RequestEvent $event): void
     {
         $this->getSettings->getSettings();
@@ -51,7 +50,9 @@ readonly class SessionValidatorListener
         }
 
         // If there is a system reset request in progress, skip all dashboard validation
-        if ($session->has(SessionStatus::SYSTEM_RESET_REQUEST->value)) {
+        if ($session->get(
+                SessionStatus::SYSTEM_RESET_REQUEST->value
+            ) === 'admin_dashboard_settings_certs_installation') {
             return;
         }
 
@@ -122,16 +123,17 @@ readonly class SessionValidatorListener
                     $url = $this->router->generate('app_landing');
                 }
                 $event->setResponse(new RedirectResponse($url));
+                return;
             }
             if (
                 $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value
             ) {
                 $url = $this->router->generate('app_configure2FA', ['context' => FirewallType::DASHBOARD->value]);
                 $event->setResponse(new RedirectResponse($url));
+                return;
             }
             if (
                 !$this->twoFAService->hasValidOTPCodes($user) &&
-                $user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value &&
                 $user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::BYPASS->value
             ) {
                 $url = $this->router->generate('app_otpCodes', ['context' => FirewallType::DASHBOARD->value]);

@@ -866,10 +866,7 @@ class TwoFAController extends AbstractController
         $session = $request->getSession();
         $route = $session->get(SessionStatus::SYSTEM_RESET_REQUEST->value) ?? '';
 
-        if ($route && $session->get(SessionStatus::INSTALLATION_STARTED->value) === true) {
-            return $this->redirectToRoute($route);
-        }
-        if ($route && $session->get(SessionStatus::CERTIFICATE_STARTED->value) === true) {
+        if ($route === 'admin_dashboard_settings_certs_installation') {
             return $this->redirectToRoute($route);
         }
 
