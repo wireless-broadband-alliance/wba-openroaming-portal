@@ -242,7 +242,7 @@ class InstallationController extends AbstractController
         if ($lastInstallation instanceof InstallationProgress) {
             $step = $this->installationService->getStep($lastInstallation);
             if ($step === InstallationStep::DATABASE->value) {
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
             }
             if ($step === InstallationStep::SETTINGS->value) {
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
@@ -381,7 +381,7 @@ class InstallationController extends AbstractController
         if ($lastInstallation instanceof InstallationProgress) {
             $step = $this->installationService->getStep($lastInstallation);
             if ($step === InstallationStep::DATABASE->value) {
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
             }
             if ($step === InstallationStep::SETTINGS->value) {
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
@@ -633,7 +633,7 @@ class InstallationController extends AbstractController
         if ($lastInstallation instanceof InstallationProgress) {
             $step = $this->installationService->getStep($lastInstallation);
             if ($step === InstallationStep::DATABASE->value) {
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
             }
             if ($step === InstallationStep::SETTINGS->value) {
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
@@ -699,7 +699,7 @@ class InstallationController extends AbstractController
         if ($lastInstallation instanceof InstallationProgress) {
             $step = $this->installationService->getStep($lastInstallation);
             if ($step === InstallationStep::DATABASE->value) {
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
             }
             if ($step === InstallationStep::SETTINGS->value) {
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
@@ -784,7 +784,7 @@ class InstallationController extends AbstractController
         if ($lastInstallation instanceof InstallationProgress) {
             $step = $this->installationService->getStep($lastInstallation);
             if ($step === InstallationStep::DATABASE->value) {
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
             }
             if ($step === InstallationStep::SETTINGS->value) {
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
