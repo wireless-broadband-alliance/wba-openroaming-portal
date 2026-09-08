@@ -88,11 +88,14 @@ class SiteController extends AbstractController
         $currentUser = $this->getUser();
         $session = $request->getSession();
 
+        $userExternalAuths = [];
+
         // Check if the user_verification setting is active
         if ($currentUser && $data[SettingName::USER_VERIFICATION->value]["value"] === OperationMode::ON->value) {
             // Retrieve the cookie about SAML_ACCOUNT Deletion from the request
             $previousLoggedID = (int)$request->cookies->get('previousLoggedID');
             $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
+
             if ($previousLoggedID && $previousLoggedID === $currentUser->getId()) {
                 // Notify the user before their data is wiped
                 try {
@@ -131,9 +134,11 @@ class SiteController extends AbstractController
             if ($currentUser->getDeletedAt()) {
                 return $this->redirectToRoute('app_logout');
             }
+
             // Check if the user is verified
             if (
                 $data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === 'false' &&
+                !empty($userExternalAuths) &&
                 $userExternalAuths[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value &&
                 !$session->has('session_verified')
             ) {
@@ -171,9 +176,11 @@ class SiteController extends AbstractController
                 );
                 return $this->redirectToRoute('app_login_confirmation');
             }
+
             if (
                 $data[SettingName::LOGIN_WITH_UUID_ONLY->value]["value"] === 'true' ||
-                $currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value
+                (!empty($currentUser->getUserExternalAuths()) && $currentUser->getUserExternalAuths()[0]->getProvider(
+                    ) !== UserProvider::PORTAL_ACCOUNT->value)
             ) {
                 // Checks the 2FA status of the platform if mandatory and force the user to configure it
                 if (
@@ -230,7 +237,7 @@ class SiteController extends AbstractController
 
         // Check if the current user has a provider
         $externalAuthsData = [];
-        if (!empty($userExternalAuths)) {
+        if (!empty($userExternalAuths) && $currentUser) {
             // Populate the externalAuthsData array
             foreach ($userExternalAuths as $userExternalAuth) {
                 $externalAuthsData[$currentUser->getId()][] = [
@@ -267,11 +274,9 @@ class SiteController extends AbstractController
                             return $this->redirectToRoute('app_landing');
                         }
                     }
+
                     if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
-                        $this->addFlash(
-                            'error',
-                            $this->translator->trans('selectOperatingSystem', [], 'controllers')
-                        );
+                        $this->addFlash('error', $this->translator->trans('selectOperatingSystem', [], 'controllers'));
                     }
 
                     $userAuths = new UserExternalAuth();
@@ -280,26 +285,21 @@ class SiteController extends AbstractController
                     $user->setEmail($user->getEmail());
                     $user->setCreatedAt(new DateTime());
                     $user->setPassword(
-                        $this->userPasswordEncoder->hashPassword(
-                            $user,
-                            uniqid("", true)
-                        )
+                        $this->userPasswordEncoder->hashPassword($user, uniqid("", true))
                     );
                     $user->setUuid(
-                        str_replace(
-                            '@',
-                            "-DEMO-" .
-                            uniqid("", true) .
-                            "-",
-                            $user->getEmail()
-                        )
+                        str_replace('@', "-DEMO-" . uniqid("", true) . "-", $user->getEmail())
                     );
                     $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
                     $userAuths->setProviderId(UserProvider::EMAIL->value);
                     $userAuths->setUser($user);
+
+                    // Save user and auth record to DB
                     $entityManager->persist($user);
                     $entityManager->persist($userAuths);
-                    // Defines the Event to the table
+                    $entityManager->flush();
+
+                    // Defines the Event
                     $eventMetadata = [
                         EventMetadataKeysType::IP->value => $request->getClientIp(),
                         EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
@@ -320,8 +320,9 @@ class SiteController extends AbstractController
                         $request
                     );
 
+                    // Redirect to landing so the top verification guard handles code generation single-handedly
                     if ($data[SettingName::USER_VERIFICATION->value]['value'] === OperationMode::ON->value) {
-                        return $this->redirectToRoute('app_login_confirmation');
+                        return $this->redirectToRoute('app_landing');
                     }
 
                     if ($data[SettingName::USER_VERIFICATION->value]['value'] === OperationMode::OFF->value) {
