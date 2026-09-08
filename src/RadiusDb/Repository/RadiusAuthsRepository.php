@@ -81,4 +81,35 @@ class RadiusAuthsRepository extends ServiceEntityRepository
 
         return $flattened;
     }
+
+    /**
+     * @return list<array<string, mixed>>
+     * @throws Exception
+     */
+    public function getAuthCountsByDayAndReply(DateTime $start, DateTime $end, string $bucket = 'day'): array
+    {
+        $expr = $this->bucketExpr($bucket);
+
+        $sql = "SELECT $expr AS bucket, reply, COUNT(*) AS cnt
+            FROM radpostauth
+            WHERE authdate BETWEEN :start AND :end
+            GROUP BY bucket, reply
+            ORDER BY bucket";
+
+        return $this->getEntityManager()->getConnection()->fetchAllAssociative($sql, [
+            'start' => $start->format('Y-m-d H:i:s'),
+            'end' => $end->format('Y-m-d H:i:s'),
+        ]);
+    }
+
+    private function bucketExpr(string $bucket): string
+    {
+        return match ($bucket) {
+            'hour' => "DATE_FORMAT(authdate, '%Y-%m-%d %H:00:00')",
+            'week' => "DATE(DATE_SUB(authdate, INTERVAL WEEKDAY(authdate) DAY))",
+            'month' => "DATE_FORMAT(authdate, '%Y-%m-01')",
+            'year' => "DATE_FORMAT(authdate, '%Y-01-01')",
+            default => "DATE(authdate)",
+        };
+    }
 }

@@ -24,7 +24,8 @@
     {% if exportFreeradiusStatistics === true %}
         <div class="flex justify-start">
             <a href="{{ path('admin_dashboard_statistics_freeradius_export', {startDate: selectedStartDate, endDate: selectedEndDate}) }}"
-               onclick="return confirm('...')"
+               data-confirm="{{ 'confirmExportFreeradiusStatistics'|trans({}, 'freeradius_statistics') }}"
+               data-download="true"
                class="btn-primary">
                 {{ 'exportStatistics'|trans({}, 'freeradius_statistics') }}
             </a>
@@ -39,7 +40,12 @@
     {# Authentication Attempts #}
     <div class="w-full bg-white rounded-lg px-5 py-4 flex flex-col gap-4 shadow">
         <div class="flex flex-row justify-between items-start">
-            <h1 class="text-lg font-medium">{{ 'authenticationAttempts'|trans({}, 'freeradius_statistics') }}</h1>
+            <div class="flex items-center gap-2">
+                <h1 class="text-lg font-medium">{{ 'authenticationAttempts'|trans({}, 'freeradius_statistics') }}</h1>
+                <span class="text-xs text-gray-400">
+                    ({{ 'groupedBy'|trans({'%bucket%': ('bucket.' ~ bucketGranularity)|trans({}, 'freeradius_statistics')}, 'freeradius_statistics') }})
+                </span>
+            </div>
             <div class="flex gap-8 text-sm">
                 <div class="flex flex-col items-start border-l border-gray-200 pl-4">
                     <span class="text-gray-400 text-xs">{{ 'accepted'|trans({}, 'freeradius_statistics') }}</span>
@@ -217,18 +223,21 @@
             }) }}
         </div>
 
-        <div class="flex items-center gap-3">
-            {% if totalCurrentAuths >= 1 %}
-                <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                    <twig:ux:icon class="w-6 text-[#7DB928]" name="wba:security-check-ok" />
-                </div>
-                <span class="text-lg font-bold text-[#7DB928]">{{ totalCurrentAuths }}</span>
-            {% else %}
-                <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                    <twig:ux:icon class="w-6 text-red-500" name="wba:security-check-error" />
-                </div>
-                <span class="text-sm font-medium text-red-500">{{ 'noDataAvailable'|trans({}, 'freeradius_statistics') }}</span>
-            {% endif %}
+        {# Content Wrapper with justify-between to align the button #}
+        <div class="flex items-center justify-between mt-4">
+            <div class="flex items-center gap-3">
+                {% if totalCurrentAuths >= 1 %}
+                    <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                        <twig:ux:icon class="w-6 text-[#7DB928]" name="wba:security-check-ok" />
+                    </div>
+                    <span class="text-lg font-bold text-[#7DB928]">{{ totalCurrentAuths }}</span>
+                {% else %}
+                    <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                        <twig:ux:icon class="w-6 text-red-500" name="wba:security-check-error" />
+                    </div>
+                    <span class="text-sm font-medium text-red-500">{{ 'noDataAvailable'|trans({}, 'freeradius_statistics') }}</span>
+                {% endif %}
+            </div>
         </div>
     </div>
 
