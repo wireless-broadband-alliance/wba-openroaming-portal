@@ -565,13 +565,13 @@ class InstallationController extends AbstractController
         if ($lastInstallation instanceof InstallationProgress) {
             $step = $this->installationService->getStep($lastInstallation);
             if ($step === InstallationStep::DATABASE->value) {
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
             }
             if ($step === InstallationStep::SETTINGS->value) {
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
             }
-            if ($step === InstallationStep::ADMIN->value && !($lastInstallation->getEmailAdmin())) {
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
+            if ($step === InstallationStep::COMMAND->value) {
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_command');
             }
         } else {
             return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
