@@ -88,6 +88,7 @@ These are some of the most important tools used on the development of this proje
 - Radius DB and a stack IDP prepared to use the portal
 - Docker (required for running the application)
 - Docker compose (responsible for managing multiple containers)
+- Reverse Proxy / Load Balancer with SSL Offloading (The portal expects HTTPS traffic to be terminated by an SSL offloading load balancer forwarding HTTP requests on port 80 with standard `X-Forwarded-*` headers)
 - Git (optional, if the user prefers to clone the repository)
 
 # Support Policy
@@ -277,9 +278,20 @@ Below is an overview of the different variables and their functions:
 - `EXPORT_USERS`: This env manages the operation to export all the **User table** content, this is disabled by default
   for legal and security reasons.
 - `EXPORT_FREERADIUS_STATISTICS`: Manages the export of FreeRADIUS statistics from the admin page.
+- `SENTRY_DSN`: Error tracking DSN configuration for monitoring application exceptions in production.
+- `TRUSTED_PROXIES`: Comma-separated list of IP addresses or CIDR blocks of your SSL offloading load balancer / reverse proxy (e.g., `192.0.0.1,10.0.0.0/8`). Critical for behind-proxy deployments so the application correctly trusts `X-Forwarded-*` headers.
 
-These two envs are for debugging purposes, they only should be used to control and manage reports from the portal.
-`SENTRY_DSN`& `TRUSTED_PROXIES`.
+### SSL Offloading & Reverse Proxy Configuration
+
+The OpenRoaming Provisioning Portal expects to be deployed behind an **SSL offloading load balancer or reverse proxy** (e.g., AWS ALB, Nginx, Cloudflare, HAProxy, Traefik).
+
+- **Traffic Flow**: HTTPS/TLS connections are terminated at the upstream load balancer. Traffic is then forwarded via HTTP to port `80` of the platform web container.
+- **Forwarded Headers Requirement**: The upstream load balancer MUST pass standard `X-Forwarded-*` headers:
+  - `X-Forwarded-Proto`: Set to `https` (required for Symfony HTTPS detection, SAML/OAuth redirect URL generation, and HSTS headers).
+  - `X-Forwarded-For`: Client IP address.
+  - `X-Forwarded-Host`: Original host requested by the client.
+  - `X-Forwarded-Port`: Port requested by the client (typically 443).
+- **Trusted Proxies (`TRUSTED_PROXIES`)**: In your `.env` file, set `TRUSTED_PROXIES` to match the IP address or CIDR range of your SSL offloading load balancer / reverse proxy so Symfony trusts the incoming `X-Forwarded-*` headers.
 
 - `ENABLE_DELETE_USERS_UI`: Shows a button on the UI, to be able to remove users from the
   portal.

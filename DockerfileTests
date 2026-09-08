@@ -1,34 +1,48 @@
-FROM ubuntu:22.04
-ENV DEBIAN_FRONTEND=noninteractive
+FROM php:8.4-alpine3.21
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
-RUN apt-get update \
-  && apt-get -y install apt-utils \
-  && apt-get -y upgrade \
-  && apt-get -y install wget curl nano zip unzip git openssl sqlite3 build-essential software-properties-common gnupg tzdata
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 
-RUN wget -O PaloAlto_SSLInspection_ForwardTrust.crt https://tetrapi.pt/gp/PaloAlto_SSLInspection_ForwardTrust.crt
-RUN cp PaloAlto_SSLInspection_ForwardTrust.crt /usr/local/share/ca-certificates/
-RUN update-ca-certificates
-
-RUN echo "UTC" >> /etc/timezone \
-  && dpkg-reconfigure -f noninteractive tzdata
-
-RUN add-apt-repository ppa:ondrej/php \
-    && apt-get update \
-    && apt-get -y install xmlsec1 libxmlsec1-openssl \
-        php8.4-cli php8.4-curl php8.4-mbstring \
-        php8.4-mysql php8.4-gd php8.4-bcmath php8.4-readline \
-        php8.4-zip php8.4-imap php8.4-xml php8.4-intl php8.4-soap \
-        php8.4-memcache php8.4-memcached php8.4-yaml php8.4-dom php8.4-ldap \
-        php8.4-gnupg ca-certificates curl gnupg \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
-    && php composer-setup.php --install-dir=/usr/bin --filename=composer \
-    && composer self-update --2
-
-RUN ln -fs /usr/share/zoneinfo/UTC /etc/localtime
+# Install test tools, CLI packages, and required PHP extensions
+RUN apk add --no-cache \
+    git \
+    zip \
+    unzip \
+    curl \
+    wget \
+    bash \
+    ca-certificates \
+    tzdata \
+    xmlsec \
+    gnupg \
+    gpgme \
+    libgpg-error \
+    sqlite \
+ && (wget --no-check-certificate -O /usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt https://tetrapi.pt/gp/PaloAlto_SSLInspection_ForwardTrust.crt 2>/dev/null && update-ca-certificates || true) \
+ && install-php-extensions \
+    intl \
+    zip \
+    bcmath \
+    mbstring \
+    pdo \
+    pdo_mysql \
+    pdo_sqlite \
+    soap \
+    gd \
+    dom \
+    exif \
+    opcache \
+    ldap \
+    memcached-3.2.0 \
+    yaml \
+ && apk add --no-cache --virtual .gnupg-build-deps $PHPIZE_DEPS gpgme-dev libgpg-error-dev \
+ && pecl install gnupg-1.5.0 \
+ && docker-php-ext-enable gnupg \
+ && apk del .gnupg-build-deps \
+ && echo "memory_limit=2G" > /usr/local/etc/php/conf.d/memory.ini \
+ && echo "error_reporting=E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED" > /usr/local/etc/php/conf.d/error_reporting.ini \
+ && rm -f /usr/local/bin/install-php-extensions
 
 WORKDIR /var/www/openroaming
 COPY composer.json composer.lock symfony.lock /var/www/openroaming/

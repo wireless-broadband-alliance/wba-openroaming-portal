@@ -26,6 +26,11 @@ readonly class DatabaseConnectionService
 
             $dbname = ltrim($parts['path'], '/');
 
+            $driverOptions = [];
+            if (defined('PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT')) {
+                $driverOptions[\PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
+            }
+
             $connectionParams = [
                 'dbname' => $dbname,
                 'user' => $parts['user'],
@@ -33,6 +38,7 @@ readonly class DatabaseConnectionService
                 'host' => $parts['host'],
                 'port' => $parts['port'] ?? null,
                 'driver' => $this->getDriverFromScheme($parts['scheme']),
+                'driverOptions' => $driverOptions,
             ];
 
             $connection = DriverManager::getConnection($connectionParams);

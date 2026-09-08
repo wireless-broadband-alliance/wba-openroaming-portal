@@ -11,10 +11,23 @@ After you have obtained the project, make sure to update your environment
 variables. A sample file named `.env.sample` is provided in the project root directory. Duplicate the sample file and
 rename it to `.env`. You can then modify the environment variables to match your specific configuration.
 
-**Note**: When updating the database credentials in the `.env` file, make sure they **match the credentials specified in
-the docker-compose.yml** file.
-Failure to match the credentials will result in the application being unable to connect to
-the database.
+**Note**: Setting `MYSQL_ROOT_PASSWORD` and `MYSQL_PASSWORD` in your `.env` file is mandatory. Docker Compose will fail startup immediately if these variables are unset or empty. Additionally, set `SUPERADMIN_PASSWORD` in `.env` before initializing fixtures or super admin user setup.
+
+### **SSL Offloading & Trusted Proxies Configuration**
+
+The OpenRoaming Provisioning Portal is designed and expected to run behind an **SSL Offloading Load Balancer** or **Reverse Proxy** (such as F5, Nginx, Cloudflare, HAProxy, or Traefik).
+
+- **Traffic Termination**: TLS/SSL connections are terminated at the upstream load balancer. The load balancer forwards plain HTTP requests to port `80` of the web container.
+- **Required Headers**: Your upstream load balancer MUST pass the following standard headers:
+  - `X-Forwarded-Proto`: Must be set to `https` for secure requests (essential for Symfony HTTPS scheme detection, SAML/OAuth redirect URL construction, and Nginx HSTS header emission).
+  - `X-Forwarded-For`: Preserves client IP addresses.
+  - `X-Forwarded-Host`: Preserves the requested hostname.
+  - `X-Forwarded-Port`: Preserves the original port (`443`).
+- **Configuring `TRUSTED_PROXIES`**: Set the `TRUSTED_PROXIES` environment variable in `.env` to the IP address(es) or CIDR block(s) of your SSL offloading load balancer / reverse proxy:
+  ```env
+  TRUSTED_PROXIES=10.0.0.0/8,192.168.1.1
+  ```
+  If `TRUSTED_PROXIES` is omitted or misconfigured, Symfony will ignore `X-Forwarded-Proto`, leading to broken HTTPS redirects, invalid authentication callbacks (Google, Microsoft, SAML), and disabled HSTS security headers.
 
 ## 2. **Start Services**
 
