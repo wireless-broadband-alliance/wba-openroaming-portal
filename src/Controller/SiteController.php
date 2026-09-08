@@ -179,17 +179,17 @@ class SiteController extends AbstractController
 
             if (
                 $data[SettingName::LOGIN_WITH_UUID_ONLY->value]["value"] === 'true' ||
-                ($currentUser->getUserExternalAuths() !== null && $currentUser->getUserExternalAuths()[0]->getProvider(
-                ) !== UserProvider::PORTAL_ACCOUNT->value)
+                (!$currentUser->getUserExternalAuths()->isEmpty() && $currentUser->getUserExternalAuths(
+                    )[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value)
             ) {
                 // Checks the 2FA status of the platform if mandatory and force the user to configure it
                 if (
                     $data[SettingName::TWO_FACTOR_AUTH_STATUS->value]['value'] ===
                     TwoFAType::ENFORCED_FOR_LOCAL->value &&
-                    $currentUser->getUserExternalAuths()->get(0)->getProvider() ===
-                    UserProvider::PORTAL_ACCOUNT->value &&
                     $currentUser->getTwoFAType() ===
-                    UserTwoFactorAuthenticationStatus::DISABLED->value
+                    UserTwoFactorAuthenticationStatus::DISABLED->value &&
+                    $currentUser->getUserExternalAuths()->get(0)->getProvider() ===
+                    UserProvider::PORTAL_ACCOUNT->value
                 ) {
                     return $this->redirectToRoute('app_configure2FA');
                 }
