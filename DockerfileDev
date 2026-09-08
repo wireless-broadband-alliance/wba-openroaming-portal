@@ -6,7 +6,8 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 WORKDIR /app
 
 # Install minimal build deps for Composer
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN sed -i '/debian-security/d' /etc/apt/sources.list \
+ && apt-get update && apt-get install -y --no-install-recommends \
     nginx supervisor git zip unzip curl gnupg tzdata wget \
  && rm -rf /var/lib/apt/lists/*
 
@@ -53,7 +54,8 @@ WORKDIR /var/www/openroaming
 ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 
 # Install runtime deps + PHP extensions
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN sed -i '/debian-security/d' /etc/apt/sources.list \
+ && apt-get update && apt-get install -y --no-install-recommends \
     nginx supervisor tzdata xmlsec1 libxmlsec1-openssl ca-certificates \
     libpng-dev libjpeg-dev libfreetype6-dev libsqlite3-dev libicu-dev libzip-dev \
     libonig-dev libxml2-dev libgpgme-dev libgpg-error-dev libmemcached-dev \
