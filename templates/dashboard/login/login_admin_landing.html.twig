@@ -193,7 +193,7 @@
                 </div>
             {% endif %}
 
-            {% if data.AUTH_METHOD_GOOGLE_LOGIN_ENABLED.value == true %}
+            {% if data.AUTH_METHOD_GOOGLE_LOGIN_ENABLED.value == 'true' %}
                 <div class="w-full">
                     <a href="{{ path('connect_google', {type: constant('App\\Enum\\FirewallType::DASHBOARD').value}) }}"
                        class="terms-widget__link"
