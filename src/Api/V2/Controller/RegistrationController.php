@@ -56,14 +56,12 @@ class RegistrationController extends AbstractController
         private readonly EventRepository $eventRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly EventActions $eventActions,
-        private readonly ParameterBagInterface $parameterBag,
         private readonly SendSMS $sendSMSService,
         private readonly SettingRepository $settingRepository,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
         private readonly CaptchaValidator $captchaValidator,
         private readonly EmailGenerator $emailGenerator,
         private readonly ValidatorInterface $validator,
-        private readonly MailerInterface $mailer,
         private readonly PhoneNumberUtil $phoneNumberUtil,
         private readonly UserStatusChecker $userStatusChecker
     ) {

@@ -312,7 +312,7 @@ readonly class EmailGenerator
      */
     private function createBaseEmail(string $recipientEmail): TemplatedEmail
     {
-        return (new TemplatedEmail())
+        return new TemplatedEmail()
             ->from(
                 new Address(
                     $this->parameterBag->get('app.email_address'),
