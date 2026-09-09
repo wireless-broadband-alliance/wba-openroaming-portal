@@ -1,5 +1,27 @@
 # Changelog
 
+# Release V1.13.2
+
+- **Landing Page Authentication Rework**: Refactored landing page authentication buttons, adding dedicated support for
+  Magic Link login alongside traditional authentication methods.
+- **Dashboard UI & Stimulus Fix**: Reworked the Authentication Methods management UI to distinctly separate Traditional
+  Login and Magic Link (UUID-only) configuration.
+- Fix bug with attribute mapping during the cloudflareHttps request certs properties association with the portal. This
+  happens during the certificate management wizard update.
+- Added customizable footer image support with display toggle and improved layout for the Landing Page Configuration.
+- Fix bug where the radsecproxy `chain.pem` was never regenerated after a certificate renewal, causing the old
+  end-entity certificate to keep being served. The certificate management wizard now rebuilds `chain.pem` from the
+  renewed client certificate and the bundled WBA CA chain, and removes the stale file as part of the renewal commands.
+
+Please make sure to execute the new migration to update and use the new required Settings details for this new usage of
+the LOGIN_WITH_UUID_ONLY setting.
+
+- Run the migrations with:
+
+```bash
+  php bin/console doctrine:migrations:migrate
+```
+
 # Release V1.13.1
 
 - Added a toggle to enable/disable the Coverage Map feature from the admin dashboard (Map Settings)

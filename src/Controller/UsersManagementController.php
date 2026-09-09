@@ -708,6 +708,6 @@ class UsersManagementController extends AbstractController
             );
         }
 
-        return $this->redirectToRoute('admin_dashboard_user_edit', ['id' => $user->getId()]);
+        return $this->redirectToRoute('admin_dashboard_user_show', ['id' => $user->getId()]);
     }
 }

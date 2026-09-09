@@ -6,7 +6,6 @@ use App\Entity\User;
 use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
-use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
@@ -22,11 +21,13 @@ use App\Service\UserDeletion\UserDeletionService;
 use DateTime;
 use Doctrine\ORM\Exception\ORMException;
 use libphonenumber\PhoneNumber;
+use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -49,6 +50,7 @@ class UserAccountDeletionController extends AbstractController
     /**
      * @throws \JsonException
      * @throws ORMException
+     * @throws ExceptionInterface
      */
     #[Route('/landing/userAccount/deletion/local', name: 'app_user_account_deletion_local')]
     #[IsGranted('ROLE_USER')]
@@ -59,9 +61,9 @@ class UserAccountDeletionController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        // Check if the local account has a phoneNumber of an email
+        // Check if the local account has a phoneNumber or an email
         if ($currentUser->getPhoneNumber() === null && empty($currentUser->getEmail())) {
-            $this->redirectToRoute('app_landing');
+            return $this->redirectToRoute('app_landing');
         }
 
         if (
@@ -79,8 +81,13 @@ class UserAccountDeletionController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser->getId()]);
-        if ($currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value) {
+        // Query external auths using the User entity instance
+        $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
+
+        if (
+            empty($userExternalAuths) ||
+            $currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value
+        ) {
             $this->addFlash(
                 'error',
                 $this->translator->trans(
@@ -95,7 +102,7 @@ class UserAccountDeletionController extends AbstractController
 
         $loginWithUuidOnly = false;
         if (is_array($data) && isset($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'])) {
-            $loginWithUuidOnly = $data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::ON->value;
+            $loginWithUuidOnly = $data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === 'true';
         }
 
         if (
@@ -134,6 +141,7 @@ class UserAccountDeletionController extends AbstractController
             }
             return $this->redirectToRoute('app_user_account_deletion_local_code');
         }
+
         $form = $this->createForm(AutoDeletePasswordType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -154,9 +162,19 @@ class UserAccountDeletionController extends AbstractController
                     // non-fatal — deletion continues regardless
                 }
 
-                $this->userDeletionService->deleteUser($currentUser, $userExternalAuths, $request, $currentUser);
+                $result = $this->userDeletionService->deleteUser(
+                    $currentUser,
+                    $userExternalAuths,
+                    $request,
+                    $currentUser
+                );
 
-                return $this->redirectToRoute('app_landing');
+                if (isset($result['success']) && $result['success'] !== true) {
+                    throw new RuntimeException($result['message'] ?? 'Deletion failed');
+                }
+
+                // Redirect to logout route to destroy session and security token
+                return $this->redirectToRoute('app_logout');
             }
 
             $this->addFlash(

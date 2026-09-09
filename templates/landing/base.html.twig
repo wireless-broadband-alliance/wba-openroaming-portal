@@ -7,12 +7,12 @@
 {% block body %}
     <div class="flex flex-col xl:flex-row xl:h-screen">
         {# Fixed First Section #}
-        <div class="w-full xl:w-1/2 h-screen bg-center bg-cover"
-             style="background-image: url('/resources/images/background.png');">
+        <div class="w-full xl:w-1/2 h-screen bg-center bg-cover">
             <div class="w-full h-full p-8 xl:pl-[130px] xl:pr-[150px] xl:pt-[210px] bg-center bg-cover"
-                 style="background-image: url('{{ data.WALLPAPER_IMAGE.value }}');">
+                 style="background-image: url('{{ asset(data.WALLPAPER_IMAGE.value) }}');">
                 <div class="h-full w-full flex flex-col">
-                    <img class="w-96 max-w-full" src="{{ data.OPENROAMING_LOGO.value }}" alt="OpenRoaming Logo"/>
+                    <img class="w-96 max-w-full" src="{{ asset(data.OPENROAMING_LOGO.value) }}"
+                         alt="OpenRoaming Logo" />
                     <div class="text-5xl font-segoe text-white mt-[55px] font-bold break-words">
                         {{ data.WELCOME_TEXT.value|raw }}
                     </div>
@@ -58,6 +58,9 @@
 
             {% block second_col %}
             {% endblock %}
+
+            {# Footer Banner Bar - Displays only when FOOTER_IMAGE_ENABLED is ON / true #}
+            {{ include('shared/_footer_landing.html.twig') }}
 
             {# Cookie Banner #}
             {% block cookie %}

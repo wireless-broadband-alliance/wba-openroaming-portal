@@ -102,8 +102,16 @@ class SecurityController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::ON->value) {
-            return $this->redirectToRoute('app_login_magic');
+        if ($data[SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value]['value'] !== 'true') {
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'authenticationMethodNotEnabled',
+                    [],
+                    'controllers'
+                )
+            );
+            return $this->redirectToRoute('app_landing');
         }
 
         // Last username entered by the user (this will be empty if the user clicked the verification link)
@@ -190,8 +198,16 @@ class SecurityController extends AbstractController
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
-        if ($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::OFF->value) {
-            return $this->redirectToRoute('app_login');
+        if ($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] !== 'true') {
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'authenticationMethodNotEnabled',
+                    [],
+                    'controllers'
+                )
+            );
+            return $this->redirectToRoute('app_landing');
         }
 
         $loginChoiceDTO = new LoginChoiceDTO();
@@ -571,7 +587,6 @@ class SecurityController extends AbstractController
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
-
 
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
 

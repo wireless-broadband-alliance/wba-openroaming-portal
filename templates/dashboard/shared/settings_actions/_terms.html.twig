@@ -14,7 +14,7 @@
                 {% for setting in form %}
                     {# Display only the terms and conditions settings #}
                     {% if setting.vars.name in ['TOS', 'TOS_LINK', 'TOS_EDITOR'] %}
-                        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full
+                        <div class="transition bg-white rounded-md p-6 w-full
                             {% if setting.vars.name in ['TOS_LINK'] %} {{ form.TOS.vars.data == 'LINK' ? '' : 'hidden' }}{% endif %}
                             {% if setting.vars.name in ['TOS_EDITOR'] %} {{ form.TOS.vars.data == 'TEXT_EDITOR' ? '' : 'hidden' }}{% endif %}"
 
@@ -111,7 +111,7 @@
                 {% for setting in form %}
                     {# Display only the terms and conditions settings #}
                     {% if setting.vars.name in ['PRIVACY_POLICY', 'PRIVACY_POLICY_LINK', 'PRIVACY_POLICY_EDITOR'] %}
-                        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full
+                        <div class="transition bg-white rounded-md p-6 w-full
                             {% if setting.vars.name in ['PRIVACY_POLICY_LINK'] %} {{ form.PRIVACY_POLICY.vars.data == 'LINK' ? '' : 'hidden' }}{% endif %}
                             {% if setting.vars.name in ['PRIVACY_POLICY_EDITOR'] %} {{ form.PRIVACY_POLICY.vars.data == 'TEXT_EDITOR' ? '' : 'hidden' }}{% endif %}"
 

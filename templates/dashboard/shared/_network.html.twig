@@ -1,4 +1,7 @@
 {# Table Content - Network #}
+{% set itemClass = 'flex flex-row items-center px-3 py-2 rounded-md duration-100 cursor-pointer hover:bg-gray-50 hover:text-lightGreen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lightGreen/50' %}
+{% set dangerItemClass = 'flex flex-row items-center px-3 py-2 rounded-md duration-100 cursor-pointer hover:bg-red-50 hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/50' %}
+
 <tr class="font-medium">
 
     {# Name #}
@@ -20,7 +23,7 @@
         {% endif %}
     </td>
 
-    {# Created At #}
+    {# Updated At #}
     <td class="p-4 pl-8">
         {% if network.updatedAt %}
             {{ network.updatedAt|date('d/m/Y H:i') }}
@@ -31,40 +34,44 @@
 
     {# Actions Buttons #}
     <td class="px-10 py-4 text-right" {{ stimulus_controller('nav-submenu') }}>
-        <button type="button" class="cursor-pointer p-2 rounded-lg hover:shadow duration-300"
+        <button type="button" class="cursor-pointer p-2 rounded-lg hover:bg-gray-100 duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lightGreen/50"
                 {{ stimulus_action('nav-submenu', 'toggle')|stimulus_action('nav-submenu', 'lost_focus', 'focusout') }}
                 {{ stimulus_target('nav-submenu', 'button') }}>
             <twig:ux:icon name="wba:menu-dots" class="w-5 h-5 fill-current"/>
         </button>
 
         {# Items List Dropdown #}
-        <div class="hidden bg-white divide-y divide-gray-100 rounded-lg shadow min-w-max absolute right-16 mt-2 z-16"
+        <div class="hidden bg-white divide-y divide-gray-100 rounded-lg shadow min-w-max absolute right-16 mt-2 z-16 text-left border border-gray-100"
                 {{ stimulus_target('nav-submenu', 'container') }}>
-            <ul class="p-2 text-gray-700 gap-y-2">
+            <ul class="p-2 text-gray-700 space-y-1 w-56">
                 <li>
                     <a href="{{ path('admin_dashboard_map_network_accessPoints', {id: network.id}) }}"
-                       class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
-                        <twig:ux:icon name="wba:wifi" class="w-5 mr-3 fill-none stroke-current"/>
+                       class="{{ itemClass }}">
+                        <twig:ux:icon name="wba:wifi" class="w-5 h-5 mr-3 shrink-0 fill-none stroke-current"/>
                         {{ 'accessPoints'|trans({}, '_network') }}
                     </a>
                 </li>
+
                 {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::MAP_WRITE')) %}
+                    <li><hr class="my-1 border-gray-100"></li>
+
                     <li>
-                    <a href="{{ path('admin_dashboard_map_network_edit', {id: network.id}) }}"
-                       class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
-                        <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3 fill-none stroke-current" />
-                        {{ 'edit'|trans({}, '_network') }}
-                    </a>
-                </li>
-                {% endif %}
-                {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::MAP_WRITE')) %}
+                        <a href="{{ path('admin_dashboard_map_network_edit', {id: network.id}) }}"
+                           class="{{ itemClass }}">
+                            <twig:ux:icon name="wba:pencil-edit" class="w-5 h-5 mr-3 shrink-0 fill-none stroke-current" />
+                            {{ 'edit'|trans({}, '_network') }}
+                        </a>
+                    </li>
+
+                    <li><hr class="my-1 border-gray-100"></li>
+
                     <li>
-                    <a href="{{ path('admin_dashboard_map_network_delete', {id: network.id}) }}"
-                       class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-red-400">
-                        <twig:ux:icon name="wba:trash" class="w-5 mr-3 fill-none stroke-current"/>
-                        {{ 'delete'|trans({}, '_network') }}
-                    </a>
-                </li>
+                        <a href="{{ path('admin_dashboard_map_network_delete', {id: network.id}) }}"
+                           class="{{ dangerItemClass }}">
+                            <twig:ux:icon name="wba:trash" class="w-5 h-5 mr-3 shrink-0 fill-none stroke-current"/>
+                            {{ 'delete'|trans({}, '_network') }}
+                        </a>
+                    </li>
                 {% endif %}
             </ul>
         </div>

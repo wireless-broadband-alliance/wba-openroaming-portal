@@ -3,14 +3,13 @@
 namespace App\Service;
 
 use App\DTO\InstallationProgressDTO;
-use App\Entity\CertificateSetupProcess;
 use App\Entity\InstallationProgress;
 use App\Entity\User;
 use App\Enum\DataBaseSetupType;
 use App\Enum\DefaultUser;
-use App\Enum\EnvSettingsNameType;
 use App\Enum\InstallationStep;
 use App\Enum\InstallationWidgetStepsEnum;
+use App\Enum\OperationMode;
 use App\Enum\ProcessStatusType;
 use App\Enum\SettingName;
 use App\Enum\SettingsConfigType;
@@ -179,7 +178,6 @@ readonly class InstallationService
         return $status;
     }
 
-
     /**
      * @throws RandomException
      * @throws TransportExceptionInterface
@@ -192,15 +190,26 @@ readonly class InstallationService
         $this->entityManager->persist($installationProgress);
         $this->entityManager->flush();
 
-        $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
-        $contactEmail = $this->settingRepository->findOneBy([
-            'name' => SettingName::CONTACT_EMAIL->value,
-        ])->getValue();
-        $customerLogo = $this->settingRepository->findOneBy([
-            'name' => SettingName::CUSTOMER_LOGO->value,
-        ])->getValue();
+        $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])?->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])?->getValue();
+        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])?->getValue();
+        $footerImageEnabledSetting = $this->settingRepository->findOneBy(
+            ['name' => SettingName::FOOTER_IMAGE_ENABLED->value]
+        )?->getValue();
+        $footerImageSetting = $this->settingRepository->findOneBy(
+            ['name' => SettingName::FOOTER_IMAGE->value]
+        )?->getValue();
+
         $projectDir = $this->parameterBag->get('kernel.project_dir');
-        $logoPath = $projectDir . '/public' . $customerLogo;
+
+        // Logo file check
+        $logoPath = !empty($customerLogo) ? $projectDir . '/public' . $customerLogo : null;
+        $hasLogo = $logoPath && file_exists($logoPath);
+
+        // Footer Banner file check
+        $isFooterEnabled = ($footerImageEnabledSetting === OperationMode::ON->value) && !empty($footerImageSetting);
+        $footerPath = $isFooterEnabled ? $projectDir . '/public' . $footerImageSetting : null;
+        $hasFooter = $isFooterEnabled && $footerPath && file_exists($footerPath);
 
         $email = new TemplatedEmail()
             ->from(
@@ -217,47 +226,16 @@ readonly class InstallationService
                 'emailTitle' => $emailTitle,
                 'contactEmail' => $contactEmail,
                 'code' => $verificationCode,
-            ])
-            ->embedFromPath($logoPath, 'logo_cid');
+                'footerImageEnabled' => $hasFooter,
+            ]);
 
-        $this->mailer->send($email);
-    }
+        if ($hasLogo) {
+            $email->embedFromPath($logoPath, 'logo_cid');
+        }
 
-    public function sendAdminVerificationCode(User $user): void
-    {
-        $verificationCode = (string)random_int(100000, 999999);
-        $user->setTwoFAcode($verificationCode);
-        $user->setTwoFAcodeGeneratedAt(new DateTime());
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
-
-        $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
-        $contactEmail = $this->settingRepository->findOneBy([
-            'name' => SettingName::CONTACT_EMAIL->value,
-        ])->getValue();
-        $customerLogo = $this->settingRepository->findOneBy([
-            'name' => SettingName::CUSTOMER_LOGO->value,
-        ])->getValue();
-        $projectDir = $this->parameterBag->get('kernel.project_dir');
-        $logoPath = $projectDir . '/public' . $customerLogo;
-
-        $email = new TemplatedEmail()
-            ->from(
-                new Address(
-                    $this->parameterBag->get('app.email_address'),
-                    $this->parameterBag->get('app.sender_name')
-                )
-            )
-            ->to($user->getEmail())
-            ->subject($this->translator->trans('adminIdentityVerification', [], 'InstallationService'))
-            ->htmlTemplate('email/installation_entity_verification.html.twig')
-            ->context([
-                'uuid' => $user->getUuid(),
-                'emailTitle' => $emailTitle,
-                'contactEmail' => $contactEmail,
-                'code' => $verificationCode,
-            ])
-            ->embedFromPath($logoPath, 'logo_cid');
+        if ($hasFooter) {
+            $email->embedFromPath($footerPath, 'footer_cid');
+        }
 
         $this->mailer->send($email);
     }

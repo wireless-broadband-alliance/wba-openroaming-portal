@@ -8,7 +8,7 @@
 
     <div class="p-2 z-0" {{ stimulus_controller('radio-card') }}>
         {# TWO_FACTOR_AUTH_STATUS #}
-        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
+        <div class="transition bg-white rounded-md p-6 w-full"
              name="statusCards"
                 {{ stimulus_controller('radio card three-options_radio') }}>
 
@@ -76,7 +76,7 @@
 
     <div class="grid gap-4 lg:grid-cols-2 p-2 z-0" {{ stimulus_controller('radio-card') }}>
         {# TWO_FACTOR_AUTH_APP_LABEL #}
-        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
+        <div class="transition bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
             <div class="flex flex-row justify-between">
                 <div class="text-base font-medium text-center break-normal md:break-all">
                     <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'TOTPAppLabel'|trans({}, '_twoFA') }}</h1>
@@ -98,7 +98,7 @@
         </div>
 
         {# TWO_FACTOR_AUTH_APP_ISSUER #}
-        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
+        <div class="transition bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
             <div class="flex flex-row justify-between">
                 <div class="text-base font-medium text-center break-normal md:break-all">
                     <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'TOTPAppIssuer'|trans({}, '_twoFA') }}</h1>
@@ -120,7 +120,7 @@
         </div>
 
         {# TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME #}
-        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
+        <div class="transition bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
             <div class="flex flex-row justify-between">
                 <div class="text-base font-medium text-center break-normal md:break-all">
                     <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'expirationTime'|trans({}, '_twoFA') }}</h1>
@@ -142,7 +142,7 @@
         </div>
 
         {# TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE #}
-        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
+        <div class="transition bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
             <div class="flex flex-row justify-between">
                 <div class="text-base font-medium text-center break-normal md:break-all">
                     <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'resendAttemptsCount'|trans({}, '_twoFA') }}</h1>
@@ -164,7 +164,7 @@
         </div>
 
         {# TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS #}
-        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
+        <div class="transition bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
             <div class="flex flex-row justify-between">
                 <div class="text-base font-medium text-center break-normal md:break-all">
                     <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'timeToResetAttempts'|trans({}, '_twoFA') }}</h1>
@@ -186,7 +186,7 @@
         </div>
 
         {# TWO_FACTOR_AUTH_RESEND_INTERVAL #}
-        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
+        <div class="transition bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
             <div class="flex flex-row justify-between">
                 <div class="text-base font-medium text-center break-normal md:break-all">
                     <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'timeIntervalToResend'|trans({}, '_twoFA') }}</h1>

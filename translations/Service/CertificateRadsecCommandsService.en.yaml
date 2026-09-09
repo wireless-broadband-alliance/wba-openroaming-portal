@@ -8,3 +8,4 @@ rebuild_and_start_container: 'Rebuild the radsecproxy image without using cache 
 verify_container: 'Verify that the radsecproxy container is running.'
 check_logs: 'Check the latest radsecproxy logs to confirm successful startup.'
 navigate_project_directory: 'Navigate to the target container directory'
+generate_chain_pem: 'Rebuild chain.pem using the renewed client certificate and the bundled WBA CA chain.'

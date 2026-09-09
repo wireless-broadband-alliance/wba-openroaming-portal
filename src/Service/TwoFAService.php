@@ -7,7 +7,7 @@ use App\Entity\OTPcode;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
-use App\Enum\PlatformMode;
+use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Enum\TwoFAType;
 use App\Enum\UserProvider;
@@ -179,21 +179,38 @@ readonly class TwoFAService
         $secondsLeft = $this->settingRepository->findOneBy(
             ['name' => SettingName::TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME->value]
         )->getValue();
-        if ($messageType === UserTwoFactorAuthenticationStatus::EMAIL->value || $user->getEmail()) {
-            $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
-            $contactEmail = $this->settingRepository->findOneBy([
-                'name' => SettingName::CONTACT_EMAIL->value
-            ])->getValue();
-            $supportTeam = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
-            $customerLogo = $this->settingRepository->findOneBy([
-                'name' => SettingName::CUSTOMER_LOGO->value
-            ])->getValue();
-            $projectDir = $this->parameterBag->get('kernel.project_dir');
-            $logoPath = $projectDir . '/public' . $customerLogo;
 
-            if (
-                $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
-            ) {
+        if ($messageType === UserTwoFactorAuthenticationStatus::EMAIL->value || $user->getEmail()) {
+            $emailTitle = $this->settingRepository->findOneBy(
+                ['name' => SettingName::PAGE_TITLE->value]
+            )?->getValue();
+            $contactEmail = $this->settingRepository->findOneBy(
+                ['name' => SettingName::CONTACT_EMAIL->value]
+            )?->getValue();
+            $supportTeam = $emailTitle;
+
+            $customerLogo = $this->settingRepository->findOneBy(
+                ['name' => SettingName::CUSTOMER_LOGO->value]
+            )?->getValue();
+            $footerImageEnabledSetting = $this->settingRepository->findOneBy(
+                ['name' => SettingName::FOOTER_IMAGE_ENABLED->value]
+            )?->getValue();
+            $footerImageSetting = $this->settingRepository->findOneBy(
+                ['name' => SettingName::FOOTER_IMAGE->value]
+            )?->getValue();
+
+            $projectDir = $this->parameterBag->get('kernel.project_dir');
+
+            // Logo file check
+            $logoPath = !empty($customerLogo) ? $projectDir . '/public' . $customerLogo : null;
+            $hasLogo = $logoPath && file_exists($logoPath);
+
+            // Footer Banner file check
+            $isFooterEnabled = ($footerImageEnabledSetting === OperationMode::ON->value) && !empty($footerImageSetting);
+            $footerPath = $isFooterEnabled ? $projectDir . '/public' . $footerImageSetting : null;
+            $hasFooter = $isFooterEnabled && $footerPath && file_exists($footerPath);
+
+            if ($eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value) {
                 // LOGIN_WITH_UUID_ONLY_CODE
                 $email = new TemplatedEmail()
                     ->from(
@@ -210,8 +227,8 @@ readonly class TwoFAService
                         'emailTitle' => $emailTitle,
                         'contactEmail' => $contactEmail,
                         'twoFaCode' => $code,
-                    ])
-                    ->embedFromPath($logoPath, 'logo_cid');
+                        'footerImageEnabled' => $hasFooter,
+                    ]);
             } elseif (
                 $eventType === AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value ||
                 $eventType === AnalyticalEventType::VERIFICATION_CODE_LOGIN_RESEND->value
@@ -229,15 +246,13 @@ readonly class TwoFAService
                     ->htmlTemplate('email/user_verification.html.twig')
                     ->context([
                         'uuid' => $user->getEmail(),
-                        'supportTeam' => $emailTitle,
+                        'supportTeam' => $supportTeam,
                         'contactEmail' => $contactEmail,
                         'twoFaCode' => $code,
-                        'is2FATemplate' => false
-                    ])
-                    ->embedFromPath($logoPath, 'logo_cid');
-            } elseif (
-                $eventType === AnalyticalEventType::USER_AUTO_DELETE_CODE->value
-            ) {
+                        'is2FATemplate' => false,
+                        'footerImageEnabled' => $hasFooter,
+                    ]);
+            } elseif ($eventType === AnalyticalEventType::USER_AUTO_DELETE_CODE->value) {
                 // AUTO DELETE CONFIRMATION CODE
                 $email = new TemplatedEmail()
                     ->from(
@@ -262,8 +277,8 @@ readonly class TwoFAService
                         'supportTeam' => $supportTeam,
                         'code' => $code,
                         'secondsLeft' => $secondsLeft,
-                    ])
-                    ->embedFromPath($logoPath, 'logo_cid');
+                        'footerImageEnabled' => $hasFooter,
+                    ]);
             } else {
                 // 2FA VERIFICATION REQUESTS
                 $email = new TemplatedEmail()
@@ -290,9 +305,18 @@ readonly class TwoFAService
                         'twoFaCode' => $code,
                         'is2FATemplate' => true,
                         'secondsLeft' => $secondsLeft,
-                    ])
-                    ->embedFromPath($logoPath, 'logo_cid');
+                        'footerImageEnabled' => $hasFooter,
+                    ]);
             }
+
+            if ($hasLogo) {
+                $email->embedFromPath($logoPath, 'logo_cid');
+            }
+
+            if ($hasFooter) {
+                $email->embedFromPath($footerPath, 'footer_cid');
+            }
+
             $this->mailer->send($email);
         } elseif ($messageType === UserTwoFactorAuthenticationStatus::SMS->value || $user->getPhoneNumber()) {
             if (

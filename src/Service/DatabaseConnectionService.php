@@ -129,9 +129,10 @@ readonly class DatabaseConnectionService
         int $port,
         string $database,
         string $serverVersion = '8',
-        string $charset = 'utf8mb4'
+        string $charset = 'utf8mb4',
+        ?string $sslMode = null,
     ): string {
-        return sprintf(
+        $url = sprintf(
             'mysql://%s:%s@%s:%d/%s?serverVersion=%s&charset=%s',
             urlencode($username),
             urlencode($password),
@@ -141,6 +142,12 @@ readonly class DatabaseConnectionService
             $serverVersion,
             $charset
         );
+
+        if ($sslMode !== null) {
+            $url .= '&sslmode=' . urlencode($sslMode);
+        }
+
+        return $url;
     }
 
     /**

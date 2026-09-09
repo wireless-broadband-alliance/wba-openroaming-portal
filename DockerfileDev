@@ -116,9 +116,16 @@ COPY service-config/nginx/mime.types /etc/nginx/mime.types
 COPY service-config/nginx/fastcgi_params /etc/nginx/fastcgi_params
 COPY service-config/nginx/sites /etc/nginx/conf.d/
 
-# Setup directories and permissions
-RUN mkdir -p /run/nginx /run/php /usr/share/nginx/modules /var/log/supervisor /var/log/nginx /var/lib/nginx /var/www/openroaming/var \
- && chown -R www-data:www-data /var/www/openroaming /run/nginx /run/php /var/log/nginx /var/log/supervisor /var/lib/nginx
+# Setup directories and least-privilege permissions (CRA-compliant: www-data
+# only gets write access to its own runtime state, never to app code or
+# system services it doesn't own)
+RUN mkdir -p /run/nginx /run/php /usr/share/nginx/modules /var/log/supervisor /var/log/nginx \
+    /var/lib/nginx/tmp/client_body /var/lib/nginx/tmp/proxy /var/lib/nginx/tmp/fastcgi \
+    /var/lib/nginx/tmp/uwsgi /var/lib/nginx/tmp/scgi \
+    /var/www/openroaming/var /var/www/openroaming/var/certs /var/www/openroaming/config/jwt \
+ && chown -R www-data:www-data /run/nginx /run/php /var/log/nginx /var/log/supervisor /var/lib/nginx \
+ && chown -R www-data:www-data /var/www/openroaming/var /var/www/openroaming/config/jwt \
+ && chmod 755 /var/lib/nginx /var/lib/nginx/tmp
 
 EXPOSE 80
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

@@ -19,4 +19,13 @@ export default class extends Controller {
             this.containerTarget.classList.add('hidden');
         }
     }
+
+    close() {
+        if (this.hasContainerTarget) {
+            this.containerTarget.classList.add('hidden');
+        }
+        if (this.hasIconTarget) {
+            this.iconTarget.classList.remove('rotate-90');
+        }
+    }
 }

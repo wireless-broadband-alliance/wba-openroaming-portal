@@ -1,14 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\RadiusDb\Repository;
 
 use App\RadiusDb\Entity\RadiusAccounting;
 use DateTime;
-use DateTimeImmutable;
-use DateTimeInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\AbstractQuery;
+use Doctrine\DBAL\Exception;
 use Doctrine\ORM\Query;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -58,6 +59,62 @@ class RadiusAccountingRepository extends ServiceEntityRepository
             ->getQuery();
     }
 
+    /**
+     * @return array<int, RadiusAccounting>
+     */
+    public function findAllActiveSessions(): array
+    {
+        $twentyFourHoursAgo = new DateTime('-24 hours');
+
+        return $this->createQueryBuilder('ra')
+            ->select('ra')
+            ->where('ra.acctStopTime IS NULL')
+            ->andWhere('ra.acctStartTime >= :twentyFourHoursAgo')
+            ->setParameter('twentyFourHoursAgo', $twentyFourHoursAgo)
+            ->orderBy('ra.acctStartTime', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @param array<int, string> $matchedUsernames
+     * @param array<int, string> $excludedUsernames
+     */
+    public function createActiveSessionsQueryBuilder(
+        ?string $search = null,
+        array $matchedUsernames = [],
+        array $excludedUsernames = []
+    ): QueryBuilder {
+        $qb = $this->createQueryBuilder('r')
+            ->andWhere('r.acctStopTime IS NULL')
+            ->andWhere('r.acctStartTime >= :twentyFourHoursAgo')
+            ->setParameter('twentyFourHoursAgo', new DateTime('-24 hours'));
+
+        if ($excludedUsernames !== []) {
+            $qb->andWhere('r.username NOT IN (:excludedUsernames)')
+                ->setParameter('excludedUsernames', $excludedUsernames);
+        }
+
+        if ($search) {
+            $conditions = $qb->expr()->orX(
+                $qb->expr()->like('r.username', ':q'),
+                $qb->expr()->like('r.framedIpAddress', ':q'),
+                $qb->expr()->like('r.calledStationId', ':q'),
+                $qb->expr()->like('r.nasIpAddress', ':q'),
+            );
+
+            if ($matchedUsernames !== []) {
+                $conditions->add($qb->expr()->in('r.username', ':matchedUsernames'));
+                $qb->setParameter('matchedUsernames', $matchedUsernames);
+            }
+
+            $qb->andWhere($conditions)
+                ->setParameter('q', "%{$search}%");
+        }
+
+        return $qb;
+    }
+
     public function findTrafficPerRealm(?DateTime $startDate, ?DateTime $endDate): Query
     {
         $queryBuilder = $this->createQueryBuilder('ra')
@@ -91,81 +148,96 @@ class RadiusAccountingRepository extends ServiceEntityRepository
     }
 
     /**
-     * Fetch RadiusAccounting records filtered by range
-     *
-     * @return RadiusAccounting[]
+     * @return list<array<string, mixed>>
+     * @throws Exception
      */
-    public function fetchByDateRange(?DateTime $startDate, ?DateTime $endDate): array
+    public function getSessionStatsByDay(DateTime $start, DateTime $end, string $bucket = 'day'): array
     {
-        $queryBuilder = $this->createQueryBuilder('ra');
+        $expr = $this->bucketExpr($bucket);
 
-        // Apply date filters if provided
-        if ($startDate && $endDate) {
-            $queryBuilder
-                ->andWhere('ra.acctStartTime >= :startDate')
-                ->andWhere('ra.acctStopTime <= :endDate')
-                ->setParameter('startDate', $startDate)
-                ->setParameter('endDate', $endDate);
-        } elseif ($startDate instanceof DateTime) {
-            // If only start date is provided, search from start date to now
-            $queryBuilder
-                ->andWhere('ra.acctStartTime >= :startDate')
-                ->setParameter('startDate', $startDate);
-        } elseif ($endDate instanceof DateTime) {
-            // If only end date is provided, search from end date to the past
-            $queryBuilder
-                ->andWhere('ra.acctStopTime <= :endDate')
-                ->setParameter('endDate', $endDate);
-        }
+        $sql = "SELECT $expr AS bucket,
+                   AVG(acctsessiontime) AS avg_time,
+                   SUM(acctsessiontime) AS total_time
+            FROM radacct
+            WHERE acctstarttime BETWEEN :start AND :end
+            GROUP BY bucket
+            ORDER BY bucket";
 
-        return $queryBuilder
-            ->getQuery()
-            ->getResult();
-    }
-
-    public function findLatestConnectionTime(?int $sinceTimestamp = null): ?int
-    {
-        $qb = $this->createQueryBuilder('ra')
-            ->select('ra.acctStartTime')
-            ->orderBy('ra.acctStartTime', 'DESC')
-            ->setMaxResults(1);
-
-        if ($sinceTimestamp !== null) {
-            $sinceDateTime = new DateTimeImmutable()->setTimestamp($sinceTimestamp);
-            $qb->andWhere('ra.acctStartTime >= :since')
-                ->setParameter('since', $sinceDateTime);
-        }
-
-        $latest = $qb->getQuery()->getOneOrNullResult(AbstractQuery::HYDRATE_ARRAY);
-
-        if (!$latest || !isset($latest['acctStartTime'])) {
-            return null;
-        }
-
-        return $latest['acctStartTime']->getTimestamp();
+        return $this->getEntityManager()->getConnection()->fetchAllAssociative($sql, [
+            'start' => $start->format('Y-m-d H:i:s'),
+            'end' => $end->format('Y-m-d H:i:s'),
+        ]);
     }
 
     /**
-     * @throws \DateMalformedStringException
-     * @return RadiusAccounting[]
+     * @return list<array<string, mixed>>
+     * @throws Exception
      */
-    public function findConnectionTime(int $sinceTimestamp): array
+    public function getRealmUsageCounts(DateTime $start, DateTime $end): array
     {
-        $sinceDateTime = new \DateTimeImmutable('@' . $sinceTimestamp);
+        $sql = "SELECT realm, COUNT(*) AS cnt
+            FROM radacct
+            WHERE acctstarttime BETWEEN :start AND :end AND realm <> ''
+            GROUP BY realm";
 
-        $qb = $this->createQueryBuilder('ra');
+        return $this->getEntityManager()->getConnection()->fetchAllAssociative($sql, [
+            'start' => $start->format('Y-m-d H:i:s'),
+            'end' => $end->format('Y-m-d H:i:s'),
+        ]);
+    }
 
-        // Subquery: get the latest acctStartTime per user since $sinceTimestamp
-        $sub = $this->createQueryBuilder('sub')
-            ->select('MAX(sub.acctStartTime)')
-            ->where('sub.username = ra.username')
-            ->andWhere('sub.acctStartTime >= :since')
-            ->getDQL();
+    /**
+     * @return list<array<string, mixed>>
+     * @throws Exception
+     */
+    public function getWifiTypeCounts(DateTime $start, DateTime $end): array
+    {
+        $sql = "SELECT
+                CASE
+                    WHEN connectinfo_start LIKE '%802.11be%' THEN 'Wi-Fi 7'
+                    WHEN connectinfo_start LIKE '%802.11ax%' THEN 'Wi-Fi 6'
+                    WHEN connectinfo_start LIKE '%802.11ac%' THEN 'Wi-Fi 5'
+                    WHEN connectinfo_start LIKE '%802.11n%'  THEN 'Wi-Fi 4'
+                    ELSE 'Unknown'
+                END AS wifi_type,
+                COUNT(*) AS cnt
+            FROM radacct
+            WHERE acctstarttime BETWEEN :start AND :end
+            GROUP BY wifi_type";
 
-        // Main query: match only the latest per user
-        $qb->where('ra.acctStartTime = (' . $sub . ')')
-            ->setParameter('since', $sinceDateTime);
+        return $this->getEntityManager()->getConnection()->fetchAllAssociative($sql, [
+            'start' => $start->format('Y-m-d H:i:s'),
+            'end' => $end->format('Y-m-d H:i:s'),
+        ]);
+    }
 
-        return $qb->getQuery()->getResult();
+    /**
+     * @return list<array<string, mixed>>
+     * @throws Exception
+     */
+    public function getApUsageCounts(DateTime $start, DateTime $end): array
+    {
+        $sql = "SELECT calledstationid AS ap, COUNT(*) AS cnt
+            FROM radacct
+            WHERE acctstarttime BETWEEN :start AND :end
+              AND calledstationid IS NOT NULL AND calledstationid <> ''
+            GROUP BY calledstationid
+            ORDER BY cnt DESC";
+
+        return $this->getEntityManager()->getConnection()->fetchAllAssociative($sql, [
+            'start' => $start->format('Y-m-d H:i:s'),
+            'end' => $end->format('Y-m-d H:i:s'),
+        ]);
+    }
+
+    private function bucketExpr(string $bucket): string
+    {
+        return match ($bucket) {
+            'hour' => "DATE_FORMAT(acctstarttime, '%Y-%m-%d %H:00:00')",
+            'week' => "DATE(DATE_SUB(acctstarttime, INTERVAL WEEKDAY(acctstarttime) DAY))",
+            'month' => "DATE_FORMAT(acctstarttime, '%Y-%m-01')",
+            'year' => "DATE_FORMAT(acctstarttime, '%Y-01-01')",
+            default => "DATE(acctstarttime)",
+        };
     }
 }

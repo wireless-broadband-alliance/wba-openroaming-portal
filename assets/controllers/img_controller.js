@@ -1,23 +1,30 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ['preview'];
+    static targets = ['preview', 'input', 'removeFlag', 'filledState', 'emptyState'];
 
-    connect() {
-        super.connect();
+    update() {
+        const file = this.inputTarget.files[0];
+        if (!file) {
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            this.previewTarget.src = e.target.result;
+            this.removeFlagTarget.checked = false;
+            this.filledStateTarget.classList.remove('hidden');
+            this.emptyStateTarget.classList.add('hidden');
+        };
+        reader.readAsDataURL(file);
     }
 
-    update(event) {
-        const file = event.target.files[0];
-
-        if (file) {
-            const reader = new FileReader();
-
-            reader.onload = (event) => {
-                this.previewTarget.src = event.target.result;
-            };
-
-            reader.readAsDataURL(file);
-        }
+    remove(event) {
+        event.preventDefault();
+        this.inputTarget.value = '';
+        this.previewTarget.src = '';
+        this.removeFlagTarget.checked = true;
+        this.filledStateTarget.classList.add('hidden');
+        this.emptyStateTarget.classList.remove('hidden');
     }
 }

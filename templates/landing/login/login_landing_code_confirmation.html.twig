@@ -1,6 +1,6 @@
 {% extends 'landing/authUser/base.html.twig' %}
 
-{% set resendType = data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::ON').value
+{% set resendType = data.LOGIN_WITH_UUID_ONLY.value == 'true'
     ? constant('App\\Enum\\CodeVerificationType::LOGIN_WITH_UUID_ONLY_CODE_RESEND').value
     : constant('App\\Enum\\CodeVerificationType::VERIFICATION_CODE_LOGIN_RESEND').value %}
 
