@@ -215,6 +215,7 @@ readonly class VerificationCodeEmailGenerator
      * Helper to embed customer logo and footer banner images,
      * adding 'footerImageEnabled' flag to the context.
      *
+     * @param array<string, array{value: string}> $settings
      * @param array<string, mixed> $context
      */
     private function configureEmailMedia(

@@ -365,6 +365,7 @@ readonly class EmailGenerator
      * Helper to embed customer logo and footer banner images into the email,
      * updating the context array with 'footerImageEnabled' flag before applying it to the email.
      *
+     * @param array<string, array{value: string}> $settings
      * @param array<string, mixed> $context
      */
     private function configureEmailMedia(
