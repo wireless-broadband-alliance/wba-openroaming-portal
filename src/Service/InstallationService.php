@@ -336,12 +336,16 @@ readonly class InstallationService
         }
 
         $jwtPassphrase = $installationProgress->getJwtPassphrase();
-
-        return !($jwtPassphrase !== null &&
+        if (
+            $jwtPassphrase !== null &&
             !$this->envValueMatches(
                 SettingsConfigType::JWT_PASSPHRASE->value,
                 $jwtPassphrase
-            ));
+            )
+        ) {
+            return false;
+        }
+        return true;
     }
 
     public function envValueMatches(string $key, ?string $expectedValue): bool
