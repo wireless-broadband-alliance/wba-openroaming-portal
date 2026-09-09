@@ -18,7 +18,6 @@ use libphonenumber\PhoneNumberUtil;
 use PixelOpen\CloudflareTurnstileBundle\Http\CloudflareTurnstileHttpClient;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -45,7 +44,6 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         private readonly UserRepository $userRepository,
         private readonly TwoFAService $twoFAService,
         private readonly TranslatorInterface $translator,
-        private readonly RequestStack $requestStack,
     ) {
     }
 
