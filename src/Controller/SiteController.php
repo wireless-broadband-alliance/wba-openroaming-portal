@@ -180,7 +180,7 @@ class SiteController extends AbstractController
             if (
                 $data[SettingName::LOGIN_WITH_UUID_ONLY->value]["value"] === 'true' ||
                 (!$currentUser->getUserExternalAuths()->isEmpty() && $currentUser->getUserExternalAuths(
-                    )[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value)
+                )[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value)
             ) {
                 // Checks the 2FA status of the platform if mandatory and force the user to configure it
                 if (
