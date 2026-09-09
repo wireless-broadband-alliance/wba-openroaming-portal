@@ -181,12 +181,16 @@ readonly class TwoFAService
         )->getValue();
 
         if ($messageType === UserTwoFactorAuthenticationStatus::EMAIL->value || $user->getEmail()) {
-            $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])?->getValue();
-            $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value]
+            $emailTitle = $this->settingRepository->findOneBy(
+                ['name' => SettingName::PAGE_TITLE->value]
+            )?->getValue();
+            $contactEmail = $this->settingRepository->findOneBy(
+                ['name' => SettingName::CONTACT_EMAIL->value]
             )?->getValue();
             $supportTeam = $emailTitle;
 
-            $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value]
+            $customerLogo = $this->settingRepository->findOneBy(
+                ['name' => SettingName::CUSTOMER_LOGO->value]
             )?->getValue();
             $footerImageEnabledSetting = $this->settingRepository->findOneBy(
                 ['name' => SettingName::FOOTER_IMAGE_ENABLED->value]

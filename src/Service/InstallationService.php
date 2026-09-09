@@ -196,7 +196,8 @@ readonly class InstallationService
         $footerImageEnabledSetting = $this->settingRepository->findOneBy(
             ['name' => SettingName::FOOTER_IMAGE_ENABLED->value]
         )?->getValue();
-        $footerImageSetting = $this->settingRepository->findOneBy(['name' => SettingName::FOOTER_IMAGE->value]
+        $footerImageSetting = $this->settingRepository->findOneBy(
+            ['name' => SettingName::FOOTER_IMAGE->value]
         )?->getValue();
 
         $projectDir = $this->parameterBag->get('kernel.project_dir');
