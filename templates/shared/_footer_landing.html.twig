@@ -1,0 +1,12 @@
+{# Footer Banner Bar - Displays only when FOOTER_IMAGE_ENABLED is ON / true #}
+{% set footerData = data ?? settings ?? null %}
+
+{% if footerData and footerData.FOOTER_IMAGE_ENABLED is defined and footerData.FOOTER_IMAGE_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
+    <div class="mt-10 pt-6 w-full">
+        <div class="flex justify-center items-center w-full px-2">
+            <img src="{{ asset(footerData.FOOTER_IMAGE.value|default('/resources/images/footer.png')) }}"
+                 alt="footer-landing-image"
+                 class="w-full h-auto object-contain max-w-full sm:max-w-xl md:max-w-2xl" />
+        </div>
+    </div>
+{% endif %}

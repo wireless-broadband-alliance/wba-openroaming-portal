@@ -26,7 +26,9 @@ class InstructionsController extends AbstractController
             SettingName::PAGE_TITLE->value,
             SettingName::CUSTOMER_LOGO_ENABLED->value,
             SettingName::CUSTOMER_LOGO->value,
-            SettingName::WALLPAPER_IMAGE->value
+            SettingName::WALLPAPER_IMAGE->value,
+            SettingName::FOOTER_IMAGE_ENABLED->value,
+            SettingName::FOOTER_IMAGE->value,
         ]);
 
         // Check URL query first

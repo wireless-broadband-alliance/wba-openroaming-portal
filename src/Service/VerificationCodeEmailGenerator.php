@@ -6,11 +6,11 @@ use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
+use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\SettingName;
 use App\Enum\SettingType;
 use App\Repository\EventRepository;
-use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use DateTime;
 use Exception;
@@ -23,12 +23,12 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 readonly class VerificationCodeEmailGenerator
 {
     public function __construct(
-        private SettingRepository $settingRepository,
         private ParameterBagInterface $parameterBag,
         private EventRepository $eventRepository,
         private EventActions $eventActions,
         private TranslatorInterface $translator,
         private UserRepository $userRepository,
+        private GetSettings $getSettings,
     ) {
     }
 
@@ -44,14 +44,10 @@ readonly class VerificationCodeEmailGenerator
         string $userAgent,
         string $settingCategory
     ): Email {
-        // Get the values from the services.yaml file using $parameterBag on the __construct
-        $emailSender = $this->parameterBag->get('app.email_address');
-        $nameSender = $this->parameterBag->get('app.sender_name');
-        $supportTeam = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
-        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
-        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
-        $projectDir = $this->parameterBag->get('kernel.project_dir');
-        $logoPath = $projectDir . '/public' . $customerLogo;
+        $settings = $this->fetchStandardSettings();
+
+        $supportTeam = $this->getVal($settings, SettingName::PAGE_TITLE);
+        $contactEmail = $this->getVal($settings, SettingName::CONTACT_EMAIL);
 
         $user->setTwoFACode((string) random_int(100000, 999999));
         $user->setTwoFACodeGeneratedAt(new DateTime());
@@ -75,18 +71,25 @@ readonly class VerificationCodeEmailGenerator
             $eventMetaData
         );
 
-        return new TemplatedEmail()
+        $context = [
+            'verificationCode' => $user->getTwoFAcode(),
+            'supportTeam' => $supportTeam,
+            'contactEmail' => $contactEmail,
+            'settingCategory' => $translatedCategory,
+        ];
+
+        $emailSender = $this->parameterBag->get('app.email_address');
+        $nameSender = $this->parameterBag->get('app.sender_name');
+
+        $email = new TemplatedEmail()
             ->from(new Address($emailSender, $nameSender))
             ->to($user->getEmail())
             ->subject($this->translator->trans('subject_verify', [], 'admin_reset'))
-            ->htmlTemplate('email/admin_reset.html.twig')
-            ->context([
-                'verificationCode' => $user->getTwoFAcode(),
-                'supportTeam' => $supportTeam,
-                'contactEmail' => $contactEmail,
-                'settingCategory' => $translatedCategory
-            ])
-            ->embedFromPath($logoPath, 'logo_cid');
+            ->htmlTemplate('email/admin_reset.html.twig');
+
+        $this->configureEmailMedia($email, $settings, $context);
+
+        return $email;
     }
 
     /**
@@ -97,26 +100,23 @@ readonly class VerificationCodeEmailGenerator
      */
     public function createEmail2FADisabledBy(User $user): Email
     {
-        // Get the values from the services.yaml file using $parameterBag on the __construct
+        $settings = $this->fetchStandardSettings();
+
+        $supportTeam = $this->getVal($settings, SettingName::PAGE_TITLE);
+        $contactEmail = $this->getVal($settings, SettingName::CONTACT_EMAIL);
+
+        $context = [
+            'uuid' => $user->getEmail(),
+            'supportTeam' => $supportTeam,
+            'contactEmail' => $contactEmail,
+        ];
+
         $emailSender = $this->parameterBag->get('app.email_address');
         $nameSender = $this->parameterBag->get('app.sender_name');
 
-        // If the verification code is not provided, generate a new one
-        $supportTeam = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
-        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
-        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
-        $projectDir = $this->parameterBag->get('kernel.project_dir');
-        $logoPath = $projectDir . '/public' . $customerLogo;
-
-        return new TemplatedEmail()
+        $email = new TemplatedEmail()
             ->from(new Address($emailSender, $nameSender))
             ->to($user->getEmail())
-            ->subject($this->translator->trans(
-                'OpenRoamingTwoFactorAuthenticationDisabled',
-                [],
-                'TwoFAService'
-            ))
-            ->htmlTemplate('email/admin_disabled_2fa.html.twig')
             ->subject(
                 $this->translator->trans(
                     'subject_2fa_disabled',
@@ -124,12 +124,11 @@ readonly class VerificationCodeEmailGenerator
                     'admin_disabled2fa'
                 )
             )
-            ->context([
-                'uuid' => $user->getEmail(),
-                'supportTeam' => $supportTeam,
-                'contactEmail' => $contactEmail
-            ])
-            ->embedFromPath($logoPath, 'logo_cid');
+            ->htmlTemplate('email/admin_disabled_2fa.html.twig');
+
+        $this->configureEmailMedia($email, $settings, $context);
+
+        return $email;
     }
 
     public function timeLeftToResendCode(int $timeInterval, ?Event $event): null|int
@@ -157,6 +156,9 @@ readonly class VerificationCodeEmailGenerator
         return null;
     }
 
+    /**
+     * @throws \DateMalformedStringException
+     */
     public function canResendCode(User $user, int $timeInterval): bool
     {
         $limitTime = new DateTime();
@@ -168,5 +170,83 @@ readonly class VerificationCodeEmailGenerator
             AnalyticalEventType::SETTING_RESET_CODE_REQUEST->value
         );
         return count($attempts) < 1;
+    }
+
+    /**
+     * Helper to fetch standard settings used by emails in a single query.
+     *
+     * @return array<string, array{value: string}>
+     */
+    private function fetchStandardSettings(): array
+    {
+        return $this->fetchSettings();
+    }
+
+    /**
+     * Helper to invoke GetSettings::getSpecificSettings with an array of SettingName enums.
+     *
+     * @return array<string, array{value: string}>
+     */
+    private function fetchSettings(): array
+    {
+        $settingNames = [
+            SettingName::PAGE_TITLE,
+            SettingName::CONTACT_EMAIL,
+            SettingName::CUSTOMER_LOGO,
+            SettingName::FOOTER_IMAGE_ENABLED,
+            SettingName::FOOTER_IMAGE,
+        ];
+        $keys = array_map(static fn(SettingName $name) => $name->value, $settingNames);
+
+        return $this->getSettings->getSpecificSettings($keys);
+    }
+
+    /**
+     * Helper to safely get a setting's value.
+     *
+     * @param array<string, array{value: string}> $settings
+     */
+    private function getVal(array $settings, SettingName $name): ?string
+    {
+        return $settings[$name->value]['value'] ?? null;
+    }
+
+    /**
+     * Helper to embed customer logo and footer banner images,
+     * adding 'footerImageEnabled' flag to the context.
+     *
+     * @param array<string, mixed> $context
+     */
+    private function configureEmailMedia(
+        TemplatedEmail $email,
+        array $settings,
+        array $context
+    ): void {
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
+
+        $customerLogo = $this->getVal($settings, SettingName::CUSTOMER_LOGO);
+        $footerImageEnabled = $this->getVal($settings, SettingName::FOOTER_IMAGE_ENABLED);
+        $footerImage = $this->getVal($settings, SettingName::FOOTER_IMAGE);
+
+        // Embed Customer Logo
+        if (!empty($customerLogo)) {
+            $logoPath = $projectDir . '/public' . $customerLogo;
+            if (file_exists($logoPath)) {
+                $email->embedFromPath($logoPath, 'logo_cid');
+            }
+        }
+
+        // Embed Footer Banner
+        $isFooterEnabled = ($footerImageEnabled === OperationMode::ON->value) && !empty($footerImage);
+        $footerPath = $isFooterEnabled ? $projectDir . '/public' . $footerImage : null;
+        $hasFooter = $isFooterEnabled && $footerPath && file_exists($footerPath);
+
+        $context['footerImageEnabled'] = $hasFooter;
+
+        if ($hasFooter) {
+            $email->embedFromPath($footerPath, 'footer_cid');
+        }
+
+        $email->context($context);
     }
 }

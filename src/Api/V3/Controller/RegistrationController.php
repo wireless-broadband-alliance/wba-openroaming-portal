@@ -350,31 +350,8 @@ class RegistrationController extends AbstractController
                     $this->entityManager->persist($user);
                     $this->entityManager->flush();
 
-                    $email = new TemplatedEmail()
-                        ->from(
-                            new Address(
-                                $this->parameterBag->get('app.email_address'),
-                                $this->parameterBag->get('app.sender_name')
-                            )
-                        )
-                        ->to($user->getEmail())
-                        ->subject('OpenRoaming Portal - Password Request')
-                        ->htmlTemplate('email/user_forgot_password_request.html.twig')
-                        ->context([
-                            'password' => $randomPassword,
-                            'forgotPasswordUser' => true,
-                            'uuid' => $user->getUuid(),
-                            'currentPassword' => $randomPassword,
-                            'verificationCode' => $user->getTwoFAcode(),
-                            'emailTitle' => $this->settingRepository->findOneBy([
-                                'name' => SettingName::PAGE_TITLE->value
-                            ])->getValue(),
-                            'contactEmail' => $this->settingRepository->findOneBy(
-                                ['name' => 'CONTACT_EMAIL']
-                            )->getValue()
-                        ]);
-
-                    $this->mailer->send($email);
+                    // Send the actual forgot password email, the same has the UI has
+                    $this->emailGenerator->sendForgotPasswordEmail($user);
 
                     // Defines the Event to the table
                     $eventMetadata = [

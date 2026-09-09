@@ -7,8 +7,7 @@
 </head>
 <body style="margin:0; padding:0; font-family: Arial, Helvetica, sans-serif; background-color:#F4F4F4;">
 
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
-       style="background-color:#F4F4F4; margin:0; padding:0;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F4F4F4; margin:0; padding:0;">
     <tr>
         <td align="center">
 
@@ -19,19 +18,16 @@
                     <td>
 
                         <!-- Header -->
-                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
-                               style="background-color:#0B1A58; text-align:center; padding:40px 20px;">
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#0B1A58; text-align:center;">
                             <tr>
-                                <td>
-                                    <img src="cid:logo_cid" alt="Customer Logo"
-                                         style="max-width:300px; height:auto; border:0;"/>
+                                <td style="padding:40px 20px;">
+                                    <img src="cid:logo_cid" alt="Customer Logo" style="max-width:300px; height:auto; border:0;"/>
                                 </td>
                             </tr>
                         </table>
 
                         <!-- Content -->
-                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
-                               style="padding:40px 20px; text-align:center;">
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="text-align:center; padding:40px 20px;">
                             <tr>
                                 <td>
                                     <h1 style="color:#0B1A58; font-size:28px; font-weight:bold; margin:0 0 30px 0; font-family: Arial, Helvetica, sans-serif;">
@@ -39,16 +35,19 @@
                                     </h1>
                                 </td>
                             </tr>
+
                             <tr>
-                                <td style="padding-bottom:30px;">
-                                    <p style="font-size:18px; line-height:1.5; color:#0B1A58; margin:0 0 15px 0; font-family: Arial, Helvetica, sans-serif;">
+                                <td style="padding-bottom:20px;">
+                                    <p style="font-size:18px; line-height:1.5; color:#0B1A58; margin:0; font-family: Arial, Helvetica, sans-serif;">
                                         {{ 'intro_new_user'|trans({}, 'user_registration_api')|raw }}
                                     </p>
+                                </td>
+                            </tr>
 
-                                    <a href="{{ absolute_url(path('app_confirm_account')) ~
-                                    '?uuid=' ~ uuid|url_encode ~
-                                    '&twoFaCode=' ~ twoFaCode|url_encode ~
-                                    '&source=api' }}"
+                            <!-- Button -->
+                            <tr>
+                                <td>
+                                    <a href="{{ absolute_url(path('app_confirm_account')) ~ '?uuid=' ~ uuid|url_encode ~ '&twoFaCode=' ~ twoFaCode|url_encode ~ '&source=api' }}"
                                        style="display:inline-block; width:90%; max-width:800px; padding:18px; background-color:#7BBA29; color:#0B1A58; font-size:18px; font-weight:bold; text-align:center; text-decoration:none; border-radius:10px; font-family: Arial, Helvetica, sans-serif;">
                                         {{ 'buttons.download_and_install'|trans({}, 'user_registration_api') }}
                                     </a>
@@ -56,15 +55,25 @@
                             </tr>
                         </table>
 
+                        <!-- Footer Image Banner -->
+                        {% if footerImageEnabled|default(false) %}
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="text-align:center;">
+                                <tr>
+                                    <td align="center" style="padding:20px 20px 35px 20px;">
+                                        <img src="cid:footer_cid" alt="Footer Banner"
+                                             style="max-width:600px; width:100%; height:auto; border:0; display:block; margin:0 auto;"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        {% endif %}
+
                         <!-- Footer -->
-                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
-                               style="background-color:#E6E6E6; text-align:center; padding:20px;">
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#E6E6E6; text-align:center; padding:20px;">
                             <tr>
                                 <td>
                                     <p style="margin:12px 0; font-size:14px; color:#1A202C; font-family: Arial, Helvetica, sans-serif;">
                                         {{ 'footer.support_team'|trans({}, 'user_registration_api') }}
-                                        <a href="mailto:{{ contactEmail }}"
-                                           style="color:#0B1A58; font-weight:bold; text-decoration:none;">{{ contactEmail }}</a>
+                                        <a href="mailto:{{ contactEmail }}" style="color:#0B1A58; font-weight:bold; text-decoration:none;">{{ contactEmail }}</a>
                                     </p>
                                     <p style="margin:12px 0; font-size:14px; color:#1A202C; font-family: Arial, Helvetica, sans-serif;">
                                         <strong style="color:#0B1A58;">{{ 'footer.thank_you'|trans({}, 'user_registration_api') }}</strong><br/>

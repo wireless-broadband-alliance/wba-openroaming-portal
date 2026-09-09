@@ -4,8 +4,8 @@ namespace App\Controller;
 
 use App\Enum\ApiVersion;
 use App\Enum\SettingName;
-use App\Repository\SettingRepository;
 use App\Service\ApiResponseService;
+use App\Service\GetSettings;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -14,7 +14,7 @@ class ApiController extends AbstractController
 {
     public function __construct(
         private readonly ApiResponseService $apiResponseService,
-        private readonly SettingRepository $settingRepository,
+        private readonly GetSettings $getSettings,
     ) {
     }
 
@@ -27,81 +27,36 @@ class ApiController extends AbstractController
     #[Route('/api/v1', name: 'api_v1_docs')]
     public function versionOne(): Response
     {
-        $routes = $this->apiResponseService->getRoutesByPrefix(ApiVersion::API_V1);
-        $commonMessages = $this->apiResponseService->getCommonResponses();
-
-        $settings = [
-            SettingName::PAGE_TITLE->value => $this->settingRepository->findOneBy(
-                ['name' => SettingName::PAGE_TITLE->value]
-            )->getValue(),
-            SettingName::CUSTOMER_LOGO_ENABLED->value => $this->settingRepository->findOneBy(
-                ['name' => SettingName::CUSTOMER_LOGO_ENABLED->value]
-            )->getValue(),
-            SettingName::CUSTOMER_LOGO->value => $this->settingRepository->findOneBy(
-                ['name' => SettingName::CUSTOMER_LOGO->value]
-            )->getValue(),
-            SettingName::OPENROAMING_LOGO->value => $this->settingRepository->findOneBy(
-                ['name' => SettingName::OPENROAMING_LOGO->value]
-            )->getValue(),
-        ];
-
-        return $this->render('api/version_one.html.twig', [
-            'routes' => $routes,
-            'commonMessages' => $commonMessages,
-            'settings' => $settings,
-        ]);
+        return $this->renderApiDocs(ApiVersion::API_V1, 'api/version_one.html.twig');
     }
 
     #[Route('/api/v2', name: 'api_v2_docs')]
     public function versionTwo(): Response
     {
-        $routes = $this->apiResponseService->getRoutesByPrefix(ApiVersion::API_V2);
-        $commonMessages = $this->apiResponseService->getCommonResponses();
-
-        $settings = [
-            SettingName::PAGE_TITLE->value => $this->settingRepository->findOneBy(
-                ['name' => SettingName::PAGE_TITLE->value]
-            )->getValue(),
-            SettingName::CUSTOMER_LOGO_ENABLED->value => $this->settingRepository->findOneBy(
-                ['name' => SettingName::CUSTOMER_LOGO_ENABLED->value]
-            )->getValue(),
-            SettingName::CUSTOMER_LOGO->value => $this->settingRepository->findOneBy(
-                ['name' => SettingName::CUSTOMER_LOGO->value]
-            )->getValue(),
-            SettingName::OPENROAMING_LOGO->value => $this->settingRepository->findOneBy(
-                ['name' => SettingName::OPENROAMING_LOGO->value]
-            )->getValue(),
-        ];
-
-        return $this->render('api/version_two.html.twig', [
-            'routes' => $routes,
-            'commonMessages' => $commonMessages,
-            'settings' => $settings,
-        ]);
+        return $this->renderApiDocs(ApiVersion::API_V2, 'api/version_two.html.twig');
     }
 
     #[Route('/api/v3', name: 'api_v3_docs')]
-    public function versionTree(): Response
+    public function versionThree(): Response
     {
-        $routes = $this->apiResponseService->getRoutesByPrefix(ApiVersion::API_V3);
+        return $this->renderApiDocs(ApiVersion::API_V3, 'api/version_tree.html.twig');
+    }
+
+    private function renderApiDocs(ApiVersion $apiVersion, string $template): Response
+    {
+        $routes = $this->apiResponseService->getRoutesByPrefix($apiVersion);
         $commonMessages = $this->apiResponseService->getCommonResponses();
 
-        $settings = [
-            SettingName::PAGE_TITLE->value => $this->settingRepository->findOneBy(
-                ['name' => SettingName::PAGE_TITLE->value]
-            )->getValue(),
-            SettingName::CUSTOMER_LOGO_ENABLED->value => $this->settingRepository->findOneBy(
-                ['name' => SettingName::CUSTOMER_LOGO_ENABLED->value]
-            )->getValue(),
-            SettingName::CUSTOMER_LOGO->value => $this->settingRepository->findOneBy(
-                ['name' => SettingName::CUSTOMER_LOGO->value]
-            )->getValue(),
-            SettingName::OPENROAMING_LOGO->value => $this->settingRepository->findOneBy(
-                ['name' => SettingName::OPENROAMING_LOGO->value]
-            )->getValue(),
-        ];
+        $settings = $this->getSettings->getSpecificSettings([
+            SettingName::PAGE_TITLE->value,
+            SettingName::CUSTOMER_LOGO_ENABLED->value,
+            SettingName::CUSTOMER_LOGO->value,
+            SettingName::OPENROAMING_LOGO->value,
+            SettingName::FOOTER_IMAGE_ENABLED->value,
+            SettingName::FOOTER_IMAGE->value,
+        ]);
 
-        return $this->render('api/version_tree.html.twig', [
+        return $this->render($template, [
             'routes' => $routes,
             'commonMessages' => $commonMessages,
             'settings' => $settings,
