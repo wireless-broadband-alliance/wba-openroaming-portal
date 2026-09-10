@@ -193,17 +193,22 @@ class RadiusAccountingRepository extends ServiceEntityRepository
     public function getWifiTypeCounts(DateTime $start, DateTime $end): array
     {
         $sql = "SELECT
-                CASE
-                    WHEN connectinfo_start LIKE '%802.11be%' THEN 'Wi-Fi 7'
-                    WHEN connectinfo_start LIKE '%802.11ax%' THEN 'Wi-Fi 6'
-                    WHEN connectinfo_start LIKE '%802.11ac%' THEN 'Wi-Fi 5'
-                    WHEN connectinfo_start LIKE '%802.11n%'  THEN 'Wi-Fi 4'
-                    ELSE 'Unknown'
-                END AS wifi_type,
-                COUNT(*) AS cnt
-            FROM radacct
-            WHERE acctstarttime BETWEEN :start AND :end
-            GROUP BY wifi_type";
+            CASE
+                WHEN connectinfo_start LIKE '%802.11be%' THEN 'Wi-Fi 7'
+                WHEN connectinfo_start LIKE '%802.11ax%' THEN 'Wi-Fi 6'
+                WHEN connectinfo_start LIKE '%802.11ac%' THEN 'Wi-Fi 5'
+                WHEN connectinfo_start LIKE '%802.11n%'  THEN 'Wi-Fi 4'
+            END AS wifi_type,
+            COUNT(*) AS cnt
+        FROM radacct
+        WHERE acctstarttime BETWEEN :start AND :end
+          AND (
+              connectinfo_start LIKE '%802.11be%'
+           OR connectinfo_start LIKE '%802.11ax%'
+           OR connectinfo_start LIKE '%802.11ac%'
+           OR connectinfo_start LIKE '%802.11n%'
+          )
+        GROUP BY wifi_type";
 
         return $this->getEntityManager()->getConnection()->fetchAllAssociative($sql, [
             'start' => $start->format('Y-m-d H:i:s'),

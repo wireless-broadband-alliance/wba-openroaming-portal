@@ -119,9 +119,16 @@ readonly class FreeradiusStatistics
         return $this->cache->get($key, function (ItemInterface $item) use ($start, $end) {
             $item->expiresAfter(self::CACHE_TTL);
             $result = [];
+
             foreach ($this->radiusAccountingRepository->getWifiTypeCounts($start, $end) as $row) {
+                // Ignore 'Unknown' or empty/null wifi types
+                if (empty($row['wifi_type']) || $row['wifi_type'] === 'Unknown') {
+                    continue;
+                }
+
                 $result[$row['wifi_type']] = (int)$row['cnt'];
             }
+
             return $result;
         });
     }
