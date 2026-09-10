@@ -12,6 +12,8 @@
 - Fix bug where the radsecproxy `chain.pem` was never regenerated after a certificate renewal, causing the old
   end-entity certificate to keep being served. The certificate management wizard now rebuilds `chain.pem` from the
   renewed client certificate and the bundled WBA CA chain, and removes the stale file as part of the renewal commands.
+- Fix bug in `PortalStatistics` when processing device download events threw a 500 error when event metadata was
+  returned as raw array data or unparsed JSON.
 
 Please make sure to execute the new migration to update and use the new required Settings details for this new usage of
 the LOGIN_WITH_UUID_ONLY setting.
