@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\Statistics\Portal;
 
+use App\Entity\Event;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\OSType;
 use App\Enum\PlatformMode;
@@ -129,9 +130,12 @@ readonly class PortalStatistics
         ];
 
         foreach ($events as $event) {
-            /** @var array<string, mixed>|string|null $metadata */
-            $metadata = is_array($event) ? $event['event_metadata'] : $event->getEventMetadata();
+            /** @var Event|array<string, mixed> $event */
+            $metadata = $event instanceof Event
+                ? $event->getEventMetadata()
+                : $event['event_metadata'];
 
+            /** @var array<string, mixed>|string|null $metadata */
             if (is_string($metadata)) {
                 $metadata = json_decode($metadata, true, 512, JSON_THROW_ON_ERROR);
             }
