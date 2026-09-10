@@ -13,6 +13,7 @@ use App\Enum\OperationMode;
 use App\Enum\ProcessStatusType;
 use App\Enum\SettingName;
 use App\Enum\SettingsConfigType;
+use App\Exception\EncryptionException;
 use App\Repository\EventRepository;
 use App\Repository\InstallationProgressRepository;
 use App\Repository\SettingRepository;
@@ -40,9 +41,13 @@ readonly class InstallationService
         private TranslatorInterface $translator,
         private UserRepository $userRepository,
         private CaptchaValidator $captchaValidator,
+        private EncryptionService $encryptionService, // 1. Inject EncryptionService
     ) {
     }
 
+    /**
+     * @throws EncryptionException
+     */
     public function verifyEnvSettings(): InstallationProgress
     {
         $installationProgress = new InstallationProgress();
@@ -51,18 +56,22 @@ readonly class InstallationService
         $installationProgress->setUpdatedAt(new DateTime());
 
         $databaseUrl = $this->parameterBag->get('app.database_url');
+        // Test with raw DSN
         if (
             $databaseUrl &&
             $this->databaseConnectionService->testDatabaseConnection($databaseUrl)
         ) {
-            $installationProgress->setDbOpenRoaming($databaseUrl);
+            // Encrypt before persisting
+            $installationProgress->setDbOpenRoaming($this->encryptionService->encrypt($databaseUrl));
 
             $databaseFreeRadiusUrl = $this->parameterBag->get('app.database_freeradius_url');
+            // Test with raw DSN
             if (
                 $databaseFreeRadiusUrl &&
                 $this->databaseConnectionService->testDatabaseConnection($databaseFreeRadiusUrl)
             ) {
-                $installationProgress->setDbFreeradius($databaseFreeRadiusUrl);
+                // Encrypt before persisting
+                $installationProgress->setDbFreeradius($this->encryptionService->encrypt($databaseFreeRadiusUrl));
 
                 $trustedProxies = $this->parameterBag->get('app.trusted_proxies');
                 if ($trustedProxies) {
@@ -74,13 +83,20 @@ readonly class InstallationService
                         $installationProgress->setTurnstileKey($turnstileKey);
 
                         $turnstileSecret = $this->parameterBag->get('app.turnstile_secret');
+                        // Validate with raw secret
                         $captchaValidation = $this->captchaValidator->validateCredentials($turnstileSecret);
                         if ($turnstileSecret && $captchaValidation['success']) {
-                            $installationProgress->setTurnstileSecret($turnstileSecret);
+                            // Encrypt before persisting
+                            $installationProgress->setTurnstileSecret(
+                                $this->encryptionService->encrypt($turnstileSecret)
+                            );
 
                             $jwtPassphrase = $this->parameterBag->get('app.jwt_passphrase');
                             if ($jwtPassphrase) {
-                                $installationProgress->setJwtPassphrase($jwtPassphrase);
+                                // Encrypt before persisting
+                                $installationProgress->setJwtPassphrase(
+                                    $this->encryptionService->encrypt($jwtPassphrase)
+                                );
 
                                 $superAdmin = $this->userRepository->findSuperAdmin();
                                 if ($superAdmin && $superAdmin->getEmail() !== DefaultUser::ADMIN->value) {

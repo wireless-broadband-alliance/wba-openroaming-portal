@@ -17,6 +17,7 @@ use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
 use App\Enum\SettingName;
 use App\Enum\SettingsConfigType;
+use App\Exception\EncryptionException;
 use App\Form\AdminConfigType;
 use App\Form\DbSetupType;
 use App\Form\SettingsType;
@@ -28,8 +29,8 @@ use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
 use App\Service\DatabaseConnectionService;
+use App\Service\EncryptionService;
 use App\Service\EventActions;
-use App\Service\ExternalIdentifierHasher;
 use App\Service\GetSettings;
 use App\Service\InstallationService;
 use App\Service\TwoFAService;
@@ -71,10 +72,13 @@ class InstallationController extends AbstractController
         private readonly CaptchaValidator $captchaValidator,
         private readonly KernelInterface $kernel,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
-        private readonly ExternalIdentifierHasher $externalIdentifierHasher,
+        private readonly EncryptionService $encryptionService,
     ) {
     }
 
+    /**
+     * @throws EncryptionException
+     */
     #[Route(
         '/dashboard/settings/certificatesManagement/installation',
         name: 'admin_dashboard_settings_certs_installation'
@@ -83,6 +87,7 @@ class InstallationController extends AbstractController
         Request $request,
     ): Response {
         $lastInstallation = $this->installationService->lastInstallation();
+
         if ($lastInstallation instanceof InstallationProgress) {
             $step = $this->installationService->getStep($lastInstallation);
             if ($step === InstallationStep::SETTINGS->value) {
@@ -170,13 +175,13 @@ class InstallationController extends AbstractController
                 $lastInstallation->setCreatedAt(new DateTime());
             }
 
-            // Hash the connection strings before storing in the database
-            $hashedOpenRoamingDb = $this->externalIdentifierHasher->hash($openRoamingDb);
-            $hashedFreeradiusDb = $this->externalIdentifierHasher->hash($freeradiusDb);
+            // Encrypt the raw connection strings before storing in the database
+            $encryptedOpenRoamingDb = $this->encryptionService->encrypt($openRoamingDb);
+            $encryptedFreeradiusDb = $this->encryptionService->encrypt($freeradiusDb);
 
             $lastInstallation->setUpdatedAt(new DateTime());
-            $lastInstallation->setDbOpenRoaming($hashedOpenRoamingDb);
-            $lastInstallation->setDbFreeradius($hashedFreeradiusDb);
+            $lastInstallation->setDbOpenRoaming($encryptedOpenRoamingDb);
+            $lastInstallation->setDbFreeradius($encryptedFreeradiusDb);
             $lastInstallation->setInstallationState(ProcessStatusType::IN_PROGRESS);
 
             $this->entityManager->persist($lastInstallation);
@@ -196,6 +201,7 @@ class InstallationController extends AbstractController
                 );
             }
 
+            // Write raw unencrypted DSN to .env for Symfony/Doctrine usage
             $orResult = $this->databaseConnectionService->writeDatabaseUrlToEnv(
                 $openRoamingDb,
                 DataBaseSetupType::DATABASE_URL->value
