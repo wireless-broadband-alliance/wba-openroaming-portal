@@ -55,7 +55,8 @@ class FreeradiusController extends AbstractController
     public function freeradiusStatisticsData(
         Request $request,
         #[MapQueryParameter] int $page = 1,
-        #[MapQueryParameter] ?int $count = 5
+        #[MapQueryParameter] ?int $count = 5,
+        #[MapQueryParameter] string $sortUsage = 'desc'
     ): Response {
         $result = $this->freeradiusConnectionService->checkDBConnection();
         if ($result['success'] === false) {
@@ -121,6 +122,19 @@ class FreeradiusController extends AbstractController
         // Access Points Usage
         $fetchChartApUsage = $this->statisticsFreeradius
             ->getApUsageStats($startDate, $endDate);
+
+        // Validate and sort array before slicing
+        $sortUsage = strtolower($sortUsage) === 'asc' ? 'asc' : 'desc';
+        if ($sortUsage === 'asc') {
+            asort($fetchChartApUsage);
+        } else {
+            arsort($fetchChartApUsage);
+        }
+
+        // Access Points Usage Count & Pagination
+        $offset = ($page - 1) * $count;
+        // Keep original keys intact
+        $fetchChartApUsage = array_slice($fetchChartApUsage, $offset, $count, true);
 
         // Current Authenticated Users
         $fetchChartCurrentAuthFreeradius = $this->statisticsFreeradius
@@ -207,6 +221,7 @@ class FreeradiusController extends AbstractController
             'paginationApUsage' => true,
             'activePreset' => $activePreset->value,
             'bucketGranularity' => $bucketGranularity,
+            'sortUsage' => $sortUsage,
         ]);
     }
 
