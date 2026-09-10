@@ -13,9 +13,9 @@ use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
+use App\Service\EncryptionService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
-use App\Service\ExternalIdentifierHasher;
 use App\Service\UserStatusChecker;
 use DateTime;
 use DateTimeInterface;
@@ -30,7 +30,6 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -57,7 +56,7 @@ class MicrosoftController extends AbstractController
         private readonly TranslatorInterface $translator,
         private readonly CsrfTokenManagerInterface $csrfTokenManager,
         private readonly SettingRepository $settingRepository,
-        private readonly ExternalIdentifierHasher $providerIdHasher,
+        private readonly EncryptionService $encryptionService,
     ) {
     }
 
@@ -262,7 +261,7 @@ class MicrosoftController extends AbstractController
         $userAuth = new UserExternalAuth();
         $userAuth->setUser($user)
             ->setProvider(UserProvider::MICROSOFT_ACCOUNT->value)
-            ->setProviderId($this->providerIdHasher->hash($microsoftUserId));
+            ->setProviderId($this->encryptionService->encrypt($microsoftUserId));
 
         $user->setPassword('notused');
 

@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Entity\UserExternalAuth;
 use App\Enum\UserProvider;
+use App\Service\EncryptionService;
 use App\Service\ExternalIdentifierHasher;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -24,7 +25,7 @@ class HashLegacyProviderIdsCommand extends Command
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
-        private readonly ExternalIdentifierHasher $providerIdHasher,
+        private readonly EncryptionService $encryptionService,
     ) {
         parent::__construct();
     }
@@ -83,7 +84,7 @@ class HashLegacyProviderIdsCommand extends Command
                     continue;
                 }
 
-                $hashedValue = $this->providerIdHasher->hash($originalValue);
+                $hashedValue = $this->encryptionService->encrypt($originalValue);
 
                 $updateSql = sprintf('UPDATE %s SET provider_id = :provider_id WHERE id = :id', $tableName);
                 $connection->executeStatement(

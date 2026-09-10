@@ -6,12 +6,14 @@ namespace App\Service;
 
 use App\Exception\EncryptionException;
 use Exception;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 class EncryptionService
 {
     private string $cipher = "aes-256-cbc";
 
     public function __construct(
+        #[Autowire(env: 'APP_SECRET')]
         private readonly string $encryptionSecret
     ) {
     }
