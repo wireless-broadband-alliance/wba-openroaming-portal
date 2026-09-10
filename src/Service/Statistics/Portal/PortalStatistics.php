@@ -129,10 +129,17 @@ readonly class PortalStatistics
         ];
 
         foreach ($events as $event) {
-            $metadata = $event->getEventMetadata();
-            if (!isset($metadata[EventMetadataKeysType::DOWNLOADED_PROFILE_TYPE->value])) {
+            /** @var array<string, mixed>|string|null $metadata */
+            $metadata = is_array($event) ? $event['event_metadata'] : $event->getEventMetadata();
+
+            if (is_string($metadata)) {
+                $metadata = json_decode($metadata, true, 512, JSON_THROW_ON_ERROR);
+            }
+
+            if (!is_array($metadata) || !isset($metadata[EventMetadataKeysType::DOWNLOADED_PROFILE_TYPE->value])) {
                 continue;
             }
+
             $type = $metadata[EventMetadataKeysType::DOWNLOADED_PROFILE_TYPE->value];
             if (isset($result[$type])) {
                 $result[$type]++;
