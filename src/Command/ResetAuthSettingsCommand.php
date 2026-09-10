@@ -174,10 +174,10 @@ class ResetAuthSettingsCommand extends Command
             ],
             [
                 'name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value,
-                'value' => 'Login Here',
+                'value' => 'Login with Password Here',
                 'translations' => [
-                    LanguageType::EN->value => 'Login Here',
-                    LanguageType::PT->value => 'Entre Aqui',
+                    LanguageType::EN->value => 'Login with Password Here',
+                    LanguageType::PT->value => 'Entre com a sua password aqui',
                 ],
             ],
             [
