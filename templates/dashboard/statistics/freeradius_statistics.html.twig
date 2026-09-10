@@ -159,7 +159,7 @@
                             <div class="flex items-center">
                                 <h1 class="mr-2">{{ 'Usage'|trans({}, 'freeradius_statistics') }}</h1>
                                 {% set nextSort = (sortUsage == 'desc') ? 'asc' : 'desc' %}
-                                <a href="{{ path('admin_dashboard_statistics_freeradius', app.request.query.all|merge({'sortUsage': nextSort, 'page': 1})) }}"
+                                <a href="{{ path('admin_dashboard_statistics_freeradius', app.request.query.all|merge({sortUsage: nextSort, page: 1})) }}"
                                    class="p-1 hover:shadow-md rounded-lg cursor-pointer flex items-center">
                                     {{ sharedSort.sortArrow('usage', 'usage', sortUsage) }}
                                 </a>
