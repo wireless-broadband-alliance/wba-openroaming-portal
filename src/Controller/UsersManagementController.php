@@ -591,7 +591,7 @@ class UsersManagementController extends AbstractController
                     'error',
                     $this->translator->trans('PasswordPasswordConfirmationMustMatch', [], 'controllers')
                 );
-                return $this->redirectToRoute('admin_dashboard_user_edit', ['id' => $user->getId()]);
+                return $this->redirectToRoute('admin_dashboard_user_reset_password', ['id' => $user->getId()]);
             }
 
             $flashes = $this->passwordResetDashboardService->resetPassword(
