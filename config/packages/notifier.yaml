@@ -9,4 +9,4 @@ framework:
             medium: ['email']
             low: ['email']
         admin_recipients:
-            - { email: admin@example.com }
+            - { email: '%env(default:EMAIL_ADDRESS:SUPERADMIN_EMAIL)%' }

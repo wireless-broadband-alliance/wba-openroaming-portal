@@ -5,8 +5,8 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
-use App\Enum\OperationMode;
 use App\Enum\TimeRangePresetStatistics;
+use App\Form\RevokeProfilesType;
 use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\EventActions;
 use App\Service\FreeradiusConnectionService;
@@ -16,6 +16,7 @@ use App\Service\Statistics\Freeradius\ExportService;
 use App\Service\Statistics\Freeradius\FreeradiusStatistics;
 use DateTime;
 use Exception;
+use Psr\Cache\InvalidArgumentException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -48,12 +49,14 @@ class FreeradiusController extends AbstractController
      * @throws \JsonException
      * @throws \DateMalformedStringException
      * @throws Exception
+     * @throws InvalidArgumentException
      */
     #[Route('/dashboard/statistics/freeradius', name: 'admin_dashboard_statistics_freeradius')]
     public function freeradiusStatisticsData(
         Request $request,
         #[MapQueryParameter] int $page = 1,
-        #[MapQueryParameter] ?int $count = 5
+        #[MapQueryParameter] ?int $count = 5,
+        #[MapQueryParameter] string $sortUsage = 'desc'
     ): Response {
         $result = $this->freeradiusConnectionService->checkDBConnection();
         if ($result['success'] === false) {
@@ -67,7 +70,7 @@ class FreeradiusController extends AbstractController
         $data = $this->getSettings->getSettings();
 
         $user = $this->getUser();
-        $export_freeradius_statistics = $this->parameterBag->get('app.export_freeradius_statistics');
+        $exportFreeradiusStatistics = $this->parameterBag->get('app.export_freeradius_statistics');
 
         // Get the submitted start and end dates from the form
         $startDateString = $request->query->get('startDate');
@@ -79,6 +82,9 @@ class FreeradiusController extends AbstractController
         );
 
         $endDate = $endDateString ? new DateTime($endDateString) : new DateTime();
+
+        // Warns the use the auto type range detected based on the date-filter limit selected
+        $bucketGranularity = $this->statisticsFreeradius->resolveBucket($startDate, $endDate);
 
         // After computing $startDate and $endDate, detect which preset was used
         $activePreset = $request->query->get('preset', '');
@@ -116,6 +122,19 @@ class FreeradiusController extends AbstractController
         // Access Points Usage
         $fetchChartApUsage = $this->statisticsFreeradius
             ->getApUsageStats($startDate, $endDate);
+
+        // Validate and sort array before slicing
+        $sortUsage = strtolower($sortUsage) === 'asc' ? 'asc' : 'desc';
+        if ($sortUsage === 'asc') {
+            asort($fetchChartApUsage);
+        } else {
+            arsort($fetchChartApUsage);
+        }
+
+        // Access Points Usage Count & Pagination
+        $offset = ($page - 1) * $count;
+        // Keep original keys intact
+        $fetchChartApUsage = array_slice($fetchChartApUsage, $offset, $count, true);
 
         // Current Authenticated Users
         $fetchChartCurrentAuthFreeradius = $this->statisticsFreeradius
@@ -198,9 +217,11 @@ class FreeradiusController extends AbstractController
             'ApUsage' => $fetchChartApUsage,
             'selectedStartDate' => $startDate->format('Y-m-d\TH:i'),
             'selectedEndDate' => $endDate->format('Y-m-d\TH:i'),
-            'exportFreeradiusStatistics' => $export_freeradius_statistics,
+            'exportFreeradiusStatistics' => $exportFreeradiusStatistics,
             'paginationApUsage' => true,
             'activePreset' => $activePreset->value,
+            'bucketGranularity' => $bucketGranularity,
+            'sortUsage' => $sortUsage,
         ]);
     }
 
@@ -241,7 +262,6 @@ class FreeradiusController extends AbstractController
             'wifi' => $this->statisticsFreeradius->getWifiStats($startDate, $endDate),
         ];
 
-        // Export Excel ONLY
         $filePath = $this->freeradiusExportService->export($data);
 
         // Event log
@@ -256,6 +276,9 @@ class FreeradiusController extends AbstractController
             ]
         );
 
-        return $this->file($filePath, 'freeradiusStatistics.xlsx');
+        $response = $this->file($filePath, 'freeradiusStatistics.zip');
+        $response->deleteFileAfterSend();
+
+        return $response;
     }
 }

@@ -105,13 +105,25 @@ class ForgotPasswordController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-
-        $user = new User();
-        $form = $this->createForm(ForgotPasswordEmailType::class, $user);
+        $formUser = new User();
+        $form = $this->createForm(ForgotPasswordEmailType::class, $formUser);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $user = $this->userRepository->findOneBy(['uuid' => $user->getEmail()]);
+            $submittedEmail = $formUser->getEmail();
+
+            // Find existing user by email (or uuid if configured as such)
+            $user = $this->userRepository->findOneBy(['email' => $submittedEmail])
+                ?? $this->userRepository->findOneBy(['uuid' => $submittedEmail]);
+
+            if (!$user) {
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('emailDoesntExist', [], 'controllers')
+                );
+                return $this->redirectToRoute('app_site_forgot_password_email');
+            }
+
             if ($user->getEmail() === $data[SettingName::BREAKING_GLASS_ADMIN_EMAIL->value]['value']) {
                 $this->addFlash(
                     'error',
@@ -119,112 +131,105 @@ class ForgotPasswordController extends AbstractController
                 );
                 return $this->redirectToRoute('app_site_forgot_password_email');
             }
-            if ($user) {
-                // Check if the provider is "PORTAL_ACCOUNT" and the providerId "EMAIL"
-                $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
-                $hasValidPortalAccount = false;
-                // Check if the user has an external auth with PortalAccount and a valid email as providerId
-                foreach ($userExternalAuths as $auth) {
-                    if (
-                        $auth->getProvider() === UserProvider::PORTAL_ACCOUNT->value &&
-                        $auth->getProviderId() === UserProvider::EMAIL->value
-                    ) {
-                        $hasValidPortalAccount = true;
-                        break;
-                    }
+
+            // Check if the provider is "PORTAL_ACCOUNT" and the providerId "EMAIL"
+            $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
+            $hasValidPortalAccount = false;
+
+            foreach ($userExternalAuths as $auth) {
+                if (
+                    $auth->getProvider() === UserProvider::PORTAL_ACCOUNT->value &&
+                    $auth->getProviderId() === UserProvider::EMAIL->value
+                ) {
+                    $hasValidPortalAccount = true;
+                    break;
                 }
-                if ($hasValidPortalAccount) {
-                    $attemptsVerification = $this->forgotPasswordService->userCanResetPassword($user);
-                    if (
-                        $attemptsVerification[ForgotPasswordEnum::SUCCESS->value]
-                    ) {
-                        $latestEvent = new Event();
-                        $latestEvent->setUser($user);
-                        $latestEvent->setEventDatetime(new DateTime());
-                        $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value);
-                        $latestEventMetadata = [
-                            EventMetadataKeysType::PLATFORM->value => PlatformMode::LIVE->value,
-                            EventMetadataKeysType::IP->value => $request->getClientIp(),
-                            EventMetadataKeysType::UUID->value => $user->getUuid(),
-                        ];
-                        $currentTime = new DateTime();
-                        $latestEventMetadata['lastVerificationCodeTime'] =
-                            $currentTime->format(DateTimeInterface::ATOM);
-                        $latestEvent->setEventMetadata($latestEventMetadata);
-                        $user->setTwoFAcode((string)random_int(100000, 999999));
-                        $user->setTwoFACodeGeneratedAt(new DateTime());
-                        $user->setTwoFAcodeIsActive(true);
+            }
 
-                        $this->entityManager->persist($latestEvent);
-                        $this->entityManager->persist($user);
-                        $this->entityManager->flush();
+            if ($hasValidPortalAccount) {
+                $attemptsVerification = $this->forgotPasswordService->userCanResetPassword($user);
+                if ($attemptsVerification[ForgotPasswordEnum::SUCCESS->value]) {
+                    $latestEvent = new Event();
+                    $latestEvent->setUser($user);
+                    $latestEvent->setEventDatetime(new DateTime());
+                    $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value);
+                    $latestEventMetadata = [
+                        EventMetadataKeysType::PLATFORM->value => PlatformMode::LIVE->value,
+                        EventMetadataKeysType::IP->value => $request->getClientIp(),
+                        EventMetadataKeysType::UUID->value => $user->getUuid(),
+                    ];
+                    $currentTime = new DateTime();
+                    $latestEventMetadata['lastVerificationCodeTime'] =
+                        $currentTime->format(DateTimeInterface::ATOM);
+                    $latestEvent->setEventMetadata($latestEventMetadata);
+                    $user->setTwoFAcode((string)random_int(100000, 999999));
+                    $user->setTwoFACodeGeneratedAt(new DateTime());
+                    $user->setTwoFAcodeIsActive(true);
 
-                        // Send email for the user
-                        $this->emailGenerator->sendForgotPasswordEmail($user);
+                    $this->entityManager->persist($latestEvent);
+                    $this->entityManager->persist($user);
+                    $this->entityManager->flush();
 
-                        $message = $this->translator->trans(
-                            'emailSentMessage',
-                            ['%email%' => $user->getEmail()],
-                            'controllers'
-                        );
-                        $this->addFlash('success', $message);
-                    } else {
-                        // Inform the user to wait before trying again
-                        $timeLeft = $attemptsVerification[ForgotPasswordEnum::TIME_LEFT->value];
-                        if (
-                            $attemptsVerification[ForgotPasswordEnum::MESSAGE_TYPE->value] ===
-                            ForgotPasswordEnum::ATTEMPTS_EXCEEDED->value
-                        ) {
-                            $minutes = ($timeLeft->days * 24 * 60)
-                                + ($timeLeft->h * 60)
-                                + $timeLeft->i;
-                            $this->addFlash(
-                                'error',
-                                $this->translator->trans(
-                                    'tooManyAttemptsMinutes',
-                                    ['%minutes%' => $minutes],
-                                    'controllers'
-                                )
-                            );
-                        } elseif (
-                            $attemptsVerification[ForgotPasswordEnum::MESSAGE_TYPE->value] ===
-                            ForgotPasswordEnum::TIME_BETWEEN_REQUESTS->value
-                        ) {
-                            $seconds = ($timeLeft->days * 24 * 3600)
-                                + ($timeLeft->h * 3600)
-                                + ($timeLeft->i * 60)
-                                + $timeLeft->s;
-                            $this->addFlash(
-                                'error',
-                                $this->translator->trans(
-                                    'timeBetweenRequests',
-                                    ['%seconds%' => $seconds],
-                                    'controllers'
-                                )
-                            );
-                        } else {
-                            $timeToResetAttempts =
-                                $data[SettingName::EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS->value]['value'];
-                            $this->addFlash(
-                                'error',
-                                $this->translator->trans(
-                                    'waitBeforeTryingAgain',
-                                    ['%minutes%' => $timeToResetAttempts],
-                                    'controllers'
-                                )
-                            );
-                        }
-                    }
-                } else {
-                    $this->addFlash(
-                        'error',
-                        $this->translator->trans('emailNotAssociatedWithValidAccount', [], 'controllers')
+                    // Send email for the user
+                    $this->emailGenerator->sendForgotPasswordEmail($user);
+
+                    $message = $this->translator->trans(
+                        'emailSentMessage',
+                        ['%email%' => $user->getEmail()],
+                        'controllers'
                     );
+                    $this->addFlash('success', $message);
+                } else {
+                    // Inform the user to wait before trying again
+                    $timeLeft = $attemptsVerification[ForgotPasswordEnum::TIME_LEFT->value];
+                    if (
+                        $attemptsVerification[ForgotPasswordEnum::MESSAGE_TYPE->value] ===
+                        ForgotPasswordEnum::ATTEMPTS_EXCEEDED->value
+                    ) {
+                        $minutes = ($timeLeft->days * 24 * 60)
+                            + ($timeLeft->h * 60)
+                            + $timeLeft->i;
+                        $this->addFlash(
+                            'error',
+                            $this->translator->trans(
+                                'tooManyAttemptsMinutes',
+                                ['%minutes%' => $minutes],
+                                'controllers'
+                            )
+                        );
+                    } elseif (
+                        $attemptsVerification[ForgotPasswordEnum::MESSAGE_TYPE->value] ===
+                        ForgotPasswordEnum::TIME_BETWEEN_REQUESTS->value
+                    ) {
+                        $seconds = ($timeLeft->days * 24 * 3600)
+                            + ($timeLeft->h * 3600)
+                            + ($timeLeft->i * 60)
+                            + $timeLeft->s;
+                        $this->addFlash(
+                            'error',
+                            $this->translator->trans(
+                                'replyCodeTotp',
+                                ['%seconds%' => $seconds],
+                                'controllers'
+                            )
+                        );
+                    } else {
+                        $timeToResetAttempts =
+                            $data[SettingName::EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS->value]['value'];
+                        $this->addFlash(
+                            'error',
+                            $this->translator->trans(
+                                'waitBeforeTryingAgain',
+                                ['%minutes%' => $timeToResetAttempts],
+                                'controllers'
+                            )
+                        );
+                    }
                 }
             } else {
                 $this->addFlash(
                     'error',
-                    $this->translator->trans('emailDoesntExist', [], 'controllers')
+                    $this->translator->trans('emailNotAssociatedWithValidAccount', [], 'controllers')
                 );
             }
         }
@@ -365,7 +370,7 @@ class ForgotPasswordController extends AbstractController
                     $this->addFlash(
                         'error',
                         $this->translator->trans(
-                            'timeBetweenRequests',
+                            'replyCodeTotp',
                             ['%seconds%' => $seconds],
                             'controllers'
                         )

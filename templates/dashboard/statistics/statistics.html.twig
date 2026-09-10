@@ -3,15 +3,17 @@
 {% block title %}{{ 'adminPageWBA'|trans({}, 'statistics') }}{% endblock %}
 
 {% block container %}
-    {# Header #}
-    <div class="flex flex-col lg:flex-row space-y-4 lg:space-y-0 justify-end items-center mb-10">
+    {# Main two-column layout wrapper #}
+
+    {# ── LEFT COLUMN ── #}
+    <div class="flex justify-end items-center mb-6">
         {{ include('dashboard/shared/_date_filter_form.html.twig', {
-            routeName: 'admin_dashboard_statistics',
+            routeName: 'admin_dashboard_statistics_freeradius',
         }) }}
     </div>
 
     {# Charts #}
-    <div class="grid gap-8 grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3">
+    <div class="grid gap-4 grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3">
 
         {# SMS & Email #}
         <div class="bg-white rounded-lg px-5 pt-4 pb-6 flex flex-col gap-4 shadow">
@@ -25,7 +27,7 @@
                     </div>
                 </div>
             </div>
-            <div class="flex items-center justify-center gap-8 py-2">
+            <div class="flex items-center justify-center gap-4 py-2">
                 <div class="relative flex-shrink-0 overflow-visible" style="width:200px; height:200px;">
                     <canvas style="width:200px; height:200px;"
                             data-controller="statistics"
@@ -57,7 +59,7 @@
                     </div>
                 </div>
             </div>
-            <div class="flex items-center justify-center gap-8 py-2">
+            <div class="flex items-center justify-center gap-4 py-2">
                 <div class="relative flex-shrink-0 overflow-visible" style="width:200px; height:200px;">
                     <canvas style="width:200px; height:200px;"
                             data-controller="statistics"
@@ -89,7 +91,7 @@
                     </div>
                 </div>
             </div>
-            <div class="flex items-center justify-center gap-8 py-2">
+            <div class="flex items-center justify-center gap-4 py-2">
                 <div class="relative flex-shrink-0 overflow-visible" style="width:200px; height:200px;">
                     <canvas style="width:200px; height:200px;"
                             data-controller="statistics"
@@ -121,7 +123,7 @@
                     </div>
                 </div>
             </div>
-            <div class="flex items-center justify-center gap-8 py-2">
+            <div class="flex items-center justify-center gap-4 py-2">
                 <div class="relative flex-shrink-0 overflow-visible" style="width:200px; height:200px;">
                     <canvas style="width:200px; height:200px;"
                             data-controller="statistics"
@@ -142,7 +144,7 @@
         </div>
 
         {# Users Management #}
-        <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
+        <div class="bg-white rounded-lg px-5 pt-4 pb-6 flex flex-col gap-4 shadow">
             <div class="flex items-center justify-between">
                 <h1 class="text-lg font-medium">{{ 'usersManagement'|trans({}, 'statistics') }}</h1>
                 <div class="flex items-center gap-3">
@@ -153,16 +155,28 @@
                     </div>
                 </div>
             </div>
-            <div class="relative h-64">
-                <canvas data-controller="statistics"
-                        data-statistics-target="chart"
-                        data-chart-style="users-verified"
-                        data-chart-data="{{ charts.usersVerified.dataJson }}"></canvas>
+            <div class="flex items-center justify-center gap-4 py-2">
+                <div class="relative flex-shrink-0 overflow-visible" style="width:200px; height:200px;">
+                    <canvas style="width:200px; height:200px;"
+                            data-controller="statistics"
+                            data-statistics-target="chart"
+                            data-chart-style="users-verified"
+                            data-chart-data="{{ charts.usersVerified.dataJson }}"></canvas>
+                </div>
+                <ul class="flex flex-col gap-4 text-sm">
+                    {% for item in charts.usersVerified.legend %}
+                        <li class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full flex-shrink-0 users-verified-dot-{{ loop.index0 }}"></span>
+                            <span class="text-gray-500">{{ item.label }} ({{ item.pct }}%)</span>
+                            <strong class="ml-1 text-gray-900">{{ item.count|number_format(0, '.', ' ') }}</strong>
+                        </li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
 
         {# Users 2FA Configuration Status #}
-        <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
+        <div class="bg-white rounded-lg px-5 pt-4 pb-6 flex flex-col gap-4 shadow">
             <div class="flex items-center justify-between">
                 <h1 class="text-lg font-medium">{{ 'users2FAStatus'|trans({}, 'statistics') }}</h1>
                 <div class="flex items-center gap-3">
@@ -173,11 +187,23 @@
                     </div>
                 </div>
             </div>
-            <div class="relative h-64">
-                <canvas data-controller="statistics"
-                        data-statistics-target="chart"
-                        data-chart-style="2fa"
-                        data-chart-data="{{ charts.twoFA.dataJson }}"></canvas>
+            <div class="flex items-center justify-center gap-4 py-2">
+                <div class="relative flex-shrink-0 overflow-visible" style="width:200px; height:200px;">
+                    <canvas style="width:200px; height:200px;"
+                            data-controller="statistics"
+                            data-statistics-target="chart"
+                            data-chart-style="2fa"
+                            data-chart-data="{{ charts.twoFA.dataJson }}"></canvas>
+                </div>
+                <ul class="flex flex-col gap-4 text-sm">
+                    {% for item in charts.twoFA.legend %}
+                        <li class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full flex-shrink-0 twofa-dot-{{ loop.index0 }}"></span>
+                            <span class="text-gray-500">{{ item.label }} ({{ item.pct }}%)</span>
+                            <strong class="ml-1 text-gray-900">{{ item.count|number_format(0, '.', ' ') }}</strong>
+                        </li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
 

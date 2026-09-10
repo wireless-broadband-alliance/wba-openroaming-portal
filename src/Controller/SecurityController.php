@@ -588,7 +588,6 @@ class SecurityController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
-
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
 
         // Check if the user is already verified

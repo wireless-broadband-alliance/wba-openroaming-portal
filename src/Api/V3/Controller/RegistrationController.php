@@ -58,14 +58,12 @@ class RegistrationController extends AbstractController
         private readonly EventRepository $eventRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly EventActions $eventActions,
-        private readonly ParameterBagInterface $parameterBag,
         private readonly SendSMS $sendSMSService,
         private readonly SettingRepository $settingRepository,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
         private readonly CaptchaValidator $captchaValidator,
         private readonly EmailGenerator $emailGenerator,
         private readonly ValidatorInterface $validator,
-        private readonly MailerInterface $mailer,
         private readonly PhoneNumberUtil $phoneNumberUtil,
         private readonly UserStatusChecker $userStatusChecker
     ) {
@@ -371,31 +369,8 @@ class RegistrationController extends AbstractController
                     $this->entityManager->persist($user);
                     $this->entityManager->flush();
 
-                    $email = new TemplatedEmail()
-                        ->from(
-                            new Address(
-                                $this->parameterBag->get('app.email_address'),
-                                $this->parameterBag->get('app.sender_name')
-                            )
-                        )
-                        ->to($user->getEmail())
-                        ->subject('OpenRoaming Portal - Password Request')
-                        ->htmlTemplate('email/user_forgot_password_request.html.twig')
-                        ->context([
-                            'password' => $randomPassword,
-                            'forgotPasswordUser' => true,
-                            'uuid' => $user->getUuid(),
-                            'currentPassword' => $randomPassword,
-                            'verificationCode' => $user->getTwoFAcode(),
-                            'emailTitle' => $this->settingRepository->findOneBy([
-                                'name' => SettingName::PAGE_TITLE->value
-                            ])->getValue(),
-                            'contactEmail' => $this->settingRepository->findOneBy(
-                                ['name' => 'CONTACT_EMAIL']
-                            )->getValue()
-                        ]);
-
-                    $this->mailer->send($email);
+                    // Send the actual forgot password email, the same has the UI has
+                    $this->emailGenerator->sendForgotPasswordEmail($user);
 
                     // Defines the Event to the table
                     $eventMetadata = [

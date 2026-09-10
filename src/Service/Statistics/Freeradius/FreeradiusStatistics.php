@@ -5,231 +5,216 @@ namespace App\Service\Statistics\Freeradius;
 use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
 use DateTime;
-use DateTimeInterface;
+use Psr\Cache\InvalidArgumentException;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 readonly class FreeradiusStatistics
 {
+    private const int CACHE_TTL = 600; // 10 min — historical radacct data for closed periods never changes
+
     public function __construct(
         private RadiusAuthsRepository $radiusAuthsRepository,
         private RadiusAccountingRepository $radiusAccountingRepository,
+        private CacheInterface $cache, // autowires to cache.app by default, no extra config needed
     ) {
     }
 
+    public function resolveBucket(DateTime $start, DateTime $end): string
+    {
+        $days = $start->diff($end)->days;
+
+        return match (true) {
+            $days <= 2 => 'hour',
+            $days <= 90 => 'day',
+            $days <= 730 => 'week',
+            $days <= 10825 => 'month', // up to 5 years
+            default => 'year',
+        };
+    }
+
     // AUTHENTICATION STATS
+
     /**
-     * @throws \Exception
      * @return array<string, array{accepted: int, rejected: int}>
+     * @throws InvalidArgumentException
      */
     public function getAuthenticationStats(DateTime $start, DateTime $end): array
     {
-        $events = $this->radiusAuthsRepository->getAuthEventsBySecond($start, $end);
+        $bucket = $this->resolveBucket($start, $end);
+        $key = $this->cacheKey('auth', $start, $end, $bucket);
 
-        $result = [];
+        return $this->cache->get($key, function (ItemInterface $item) use ($start, $end, $bucket) {
+            $item->expiresAfter(self::CACHE_TTL);
 
-        foreach ($events as $event) {
-            /** @phpstan-ignore-next-line */
-            $date = $event->getAuthdate();
-            if (!$date instanceof DateTimeInterface) {
-                continue;
+            $result = [];
+            foreach ($this->radiusAuthsRepository->getAuthCountsByDayAndReply($start, $end, $bucket) as $row) {
+                $result[$row['bucket']] ??= ['accepted' => 0, 'rejected' => 0];
+                match ($row['reply']) {
+                    'Access-Accept' => $result[$row['bucket']]['accepted'] += (int)$row['cnt'],
+                    'Access-Reject' => $result[$row['bucket']]['rejected'] += (int)$row['cnt'],
+                    default => null,
+                };
             }
-
-            $key = $date->format('Y-m-d');
-
-            $result[$key] ??= [
-                'accepted' => 0,
-                'rejected' => 0,
-            ];
-
-            /** @phpstan-ignore-next-line */
-            match ($event->getReply()) {
-                'Access-Accept' => $result[$key]['accepted']++,
-                'Access-Reject' => $result[$key]['rejected']++,
-                default => null,
-            };
-        }
-
-        return $result;
+            return $result;
+        });
     }
 
     // SESSION AVERAGE
     /**
      * @return array<string, float>
+     *@throws InvalidArgumentException
      */
     public function getSessionAverageStats(DateTime $start, DateTime $end): array
     {
-        $events = $this->radiusAccountingRepository->fetchByDateRange($start, $end);
-
-        $totals = [];
-        $counts = [];
-
-        foreach ($events as $event) {
-            $date = $event->getAcctStartTime();
-            if (!$date instanceof DateTimeInterface) {
-                continue;
-            }
-
-            $key = $date->format('Y-m-d');
-
-            $totals[$key] ??= 0;
-            $counts[$key] ??= 0;
-
-            $totals[$key] += (float)$event->getAcctSessionTime();
-            $counts[$key]++;
-        }
-
         $result = [];
-
-        foreach ($totals as $key => $total) {
-            $result[$key] = $counts[$key] > 0
-                ? $total / $counts[$key]
-                : 0;
+        foreach ($this->getSessionStatsByBucket($start, $end) as $row) {
+            $result[$row['bucket']] = (float)$row['avg_time'];
         }
-
         return $result;
     }
 
     // SESSION TOTAL
     /**
      * @return array<string, float>
+     *@throws InvalidArgumentException
      */
     public function getSessionTotalStats(DateTime $start, DateTime $end): array
     {
-        $events = $this->radiusAccountingRepository->fetchByDateRange($start, $end);
-
         $result = [];
-
-        foreach ($events as $event) {
-            $date = $event->getAcctStartTime();
-            if (!$date instanceof DateTimeInterface) {
-                continue;
-            }
-
-            $key = $date->format('Y-m-d');
-
-            $result[$key] ??= 0;
-            $result[$key] += (float)$event->getAcctSessionTime();
+        foreach ($this->getSessionStatsByBucket($start, $end) as $row) {
+            $result[$row['bucket']] = (float)$row['total_time'];
         }
-
         return $result;
     }
 
     // REALM USAGE
     /**
      * @return array<string, int>
+     *@throws InvalidArgumentException
      */
     public function getRealmUsageStats(DateTime $start, DateTime $end): array
     {
-        $events = $this->radiusAccountingRepository->fetchByDateRange($start, $end);
+        $key = $this->cacheKey('realm', $start, $end);
 
-        $result = [];
-
-        foreach ($events as $event) {
-            $realm = (string)$event->getRealm();
-            if ($realm === '') {
-                continue;
+        return $this->cache->get($key, function (ItemInterface $item) use ($start, $end) {
+            $item->expiresAfter(self::CACHE_TTL);
+            $result = [];
+            foreach ($this->radiusAccountingRepository->getRealmUsageCounts($start, $end) as $row) {
+                $result[$row['realm']] = (int)$row['cnt'];
             }
-
-            $result[$realm] ??= 0;
-            $result[$realm]++;
-        }
-
-        return $result;
+            return $result;
+        });
     }
 
     // CURRENT AUTH
+    /**
+     * @return array<string, int>
+     * @throws InvalidArgumentException
+     */
+    public function getWifiStats(DateTime $start, DateTime $end): array
+    {
+        $key = $this->cacheKey('wifi', $start, $end);
+
+        return $this->cache->get($key, function (ItemInterface $item) use ($start, $end) {
+            $item->expiresAfter(self::CACHE_TTL);
+            $result = [];
+
+            foreach ($this->radiusAccountingRepository->getWifiTypeCounts($start, $end) as $row) {
+                // Ignore 'Unknown' or empty/null wifi types
+                if (empty($row['wifi_type']) || $row['wifi_type'] === 'Unknown') {
+                    continue;
+                }
+
+                $result[$row['wifi_type']] = (int)$row['cnt'];
+            }
+
+            return $result;
+        });
+    }
+
+    // ACCESS POINT USAGE
+
+    /**
+     * @return array<string, int>
+     * @throws InvalidArgumentException
+     */
+    public function getApUsageStats(DateTime $start, DateTime $end): array
+    {
+        $key = $this->cacheKey('ap', $start, $end);
+
+        return $this->cache->get($key, function (ItemInterface $item) use ($start, $end) {
+            $item->expiresAfter(self::CACHE_TTL);
+            $result = [];
+            foreach ($this->radiusAccountingRepository->getApUsageCounts($start, $end) as $row) {
+                $result[$row['ap']] = (int)$row['cnt'];
+            }
+            return $result;
+        });
+    }
+
+    // TRAFFIC
+    /**
+     * @return array<string, array{input: int, output: int}>
+     *@throws InvalidArgumentException
+     */
+    public function getTrafficStats(DateTime $start, DateTime $end): array
+    {
+        $key = $this->cacheKey('traffic', $start, $end);
+
+        return $this->cache->get($key, function (ItemInterface $item) use ($start, $end) {
+            $item->expiresAfter(self::CACHE_TTL);
+            $rows = $this->radiusAccountingRepository->findTrafficPerRealm($start, $end)->getResult();
+
+            $result = [];
+            foreach ($rows as $row) {
+                $realm = (string)$row['realm'];
+                $result[$realm] ??= ['input' => 0, 'output' => 0];
+                $result[$realm]['input'] += (int)$row['total_input'];
+                $result[$realm]['output'] += (int)$row['total_output'];
+            }
+            return $result;
+        });
+    }
+
+    // Deliberately NOT cached — "Current Authentications" is meant to be live.
+
     /**
      * @return array<string, int>
      */
     public function getCurrentAuthStats(): array
     {
         $sessions = $this->radiusAccountingRepository->findActiveSessions()->getResult();
-
         $result = [];
-
         foreach ($sessions as $session) {
-            $realm = $session['realm'];
-            $result[$realm] = (int)$session['num_users'];
+            $result[$session['realm']] = (int)$session['num_users'];
         }
-
         return $result;
     }
 
-    // TRAFFIC
     /**
-     * @return array<string, array{input: int, output: int}>
+     * @return list<array<string, mixed>>
+     * @throws InvalidArgumentException
      */
-    public function getTrafficStats(DateTime $start, DateTime $end): array
+    private function getSessionStatsByBucket(DateTime $start, DateTime $end): array
     {
-        $rows = $this->radiusAccountingRepository
-            ->findTrafficPerRealm($start, $end)
-            ->getResult();
+        $bucket = $this->resolveBucket($start, $end);
+        $key = $this->cacheKey('session_stats', $start, $end, $bucket);
 
-        $result = [];
-
-        foreach ($rows as $row) {
-            $realm = (string)$row['realm'];
-
-            $result[$realm] ??= [
-                'input' => 0,
-                'output' => 0,
-            ];
-
-            $result[$realm]['input'] += (int)$row['total_input'];
-            $result[$realm]['output'] += (int)$row['total_output'];
-        }
-
-        return $result;
+        return $this->cache->get($key, function (ItemInterface $item) use ($start, $end, $bucket) {
+            $item->expiresAfter(self::CACHE_TTL);
+            return $this->radiusAccountingRepository->getSessionStatsByDay($start, $end, $bucket);
+        });
     }
 
-    // WIFI STATS
-    /**
-     * @return array<string, int>
-     */
-    public function getWifiStats(DateTime $start, DateTime $end): array
+    private function cacheKey(string $method, DateTime $start, DateTime $end, ?string $bucket = null): string
     {
-        $events = $this->radiusAccountingRepository->fetchByDateRange($start, $end);
-
-        $result = [];
-
-        foreach ($events as $event) {
-            $info = (string)$event->getConnectInfoStart();
-
-            $type = match (true) {
-                str_contains($info, '802.11be') => 'Wi-Fi 7',
-                str_contains($info, '802.11ax') => 'Wi-Fi 6',
-                str_contains($info, '802.11ac') => 'Wi-Fi 5',
-                str_contains($info, '802.11n') => 'Wi-Fi 4',
-                default => 'Unknown',
-            };
-
-            $result[$type] ??= 0;
-            $result[$type]++;
-        }
-
-        return $result;
-    }
-
-    // AP USAGE
-    /**
-     * @return array<string, int>
-     */
-    public function getApUsageStats(DateTime $start, DateTime $end): array
-    {
-        $events = $this->radiusAccountingRepository->fetchByDateRange($start, $end);
-
-        $result = [];
-
-        foreach ($events as $event) {
-            $ap = $event->getCalledStationId();
-
-            if (!$ap) {
-                continue;
-            }
-
-            $result[$ap] ??= 0;
-            $result[$ap]++;
-        }
-
-        return $result;
+        return sprintf(
+            'freeradius_stats.%s.%s.%s.%s',
+            $method,
+            $start->format('YmdHis'),
+            $end->format('YmdHis'),
+            $bucket ?? 'none'
+        );
     }
 }

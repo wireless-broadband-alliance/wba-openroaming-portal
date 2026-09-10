@@ -160,7 +160,7 @@ class CertificateManagementFreeradiusController extends AbstractController
             }
 
             // Save CA.pem in the application
-            $tmpPath = sys_get_temp_dir() . '/ca.pem';
+            $tmpPath = tempnam(sys_get_temp_dir(), 'ca_pem_');
             $caContent = rtrim($caContent) . "\n"; // Ensure is ends with a breaking line
             file_put_contents($tmpPath, $caContent);
 

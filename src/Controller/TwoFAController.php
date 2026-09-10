@@ -760,6 +760,8 @@ class TwoFAController extends AbstractController
                 AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND->value,
             CodeVerificationType::VERIFICATION_CODE_LOGIN_RESEND->value =>
                 AnalyticalEventType::VERIFICATION_CODE_LOGIN_RESEND->value,
+            CodeVerificationType::AUTO_DELETE_RESEND->value =>
+                AnalyticalEventType::USER_AUTO_DELETE_CODE->value,
         ];
         $eventType = $eventTypeMapping[$type] ?? null;
 

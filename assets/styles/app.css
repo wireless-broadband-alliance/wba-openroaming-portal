@@ -238,31 +238,33 @@
 }
 
 .landing-container {
-    @apply bg-white shadow-2xl rounded-2xl w-[95%] sm:w-[90%] min-h-[80vh] sm:min-h-[85vh] pt-12 px-6 sm:px-10 flex flex-col;
+    @apply bg-white shadow-2xl rounded-2xl
+    w-[95%] sm:w-[92%] md:w-[90%] lg:w-[88%] xl:w-[85%] 2xl:w-[80%]
+    max-w-[2400px]
+    min-h-[calc(100vh-4rem)] sm:min-h-[calc(100vh-6rem)]
+    p-6 sm:p-10 lg:p-12 2xl:p-16
+    flex flex-col justify-between
+    transition-all duration-300;
+}
+
+.landing-content {
+    @apply flex-1 flex flex-col justify-between w-full;
 }
 
 .landing-header {
     @apply flex flex-col-reverse sm:flex-row sm:items-center justify-between mb-4 gap-2;
 }
 
-.landing-content {
-    @apply h-[70vh] overflow-y-auto p-4;
-}
-
 .landing-language-selector {
     @apply self-end sm:self-auto z-30;
 }
 
-.instructions-header {
-    @apply flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-2;
-}
-
 .instructions-title {
-    @apply text-xl sm:text-2xl md:text-3xl font-bold pb-8;
+    @apply text-xl sm:text-2xl md:text-3xl font-bold;
 }
 
 .instructions-tabs {
-    @apply grid grid-cols-2 sm:grid-cols-4 gap-2 border-b border-gray-200 mb-6 w-full pb-8;
+    @apply grid grid-cols-2 sm:grid-cols-4 gap-2 border-b border-gray-200 mb-6 w-full pb-4;
 }
 
 .instructions-tab {
@@ -270,7 +272,7 @@
 }
 
 .instructions-content {
-    @apply h-[60vh] overflow-y-auto p-2;
+    @apply flex-1 p-2;
 }
 
 /* Hamburger Menu */

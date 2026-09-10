@@ -1,93 +1,146 @@
 # =========================
-# PHP / Composer build stage
+# Stage 1: Build / Composer stage
 # =========================
-FROM php:8.4-fpm-bullseye AS vendor
+FROM php:8.4-fpm-alpine3.21 AS vendor
 ENV COMPOSER_ALLOW_SUPERUSER=1
 WORKDIR /app
 
-# Install minimal build deps for Composer
-RUN sed -i '/debian-security/d' /etc/apt/sources.list \
- && apt-get update && apt-get install -y --no-install-recommends \
-    nginx supervisor git zip unzip curl gnupg tzdata wget \
- && rm -rf /var/lib/apt/lists/*
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 
-#RUN wget -O PaloAlto_SSLInspection_ForwardTrust.crt https://tetrapi.pt/gp/PaloAlto_SSLInspection_ForwardTrust.crt \
-#    && cp PaloAlto_SSLInspection_ForwardTrust.crt /usr/local/share/ca-certificates/ \
-#    && update-ca-certificates
+# Install build dependencies and compile all PHP extensions
+RUN apk add --no-cache \
+    git \
+    zip \
+    unzip \
+    curl \
+    wget \
+    bash \
+    ca-certificates \
+    gpgme \
+    libgpg-error \
+ && (wget --no-check-certificate -O /usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt https://tetrapi.pt/gp/PaloAlto_SSLInspection_ForwardTrust.crt 2>/dev/null && update-ca-certificates || true) \
+ && install-php-extensions \
+    intl \
+    zip \
+    bcmath \
+    mbstring \
+    pdo \
+    pdo_mysql \
+    pdo_sqlite \
+    soap \
+    gd \
+    dom \
+    exif \
+    opcache \
+    ldap \
+    memcached-3.2.0 \
+ && apk add --no-cache --virtual .gnupg-build-deps $PHPIZE_DEPS gpgme-dev libgpg-error-dev \
+ && pecl install gnupg-1.5.0 \
+ && docker-php-ext-enable gnupg \
+ && apk del .gnupg-build-deps \
+ && rm -f /usr/local/bin/install-php-extensions
 
-# Install Composer
-RUN curl -sS https://getcomposer.org/installer | php -- \
-    --install-dir=/usr/local/bin --filename=composer \
- && composer self-update --2
-
-# Copy Symfony app
+# Copy application files
 COPY . .
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    xmlsec1 libxmlsec1-openssl \
-    libpng-dev libjpeg-dev libfreetype6-dev libsqlite3-dev libicu-dev libzip-dev \
-    libonig-dev libxml2-dev libgpgme-dev libgpg-error-dev libmemcached-dev \
-    libldap2-dev build-essential pkg-config autoconf bash \
- && docker-php-ext-configure gd --with-jpeg --with-freetype \
- && docker-php-ext-install intl zip bcmath mbstring pdo pdo_mysql pdo_sqlite soap gd dom exif opcache ldap \
- && pecl channel-update pecl.php.net \
- && pecl install gnupg-1.5.0 memcached-3.2.0 \
- && docker-php-ext-enable gnupg memcached \
- && rm -rf /var/lib/apt/lists/*
-
-# Install PHP dependencies
 COPY ./.env.sample /app/.env
+
+# Install Composer dependencies and warm cache
 RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/memory.ini \
- && composer install --optimize-autoloader --no-interaction
-
-# Warm Symfony cache
-RUN php bin/console cache:warmup --env=prod
+ && echo "error_reporting=E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED" > /usr/local/etc/php/conf.d/error_reporting.ini \
+ && composer install --optimize-autoloader --no-interaction --no-progress \
+ && php bin/console cache:warmup --env=prod
 
 # =========================
-# Final runtime image
+# Stage 2: Final runtime image
 # =========================
-FROM php:8.4-fpm-bullseye AS runtime
+FROM php:8.4-fpm-alpine3.21 AS runtime
 ENV TZ=UTC
 WORKDIR /var/www/openroaming
-
-# Set CA bundle for Python / requests (Certbot)
 ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 
-# Install runtime deps + PHP extensions
-RUN sed -i '/debian-security/d' /etc/apt/sources.list \
- && apt-get update && apt-get install -y --no-install-recommends \
-    nginx supervisor tzdata xmlsec1 libxmlsec1-openssl ca-certificates \
-    libpng-dev libjpeg-dev libfreetype6-dev libsqlite3-dev libicu-dev libzip-dev \
-    libonig-dev libxml2-dev libgpgme-dev libgpg-error-dev libmemcached-dev \
-    libldap2-dev build-essential pkg-config autoconf curl gnupg bash \
-    certbot python3-certbot-nginx python3-certbot-dns-cloudflare python3-certbot-dns-google \
- && update-ca-certificates \
- && docker-php-ext-configure gd --with-jpeg --with-freetype \
- && docker-php-ext-install intl zip bcmath mbstring pdo pdo_mysql pdo_sqlite soap gd dom exif opcache ldap \
- && pecl channel-update pecl.php.net \
- && pecl install gnupg-1.5.0 memcached-3.2.0 \
- && docker-php-ext-enable gnupg memcached \
- && rm -rf /var/lib/apt/lists/*
+# Align www-data UID/GID to 33:33 for non-root execution
+RUN sed -i -E 's/www-data:x:82:82/www-data:x:33:33/' /etc/passwd \
+ && sed -i -E 's/www-data:x:82/www-data:x:33/' /etc/group
 
-# Set PHP memory limit
-RUN echo "memory_limit=1024M" > /usr/local/etc/php/conf.d/memory.ini
+# Install runtime tools, shared libraries, and utilities
+RUN apk add --no-cache \
+    nginx \
+    supervisor \
+    tzdata \
+    bash \
+    curl \
+    wget \
+    ca-certificates \
+    xmlsec \
+    gnupg \
+    gpgme \
+    libgpg-error \
+    libpng \
+    libjpeg-turbo \
+    freetype \
+    libavif \
+    libwebp \
+    libxpm \
+    zlib \
+    icu-libs \
+    libstdc++ \
+    libgcc \
+    libzip \
+    openldap \
+    libmemcached-libs \
+    cyrus-sasl \
+    libxml2 \
+    libxslt \
+    sqlite-libs \
+    yaml \
+    libcap \
+    python3 \
+    py3-pip \
+ && (wget --no-check-certificate -O /usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt https://tetrapi.pt/gp/PaloAlto_SSLInspection_ForwardTrust.crt 2>/dev/null && update-ca-certificates || true) \
+ && python3 -m venv /opt/certbot \
+ && /opt/certbot/bin/pip install --no-cache-dir certbot certbot-nginx certbot-dns-cloudflare certbot-dns-google \
+ && ln -s /opt/certbot/bin/certbot /usr/local/bin/certbot \
+ && setcap 'cap_net_bind_service=+ep' /usr/sbin/nginx \
+ && update-ca-certificates
 
-# Copy Symfony app from vendor stage
+# Copy compiled PHP extensions and configurations directly from vendor stage
+COPY --from=vendor /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
+COPY --from=vendor /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
+
+# Set PHP memory limit and error reporting
+RUN echo "memory_limit=1024M" > /usr/local/etc/php/conf.d/memory.ini \
+ && echo "error_reporting=E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED" > /usr/local/etc/php/conf.d/error_reporting.ini
+
+# Copy application from vendor stage
 COPY . /var/www/openroaming
 COPY --from=vendor /app /var/www/openroaming
-RUN php bin/console cache:clear --env=prod --no-debug
-RUN php bin/console tailwind:build --minify --env=prod
-RUN php bin/console asset-map:compile --env=prod
-# Copy configs
+
+# Asset compilation and cache optimization
+RUN php bin/console cache:clear --env=prod --no-debug \
+ && php bin/console tailwind:build --minify --env=prod \
+ && php bin/console asset-map:compile --env=prod
+
+# Copy service configs
 COPY service-config/supervisor/supervisord.conf /etc/supervisor/conf.d/
 COPY service-config/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY service-config/nginx/mime.types /etc/nginx/mime.types
 COPY service-config/nginx/fastcgi_params /etc/nginx/fastcgi_params
 COPY service-config/nginx/sites /etc/nginx/conf.d/
 
-# Prepare runtime environment
-RUN mkdir -p /run/nginx /run/php /var/log/supervisor /var/www/openroaming/var \
- && chown -R www-data:www-data /var/www/openroaming
+# Setup directories and least-privilege permissions (CRA-compliant: www-data
+# only gets write access to its own runtime state, never to app code or
+# system services it doesn't own)
+RUN mkdir -p /run/nginx /run/php /usr/share/nginx/modules /var/log/supervisor /var/log/nginx \
+    /var/lib/nginx/tmp/client_body /var/lib/nginx/tmp/proxy /var/lib/nginx/tmp/fastcgi \
+    /var/lib/nginx/tmp/uwsgi /var/lib/nginx/tmp/scgi \
+    /var/www/openroaming/var /var/www/openroaming/var/certs /var/www/openroaming/config/jwt \
+ && chown -R www-data:www-data /run/nginx /run/php /var/log/nginx /var/log/supervisor /var/lib/nginx \
+ && chown -R www-data:www-data /var/www/openroaming/var /var/www/openroaming/config/jwt \
+ && chmod 755 /var/lib/nginx /var/lib/nginx/tmp
+
+# Explicit non-root privilege drop
+USER www-data
 
 EXPOSE 80
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

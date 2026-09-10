@@ -75,6 +75,19 @@
                             </tr>
                         </table>
 
+                        <!-- Footer Image Banner -->
+                        {% if footerImageEnabled|default(false) %}
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+                                   style="text-align:center;">
+                                <tr>
+                                    <td align="center" style="padding:20px 20px 35px 20px;">
+                                        <img src="cid:footer_cid" alt="Footer Banner"
+                                             style="max-width:600px; width:100%; height:auto; border:0; display:block; margin:0 auto;" />
+                                    </td>
+                                </tr>
+                            </table>
+                        {% endif %}
+
                         <!-- Footer -->
                         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#E6E6E6; text-align:center; padding:20px;">
                             <tr>

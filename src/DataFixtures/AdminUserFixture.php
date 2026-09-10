@@ -25,10 +25,18 @@ class AdminUserFixture extends Fixture
 
     public function load(ObjectManager $manager): void
     {
+        $email = $_ENV['SUPERADMIN_EMAIL'] ?? $_SERVER['SUPERADMIN_EMAIL'] ?? DefaultUser::ADMIN->value;
+        $password = $_ENV['SUPERADMIN_PASSWORD'] ?? $_SERVER['SUPERADMIN_PASSWORD'] ?? null;
+        if (empty($password)) {
+            throw new \RuntimeException(
+                'SUPERADMIN_PASSWORD environment variable is required and must be set in .env before running fixtures.'
+            );
+        }
+
         $admin = new User();
-        $admin->setUuid(DefaultUser::ADMIN->value);
-        $admin->setEmail(DefaultUser::ADMIN->value);
-        $admin->setPassword($this->userPasswordHashed->hashPassword($admin, 'gnimaornepo'));
+        $admin->setUuid($email);
+        $admin->setEmail($email);
+        $admin->setPassword($this->userPasswordHashed->hashPassword($admin, $password));
         $admin->setRoles(['ROLE_SUPER_ADMIN']);
         $admin->setPermissions([]);
         $admin->setIsVerified(true);

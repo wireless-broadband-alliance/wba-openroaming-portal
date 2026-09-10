@@ -36,8 +36,8 @@ export default class extends Controller {
             authentication: () => this.renderDoughnutChart(target, 'authentication'),
             devices: () => this.renderDoughnutChart(target, 'devices'),
             'platform-status': () => this.renderDoughnutChart(target, 'platform-status'),
-            'users-verified': () => this.renderDoughnutChart(target),
-            '2fa': () => this.renderDoughnutChart(target),
+            'users-verified': () => this.renderDoughnutChart(target, 'users-verified'),
+            '2fa': () => this.renderDoughnutChart(target, 'twofa'),
         };
 
         const handler = handlers[style] || (() => this.renderDefaultChart(target));
