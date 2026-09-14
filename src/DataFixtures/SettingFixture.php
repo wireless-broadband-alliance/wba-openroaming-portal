@@ -90,7 +90,7 @@ class SettingFixture extends Fixture
                 'value' => 'Don\'t have an account? Create one'
             ],
             ['name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value, 'value' => 'true'],
-            ['name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value, 'value' => 'Login Here'],
+            ['name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value, 'value' => 'Login with Password Here'],
             [
                 'name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value,
                 'value' => 'Already have an account? Login then'
