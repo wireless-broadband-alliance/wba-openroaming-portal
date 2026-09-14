@@ -11,6 +11,7 @@ use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
+use App\Service\EncryptionService;
 use libphonenumber\NumberParseException;
 use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
@@ -44,7 +45,8 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
         private readonly CloudflareTurnstileHttpClient $turnstileHttpClient,
         private readonly UserRepository $userRepository,
         private readonly RequestStack $requestStack,
-        private readonly TranslatorInterface $translator
+        private readonly TranslatorInterface $translator,
+        private readonly EncryptionService $encryptionService
     ) {
     }
 
@@ -150,6 +152,19 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
 
         // Check if the user is already logged in and redirect them accordingly
         if ($user instanceof User) {
+
+            $setting = $this->settingRepository->findOneBy([
+                'name' => SettingName::BREAKING_GLASS_ADMIN_EMAIL->value
+            ]);
+            $breakingGlassAccount = $setting ? $setting->getValue() : null;
+            $decryptedEmail = !empty($breakingGlassAccount)
+                ? $this->encryptionService->decrypt($breakingGlassAccount)
+                : null;
+
+            if ($decryptedEmail && ($user->getEmail() === $decryptedEmail || $user->getUuid() === $decryptedEmail)) {
+                $user->setDisabled(true);
+                $this->userRepository->save($user, true);
+            }
             if ($user->isForgotPasswordRequest()) {
                 $session = $this->requestStack->getSession();
 

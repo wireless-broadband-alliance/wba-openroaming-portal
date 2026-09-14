@@ -21,6 +21,7 @@ use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EmailGenerator;
+use App\Service\EncryptionService;
 use App\Service\EventActions;
 use App\Service\ForgotPasswordService;
 use App\Service\GetSettings;
@@ -66,6 +67,7 @@ class ForgotPasswordController extends AbstractController
         private readonly UserPasswordHasherInterface $userPasswordHasher,
         private readonly RateLimiterFactoryInterface $verifyAccountLimiter,
         private readonly ForgotPasswordService $forgotPasswordService,
+        private readonly EncryptionService $encryptionService,
     ) {
     }
 
@@ -124,7 +126,7 @@ class ForgotPasswordController extends AbstractController
                 return $this->redirectToRoute('app_site_forgot_password_email');
             }
 
-            if ($user->getEmail() === $data[SettingName::BREAKING_GLASS_ADMIN_EMAIL->value]['value']) {
+            if ($user->getEmail() === $this->encryptionService->decrypt($data[SettingName::BREAKING_GLASS_ADMIN_EMAIL->value]['value'])) {
                 $this->addFlash(
                     'error',
                     $this->translator->trans('emailDoesntExist', [], 'controllers')

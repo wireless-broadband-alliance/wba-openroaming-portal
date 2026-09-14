@@ -7,8 +7,10 @@ use App\Enum\FirewallType;
 use App\Enum\SessionStatus;
 use App\Enum\SettingName;
 use App\Enum\UserTwoFactorAuthenticationStatus;
+use App\Exception\EncryptionException;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
+use App\Service\EncryptionService;
 use App\Service\GetSettings;
 use App\Service\TwoFAService;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
@@ -26,7 +28,6 @@ readonly class SessionValidatorListener
         private UserRepository $userRepository,
         private GetSettings $getSettings,
         private TwoFAService $twoFAService,
-        private SettingRepository $settingRepository,
     ) {
     }
 
@@ -87,18 +88,6 @@ readonly class SessionValidatorListener
         if ($user && str_starts_with($path, '/dashboard')) {
             // Make an exception to ignore the '/dashboard/login' route
             if (in_array($path, $url)) {
-                return;
-            }
-
-            $breakingGlassAccount = $this->settingRepository->findOneBy(
-                ['name' => SettingName::BREAKING_GLASS_ADMIN_EMAIL->value]
-            )->getValue();
-            if (
-                $user->getEmail() === $breakingGlassAccount ||
-                $user->getUuid() === $breakingGlassAccount
-            ) {
-                $user->setDisabled(true);
-                $this->userRepository->save($user, true);
                 return;
             }
 

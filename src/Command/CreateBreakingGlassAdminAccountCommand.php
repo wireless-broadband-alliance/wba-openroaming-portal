@@ -15,8 +15,10 @@ use App\Enum\PlatformMode;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
+use App\Exception\EncryptionException;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
+use App\Service\EncryptionService;
 use App\Service\TwoFAService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -43,6 +45,7 @@ class CreateBreakingGlassAdminAccountCommand extends Command
         private readonly UserRepository $userRepository,
         private readonly SettingRepository $settingRepository,
         private readonly TwoFAService $twoFAService,
+        private readonly EncryptionService $encryptionService,
     ) {
         parent::__construct();
     }
@@ -60,6 +63,7 @@ class CreateBreakingGlassAdminAccountCommand extends Command
 
     /**
      * @throws RandomException
+     * @throws EncryptionException
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -92,7 +96,8 @@ class CreateBreakingGlassAdminAccountCommand extends Command
             AdminPermissionsType::cases()
         );
 
-        $existingEmail = $setting->getValue();
+        $rawValue = $setting->getValue();
+        $existingEmail = (!empty($rawValue)) ? $this->encryptionService->decrypt($rawValue) : null;
         $existingUser = $existingEmail
             ? $this->userRepository->findOneBy(['email' => $existingEmail])
             : null;
@@ -144,13 +149,14 @@ class CreateBreakingGlassAdminAccountCommand extends Command
      * @param string[] $allPermissions
      * @return array{0: User, 1: string}
      * @throws RandomException
+     * @throws EncryptionException
      */
     private function createAccount(mixed $setting, string $plainPassword, array $allPermissions): array
     {
         $username = sprintf('breakglass_%s', bin2hex(random_bytes(4)));
         $email = $username . '@openroaming.com';
 
-        $setting->setValue($email);
+        $setting->setValue($this->encryptionService->encrypt($email));
 
         $user = new User();
         $user->setUuid($email);
