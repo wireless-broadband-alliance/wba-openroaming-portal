@@ -41,11 +41,15 @@ readonly class InstallationService
         private TranslatorInterface $translator,
         private UserRepository $userRepository,
         private CaptchaValidator $captchaValidator,
-        private EncryptionService $encryptionService, // 1. Inject EncryptionService
+        private EncryptionService $encryptionService,
     ) {
     }
 
     /**
+     * TRUSTED_PROXIES, TURNSTILE_KEY, TURNSTILE_SECRET and JWT_PASSPHRASE are each
+     * checked and persisted independently onto InstallationProgress. A missing or
+     * invalid value for one of them no longer blocks the others from being saved.
+     *
      * @throws EncryptionException
      */
     public function verifyEnvSettings(): InstallationProgress
@@ -56,59 +60,48 @@ readonly class InstallationService
         $installationProgress->setUpdatedAt(new DateTime());
 
         $databaseUrl = $this->parameterBag->get('app.database_url');
-        // Test with raw DSN
-        if (
-            $databaseUrl &&
-            $this->databaseConnectionService->testDatabaseConnection($databaseUrl)
-        ) {
-            // Encrypt before persisting
+        if ($databaseUrl && $this->databaseConnectionService->testDatabaseConnection($databaseUrl)) {
             $installationProgress->setDbOpenRoaming($this->encryptionService->encrypt($databaseUrl));
+        }
 
-            $databaseFreeRadiusUrl = $this->parameterBag->get('app.database_freeradius_url');
-            // Test with raw DSN
-            if (
-                $databaseFreeRadiusUrl &&
-                $this->databaseConnectionService->testDatabaseConnection($databaseFreeRadiusUrl)
-            ) {
-                // Encrypt before persisting
-                $installationProgress->setDbFreeradius($this->encryptionService->encrypt($databaseFreeRadiusUrl));
+        $databaseFreeRadiusUrl = $this->parameterBag->get('app.database_freeradius_url');
+        if (
+            $databaseFreeRadiusUrl &&
+            $this->databaseConnectionService->testDatabaseConnection($databaseFreeRadiusUrl)
+        ) {
+            $installationProgress->setDbFreeradius($this->encryptionService->encrypt($databaseFreeRadiusUrl));
+        }
 
-                $trustedProxies = $this->parameterBag->get('app.trusted_proxies');
-                if ($trustedProxies) {
-                    $trustedProxiesArray = array_map(trim(...), explode(',', $trustedProxies));
-                    $installationProgress->setTrustedProxies($trustedProxiesArray);
+        $trustedProxies = $this->parameterBag->get('app.trusted_proxies');
+        if ($trustedProxies) {
+            $trustedProxiesArray = array_map(trim(...), explode(',', $trustedProxies));
+            $installationProgress->setTrustedProxies($trustedProxiesArray);
+        }
 
-                    $turnstileKey = $this->parameterBag->get('app.turnstile_key');
-                    if ($turnstileKey) {
-                        $installationProgress->setTurnstileKey($turnstileKey);
+        $turnstileKey = $this->parameterBag->get('app.turnstile_key');
+        if ($turnstileKey) {
+            $installationProgress->setTurnstileKey($turnstileKey);
+        }
 
-                        $turnstileSecret = $this->parameterBag->get('app.turnstile_secret');
-                        // Validate with raw secret
-                        $captchaValidation = $this->captchaValidator->validateCredentials($turnstileSecret);
-                        if ($turnstileSecret && $captchaValidation['success']) {
-                            // Encrypt before persisting
-                            $installationProgress->setTurnstileSecret(
-                                $this->encryptionService->encrypt($turnstileSecret)
-                            );
-
-                            $jwtPassphrase = $this->parameterBag->get('app.jwt_passphrase');
-                            if ($jwtPassphrase) {
-                                // Encrypt before persisting
-                                $installationProgress->setJwtPassphrase(
-                                    $this->encryptionService->encrypt($jwtPassphrase)
-                                );
-
-                                $superAdmin = $this->userRepository->findSuperAdmin();
-                                if ($superAdmin && $superAdmin->getEmail() !== DefaultUser::ADMIN->value) {
-                                    $installationProgress->setEmailAdmin($superAdmin->getEmail());
-                                    $installationProgress->setAdminConfirmed(true);
-                                }
-                            }
-                        }
-                    }
-                }
+        $turnstileSecret = $this->parameterBag->get('app.turnstile_secret');
+        if ($turnstileSecret) {
+            $captchaValidation = $this->captchaValidator->validateCredentials($turnstileSecret);
+            if ($captchaValidation['success']) {
+                $installationProgress->setTurnstileSecret($this->encryptionService->encrypt($turnstileSecret));
             }
         }
+
+        $jwtPassphrase = $this->parameterBag->get('app.jwt_passphrase');
+        if ($jwtPassphrase) {
+            $installationProgress->setJwtPassphrase($this->encryptionService->encrypt($jwtPassphrase));
+        }
+
+        $superAdmin = $this->userRepository->findSuperAdmin();
+        if ($superAdmin && $superAdmin->getEmail() !== DefaultUser::ADMIN->value) {
+            $installationProgress->setEmailAdmin($superAdmin->getEmail());
+            $installationProgress->setAdminConfirmed(true);
+        }
+
         $this->getStep($installationProgress);
         $this->entityManager->persist($installationProgress);
         $this->entityManager->flush();
@@ -267,6 +260,9 @@ readonly class InstallationService
         return count($attempts) < $nrAttempts;
     }
 
+    /**
+     * @throws EncryptionException
+     */
     public function fillDto(
         InstallationProgress $installationProgress
     ): InstallationProgressDTO {
@@ -274,7 +270,7 @@ readonly class InstallationService
         $dto->installationState = $installationProgress->getInstallationState();
 
         $dbOpenRoamingPartials = $this->databaseConnectionService->parseDatabaseUrl(
-            $installationProgress->getDbOpenRoaming()
+            $this->decryptOrEmpty($installationProgress->getDbOpenRoaming())
         );
         $dto->dbOpenRoamingUserName = $dbOpenRoamingPartials['username'];
         $dto->dbOpenRoamingPassword = $dbOpenRoamingPartials['password'];
@@ -282,7 +278,7 @@ readonly class InstallationService
         $dto->dbOpenRoamingPort = (string)$dbOpenRoamingPartials['port'];
 
         $dbFreeradiusPartials = $this->databaseConnectionService->parseDatabaseUrl(
-            $installationProgress->getDbFreeradius()
+            $this->decryptOrEmpty($installationProgress->getDbFreeradius())
         );
         $dto->dbFreeradiusUserName = $dbFreeradiusPartials['username'];
         $dto->dbFreeradiusPassword = $dbFreeradiusPartials['password'];
@@ -291,7 +287,7 @@ readonly class InstallationService
 
         $dto->trustedProxies = implode(',', $installationProgress->getTrustedProxies() ?? []);
         $dto->turnstileKey = $installationProgress->getTurnstileKey();
-        $dto->turnstileSecret = $installationProgress->getTurnstileSecret();
+        $dto->turnstileSecret = $this->decryptOrNull($installationProgress->getTurnstileSecret());
 
         $dto->emailAdmin = $installationProgress->getEmailAdmin();
 
@@ -301,32 +297,39 @@ readonly class InstallationService
         return $dto;
     }
 
+    /**
+     * @throws EncryptionException
+     */
     public function checkDatabaseSettings(InstallationProgress $installationProgress): bool
     {
         if (
             !$this->envValueMatches(
                 DataBaseSetupType::DATABASE_URL->value,
-                $installationProgress->getDbOpenRoaming()
+                $this->decryptOrNull($installationProgress->getDbOpenRoaming())
             )
         ) {
             return false;
         }
         return $this->envValueMatches(
             DataBaseSetupType::DATABASE_FREERADIUS_URL->value,
-            $installationProgress->getDbFreeradius()
+            $this->decryptOrNull($installationProgress->getDbFreeradius())
         );
     }
 
+    /**
+     * @throws EncryptionException
+     */
     public function checkSettingsValues(InstallationProgress $installationProgress): bool
     {
         if (
             !$this->envValueMatches(
                 SettingsConfigType::TRUSTED_PROXIES->value,
-                implode(',', $installationProgress->getTrustedProxies())
+                implode(',', $installationProgress->getTrustedProxies() ?? [])
             )
         ) {
             return false;
         }
+
         if (
             !$this->envValueMatches(
                 SettingsConfigType::TURNSTILE_KEY->value,
@@ -335,10 +338,11 @@ readonly class InstallationService
         ) {
             return false;
         }
+
         if (
             !$this->envValueMatches(
                 SettingsConfigType::TURNSTILE_SECRET->value,
-                $installationProgress->getTurnstileSecret()
+                $this->decryptOrNull($installationProgress->getTurnstileSecret())
             )
         ) {
             return false;
@@ -349,11 +353,12 @@ readonly class InstallationService
             $jwtPassphrase !== null &&
             !$this->envValueMatches(
                 SettingsConfigType::JWT_PASSPHRASE->value,
-                $jwtPassphrase
+                $this->encryptionService->decrypt($jwtPassphrase)
             )
         ) {
             return false;
         }
+
         return true;
     }
 
@@ -378,33 +383,36 @@ readonly class InstallationService
         return false;
     }
 
+    /**
+     * @throws EncryptionException
+     */
     public function resetToLastInstallation(): void
     {
         $lastCompleted = $this->installationProgressRepository->getLastCompleted();
         if ($lastCompleted instanceof InstallationProgress) {
             $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                $lastCompleted->getDbOpenRoaming(),
+                $this->decryptOrEmpty($lastCompleted->getDbOpenRoaming()),
                 DataBaseSetupType::DATABASE_URL->value
             );
             $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                $lastCompleted->getDbFreeradius(),
+                $this->decryptOrEmpty($lastCompleted->getDbFreeradius()),
                 DataBaseSetupType::DATABASE_FREERADIUS_URL->value
             );
             $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                implode(',', $lastCompleted->getTrustedProxies()),
+                implode(',', $lastCompleted->getTrustedProxies() ?? []),
                 SettingsConfigType::TRUSTED_PROXIES->value
             );
             $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                $lastCompleted->getTurnstileKey(),
+                $lastCompleted->getTurnstileKey() ?? '',
                 SettingsConfigType::TURNSTILE_KEY->value
             );
             $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                $lastCompleted->getTurnstileSecret(),
+                $this->decryptOrEmpty($lastCompleted->getTurnstileSecret()),
                 SettingsConfigType::TURNSTILE_SECRET->value
             );
             if ($lastCompleted->getJwtPassphrase() !== null) {
                 $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                    $lastCompleted->getJwtPassphrase(),
+                    $this->encryptionService->decrypt($lastCompleted->getJwtPassphrase()),
                     SettingsConfigType::JWT_PASSPHRASE->value
                 );
             }
@@ -418,34 +426,61 @@ readonly class InstallationService
         }
     }
 
+    /**
+     * @throws EncryptionException
+     */
     public function commandToDataBase(InstallationProgress $installationProgress): string
     {
         return 'scripts/update-db-env.sh "' .
-            $installationProgress->getDbOpenRoaming() .
+            $this->decryptOrEmpty($installationProgress->getDbOpenRoaming()) .
             '" "' .
-            $installationProgress->getDbFreeradius() .
+            $this->decryptOrEmpty($installationProgress->getDbFreeradius()) .
             '"';
     }
 
+    /**
+     * @throws EncryptionException
+     */
     public function commandToSettings(InstallationProgress $installationProgress): string
     {
+        $trustedProxies = implode(',', $installationProgress->getTrustedProxies() ?? []);
+        $turnstileKey = $installationProgress->getTurnstileKey() ?? '';
+        $turnstileSecret = $this->decryptOrEmpty($installationProgress->getTurnstileSecret());
+
         if ($installationProgress->getJwtPassphrase() !== null) {
             return 'scripts/update-settings-env.sh "' .
-                $installationProgress->getJwtPassphrase() .
+                $this->encryptionService->decrypt($installationProgress->getJwtPassphrase()) .
                 '" "' .
-                implode(',', $installationProgress->getTrustedProxies()) .
+                $trustedProxies .
                 '" "' .
-                $installationProgress->getTurnstileKey() .
+                $turnstileKey .
                 '" "' .
-                $installationProgress->getTurnstileSecret() .
+                $turnstileSecret .
                 '"';
         }
+
         return 'scripts/update-settings-env.sh "" "' .
-            implode(',', $installationProgress->getTrustedProxies()) .
+            $trustedProxies .
             '" "' .
-            $installationProgress->getTurnstileKey() .
+            $turnstileKey .
             '" "' .
-            $installationProgress->getTurnstileSecret() .
+            $turnstileSecret .
             '"';
+    }
+
+    /**
+     * @throws EncryptionException
+     */
+    private function decryptOrEmpty(?string $encryptedValue): string
+    {
+        return $encryptedValue !== null ? $this->encryptionService->decrypt($encryptedValue) : '';
+    }
+
+    /**
+     * @throws EncryptionException
+     */
+    private function decryptOrNull(?string $encryptedValue): ?string
+    {
+        return $encryptedValue !== null ? $this->encryptionService->decrypt($encryptedValue) : null;
     }
 }

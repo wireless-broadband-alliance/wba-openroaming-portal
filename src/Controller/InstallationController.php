@@ -432,9 +432,13 @@ class InstallationController extends AbstractController
             $lastInstallation->setUpdatedAt(new DateTime());
             $lastInstallation->setTrustedProxies($settingsDTO->trustedProxies);
             $lastInstallation->setTurnstileKey($settingsDTO->turnstileKey ?? '');
-            $lastInstallation->setTurnstileSecret($settingsDTO->turnstileSecret ?? '');
+            $lastInstallation->setTurnstileSecret(
+                $this->encryptionService->encrypt($settingsDTO->turnstileSecret ?? '')
+            );
             if ($settingsDTO->jwtPassphraseEnable) {
-                $lastInstallation->setJwtPassphrase($settingsDTO->jwtPassphrase);
+                $lastInstallation->setJwtPassphrase(
+                    $this->encryptionService->encrypt($settingsDTO->jwtPassphrase)
+                );
             }
             $lastInstallation->setInstallationState(ProcessStatusType::IN_PROGRESS);
             $this->entityManager->persist($lastInstallation);
