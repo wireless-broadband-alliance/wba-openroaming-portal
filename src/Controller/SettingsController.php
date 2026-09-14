@@ -19,6 +19,7 @@ use App\Enum\LanguageType;
 use App\Enum\SettingName;
 use App\Enum\SettingType;
 use App\Enum\TextEditorName;
+use App\Exception\EncryptionException;
 use App\Form\AuthSettingsType;
 use App\Form\CapportSettingsType;
 use App\Form\LDAPSettingsType;
@@ -30,6 +31,7 @@ use App\Form\TwoFASettingsType;
 use App\Repository\TextEditorRepository;
 use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\CertificateCheckerService;
+use App\Service\EncryptionService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\HtmlSanitizerService;
@@ -58,6 +60,7 @@ class SettingsController extends AbstractController
         private readonly TextEditorRepository $textEditorRepository,
         private readonly SettingsService $settingsService,
         private readonly HtmlSanitizerService $htmlSanitizerService,
+        private readonly EncryptionService $encryptionService,
     ) {
     }
 
@@ -645,30 +648,57 @@ class SettingsController extends AbstractController
         ]);
     }
 
+    /**
+     * @throws EncryptionException
+     */
     #[Route('/dashboard/settings/LDAP', name: 'admin_dashboard_settings_LDAP')]
     #[IsGranted(UserAuthenticationVoter::LDAP_SYNCHRONIZATION_READ)]
     public function settingsLDAP(Request $request): Response
     {
-        /** @var array<string, array{value: string, description: string}> $data */
+        $encryptedSettings = [
+            SettingName::SYNC_LDAP_SERVER->value,
+            SettingName::SYNC_LDAP_BIND_USER_DN->value,
+            SettingName::SYNC_LDAP_BIND_USER_PASSWORD->value,
+            SettingName::SYNC_LDAP_SEARCH_BASE_DN->value,
+        ];
+
+        /** @var array<string, array{value: string|null, description?: string}> $data */
         $data = $this->getSettings->getSettings();
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         $canWrite = $this->isGranted(UserAuthenticationVoter::LDAP_SYNCHRONIZATION_WRITE);
 
-        // Initialize DTO from settings
+        // Decrypt sensitive settings before passing them to the DTO / Form
+        foreach ($encryptedSettings as $settingKey) {
+            if (isset($data[$settingKey]['value'])) {
+                $data[$settingKey]['value'] = $this->safeDecrypt($data[$settingKey]['value']);
+            }
+        }
+
+        // Initialize DTO with decrypted settings
         $dto = new LDAPSettingsDTO($data);
 
         // Create form bound to DTO
         $form = $this->createForm(LDAPSettingsType::class, $dto, ['disabled' => !$canWrite]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
+        if ($canWrite && $form->isSubmitted() && $form->isValid()) {
             /** @var LDAPSettingsDTO $dto */
             $dto = $form->getData();
+            $settingsData = $dto->toArray();
 
-            // Save updated settings
-            $changeset = $this->settingsService->updateSettingsFromArray($dto->toArray());
+            // Encrypt sensitive settings before saving to Database
+            foreach ($encryptedSettings as $settingKey) {
+                $plainValue = $settingsData[$settingKey]['value'] ?? null;
+
+                if ($plainValue !== null && $plainValue !== '') {
+                    $settingsData[$settingKey]['value'] = $this->encryptionService->encrypt($plainValue);
+                }
+            }
+
+            // Save updated encrypted settings
+            $changeset = $this->settingsService->updateSettingsFromArray($settingsData);
             $this->settingsService->flush();
 
             // Log the event
@@ -680,7 +710,7 @@ class SettingsController extends AbstractController
                     EventMetadataKeysType::IP->value => $request->getClientIp(),
                     EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
                     EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
-                    EventMetadataKeysType::CHANGESET->value  => $changeset,
+                    EventMetadataKeysType::CHANGESET->value => $changeset,
                 ]
             );
 
@@ -1065,5 +1095,23 @@ class SettingsController extends AbstractController
             'data' => $data,
             'user' => $currentUser,
         ]);
+    }
+
+    /**
+     * Safely decrypts a value. If decryption fails (e.g. existing legacy plaintext),
+     * returns the original raw value.
+     */
+    private function safeDecrypt(?string $value): ?string
+    {
+        if ($value === null || $value === '') {
+            return $value;
+        }
+
+        try {
+            return $this->encryptionService->decrypt($value);
+        } catch (EncryptionException) {
+            // Value is not encrypted yet (e.g., existing legacy plain text)
+            return $value;
+        }
     }
 }
