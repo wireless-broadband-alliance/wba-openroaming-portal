@@ -121,12 +121,7 @@ readonly class FreeradiusStatistics
             $result = [];
 
             foreach ($this->radiusAccountingRepository->getWifiTypeCounts($start, $end) as $row) {
-                // Ignore 'Unknown' or empty/null wifi types
-                if (empty($row['wifi_type']) || $row['wifi_type'] === 'Unknown') {
-                    continue;
-                }
-
-                $result[$row['wifi_type']] = (int)$row['cnt'];
+                $result[(string)$row['wifi_type']] = (int)$row['cnt'];
             }
 
             return $result;
