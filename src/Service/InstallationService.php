@@ -125,12 +125,23 @@ readonly class InstallationService
         return $lastInstallation;
     }
 
+    /**
+     * @throws EncryptionException
+     */
     public function getStep(InstallationProgress $installationProgress): string
     {
         if (
             $installationProgress->getDbOpenRoaming() &&
             $installationProgress->getDbFreeradius()
         ) {
+            if (
+                !$installationProgress->getTrustedProxies() ||
+                !$installationProgress->getTurnstileKey() ||
+                !$installationProgress->getTurnstileSecret()
+            ) {
+                return InstallationStep::SETTINGS->value;
+            }
+
             if (
                 $installationProgress->getEmailAdmin() &&
                 $installationProgress->isAdminConfirmed()

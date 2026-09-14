@@ -401,9 +401,6 @@ class InstallationController extends AbstractController
             if ($step === InstallationStep::DATABASE->value) {
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
             }
-            if ($step === InstallationStep::SETTINGS->value) {
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
-            }
             if ($step === InstallationStep::ADMIN->value && !($lastInstallation->getEmailAdmin())) {
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
             }
@@ -431,7 +428,9 @@ class InstallationController extends AbstractController
 
             $lastInstallation->setUpdatedAt(new DateTime());
             $lastInstallation->setTrustedProxies($settingsDTO->trustedProxies);
-            $lastInstallation->setTurnstileKey($settingsDTO->turnstileKey ?? '');
+            $lastInstallation->setTurnstileKey(
+                $this->encryptionService->encrypt($settingsDTO->turnstileKey ?? '')
+            );
             $lastInstallation->setTurnstileSecret(
                 $this->encryptionService->encrypt($settingsDTO->turnstileSecret ?? '')
             );
