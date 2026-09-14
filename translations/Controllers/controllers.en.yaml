@@ -238,3 +238,4 @@ sms_provider_test:
   unreachable_provider: "Could not reach BudgetSMS: %error%"
 coverageMapDisabled: 'The coverage map is currently disabled.'
 cannotResetExternalAuthProviderPassword: "Password reset is only allowed for Portal Accounts."
+encryptionError: 'An error occurred while encrypting data. Please try again.'

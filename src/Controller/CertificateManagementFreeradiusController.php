@@ -19,6 +19,7 @@ use App\Enum\FirewallType;
 use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
 use App\Enum\SettingName;
+use App\Exception\EncryptionException;
 use App\Exception\FreeradiusTestException;
 use App\Form\CertificateFreeradiusUploadManualType;
 use App\Form\CertificatesFreeradiusPasteType;
@@ -36,6 +37,7 @@ use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateStorageService;
 use App\Service\CertificateWriterUpdateService;
 use App\Service\CloudflareService;
+use App\Service\EncryptionService;
 use App\Service\EventActions;
 use App\Service\FreeradiusCertificateValidatorService;
 use App\Service\FreeradiusTestOrchestrator;
@@ -80,6 +82,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         private readonly FreeradiusCertificateValidatorService $freeradiusCertificateValidatorService,
         private readonly CertificateFreeradiusHTTPChallengeCommandsService $httpChallengeCommands,
         private readonly CertificateCAGeneratorService $certificateCAGeneratorService,
+        private readonly EncryptionService $encryptionService
     ) {
     }
 
@@ -926,17 +929,27 @@ class CertificateManagementFreeradiusController extends AbstractController
                 $certificateSetupProcess->setFreeradiusFormCompletedAt(new DateTimeImmutable());
                 $certificateSetupProcess->setFreeradiusConfigAppliedAt(null);
                 $certificateSetupProcess->setIsFreeradiusCloudflare(true);
+
+                try {
+                    $encryptedToken = $this->encryptionService->encrypt($dto->token);
+                } catch (EncryptionException) {
+                    $this->addFlash('error', $this->translator->trans('encryptionError', [], 'controllers'));
+
+                    return $this->redirectToRoute(
+                        'admin_dashboard_settings_certs_freeradius_cloudflare_dnsChallenge'
+                    );
+                }
+
                 $setting = $this->settingRepository->findOneBy(['name' => SettingName::CLOUDFLARE_TOKEN->value]);
-                if ($setting) {
-                    $setting->setValue($dto->token);
-                } else {
+                if (!$setting) {
                     $setting = new Setting();
                     $setting->setName(SettingName::CLOUDFLARE_TOKEN->value);
-                    $setting->setValue($dto->token);
                     $this->entityManager->persist($setting);
                 }
+
+                $setting->setValue($encryptedToken);
+
                 $this->entityManager->persist($certificateSetupProcess);
-                $this->entityManager->persist($setting);
                 $this->entityManager->flush();
             }
 
