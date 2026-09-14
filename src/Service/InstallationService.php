@@ -455,7 +455,7 @@ readonly class InstallationService
     public function commandToSettings(InstallationProgress $installationProgress): string
     {
         $trustedProxies = implode(',', $installationProgress->getTrustedProxies() ?? []);
-        $turnstileKey = $installationProgress->getTurnstileKey() ?? '';
+        $turnstileKey = $this->decryptOrEmpty($installationProgress->getTurnstileKey());
         $turnstileSecret = $this->decryptOrEmpty($installationProgress->getTurnstileSecret());
 
         if ($installationProgress->getJwtPassphrase() !== null) {

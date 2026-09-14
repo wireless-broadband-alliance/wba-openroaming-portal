@@ -241,14 +241,15 @@
     @apply bg-white shadow-2xl rounded-2xl
     w-[95%] sm:w-[92%] md:w-[90%] lg:w-[88%] xl:w-[85%] 2xl:w-[80%]
     max-w-[2400px]
-    min-h-[calc(100vh-4rem)] sm:min-h-[calc(100vh-6rem)]
+    max-h-[calc(100vh-4rem)] sm:max-h-[calc(100vh-6rem)]
     p-6 sm:p-10 lg:p-12 2xl:p-16
-    flex flex-col justify-between
+    flex flex-col gap-8
+    overflow-y-auto
     transition-all duration-300;
 }
 
 .landing-content {
-    @apply flex-1 flex flex-col justify-between w-full;
+    @apply flex-1 flex flex-col gap-6 w-full;
 }
 
 .landing-header {
