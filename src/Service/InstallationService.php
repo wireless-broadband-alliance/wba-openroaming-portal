@@ -344,7 +344,7 @@ readonly class InstallationService
         if (
             !$this->envValueMatches(
                 SettingsConfigType::TURNSTILE_KEY->value,
-                $installationProgress->getTurnstileKey()
+                $this->decryptOrNull($installationProgress->getTurnstileKey())
             )
         ) {
             return false;
