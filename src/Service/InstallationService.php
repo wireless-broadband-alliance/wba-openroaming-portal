@@ -80,7 +80,7 @@ readonly class InstallationService
 
         $turnstileKey = $this->parameterBag->get('app.turnstile_key');
         if ($turnstileKey) {
-            $installationProgress->setTurnstileKey($turnstileKey);
+            $installationProgress->setTurnstileKey($this->encryptionService->encrypt($turnstileKey));
         }
 
         $turnstileSecret = $this->parameterBag->get('app.turnstile_secret');
@@ -344,7 +344,7 @@ readonly class InstallationService
         if (
             !$this->envValueMatches(
                 SettingsConfigType::TURNSTILE_KEY->value,
-                $installationProgress->getTurnstileKey()
+                $this->decryptOrNull($installationProgress->getTurnstileKey())
             )
         ) {
             return false;
