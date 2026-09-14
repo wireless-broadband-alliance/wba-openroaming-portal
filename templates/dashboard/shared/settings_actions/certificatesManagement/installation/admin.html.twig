@@ -22,8 +22,8 @@
     <div class="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
 
         {# --- Email Card --- #}
-        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
-            <div>
+        <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 flex flex-col">
+            <div class="min-h-[4.5rem]">
                 <div class="flex flex-row justify-between items-center mb-3">
                     <h1 class="text-base font-semibold text-gray-800">
                         {{ 'emailLabel'|trans({}, 'admin_config') }}
@@ -41,16 +41,16 @@
                 }) }}
             </div>
 
-            <div class="mt-6 space-y-2">
-                <p class="text-xs text-gray-500">
-                    {{ 'emailWarning'|trans({}, 'admin_config') }}
-                </p>
-
+            <div class="space-y-2 flex-1 flex flex-col justify-start">
                 {{ form_widget(form.email, {
                     attr: {
                         class: 'form-widget mt-1 block w-full rounded-md border-gray-200 p-2',
                     },
                 }) }}
+
+                <p class="text-xs text-gray-500">
+                    {{ 'emailWarning'|trans({}, 'admin_config') }}
+                </p>
 
                 {% if form_errors(form.email) %}
                     <div class="text-xs text-red-500 font-medium mt-1">
@@ -61,14 +61,16 @@
         </div>
 
         {# --- Password Card --- #}
-        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
-            <div>
-                <h1 class="text-base font-semibold text-gray-800 mb-3">
-                    {{ 'passwordLabel'|trans({}, 'admin_config') }}
-                </h1>
+        <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 flex flex-col">
+            <div class="min-h-[4.5rem]">
+                <div class="flex flex-row justify-between items-center mb-3">
+                    <h1 class="text-base font-semibold text-gray-800">
+                        {{ 'passwordLabel'|trans({}, 'admin_config') }}
+                    </h1>
+                </div>
             </div>
 
-            <div class="mt-6 space-y-2">
+            <div class="space-y-2 flex-1 flex flex-col justify-start">
                 {{ form_widget(form.password, {
                     attr: {
                         class: 'form-widget mt-1 block w-full rounded-md border-gray-200 p-2',
@@ -84,14 +86,16 @@
         </div>
 
         {# --- Confirm Password Card --- #}
-        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
-            <div>
-                <h1 class="text-base font-semibold text-gray-800 mb-3">
-                    {{ 'passwordConfirmLabel'|trans({}, 'admin_config') }}
-                </h1>
+        <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 flex flex-col">
+            <div class="min-h-[4.5rem]">
+                <div class="flex flex-row justify-between items-center mb-3">
+                    <h1 class="text-base font-semibold text-gray-800">
+                        {{ 'passwordConfirmLabel'|trans({}, 'admin_config') }}
+                    </h1>
+                </div>
             </div>
 
-            <div class="mt-6 space-y-2">
+            <div class="space-y-2 flex-1 flex flex-col justify-start">
                 {{ form_widget(form.confirmPassword, {
                     attr: {
                         class: 'form-widget mt-1 block w-full rounded-md border-gray-200 p-2',
