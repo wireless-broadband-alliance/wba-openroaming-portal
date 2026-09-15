@@ -2,6 +2,16 @@
 
 # Release V1.13.2
 
+### Breaking Changes & API Clean-up
+
+- **Complete Removal of Legacy API v1 & v2**: All routes, controllers, configurations, and metadata related to API v1
+  and API v2 have been permanently removed.
+  * As previously announced in [Release V1.9.0](#api-deprecation-notice), API v1 and v2 reached their end-of-life and
+    are no longer available.
+  * **API v3** is now the sole supported API version for all portal integrations.
+  * Any clients or integrations still sending requests to `/api/v1` or `/api/v2` endpoints must update immediately to
+    `/api/v3`.
+
 - **Landing Page Authentication Rework**: Refactored landing page authentication buttons, adding dedicated support for
   Magic Link login alongside traditional authentication methods.
 - **Dashboard UI & Stimulus Fix**: Reworked the Authentication Methods management UI to distinctly separate Traditional

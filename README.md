@@ -194,7 +194,12 @@ such as CAPTCHA validation, that are integrated to protect user data and ensure 
 
 Please refer to the [API documentation](docs/Api/V3/index_v3.html) for detailed usage instructions and examples.
 
-Follow this link for more information on API documentation: [Api Guide](docs/APIGUI.md)
+The OpenRoaming Portal exclusively supports **API v3**.
+
+> **Legacy API Notice**:  
+> API v1 and API v2 were officially deprecated in "Release V1.9.0" and have been **completely removed**
+> as of "Release V1.13.2". Requests to `/api/v1` and `/api/v2` will return `404 Not Found`. Please refer
+> to the API v3 specifications for all client implementations.
 
 ## Upgrade Stop: Important Instructions for Future Updates
 
@@ -371,7 +376,7 @@ link: [Cloudflare Turnstile Production Guide]( https://developers.cloudflare.com
 For detailed instructions on the GeoLite GUI setup, operations, and usage, refer to
 the [GeoLite GUI Guide](docs/GEOLITEGUI.md).
 
-### API Platform
+### API
 
 The following configurations are required for the API of the project.
 

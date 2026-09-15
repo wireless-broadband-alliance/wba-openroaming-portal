@@ -3,7 +3,7 @@
 namespace App\Service;
 
 use App\Enum\ApiVersion;
-use InvalidArgumentException;
+use Exception;
 use Symfony\Component\Routing\RouterInterface;
 
 readonly class ApiResponseService
@@ -23,6 +23,7 @@ readonly class ApiResponseService
      *     description: string|null,
      *     requestBody: array<string, mixed>|null
      * }>>
+     * @throws Exception
      */
     public function getRoutesByPrefix(ApiVersion $version): array
     {
@@ -30,13 +31,10 @@ readonly class ApiResponseService
         $grouped = [];
         $responses = $this->getResponseMetadata($version);
 
-        $prefixMap = [
-            ApiVersion::API_V1->value => '/api/v1',
-            ApiVersion::API_V2->value => '/api/v2',
-            ApiVersion::API_V3->value => '/api/v3',
-        ];
-
-        $prefix = $prefixMap[$version->value];
+        $prefix = match ($version) {
+            ApiVersion::API_V3 => '/api/v3',
+            default => throw new Exception('Unexpected match value'),
+        };
 
         foreach ($routes as $name => $route) {
             $path = $route->getPath();
@@ -94,17 +92,16 @@ readonly class ApiResponseService
      *     description?: string,
      *     requestBody?: array<string, mixed>
      * }>
-     * @throws \JsonException
+     * @throws Exception
      */
     private function getResponseMetadata(ApiVersion $version): array
     {
-        $configFiles = [
-            ApiVersion::API_V1->value => __DIR__ . '/../../config/api/api_responses_v1.php',
-            ApiVersion::API_V2->value => __DIR__ . '/../../config/api/api_responses_v2.php',
-            ApiVersion::API_V3->value => __DIR__ . '/../../config/api/api_responses_v3.php',
-        ];
+        $configFile = match ($version) {
+            ApiVersion::API_V3 => __DIR__ . '/../../config/api/api_responses_v3.php',
+            default => throw new Exception('Unexpected match value'),
+        };
 
-        return require $configFiles[$version->value];
+        return require $configFile;
     }
 
     /**
