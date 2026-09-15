@@ -1,3 +1,12 @@
+{% set has_first_name_errors = form.firstName.vars.errors|length > 0 %}
+{% set has_last_name_errors = form.lastName.vars.errors|length > 0 %}
+{% set has_personal_errors = form.vars.errors|length > 0 or has_first_name_errors or has_last_name_errors %}
+
+{% set has_current_pass_errors = formPassword.password.vars.errors|length > 0 %}
+{% set has_new_pass_errors = formPassword.newPassword.vars.errors|length > 0 %}
+{% set has_confirm_pass_errors = formPassword.confirmPassword.vars.errors|length > 0 %}
+{% set has_password_errors = formPassword.vars.errors|length > 0 or has_current_pass_errors or has_new_pass_errors or has_confirm_pass_errors %}
+
 <div class="bg-white rounded-lg transition-all duration-300 px-10 py-[35px] h-[calc(90%)] lg:h-[calc(80%)] w-[810px] overflow-auto">
 
     <div class="flex flex-row justify-start items-center">
