@@ -29,13 +29,21 @@
 
 * **Sensitive System Settings Encryption (CRA Annex I §1.3)**: System configuration parameters (including LDAP
   credentials, server endpoints, emergency administrative break-glass accounts, and Cloudflare tokens) are now encrypted
-  at rest
-  using AES-256-CBC.
+  at rest using AES-256-CBC.
 * **Required one-time action:** Run the `app:cra:encrypt-settings` command to encrypt any existing legacy plaintext
   settings in the database. This command is idempotent and safe to re-run.
 
 ```bash
     php bin/console app:cra:encrypt-settings
+```
+
+* **RADIUS Token Encryption (CRA Annex I §1.3)**: Legacy plain-text RADIUS tokens (`radius_token`) associated with User
+  Radius Profiles are now encrypted at rest using AES-256-CBC encryption to protect Passpoint credentials.
+* **Required one-time action:** Run the `radius:encrypt-legacy-tokens` command to encrypt any existing plain-text RADIUS
+  tokens in the database. This command is idempotent and safe to re-run.
+
+```bash
+    php bin/console radius:encrypt-legacy-tokens
 ```
 
 * Fix bug with attribute mapping during the cloudflareHttps request certs properties association with the portal. This
