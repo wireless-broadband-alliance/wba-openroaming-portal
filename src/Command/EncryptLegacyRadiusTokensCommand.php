@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Doctrine\Type\EncryptedStringType;
 use App\Entity\UserRadiusProfile;
-use Doctrine\DBAL\Types\Type;
+use App\Exception\EncryptionException;
+use App\Service\EncryptionService;
+use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
@@ -18,13 +18,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
-    name: 'app:radius:encrypt-legacy-tokens',
+    name: 'radius:encrypt-legacy-tokens',
     description: 'Encrypts legacy plain-text RADIUS tokens to comply with CRA.',
 )]
 class EncryptLegacyRadiusTokensCommand extends Command
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
+        private readonly EncryptionService $encryptionService,
     ) {
         parent::__construct();
     }
@@ -35,6 +36,10 @@ class EncryptLegacyRadiusTokensCommand extends Command
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the encryption process');
     }
 
+    /**
+     * @throws Exception
+     * @throws EncryptionException
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if (!$input->getOption('yes')) {
@@ -56,24 +61,26 @@ class EncryptLegacyRadiusTokensCommand extends Command
         $connection->beginTransaction();
 
         try {
-            $sql = sprintf('SELECT id, radius_token FROM %s WHERE radius_token IS NOT NULL', $tableName);
+            $sql = sprintf(
+                'SELECT id, radius_token FROM %s WHERE radius_token IS NOT NULL AND radius_token != ""',
+                $tableName
+            );
             $profiles = $connection->fetchAllAssociative($sql);
-
-            /** @var EncryptedStringType $type */
-            $type = Type::getType(EncryptedStringType::NAME);
-            $platform = $connection->getDatabasePlatform();
 
             $updatedCount = 0;
 
             foreach ($profiles as $row) {
                 $originalValue = $row['radius_token'];
 
-                $phpValue = $type->convertToPHPValue($originalValue, $platform);
-                if ($phpValue !== $originalValue) {
+                try {
+                    // If decryption succeeds, the token is already encrypted
+                    $this->encryptionService->decrypt($originalValue);
                     continue;
+                } catch (EncryptionException) {
+                    // Decryption failed: token is legacy plain text and requires encryption
                 }
 
-                $encryptedValue = $type->convertToDatabaseValue($originalValue, $platform);
+                $encryptedValue = $this->encryptionService->encrypt($originalValue);
 
                 $updateSql = sprintf('UPDATE %s SET radius_token = :token WHERE id = :id', $tableName);
                 $connection->executeStatement(

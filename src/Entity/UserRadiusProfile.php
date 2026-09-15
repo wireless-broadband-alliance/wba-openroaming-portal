@@ -20,7 +20,7 @@ class UserRadiusProfile
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    #[ORM\Column(type: 'encrypted_string')]
+    #[ORM\Column(length: 255)]
     private ?string $radius_token = null;
 
     #[ORM\Column(length: 255)]

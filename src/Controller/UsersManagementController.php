@@ -504,9 +504,8 @@ class UsersManagementController extends AbstractController
                 );
             }
 
-            if ($userUpdateDTO->isVerified) {
-                $this->profileManager->enableProfiles($user);
-            } else {
+            // Only revoke profiles if verification is explicitly removed
+            if (!$userUpdateDTO->isVerified) {
                 $this->profileManager->disableProfiles(
                     $user,
                     UserRadiusProfileRevokeReason::ADMIN_REMOVED_USER_VERIFICATION->value,
