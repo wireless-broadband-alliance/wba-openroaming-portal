@@ -16,57 +16,69 @@
 ```bash
     php bin/console app:cra:encrypt-oauth-ids
 ```
-- Fix bug with attribute mapping during the cloudflareHttps request certs properties association with the portal. This
+
+* **Sensitive System Settings Encryption (CRA Annex I §1.3)**: System configuration parameters (including LDAP
+  credentials, server endpoints, emergency administrative break-glass accounts, and Cloudflare tokens) are now encrypted
+  at rest
+  using AES-256-CBC.
+* **Required one-time action:** Run the `app:cra:encrypt-settings` command to encrypt any existing legacy plaintext
+  settings in the database. This command is idempotent and safe to re-run.
+
+```bash
+    php bin/console app:cra:encrypt-settings
+```
+
+* Fix bug with attribute mapping during the cloudflareHttps request certs properties association with the portal. This
   happens during the certificate management wizard update.
-- Added customizable footer image support with display toggle and improved layout for the Landing Page Configuration.
-- Fix bug where the radsecproxy `chain.pem` was never regenerated after a certificate renewal, causing the old
+* Added customizable footer image support with display toggle and improved layout for the Landing Page Configuration.
+* Fix bug where the radsecproxy `chain.pem` was never regenerated after a certificate renewal, causing the old
   end-entity certificate to keep being served. The certificate management wizard now rebuilds `chain.pem` from the
   renewed client certificate and the bundled WBA CA chain, and removes the stale file as part of the renewal commands.
-- Fix bug in `PortalStatistics` when processing device download events threw a 500 error when event metadata was
+* Fix bug in `PortalStatistics` when processing device download events threw a 500 error when event metadata was
   returned as raw array data or unparsed JSON.
 
 Please make sure to execute the new migration to update and use the new required Settings details for this new usage of
 the LOGIN_WITH_UUID_ONLY setting.
 
-- Run the migrations with:
+* Run the migrations with:
 
 ```bash
   php bin/console doctrine:migrations:migrate
 ```
 
-- **JWT TTL Reduced (CRA Annex I §1.2)**: Reduced the `lexik_jwt_authentication.yaml` token TTL from 3600s (1 hour)
+* **JWT TTL Reduced (CRA Annex I §1.2)**: Reduced the `lexik_jwt_authentication.yaml` token TTL from 3600s (1 hour)
   to 900s (15 minutes) for the privileged IAM API, and implemented token refresh endpoints. API static docs and the
   auth refresh documentation were updated to reflect the new 900s TTL and the new error response messages.
-- **Metrics Endpoint Access Restricted (CRA Annex I §1.7)**: Fixed the `.env.sample` default for
+* **Metrics Endpoint Access Restricted (CRA Annex I §1.7)**: Fixed the `.env.sample` default for
   `METRICS_ALLOWED_IPS`, which previously defaulted to `0.0.0.0/0`, allowing any IP to query Prometheus metrics
   data if the metrics endpoint was enabled.
-- **Database Installation Interface Rework**: Database configuration template layout reviewed
+* **Database Installation Interface Rework**: Database configuration template layout reviewed
   with responsive grid for OpenRoaming and FreeRADIUS details during the installation process.
 
 ### Other CRA compliance fixes in this release
 
-- InstallationService no longer stores the password hash inside the Progress object
-- `Setting.value` secrets are no longer stored unencrypted
-- Removed raw `exec()` usage vulnerable to command injection and path traversal
-- Certbot no longer hardcodes RSA-2048 keys
-- RSA now uses OAEP padding instead of PKCS#1 v1.5
-- SMS provider API keys are no longer stored in plaintext
-- RADIUS tokens are no longer stored in plaintext
-- Magic-link and 2FA email tokens are no longer stored in plaintext
-- OTP backup codes are no longer stored in plaintext
-- TOTP 2FA secrets are no longer stored in plaintext
-- Automated data retention & PII cleanup routine implemented
-- Enforced web server request payload caps and connection rate limiting
-- Enforced non-zero exit code checks in container vulnerability scanning
-- Machine-readable CycloneDX SBOM generation added to CI/CD
-- Configured strict session cookie protection flags
-- Remediated bypassed security firewalls on API routes
-- Enforced mandatory TLS (HSTS & database `sslmode=verify-full`)
-- Externalized database secrets and bound services to localhost in Docker Compose
-- Hardened web server security headers and eliminated permissive CSP
-- Applied secure defaults across the platform
-- Enforced non-root process execution and purged build tooling from container runtime
-- Only allow reset of password only for actual portal accounts created on the portal
+* InstallationService no longer stores the password hash inside the Progress object
+* `Setting.value` secrets are no longer stored unencrypted
+* Removed raw `exec()` usage vulnerable to command injection and path traversal
+* Certbot no longer hardcodes RSA-2048 keys
+* RSA now uses OAEP padding instead of PKCS#1 v1.5
+* SMS provider API keys are no longer stored in plaintext
+* RADIUS tokens are no longer stored in plaintext
+* Magic-link and 2FA email tokens are no longer stored in plaintext
+* OTP backup codes are no longer stored in plaintext
+* TOTP 2FA secrets are no longer stored in plaintext
+* Automated data retention & PII cleanup routine implemented
+* Enforced web server request payload caps and connection rate limiting
+* Enforced non-zero exit code checks in container vulnerability scanning
+* Machine-readable CycloneDX SBOM generation added to CI/CD
+* Configured strict session cookie protection flags
+* Remediated bypassed security firewalls on API routes
+* Enforced mandatory TLS (HSTS & database `sslmode=verify-full`)
+* Externalized database secrets and bound services to localhost in Docker Compose
+* Hardened web server security headers and eliminated permissive CSP
+* Applied secure defaults across the platform
+* Enforced non-root process execution and purged build tooling from container runtime
+* Only allow reset of password only for actual portal accounts created on the portal
 
 # Release V1.13.1
 
