@@ -228,7 +228,7 @@ class AuthController extends AbstractController
             }
         }
 
-        if ($isLoginWithUUIDOnly === OperationMode::OFF->value) {
+        if ($isLoginWithUUIDOnly === 'false') {
             // If the login with uuid is disabled generate JWT Token
             $token = $this->JWTTokenGenerator->generateToken($user);
             if (is_array($token) && $token['success'] === false) {
