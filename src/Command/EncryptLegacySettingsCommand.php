@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Doctrine\Type\EncryptedStringType;
 use App\Entity\Setting;
-use Doctrine\DBAL\Types\Type;
+use App\Enum\SettingName;
+use App\Exception\EncryptionException;
+use App\Service\EncryptionService;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -18,13 +20,23 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
-    name: 'app:settings:encrypt-legacy',
+    name: 'app:cra:encrypt-settings',
     description: 'Encrypts old plain-text settings in the database to comply with CRA.',
 )]
 class EncryptLegacySettingsCommand extends Command
 {
+    private const array TARGET_SETTINGS = [
+        SettingName::SYNC_LDAP_SERVER->value,
+        SettingName::SYNC_LDAP_BIND_USER_DN->value,
+        SettingName::SYNC_LDAP_BIND_USER_PASSWORD->value,
+        SettingName::SYNC_LDAP_SEARCH_BASE_DN->value,
+        SettingName::BREAKING_GLASS_ADMIN_EMAIL->value,
+        SettingName::CLOUDFLARE_TOKEN->value,
+    ];
+
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
+        private readonly EncryptionService $encryptionService,
     ) {
         parent::__construct();
     }
@@ -32,12 +44,19 @@ class EncryptLegacySettingsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the encryption process');
+            ->addOption(
+                'yes',
+                'y',
+                InputOption::VALUE_NONE,
+                'Automatically confirm the encryption process'
+            );
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        // Check if the --yes option is provided, then skip the confirmation prompt
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
             $question = new ConfirmationQuestion(
@@ -52,37 +71,38 @@ class EncryptLegacySettingsCommand extends Command
         }
 
         $connection = $this->entityManager->getConnection();
-
-        // Dynamically get the exact database table name from Doctrine Metadata
         $tableName = $this->entityManager->getClassMetadata(Setting::class)->getTableName();
 
-        // Begin a database transaction to ensure data consistency
         $connection->beginTransaction();
 
         try {
-            // Fetch all settings directly from the database using the mapped table name
-            $sql = sprintf('SELECT id, value FROM %s WHERE value IS NOT NULL', $tableName);
-            $settings = $connection->fetchAllAssociative($sql);
+            // Query only the targeted settings that are not null or empty
+            $sql = sprintf(
+                'SELECT id, name, value FROM %s WHERE name IN (:names) AND value IS NOT NULL AND value != ""',
+                $tableName
+            );
 
-            /** @var EncryptedStringType $type */
-            $type = Type::getType(EncryptedStringType::NAME);
-            $platform = $connection->getDatabasePlatform();
+            $settings = $connection->fetchAllAssociative(
+                $sql,
+                ['names' => self::TARGET_SETTINGS],
+                ['names' => ArrayParameterType::STRING]
+            );
 
             $updatedCount = 0;
 
             foreach ($settings as $row) {
                 $originalValue = $row['value'];
 
-                // Check if the value is already encrypted (valid base64 and correct nonce length)
-                $decoded = base64_decode((string) $originalValue, true);
-                if ($decoded !== false && strlen($decoded) >= SODIUM_CRYPTO_SECRETBOX_NONCEBYTES) {
-                    continue; // Skip already encrypted settings
+                try {
+                    // If decryption succeeds, the setting is already encrypted
+                    $this->encryptionService->decrypt($originalValue);
+                    continue;
+                } catch (EncryptionException) {
+                    // Decryption failed: setting is legacy plain text and needs encryption
                 }
 
-                // Encrypt the legacy value
-                $encryptedValue = $type->convertToDatabaseValue($originalValue, $platform);
+                $encryptedValue = $this->encryptionService->encrypt($originalValue);
 
-                // Update the setting directly in the database
                 $updateSql = sprintf('UPDATE %s SET value = :value WHERE id = :id', $tableName);
                 $connection->executeStatement(
                     $updateSql,
@@ -100,11 +120,9 @@ class EncryptLegacySettingsCommand extends Command
 <comment>Note:</comment> All system configurations are now compliant with CRA Annex I §1.3.
 EOL;
 
-            // Output the styled message
             $output->write($message);
             $output->writeln(['']);
         } catch (Exception $e) {
-            // Handle any exceptions and roll back in case of an error
             $connection->rollBack();
             $output->writeln('An error occurred while encrypting settings: ' . $e->getMessage());
             return Command::FAILURE;

@@ -9,12 +9,12 @@
 - **OAuth `provider_id` Encryption (CRA Annex I §1.3, §1.5)**: Google and Microsoft `provider_id` values are now
   hashed (HMAC-SHA256) via a new `ProviderIdHasher` service before being persisted, instead of being stored in
   plaintext.
-  - **Required one-time action:** Run the new `app:auth:hash-legacy-ids` command to hash any existing legacy
+  - **Required one-time action:** Run the new `app:cra:encrypt-oauth-ids` command to hash any existing legacy
     plaintext `provider_id` values for Google and Microsoft accounts. This command is idempotent and safe to
     re-run.
 
 ```bash
-    php bin/console app:auth:hash-legacy-ids
+    php bin/console app:cra:encrypt-oauth-ids
 ```
 - Fix bug with attribute mapping during the cloudflareHttps request certs properties association with the portal. This
   happens during the certificate management wizard update.

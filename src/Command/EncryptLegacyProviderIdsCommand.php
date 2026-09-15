@@ -5,7 +5,6 @@ namespace App\Command;
 use App\Entity\UserExternalAuth;
 use App\Enum\UserProvider;
 use App\Service\EncryptionService;
-use App\Service\ExternalIdentifierHasher;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -18,10 +17,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
-    name: 'app:auth:hash-legacy-ids',
-    description: 'Hashes legacy plain-text OAuth provider IDs for Google and Microsoft accounts to comply with CRA.',
+    name: 'app:cra:encrypt-oauth-ids',
+    description: 'Encrypts legacy plain-text OAuth provider IDs for Google and Microsoft accounts to comply with CRA.',
 )]
-class HashLegacyProviderIdsCommand extends Command
+class EncryptLegacyProviderIdsCommand extends Command
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
