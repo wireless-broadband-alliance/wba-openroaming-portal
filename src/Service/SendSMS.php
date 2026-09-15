@@ -19,6 +19,7 @@ readonly class SendSMS
         private SettingRepository $settingRepository,
         private SMSProviderRepository $smsProviderRepository,
         private UserRepository $userRepository,
+        private EncryptionService $encryptionService,
     ) {
     }
 
@@ -40,7 +41,7 @@ readonly class SendSMS
         }
 
         $serviceClass = $provider->getSMSProviderType()->getServiceClass();
-        $serviceClass::sendSMS($provider, $message, $user);
+        $serviceClass::sendSMS($provider, $this->encryptionService, $message, $user);
 
         if ($messageLength) {
             return SMSResponse::SMS_SUCCESS_CODE->value;

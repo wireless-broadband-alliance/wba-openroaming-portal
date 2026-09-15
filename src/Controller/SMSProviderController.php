@@ -12,9 +12,11 @@ use App\Enum\EventMetadataKeysType;
 use App\Enum\ParamType;
 use App\Enum\SettingName;
 use App\Enum\SMSProviderType;
+use App\Exception\EncryptionException;
 use App\Form\SMSProviderType as SMSProviderFormType;
 use App\Repository\SettingRepository;
 use App\Security\Voter\UserAuthenticationVoter;
+use App\Service\EncryptionService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use DateTime;
@@ -38,6 +40,7 @@ class SMSProviderController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly SettingRepository $settingRepository,
         private readonly EventActions $eventActions,
+        private readonly EncryptionService $encryptionService,
     ) {
     }
 
@@ -112,7 +115,7 @@ class SMSProviderController extends AbstractController
     #[IsGranted(UserAuthenticationVoter::SMS_CONFIG_WRITE)]
     public function edit(SMSProvider $provider, Request $request): Response
     {
-        $dto = SMSProviderDTO::fromEntity($provider);
+        $dto = SMSProviderDTO::fromEntity($provider, $this->encryptionService);
         $form = $this->createForm(SMSProviderFormType::class, $dto);
         $form->handleRequest($request);
 
@@ -341,6 +344,7 @@ class SMSProviderController extends AbstractController
 
     /**
      * Builds and persists a brand-new SMSProvider from the DTO's named fields.
+     * @throws EncryptionException
      */
     private function createProviderFromDto(SMSProviderDTO $dto): SMSProvider
     {
@@ -360,7 +364,8 @@ class SMSProviderController extends AbstractController
             $param->setUpdatedAt($now);
             $param->setType(ParamType::STRING);
             $param->setParamType($paramType);
-            $param->setValue($value);
+            $encryptedValue = $this->encryptionService->encrypt($value);
+            $param->setValue($encryptedValue);
             $provider->addSmsProviderParam($param);
             $this->entityManager->persist($param);
         }
@@ -372,6 +377,7 @@ class SMSProviderController extends AbstractController
      * Updates an existing SMSProvider's named fields, matched by paramType.
      * If the provider type itself changed, any params belonging to the old
      * type are removed since they no longer apply.
+     * @throws EncryptionException
      */
     private function updateProviderFromDto(SMSProvider $provider, SMSProviderDTO $dto): void
     {
@@ -389,7 +395,8 @@ class SMSProviderController extends AbstractController
 
         foreach ($this->buildParamValues($dto) as $paramType => $value) {
             if (isset($existingParamsByType[$paramType])) {
-                $existingParamsByType[$paramType]->setValue($value);
+                $encryptedValue = $this->encryptionService->encrypt($value);
+                $existingParamsByType[$paramType]->setValue($encryptedValue);
                 $existingParamsByType[$paramType]->setUpdatedAt($now);
                 unset($existingParamsByType[$paramType]);
 
@@ -401,7 +408,8 @@ class SMSProviderController extends AbstractController
             $param->setUpdatedAt($now);
             $param->setType(ParamType::STRING);
             $param->setParamType($paramType);
-            $param->setValue($value);
+            $encryptedValue = $this->encryptionService->encrypt($value);
+            $param->setValue($encryptedValue);
             $provider->addSmsProviderParam($param);
             $this->entityManager->persist($param);
         }

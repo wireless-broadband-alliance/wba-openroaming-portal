@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Doctrine\Type\EncryptedStringType;
 use App\Entity\SMSProviderParam;
-use Doctrine\DBAL\Types\Type;
+use App\Exception\EncryptionException;
+use App\Service\EncryptionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -25,6 +25,7 @@ class EncryptLegacySmsParamsCommand extends Command
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
+        private readonly EncryptionService $encryptionService,
     ) {
         parent::__construct();
     }
@@ -59,22 +60,23 @@ class EncryptLegacySmsParamsCommand extends Command
             $sql = sprintf('SELECT id, value FROM %s WHERE value IS NOT NULL', $tableName);
             $params = $connection->fetchAllAssociative($sql);
 
-            /** @var EncryptedStringType $type */
-            $type = Type::getType(EncryptedStringType::NAME);
-            $platform = $connection->getDatabasePlatform();
-
             $updatedCount = 0;
 
             foreach ($params as $row) {
-                $originalValue = $row['value'];
+                $originalValue = (string) $row['value'];
+                $isEncrypted = true;
 
-                $phpValue = $type->convertToPHPValue($originalValue, $platform);
+                try {
+                    $this->encryptionService->decrypt($originalValue);
+                } catch (EncryptionException $e) {
+                    $isEncrypted = false;
+                }
 
-                if ($phpValue !== $originalValue) {
+                if ($isEncrypted) {
                     continue;
                 }
 
-                $encryptedValue = $type->convertToDatabaseValue($originalValue, $platform);
+                $encryptedValue = $this->encryptionService->encrypt($originalValue);
 
                 $updateSql = sprintf('UPDATE %s SET value = :value WHERE id = :id', $tableName);
                 $connection->executeStatement(

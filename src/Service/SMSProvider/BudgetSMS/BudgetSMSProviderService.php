@@ -6,6 +6,8 @@ use App\Entity\SMSProvider;
 use App\Entity\User;
 use App\Enum\BudgetSMS\BudgetSmsErrorCode;
 use App\Enum\ParamType;
+use App\Exception\EncryptionException;
+use App\Service\EncryptionService;
 use App\Service\SMSProvider\SMSProviderInterface;
 use libphonenumber\PhoneNumber;
 use libphonenumber\PhoneNumberFormat;
@@ -34,12 +36,12 @@ final readonly class BudgetSMSProviderService implements SMSProviderInterface
      * @throws ClientExceptionInterface
      * @throws \JsonException
      */
-    public static function sendSMS(SMSProvider $provider, string $message, User $user): string
+    public static function sendSMS(SMSProvider $provider, EncryptionService $encryptionService ,string $message, User $user): string
     {
         $recipient = $user->getPhoneNumber()->getCountryCode() . $user->getPhoneNumber()->getNationalNumber();
 
         $queryParams = array_merge(
-            self::getProviderParams($provider),
+            self::getProviderParams($provider, $encryptionService),
             [
                 'to' => $recipient,
                 'msg' => $message,
@@ -47,8 +49,13 @@ final readonly class BudgetSMSProviderService implements SMSProviderInterface
         );
 
         $apiUrl = self::resolveApiUrl($provider) . '?' . http_build_query($queryParams);
-
         $client = HttpClient::create();
+        $response = $client->request('GET', $apiUrl);
+
+        /*
+        $statusCode = $response->getStatusCode();
+        $content = $response->getContent(false);
+        */
 
         return $client->request('GET', $apiUrl)->getContent();
     }
@@ -133,11 +140,11 @@ final readonly class BudgetSMSProviderService implements SMSProviderInterface
      * @return array<string, mixed>
      * @throws \JsonException
      */
-    private static function getProviderParams(SMSProvider $provider): array
+    private static function getProviderParams(SMSProvider $provider, EncryptionService $encryptionService): array
     {
         $params = [];
         foreach ($provider->getSmsProviderParams() as $param) {
-            $value = $param->getValue();
+            $value = self::decryptValue($encryptionService, $param->getValue());
             $type = $param->getType();
 
             $params[$param->getParamType()] = match ($type) {
@@ -153,5 +160,14 @@ final readonly class BudgetSMSProviderService implements SMSProviderInterface
         }
 
         return $params;
+    }
+
+    public static function decryptValue(EncryptionService $encryptionService, string $value): string
+    {
+        try {
+            return $encryptionService->decrypt($value);
+        } catch (EncryptionException) {
+            return $value;
+        }
     }
 }

@@ -4,11 +4,14 @@ namespace App\DTO;
 
 use App\Entity\SMSProvider;
 use App\Enum\SMSProviderType;
+use App\Exception\EncryptionException;
+use App\Service\EncryptionService;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class SMSProviderDTO
 {
+
     public ?int $id = null;
 
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
@@ -39,7 +42,10 @@ class SMSProviderDTO
     #[Assert\Length(max: 16, maxMessage: 'fieldCannotBeLongerThan')]
     public ?string $from = null;
 
-    public static function fromEntity(SMSProvider $provider): self
+    /**
+     * @throws EncryptionException
+     */
+    public static function fromEntity(SMSProvider $provider, EncryptionService $encryptionService): self
     {
         $dto = new self();
         $dto->id = $provider->getId();
@@ -49,10 +55,10 @@ class SMSProviderDTO
 
         foreach ($provider->getSmsProviderParams() as $param) {
             match ($param->getParamType()) {
-                'username' => $dto->username = $param->getValue(),
-                'userid' => $dto->userid = $param->getValue(),
-                'handle' => $dto->handle = $param->getValue(),
-                'from' => $dto->from = $param->getValue(),
+                'username' => $dto->username = $encryptionService->decrypt($param->getValue()),
+                'userid' => $dto->userid = $encryptionService->decrypt($param->getValue()),
+                'handle' => $dto->handle = $encryptionService->decrypt($param->getValue()),
+                'from' => $dto->from = $encryptionService->decrypt($param->getValue()),
                 default => null,
             };
         }
