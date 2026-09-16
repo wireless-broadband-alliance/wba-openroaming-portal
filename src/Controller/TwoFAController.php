@@ -957,10 +957,7 @@ class TwoFAController extends AbstractController
             return $this->redirectToRoute('app_dashboard_login');
         }
 
-        $codes = [];
-        foreach ($user->getOTPcodes() as $code) {
-            $codes[] = $code->getCode();
-        }
+        $codes = $this->twoFAService->getPlainTextOTPCodes($user);
 
         // Create the content of the file
         $fileContent = implode("\n", $codes);
