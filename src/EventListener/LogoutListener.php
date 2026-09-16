@@ -35,6 +35,7 @@ class LogoutListener implements EventSubscriberInterface
             $session->remove(SessionStatus::TWO_FACTOR_CONTEXT->value);
             $session->remove(SessionStatus::FORGOT_PASSWORD_UUID->value);
             $session->remove(SessionStatus::VERIFIED->value);
+            $session->remove(SessionStatus::AUTHENTICATED_VIA_UUID_ONLY->value);
             $session->remove(SessionStatus::SYSTEM_RESET_REQUEST->value);
             $session->remove(SessionStatus::INSTALLATION_STARTED->value);
             $session->remove(SessionStatus::CERTIFICATE_STARTED->value);

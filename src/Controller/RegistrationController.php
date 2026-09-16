@@ -8,6 +8,7 @@ use App\Enum\EventMetadataKeysType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
+use App\Enum\SessionStatus;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Form\RegistrationFormSMSType;
@@ -409,7 +410,7 @@ class RegistrationController extends AbstractController
                 $user->setIsVerified(true);
                 $this->userRepository->save($user, true);
                 $session = $this->requestStack->getSession();
-                $session->set('session_verified', true);
+                $session->set(SessionStatus::VERIFIED->value, true);
 
                 // Defines the Event to the table
                 $eventMetaData = [

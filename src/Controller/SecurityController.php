@@ -8,8 +8,8 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\FirewallType;
-use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
+use App\Enum\SessionStatus;
 use App\Enum\SettingName;
 use App\Enum\SMSResponse;
 use App\Enum\UserProvider;
@@ -594,7 +594,7 @@ class SecurityController extends AbstractController
         $session = $this->requestStack->getSession();
         if (
             $userExternalAuths[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value ||
-            $session->has('session_verified')
+            $session->has(SessionStatus::VERIFIED->value)
         ) {
             return $this->redirectToRoute('app_landing');
         }
@@ -613,7 +613,7 @@ class SecurityController extends AbstractController
                 $user->setForgotPasswordRequest(false);
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
-                $session->set('session_verified', true);
+                $session->set(SessionStatus::VERIFIED->value, true);
 
                 return $this->redirectToRoute('app_landing');
             }
@@ -657,8 +657,10 @@ class SecurityController extends AbstractController
 
                 if (!$user->isVerified()) {
                     $user->setIsVerified(true);
-                    $session->set('session_verified', true);
                 }
+
+                $session->set(SessionStatus::VERIFIED->value, true);
+                $session->set(SessionStatus::AUTHENTICATED_VIA_UUID_ONLY->value, true);
 
                 $user->setTwoFAcodeIsActive(false);
                 $this->userRepository->save($user, true);

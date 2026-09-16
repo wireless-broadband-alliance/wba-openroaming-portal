@@ -10,6 +10,7 @@ use App\Enum\EventMetadataKeysType;
 use App\Enum\FirewallType;
 use App\Enum\ForgotPasswordEnum;
 use App\Enum\PlatformMode;
+use App\Enum\SessionStatus;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Form\ForgotPasswordEmailType;
@@ -126,12 +127,16 @@ class ForgotPasswordController extends AbstractController
                 return $this->redirectToRoute('app_site_forgot_password_email');
             }
 
-            if ($user->getEmail() === $this->encryptionService->decrypt($data[SettingName::BREAKING_GLASS_ADMIN_EMAIL->value]['value'])) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('emailDoesntExist', [], 'controllers')
-                );
-                return $this->redirectToRoute('app_site_forgot_password_email');
+            $breakingGlassSetting = $data[SettingName::BREAKING_GLASS_ADMIN_EMAIL->value]['value'] ?? null;
+            if (!empty($breakingGlassSetting)) {
+                $breakingGlassEmail = $this->encryptionService->decrypt($breakingGlassSetting);
+                if ($user->getEmail() === $breakingGlassEmail) {
+                    $this->addFlash(
+                        'error',
+                        $this->translator->trans('emailDoesntExist', [], 'controllers')
+                    );
+                    return $this->redirectToRoute('app_site_forgot_password_email');
+                }
             }
 
             // Check if the provider is "PORTAL_ACCOUNT" and the providerId "EMAIL"
@@ -676,7 +681,7 @@ class ForgotPasswordController extends AbstractController
             $currentUser->setTwoFACodeGeneratedAt(new DateTime());
             $currentUser->setTwoFAcodeIsActive(true);
             $session = $request->getSession();
-            $session->set('session_verified', true);
+            $session->set(SessionStatus::VERIFIED->value, true);
 
             $this->entityManager->persist($currentUser);
             $this->entityManager->flush();

@@ -6,7 +6,7 @@ use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
-use App\Enum\OperationMode;
+use App\Enum\SessionStatus;
 use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use App\Service\EventActions;
@@ -48,7 +48,7 @@ readonly class LoginSuccessListener implements EventSubscriberInterface
                 $loginUuidOnlySetting->getValue() === 'false'
                 && $user->isVerified()
             ) {
-                $session->set('session_verified', true);
+                $session->set(SessionStatus::VERIFIED->value, true);
             }
 
             // Defines the Event to the table

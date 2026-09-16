@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
+use App\Enum\SessionStatus;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
@@ -62,6 +63,7 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         $password = (string) ($loginData['password'] ?? '');
 
         $request->getSession()->set('last_login_method', $loginMethod);
+        $request->getSession()->remove(SessionStatus::AUTHENTICATED_VIA_UUID_ONLY->value);
         if ($loginMethod === UserProvider::EMAIL->value) {
             $identifier = $formData['login']['email'] ?? null;
 
