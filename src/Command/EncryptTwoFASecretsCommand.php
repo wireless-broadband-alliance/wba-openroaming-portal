@@ -18,8 +18,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
-    name: 'app:twofa:encrypt-secrets',
-    description: 'Encrypts legacy plain-text TOTP secrets in the database using Sodium.',
+    name: 'app:cra:encrypt-totp-secrets',
+    description: 'Encrypts legacy plain-text TOTP secrets in the database.',
 )]
 class EncryptTwoFASecretsCommand extends Command
 {
@@ -31,7 +31,12 @@ class EncryptTwoFASecretsCommand extends Command
 
     protected function configure(): void
     {
-        $this->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the encryption process');
+        $this->addOption(
+            'yes',
+            'y',
+            InputOption::VALUE_NONE,
+            'Automatically confirm the encryption process'
+        );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
