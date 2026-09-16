@@ -57,7 +57,7 @@
   - **Required action:** Run the `app:cra:encrypt-totp-secrets` command to encrypt any existing plain-text TOTP
     secrets in the database. This command is idempotent and safe to re-run.
 ```bash
-    php bin/console app:cra:encrypt-totp-secrets
+    php bin/console app:cra:encrypt-2fa-data
 ```
 
 * Fix bug with attribute mapping during the cloudflareHttps request certs properties association with the portal. This
