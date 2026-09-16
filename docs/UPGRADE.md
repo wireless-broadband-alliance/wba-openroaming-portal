@@ -110,7 +110,7 @@ Use this table to determine the exact upgrade steps based on your current versio
 | 1.12.0          | 1.12.1         | Updated configuration variables default value to follow better practices (bool instead of ON & OFF, please consult the `env.sample` for more details).                                                                                                                                                                                                                                                                                                                                  |
 | 1.12.1          | 1.13.0         | Run `php bin/console doctrine:migrations:migrate` to set up the new `AccessPoint`, `Network`, and `SMSProvider`/`SMSProviderParam` tables. Then run `php bin/console prepare:multiSMSMigration` **once** to migrate existing BudgetSMS API credentials from the `Settings` table to the new dedicated `SMSProvider` management system. Perform both actions while the portal is **offline or restricted**.                                                                              |
 | 1.13.0          | 1.13.1         | No migration or actions required.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| 1.13.1          | 1.13.2         | Run `php bin/console doctrine:migrations:migrate` to update database setting structures. Next, run the three CRA data encryption commands: `app:cra:encrypt-oauth-ids`, `app:cra:encrypt-settings`, and `radius:encrypt-legacy-tokens`.                                                                                                                                                                                                                                                 |
+| 1.13.1          | 1.14.0         | Run `php bin/console doctrine:migrations:migrate` to update database setting structures. Next, run the four CRA data encryption commands: `app:cra:encrypt-oauth-ids`, `app:cra:encrypt-settings`, `radius:encrypt-legacy-tokens`, and `app:cra:encrypt-otp-codes`.                                                                                                                                                                                                                     |
 
 Use this table to determine the exact upgrade steps based on your current version.
 
@@ -188,9 +188,9 @@ Follow these general steps when updating the portal:
 
 ---
 
-## Release-Specific Notes: Version 1.13.2
+## Release-Specific Notes: Version 1.14.0
 
-**Scenario**: Your current version is **1.13.1** (or earlier 1.13.x), and you want to upgrade to **1.13.2**.
+**Scenario**: Your current version is **1.13.1** (or earlier 1.13.x), and you want to upgrade to **1.14.0**.
 
 * **Required Database Migrations:**
   Run Doctrine migrations to apply setting structure updates:
@@ -201,7 +201,7 @@ Follow these general steps when updating the portal:
 
 * **Required One-Time Actions — Cyber Resilience Act (CRA Annex I §1.3) Data Encryption:**
   To comply with CRA data protection mandates, existing plain-text sensitive data in the database must be encrypted.
-  Execute the following three commands in sequence:
+  Execute the following four commands in sequence:
 
 1. **OAuth Provider IDs Encryption:**
 
@@ -221,7 +221,13 @@ Follow these general steps when updating the portal:
      php bin/console radius:encrypt-legacy-tokens
 ```
 
-> **Note:** All three commands are idempotent and safe to re-run if needed.
+4. **Legacy OTP Backup Codes Encryption:**
+
+```bash
+     php bin/console app:cra:encrypt-otp-codes
+```
+
+> **Note:** All four commands are idempotent and safe to re-run if needed.
 
 ---
 

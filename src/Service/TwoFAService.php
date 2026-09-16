@@ -12,6 +12,7 @@ use App\Enum\SettingName;
 use App\Enum\TwoFAType;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
+use App\Exception\EncryptionException;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -31,6 +32,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class TwoFAService
 {
+    private const int OTP_CODES_AMOUNT = 12;
+
     public function __construct(
         private EntityManagerInterface $entityManager,
         private UserRepository $userRepository,
@@ -40,7 +43,8 @@ readonly class TwoFAService
         private SettingRepository $settingRepository,
         private EventActions $eventActions,
         private EventRepository $eventRepository,
-        private TranslatorInterface $translator
+        private TranslatorInterface $translator,
+        private EncryptionService $encryptionService
     ) {
     }
 
@@ -110,29 +114,28 @@ readonly class TwoFAService
     }
 
     /**
-     * @return string[] Returns an array of plaintext codes for one-time display
+     * Generates a fresh set of OTP recovery codes.
+     *
+     * Codes are stored encrypted (reversible) rather than hashed, so that they can be
+     * displayed back to the user after the initial setup.
+     *
+     * @return string[] Returns an array of plaintext codes for display
      * @throws RandomException
+     * @throws EncryptionException
      */
     public function generateOTPCodes(User $user): array
     {
-        // Remove existing codes
-        foreach ($user->getOTPcodes() as $code) {
-            $this->entityManager->remove($code);
-        }
+        // Remove existing codes, both from the DB and from the in-memory collection
+        $this->removeOTPCodes($user);
 
-        $nCodes = 12; // Number of codes generated.
-        $plainTextCodes = []; // Store plaintext codes to return to the controller
+        $plainTextCodes = [];
 
-        for ($i = 0; $i < $nCodes; $i++) {
-            // Generate the plaintext code and save it for the return array
+        for ($i = 0; $i < self::OTP_CODES_AMOUNT; $i++) {
             $plainCode = $this->generateMixedCode();
             $plainTextCodes[] = $plainCode;
 
-            // Hash the code using Argon2id
-            $hashedCode = password_hash($plainCode, PASSWORD_ARGON2ID);
-
             $otpCode = new OTPcode();
-            $otpCode->setCode($hashedCode); // Store ONLY the hash in the DB
+            $otpCode->setCode($this->encryptionService->encrypt($plainCode));
             $otpCode->setUser($user);
             $otpCode->setActive(false);
             $otpCode->setCreatedAt(new DateTime());
@@ -147,12 +150,53 @@ readonly class TwoFAService
         return $plainTextCodes;
     }
 
+    /**
+     * Returns the plaintext of the user's current OTP codes.
+     *
+     * @return string[]
+     */
+    public function getPlainTextOTPCodes(User $user): array
+    {
+        $plainTextCodes = [];
+
+        foreach ($user->getOTPcodes() as $code) {
+            $storedCode = $code->getCode();
+            if (!is_string($storedCode)) {
+                continue;
+            }
+
+            try {
+                $plainTextCodes[] = $this->encryptionService->decrypt($storedCode);
+            } catch (EncryptionException) {
+                // Skip values that cannot be decrypted (e.g. legacy or corrupted rows)
+                continue;
+            }
+        }
+
+        return $plainTextCodes;
+    }
+
     public function validateOTPCodes(User $user, string $formCode): bool
     {
         $twoFACodes = $user->getOTPcodes();
         foreach ($twoFACodes as $code) {
-            // Verify if the code is active and matches the Argon2id hash
-            if ($code->isActive() && password_verify($formCode, $code->getCode())) {
+            if (!$code->isActive()) {
+                continue;
+            }
+
+            $storedCode = $code->getCode();
+            if (!is_string($storedCode)) {
+                continue;
+            }
+
+            try {
+                $plainCode = $this->encryptionService->decrypt($storedCode);
+            } catch (EncryptionException) {
+                // Skip values that cannot be decrypted (e.g. legacy or corrupted rows)
+                continue;
+            }
+
+            if (hash_equals($plainCode, $formCode)) {
                 // As we can only use the code once, we have to deactivate it after it is used.
                 $code->setActive(false);
                 $this->entityManager->persist($code);
@@ -447,11 +491,11 @@ readonly class TwoFAService
 
     private function removeOTPCodes(User $user): void
     {
-        $codes = $user->getOTPcodes();
-        foreach ($codes as $code) {
+        foreach ($user->getOTPcodes() as $code) {
             $user->removeOTPcode($code);
-            $this->entityManager->persist($user);
+            $this->entityManager->remove($code);
         }
+        $this->entityManager->persist($user);
         $this->entityManager->flush();
     }
 

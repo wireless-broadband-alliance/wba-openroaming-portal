@@ -12,6 +12,7 @@ use App\Enum\FirewallType;
 use App\Enum\SessionStatus;
 use App\Enum\SettingName;
 use App\Enum\UserTwoFactorAuthenticationStatus;
+use App\Exception\EncryptionException;
 use App\Form\TwoFACode;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
@@ -31,7 +32,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class TwoFAController extends AbstractController
@@ -599,6 +599,10 @@ class TwoFAController extends AbstractController
         ]);
     }
 
+    /**
+     * @throws EncryptionException
+     * @throws RandomException
+     */
     #[Route(
         '/{context}/2FAFirstSetup/codes',
         name: 'app_otpCodes',
@@ -629,11 +633,14 @@ class TwoFAController extends AbstractController
             );
             return $this->redirectToRoute('app_dashboard_login');
         }
+
         $data = $this->getSettings->getSettings();
         $session = $request->getSession();
+
         if ($this->twoFAService->hasValidOTPCodes($user)) {
             return $this->redirectToRoute('app_landing');
         }
+
         if ($this->twoFAService->twoFAisActive($user)) {
             $session_admin = $session->get('session_admin');
             if ($session_admin) {
@@ -642,11 +649,10 @@ class TwoFAController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        $plainTextCodes = $session->get('pending_otp_codes');
-
-        if (!$plainTextCodes || $user->getOTPcodes()->isEmpty()) {
+        if ($user->getOTPcodes()->isEmpty()) {
             $plainTextCodes = $this->twoFAService->generateOTPCodes($user);
-            $session->set('pending_otp_codes', $plainTextCodes);
+        } else {
+            $plainTextCodes = $this->twoFAService->getPlainTextOTPCodes($user);
         }
 
         return $this->render('landing/twoFAAuthentication/otpCodes.html.twig', [

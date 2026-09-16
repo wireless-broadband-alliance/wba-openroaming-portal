@@ -33,7 +33,12 @@ class EncryptLegacyRadiusTokensCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the encryption process');
+            ->addOption(
+                'yes',
+                'y',
+                InputOption::VALUE_NONE,
+                'Automatically confirm the encryption process'
+            );
     }
 
     /**
