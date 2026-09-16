@@ -4,8 +4,6 @@ namespace App\DTO;
 
 use App\Entity\SMSProviderParam;
 use App\Enum\ParamType;
-use App\Exception\EncryptionException;
-use App\Service\EncryptionService;
 use App\Validator\Constraints\ValueMatchesParamType;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -25,16 +23,13 @@ class SMSProviderParamDTO
     #[Assert\Length(max: 255, maxMessage: 'fieldCannotBeLongerThan')]
     public ?string $value = null;
 
-    /**
-     * @throws EncryptionException
-     */
-    public static function fromEntity(SMSProviderParam $param, EncryptionService $encryptionService): self
+    public static function fromEntity(SMSProviderParam $param): self
     {
         $dto = new self();
         $dto->id = $param->getId();
         $dto->type = $param->getType();
         $dto->paramType = $param->getParamType();
-        $dto->value = $encryptionService->decrypt($param->getValue());
+        $dto->value = $param->getValue();
 
         return $dto;
     }

@@ -8,10 +8,8 @@ use App\Entity\SMSProviderParam;
 use App\Enum\ParamType;
 use App\Enum\SettingName;
 use App\Enum\SMSProviderType;
-use App\Exception\EncryptionException;
 use App\Repository\SettingRepository;
 use App\Repository\SMSProviderRepository;
-use App\Service\EncryptionService;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -35,7 +33,6 @@ class MultipleSMSMigrationCommand extends Command
         private readonly EntityManagerInterface $entityManager,
         private readonly SettingRepository $settingRepository,
         private readonly SMSProviderRepository $smsProviderRepository,
-        private readonly EncryptionService  $encryptionService,
     ) {
         parent::__construct();
     }
@@ -46,9 +43,6 @@ class MultipleSMSMigrationCommand extends Command
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the migration');
     }
 
-    /**
-     * @throws EncryptionException
-     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // This command must only run once — a second run would create a duplicate
@@ -122,8 +116,7 @@ class MultipleSMSMigrationCommand extends Command
         foreach ($settingsToMigrate as $paramType => $migrated) {
             $smsParam = new SMSProviderParam();
             $smsParam->setParamType($paramType);
-            $encryptedValue = $this->encryptionService->encrypt($migrated['value']);
-            $smsParam->setValue($encryptedValue);
+            $smsParam->setValue($migrated['value']);
             $smsParam->setType(ParamType::STRING);
             $smsParam->setCreatedAt($now);
             $smsParam->setUpdatedAt($now);
