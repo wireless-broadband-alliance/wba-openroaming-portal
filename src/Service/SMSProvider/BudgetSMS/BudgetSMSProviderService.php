@@ -50,6 +50,15 @@ final readonly class BudgetSMSProviderService implements SMSProviderInterface
 
         $client = HttpClient::create();
 
+        // debug stuff
+        /*
+        $response = $client->request('GET', $apiUrl);
+        $statusCode = $response->getStatusCode();
+        $content = $response->getContent(false);
+        dd($statusCode, $content);
+        */
+
+
         return $client->request('GET', $apiUrl)->getContent();
     }
 
