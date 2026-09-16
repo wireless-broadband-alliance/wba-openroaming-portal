@@ -19,7 +19,7 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
     name: 'app:cra:encrypt-totp-secrets',
-    description: 'Encrypts legacy plain-text TOTP secrets in the database.',
+    description: 'Encrypts legacy plain-text 2FA secrets and 2FA codes in the database.',
 )]
 class EncryptTwoFASecretsCommand extends Command
 {
@@ -44,7 +44,7 @@ class EncryptTwoFASecretsCommand extends Command
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
             $question = new ConfirmationQuestion(
-                'This action will encrypt all legacy plain-text TOTP secrets. [y/N] ',
+                'This action will encrypt all legacy plain-text 2FA secrets and 2FA codes. [y/N] ',
                 false
             );
             /** @var QuestionHelper $helper */
@@ -61,7 +61,7 @@ class EncryptTwoFASecretsCommand extends Command
 
         try {
             $sql = sprintf(
-                'SELECT id, twoFAsecret FROM %s WHERE twoFAsecret IS NOT NULL AND twoFAsecret != \'\'',
+                'SELECT id, twoFAsecret, twoFAcode FROM %s WHERE (twoFAsecret IS NOT NULL AND twoFAsecret != \'\') OR (twoFAcode IS NOT NULL AND twoFAcode != \'\')',
                 $tableName
             );
             $users = $connection->fetchAllAssociative($sql);
@@ -73,27 +73,42 @@ class EncryptTwoFASecretsCommand extends Command
             $updatedCount = 0;
 
             foreach ($users as $row) {
-                $original = $row['twoFAsecret'];
+                $updates = [];
+                $params = ['id' => $row['id']];
 
-                $phpValue = $type->convertToPHPValue($original, $platform);
+                if (!empty($row['twoFAsecret'])) {
+                    $secretOriginal = $row['twoFAsecret'];
+                    $secretPhp = $type->convertToPHPValue($secretOriginal, $platform);
 
-                if ($phpValue !== $original) {
-                    continue;
+                    if ($secretPhp === $secretOriginal) {
+                        $updates[] = 'twoFAsecret = :sec';
+                        $params['sec'] = $type->convertToDatabaseValue($secretOriginal, $platform);
+                    }
                 }
 
-                $encrypted = $type->convertToDatabaseValue($original, $platform);
+                if (!empty($row['twoFAcode'])) {
+                    $codeOriginal = $row['twoFAcode'];
+                    $codePhp = $type->convertToPHPValue($codeOriginal, $platform);
 
-                $connection->executeStatement(
-                    sprintf('UPDATE %s SET twoFAsecret = :sec WHERE id = :id', $tableName),
-                    ['sec' => $encrypted, 'id' => $row['id']]
-                );
-                $updatedCount++;
+                    if ($codePhp === $codeOriginal) {
+                        $updates[] = 'twoFAcode = :code';
+                        $params['code'] = $type->convertToDatabaseValue($codeOriginal, $platform);
+                    }
+                }
+
+                if (!empty($updates)) {
+                    $connection->executeStatement(
+                        sprintf('UPDATE %s SET %s WHERE id = :id', $tableName, implode(', ', $updates)),
+                        $params
+                    );
+                    $updatedCount++;
+                }
             }
 
             $connection->commit();
 
             $output->writeln(sprintf(
-                '<info>Success:</info> %d legacy TOTP secrets were securely encrypted.',
+                '<info>Success:</info> %d user record(s) with legacy 2FA data were securely encrypted.',
                 $updatedCount
             ));
         } catch (Exception $e) {

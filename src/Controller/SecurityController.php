@@ -638,11 +638,22 @@ class SecurityController extends AbstractController
     ): Response {
         // Get the uuid and verification code from the URL query parameters
         $token = $request->query->get('token');
+        $uuid = $request->query->get('uuid');
+
+        if (!$uuid || !$token) {
+            $this->addFlash('error', $this->translator->trans('invalidLogin', [], 'controllers'));
+            return $this->redirectToRoute('app_login');
+        }
 
         // Get the user with the matching email, excluding admin users
-        $user = $this->userRepository->findOneBy(['twoFAcode' => $token]);
+        $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
 
-        if ($user && $user->getTwoFAcodeIsActive() && $this->magicLinkService->linkValidity($user)) {
+        if (
+            $user &&
+            $user->getTwoFAcode() === $token &&
+            $user->getTwoFAcodeIsActive() &&
+            $this->magicLinkService->linkValidity($user)
+        ) {
             try {
                 // Create a token manually for the user
                 $token = new UsernamePasswordToken($user, FirewallType::LANDING->value, $user->getRoles());
