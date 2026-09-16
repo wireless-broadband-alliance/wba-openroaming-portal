@@ -18,7 +18,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
-    name: 'app:cra:encrypt-totp-secrets',
+    name: 'app:cra:encrypt-2fa-data',
     description: 'Encrypts legacy plain-text 2FA secrets and 2FA codes in the database.',
 )]
 class EncryptTwoFASecretsCommand extends Command
