@@ -37,7 +37,8 @@ class CraMigrateAllCommand extends Command
             /** @var QuestionHelper $helper */
             $helper = $this->getHelper('question');
             $question = new ConfirmationQuestion(
-                'This action will encrypt all legacy OAuth IDs, system settings, RADIUS tokens, OTP codes, SMS parameters, and 2FA data. Continue? [y/N] ',
+                'This action will encrypt all legacy OAuth IDs, 
+                system settings, RADIUS tokens, OTP codes, SMS parameters, and 2FA data. Continue? [y/N] ',
                 false
             );
 
@@ -89,7 +90,8 @@ class CraMigrateAllCommand extends Command
 
 
 <info>Success:</info> All CRA data encryption migration tasks were completed successfully.
-<comment>Note:</comment> OAuth IDs, system settings, RADIUS tokens, OTP backup codes, SMS parameters, and 2FA user data are now fully protected in compliance with CRA guidelines.
+<comment>Note:</comment> OAuth IDs, system settings, RADIUS tokens, OTP backup codes, 
+SMS parameters, and 2FA user data are now fully protected in compliance with CRA guidelines.
 EOL;
 
         $output->write($message);
