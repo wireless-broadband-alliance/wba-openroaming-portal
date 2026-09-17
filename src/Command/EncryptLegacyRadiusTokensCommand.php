@@ -18,7 +18,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
-    name: 'radius:encrypt-legacy-tokens',
+    name: 'app:cra:encrypt-radius-legacy-tokens',
     description: 'Encrypts legacy plain-text RADIUS tokens to comply with CRA.',
 )]
 class EncryptLegacyRadiusTokensCommand extends Command
