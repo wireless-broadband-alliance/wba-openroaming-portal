@@ -70,6 +70,17 @@
     php bin/console app:cra:encrypt-2fa-data
 ```
 
+- **All-in-One CRA Data Encryption Migration (`app:cra:migrate-all`)**: Added a master console command to execute the full
+suite of CRA encryption tasks in sequence (OAuth IDs, System Settings, RADIUS tokens, OTP codes, SMS parameters, and 2FA
+data).
+
+- **Required Action:** Run the master migration command to encrypt all legacy plaintext data across the platform in a
+  single step:
+
+```bash
+    php bin/console app:cra:migrate-all --yes
+```
+
 * Fix bug with attribute mapping during the cloudflareHttps request certs properties association with the portal. This
   happens during the certificate management wizard update.
 * Added customizable footer image support with display toggle and improved layout for the Landing Page Configuration.
