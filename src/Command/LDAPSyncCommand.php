@@ -109,7 +109,8 @@ class LDAPSyncCommand extends Command
             $this->settingRepository->findOneBy(['name' => SettingName::SYNC_LDAP_BIND_USER_DN->value])?->getValue()
         );
         $ldapPassword = $this->safeDecrypt(
-            $this->settingRepository->findOneBy(['name' => SettingName::SYNC_LDAP_BIND_USER_PASSWORD->value])?->getValue()
+            $this->settingRepository->
+            findOneBy(['name' => SettingName::SYNC_LDAP_BIND_USER_PASSWORD->value])?->getValue()
         );
         $searchBaseDN = $this->safeDecrypt(
             $this->settingRepository->findOneBy(['name' => SettingName::SYNC_LDAP_SEARCH_BASE_DN->value])?->getValue()

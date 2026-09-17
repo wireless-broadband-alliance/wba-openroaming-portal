@@ -32,7 +32,11 @@ class EncryptionService
         try {
             $iv = random_bytes($ivLength);
         } catch (Exception $e) {
-            throw new EncryptionException('Failed to generate a cryptographically strong IV.', $e->getCode(), previous: $e);
+            throw new EncryptionException(
+                'Failed to generate a cryptographically strong IV.',
+                $e->getCode(),
+                previous: $e
+            );
         }
 
         $encryptedRaw = openssl_encrypt(
