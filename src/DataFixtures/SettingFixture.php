@@ -178,7 +178,7 @@ class SettingFixture extends Fixture
             ['name' => SettingName::MAP_CENTER_ZOOM->value, 'value' => '12'],
 
             ['name' => SettingName::CLEANUP_EXPIRED_DATA_CRON->value, 'value' => '* 5 * * *'],
-            ['name' => SettingName::CLEANUP_EXPIRED_DATA_CRON_ENABLED->value, 'value' => 'OFF'],
+            ['name' => SettingName::CLEANUP_EXPIRED_DATA_CRON_ENABLED->value, 'value' => 'ON'],
             ['name' => SettingName::USER_RETENTION_DAYS->value, 'value' => '30'],
             ['name' => SettingName::OTP_EXPIRATION_HOURS->value, 'value' => '12'],
         ];
