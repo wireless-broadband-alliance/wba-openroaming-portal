@@ -9,7 +9,7 @@ use Exception;
 class EncryptedStringType extends Type
 {
     public const NAME = 'encrypted_string';
-    private const CIPHER = 'aes-256-cbc';
+    private const string CIPHER = 'aes-256-cbc';
 
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {

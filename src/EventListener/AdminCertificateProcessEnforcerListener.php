@@ -177,14 +177,6 @@ readonly class AdminCertificateProcessEnforcerListener
 
         // Check certificates progress
         $certProcess = $this->certificateSetupProcessRepository->getLatestProcess();
-        if (!$certProcess instanceof CertificateSetupProcess) {
-            $session->set(
-                SessionStatus::SYSTEM_RESET_REQUEST->value,
-                'admin_dashboard_settings_certs_radsecproxy_upload'
-            );
-            $this->redirectTo($event, 'admin_dashboard_settings_certs_radsecproxy_upload');
-            return;
-        }
 
         // Radsecproxy test required
         if (!$certProcess->getRadsecproxyTestResult() instanceof CertificateTestResult) {

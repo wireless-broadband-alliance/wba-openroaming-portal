@@ -96,7 +96,7 @@ class EncryptTwoFASecretsCommand extends Command
                     }
                 }
 
-                if (!empty($updates)) {
+                if ($updates !== []) {
                     $connection->executeStatement(
                         sprintf('UPDATE %s SET %s WHERE id = :id', $tableName, implode(', ', $updates)),
                         $params
