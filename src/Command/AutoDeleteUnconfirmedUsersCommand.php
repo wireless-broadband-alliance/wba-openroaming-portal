@@ -18,7 +18,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use function Symfony\Component\String\u;
 
 #[AsCommand(
-    name: 'clear:deleteUnconfirmedUsers',
+    name: 'clear:delete-unconfirmed-users',
     description: 'Delete unconfirmed users when timeout exceeded',
 )]
 class AutoDeleteUnconfirmedUsersCommand extends Command

@@ -33,7 +33,7 @@ readonly class Schedule implements ScheduleProviderInterface
             $schedule->add(
                 RecurringMessage::cron(
                     $this->getRequiredSetting(SettingName::DELETE_UNCONFIRMED_USERS_CRON->value),
-                    new RunCommandMessage('clear:deleteUnconfirmedUsers')
+                    new RunCommandMessage('clear:delete-unconfirmed-users')
                 )
             );
         }
@@ -62,7 +62,7 @@ readonly class Schedule implements ScheduleProviderInterface
             $schedule->add(
                 RecurringMessage::cron(
                     $this->getRequiredSetting(SettingName::CLEANUP_EXPIRED_DATA_CRON->value),
-                    new RunCommandMessage('clear:cleanup-expired-data --yes')
+                    new RunCommandMessage('clear:expired-user-data --yes')
                 )
             );
         }
