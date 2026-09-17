@@ -12,6 +12,16 @@
   * Any clients or integrations still sending requests to `/api/v1` or `/api/v2` endpoints must update immediately to
     `/api/v3`.
 
+- **Automated Data Retention & Expired OTP Cleanup (CRA Annex I §1.5)**: Added the `clear:expired-user-data` command to
+  enforce data retention and minimization. It permanently purges soft-deleted users older than the configured
+  threshold (default: 30 days) along with associated records (`Event`, `DeletedUserData`, `OTPcode`,
+  `UserRadiusProfile`), and clears expired 2FA/OTP codes older than the threshold (default: 12 hours).
+  - Designed to run as a scheduled cron job using the non-interactive option:
+
+```bash
+    php bin/console app:cleanup-expired-data --yes
+```
+
 - **Landing Page Authentication Rework**: Refactored landing page authentication buttons, adding dedicated support for
   Magic Link login alongside traditional authentication methods.
 - **Dashboard UI & Stimulus Fix**: Reworked the Authentication Methods management UI to distinctly separate Traditional
@@ -398,7 +408,7 @@ Failure to migrate before the end of the grace period may result in **loss of ac
   Run the migrations with:
 
 ```bash
-php bin/console doctrine:migrations:migrate
+  php bin/console doctrine:migrations:migrate
 ```
 
 # Release V1.8.0
@@ -412,7 +422,7 @@ php bin/console doctrine:migrations:migrate
 > this one:
 
 ```
-php:bin/console messenger:consume scheduler_default -vv
+  php:bin/console messenger:consume scheduler_default -vv
 ```
 
 - Update API for version 2, fix bug for iOS App's with invalid format for profile generation endpoint.
@@ -452,7 +462,7 @@ php:bin/console messenger:consume scheduler_default -vv
   Run the migrations with:
 
 ```bash
-php bin/console doctrine:migrations:migrate
+  php bin/console doctrine:migrations:migrate
 ```
 
 ---
@@ -530,7 +540,7 @@ php bin/console doctrine:migrations:migrate
 - **Note**: The Allocate Providers Command has been discontinued and has therefore been removed
 
 ```Bash
-php bin/console reset:allocate-providers
+  php bin/console reset:allocate-providers
 ```
 
 # Release V1.6.0
@@ -549,7 +559,7 @@ php bin/console reset:allocate-providers
 - Update READ.ME add new env's && settings
 - Auto delete unconfirmed users after a specific timeframe configurable by the admin
 - Added a new endpoint for Turnstile configuration required for the Android App's
-- **Clear Unverified Accounts Command**: `clear:deleteUnconfirmedUsers` Removes any records in the `User` and all the
+- **Clear Unverified Accounts Command**: `clear:delete-unconfirmed-users` Removes any records in the `User` and all the
   associated entity's that have an unverified accounts associated.
 
 > **Important**: This command will permanently delete any log or record in the `User` entity.
@@ -560,7 +570,7 @@ For more details on how this command works, please refer to the file at:
 To use this command, run the following root in the root folder of the project:
 
 ```bash
-php bin/console clear:deleteUnconfirmedUsers
+  php bin/console clear:delete-unconfirmed-users
 ```
 
 - **Notify User When Profile is about to Expire Command**: `notify:usersWhenProfileExpires` Sends a notification
@@ -572,7 +582,7 @@ For more details on how this command works, please refer to the file at:
 To use this command, run the following root in the root folder of the project:
 
 ```bash
-php bin/console notify:usersWhenProfileExpires
+  php bin/console notify:usersWhenProfileExpires
 ```
 
 # Release V1.5.0
@@ -605,7 +615,7 @@ For more details on how this command works, please refer to the file at:
 To use this command, run the following root in the root folder of the project:
 
 ```bash
-php bin/console clear:eventEntity
+  php bin/console clear:eventEntity
 ```
 
 - Rework Pagination on User Management Table
@@ -631,7 +641,7 @@ For more details on how this command works, please refer to the file at:
 To use this command, run the following code in the root folder of the project:
 
 ```bash
-php bin/console reset:allocate-providers
+  php bin/console reset:allocate-providers
 ```
 
 - Rework User delete - Add PGP encryption (Steps for configuration on the [Installation Guide](docs/INSTALATION.md),
