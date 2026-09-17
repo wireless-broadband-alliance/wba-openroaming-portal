@@ -2,6 +2,7 @@
 
 namespace App\EventListener;
 
+use App\Entity\CertificateSetupProcess;
 use App\Entity\InstallationProgress;
 use App\Entity\User;
 use App\Enum\CertificateTestResult;
@@ -164,7 +165,7 @@ readonly class AdminCertificateProcessEnforcerListener
 
         $certProcess = $this->certificateSetupProcessRepository->getLatestProcess();
 
-        if ($certProcess === null) {
+        if (!$certProcess instanceof CertificateSetupProcess) {
             $session->set(
                 SessionStatus::SYSTEM_RESET_REQUEST->value,
                 'admin_dashboard_settings_certs_radsecproxy_upload'
