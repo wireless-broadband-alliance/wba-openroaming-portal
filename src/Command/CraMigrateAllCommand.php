@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Command;
 
 use Exception;
+use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
@@ -48,7 +49,7 @@ class CraMigrateAllCommand extends Command
 
         $application = $this->getApplication();
 
-        if ($application === null) {
+        if (!$application instanceof Application) {
             $output->writeln('<error>Application container is not available.</error>');
             return Command::FAILURE;
         }
