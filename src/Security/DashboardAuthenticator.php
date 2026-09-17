@@ -152,7 +152,6 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
 
         // Check if the user is already logged in and redirect them accordingly
         if ($user instanceof User) {
-
             $setting = $this->settingRepository->findOneBy([
                 'name' => SettingName::BREAKING_GLASS_ADMIN_EMAIL->value
             ]);

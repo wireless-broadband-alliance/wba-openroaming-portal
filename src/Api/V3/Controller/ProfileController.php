@@ -118,8 +118,8 @@ class ProfileController extends AbstractController
             $androidLimit = 32;
             $realmSize = strlen($this->getSettingValueRaw(SettingName::RADIUS_REALM_NAME->value)) + 1;
             $username = $this->generateToken($androidLimit - $realmSize) . "@" . $this->getSettingValueRaw(
-                    SettingName::RADIUS_REALM_NAME->value
-                );
+                SettingName::RADIUS_REALM_NAME->value
+            );
             $plainToken = $this->generateToken($androidLimit - $realmSize);
             $encryptedToken = $this->encryptionService->encrypt($plainToken);
 
@@ -262,8 +262,8 @@ class ProfileController extends AbstractController
             $androidLimit = 32;
             $realmSize = strlen($this->getSettingValueRaw(SettingName::RADIUS_REALM_NAME->value)) + 1;
             $username = $this->generateToken($androidLimit - $realmSize) . "@" . $this->getSettingValueRaw(
-                    SettingName::RADIUS_REALM_NAME->value
-                );
+                SettingName::RADIUS_REALM_NAME->value
+            );
             $plainToken = $this->generateToken($androidLimit - $realmSize);
             $encryptedToken = $this->encryptionService->encrypt($plainToken);
 
@@ -319,8 +319,8 @@ class ProfileController extends AbstractController
 
         $data = [
             'payloadIdentifier' => 'com.apple.wifi.managed.' . $this->getSettingValueRaw(
-                    SettingName::PAYLOAD_IDENTIFIER->value
-                ) . '-2',
+                SettingName::PAYLOAD_IDENTIFIER->value
+            ) . '-2',
             'payloadType' => 'com.apple.wifi.managed',
             'payloadUUID' => $this->getSettingValueRaw(SettingName::PAYLOAD_IDENTIFIER->value) . '-1',
             'domainName' => $this->getSettingValueRaw(SettingName::DOMAIN_NAME->value),

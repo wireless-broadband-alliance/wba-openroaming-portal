@@ -61,7 +61,9 @@ class EncryptTwoFASecretsCommand extends Command
 
         try {
             $sql = sprintf(
-                'SELECT id, twoFAsecret, twoFAcode FROM %s WHERE (twoFAsecret IS NOT NULL AND twoFAsecret != \'\') OR (twoFAcode IS NOT NULL AND twoFAcode != \'\')',
+                'SELECT id, twoFAsecret, twoFAcode FROM %s 
+                                  WHERE (twoFAsecret IS NOT NULL AND twoFAsecret != \'\') OR 
+                                        (twoFAcode IS NOT NULL AND twoFAcode != \'\')',
                 $tableName
             );
             $users = $connection->fetchAllAssociative($sql);

@@ -51,9 +51,11 @@ readonly class SessionValidatorListener
         }
 
         // If there is a system reset request in progress, skip all dashboard validation
-        if ($session->get(
+        if (
+            $session->get(
                 SessionStatus::SYSTEM_RESET_REQUEST->value
-            ) === 'admin_dashboard_settings_certs_installation') {
+            ) === 'admin_dashboard_settings_certs_installation'
+        ) {
             return;
         }
 
