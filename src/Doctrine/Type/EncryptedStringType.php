@@ -5,6 +5,7 @@ namespace App\Doctrine\Type;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Type;
 use Exception;
+use RuntimeException;
 
 class EncryptedStringType extends Type
 {
@@ -25,11 +26,14 @@ class EncryptedStringType extends Type
         }
 
         $ivLength = openssl_cipher_iv_length(self::CIPHER);
+        if ($ivLength < 1) {
+            throw new RuntimeException('Unable to determine valid IV length for cipher.');
+        }
 
         try {
             $iv = random_bytes($ivLength);
         } catch (Exception) {
-            throw new \RuntimeException('Failed to generate a cryptographically strong IV.');
+            throw new RuntimeException('Failed to generate a cryptographically strong IV.');
         }
 
         $secretKey = $this->getSecretKey();
@@ -43,7 +47,7 @@ class EncryptedStringType extends Type
         );
 
         if ($encryptedRaw === false) {
-            throw new \RuntimeException('Encryption failed during database conversion.');
+            throw new RuntimeException('Encryption failed during database conversion.');
         }
 
         return base64_encode($iv . $encryptedRaw);
@@ -58,7 +62,7 @@ class EncryptedStringType extends Type
         $decoded = base64_decode((string) $value, true);
         $ivLength = openssl_cipher_iv_length(self::CIPHER);
 
-        if ($decoded === false || strlen($decoded) <= $ivLength) {
+        if ($decoded === false || $ivLength < 1 || strlen($decoded) <= $ivLength) {
             return (string) $value;
         }
 

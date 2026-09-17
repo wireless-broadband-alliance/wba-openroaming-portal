@@ -2,7 +2,6 @@
 
 namespace App\EventListener;
 
-use App\Entity\CertificateSetupProcess;
 use App\Entity\InstallationProgress;
 use App\Entity\User;
 use App\Enum\CertificateTestResult;
@@ -13,6 +12,7 @@ use App\Repository\InstallationProgressRepository;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -162,7 +162,9 @@ readonly class AdminCertificateProcessEnforcerListener
             return;
         }
 
-        if (!($this->certificateSetupProcessRepository->getLatestProcess() instanceof CertificateSetupProcess)) {
+        $certProcess = $this->certificateSetupProcessRepository->getLatestProcess();
+
+        if ($certProcess === null) {
             $session->set(
                 SessionStatus::SYSTEM_RESET_REQUEST->value,
                 'admin_dashboard_settings_certs_radsecproxy_upload'
@@ -174,9 +176,6 @@ readonly class AdminCertificateProcessEnforcerListener
             );
             return;
         }
-
-        // Check certificates progress
-        $certProcess = $this->certificateSetupProcessRepository->getLatestProcess();
 
         // Radsecproxy test required
         if (!$certProcess->getRadsecproxyTestResult() instanceof CertificateTestResult) {
@@ -215,7 +214,10 @@ readonly class AdminCertificateProcessEnforcerListener
     private function redirectTo(RequestEvent $event, string $routeName, ?string $flashMessage = null): void
     {
         if ($flashMessage !== null) {
-            $event->getRequest()->getSession()->getFlashBag()->add('success', $flashMessage);
+            $session = $event->getRequest()->getSession();
+            if ($session instanceof Session) {
+                $session->getFlashBag()->add('success', $flashMessage);
+            }
         }
         $url = $this->urlGenerator->generate($routeName);
         $event->setResponse(new RedirectResponse($url));
