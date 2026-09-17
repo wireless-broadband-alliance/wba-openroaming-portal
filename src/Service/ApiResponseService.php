@@ -33,7 +33,6 @@ readonly class ApiResponseService
 
         $prefix = match ($version) {
             ApiVersion::API_V3 => '/api/v3',
-            default => throw new Exception('Unexpected match value'),
         };
 
         foreach ($routes as $name => $route) {
@@ -98,7 +97,6 @@ readonly class ApiResponseService
     {
         $configFile = match ($version) {
             ApiVersion::API_V3 => __DIR__ . '/../../config/api/api_responses_v3.php',
-            default => throw new Exception('Unexpected match value'),
         };
 
         return require $configFile;

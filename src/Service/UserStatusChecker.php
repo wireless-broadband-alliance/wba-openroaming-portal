@@ -27,7 +27,7 @@ readonly class UserStatusChecker
 
     public function checkUserStatus(
         User $user
-    ): BaseResponseV1|BaseResponseV2|BaseResponseV3|null {
+    ): BaseResponseV3|null {
         if (!$user->isVerified()) {
             return new BaseResponseV3(
                 401,

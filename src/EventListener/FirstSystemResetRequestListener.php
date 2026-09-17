@@ -16,6 +16,7 @@ use App\Service\InstallationService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
@@ -146,8 +147,10 @@ readonly class FirstSystemResetRequestListener
         string $message,
         string $routeName
     ): void {
-        // Add the translated message to the flash bag
-        $event->getRequest()->getSession()->getFlashBag()->add('danger', $message);
+        // Add the translated message to the flash bag if supported by the session implementation
+        if ($session instanceof Session) {
+            $session->getFlashBag()->add('danger', $message);
+        }
 
         $session->set(SessionStatus::INSTALLATION_STARTED->value, true);
         $session->set(SessionStatus::INSTALLATION_VERIFICATION->value, true);
@@ -157,10 +160,8 @@ readonly class FirstSystemResetRequestListener
         $url = $this->urlGenerator->generate($routeName);
         $response = new RedirectResponse($url);
 
-        // Save session and flash messages
-        $event->getRequest()->getSession()->save();
-
-        // Store the redirect in request attributes so a controller/listener can handle it
+        // Save session and store redirect attribute
+        $session->save();
         $event->getRequest()->attributes->set('_redirect', $response);
     }
 }
