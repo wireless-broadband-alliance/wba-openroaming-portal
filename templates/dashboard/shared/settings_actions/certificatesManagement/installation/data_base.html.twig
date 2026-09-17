@@ -44,8 +44,8 @@
                                 attr: {
                                     class: 'form-widget',
                                     'wire:model.debounce.500ms': 'dbSetupDTO.dbOpenRoaming',
-                                    placeholder: '127.0.0.1'
-                                }
+                                    placeholder: '127.0.0.1',
+                                },
                             }) }}
                             <div class="text-xs text-red-500 mt-1">{{ form_errors(form.dbOpenRoamingIp) }}</div>
                         </div>
@@ -60,8 +60,8 @@
                                 attr: {
                                     class: 'form-widget',
                                     'wire:model.debounce.500ms': 'dbSetupDTO.dbOpenRoaming',
-                                    placeholder: '3306'
-                                }
+                                    placeholder: '3306',
+                                },
                             }) }}
                             <div class="text-xs text-red-500 mt-1">{{ form_errors(form.dbOpenRoamingPort) }}</div>
                         </div>
@@ -77,8 +77,8 @@
                         attr: {
                             class: 'form-widget',
                             'wire:model.debounce.500ms': 'dbSetupDTO.dbOpenRoamingDbName',
-                            placeholder: 'openroaming'
-                        }
+                            placeholder: 'openroaming',
+                        },
                     }) }}
                     <div class="text-xs text-red-500 mt-1">{{ form_errors(form.dbOpenRoamingDbName) }}</div>
                 </div>
@@ -94,8 +94,8 @@
                                 attr: {
                                     class: 'form-widget',
                                     'wire:model.debounce.500ms': 'dbSetupDTO.dbOpenRoaming',
-                                    placeholder: 'db_user'
-                                }
+                                    placeholder: 'db_user',
+                                },
                             }) }}
                             <div class="text-xs text-red-500 mt-1">{{ form_errors(form.dbOpenRoamingUserName) }}</div>
                         </div>
@@ -109,8 +109,8 @@
                             {{ form_widget(form.dbOpenRoamingPassword, {
                                 attr: {
                                     class: 'form-widget',
-                                    placeholder: '••••••••'
-                                }
+                                    placeholder: '••••••••',
+                                },
                             }) }}
                             <div class="text-xs text-red-500 mt-1">{{ form_errors(form.dbOpenRoamingPassword) }}</div>
                         </div>
@@ -140,8 +140,8 @@
                                 attr: {
                                     class: 'form-widget',
                                     'wire:model.debounce.500ms': 'dbSetupDTO.dbFreeradius',
-                                    placeholder: '127.0.0.1'
-                                }
+                                    placeholder: '127.0.0.1',
+                                },
                             }) }}
                             <div class="text-xs text-red-500 mt-1">{{ form_errors(form.dbFreeradiusIp) }}</div>
                         </div>
@@ -156,8 +156,8 @@
                                 attr: {
                                     class: 'form-widget',
                                     'wire:model.debounce.500ms': 'dbSetupDTO.dbFreeradius',
-                                    placeholder: '3306'
-                                }
+                                    placeholder: '3306',
+                                },
                             }) }}
                             <div class="text-xs text-red-500 mt-1">{{ form_errors(form.dbFreeradiusPort) }}</div>
                         </div>
@@ -173,8 +173,8 @@
                         attr: {
                             class: 'form-widget',
                             'wire:model.debounce.500ms': 'dbSetupDTO.dbFreeradiusDbName',
-                            placeholder: 'radius'
-                        }
+                            placeholder: 'radius',
+                        },
                     }) }}
                     <div class="text-xs text-red-500 mt-1">{{ form_errors(form.dbFreeradiusDbName) }}</div>
                 </div>
@@ -190,8 +190,8 @@
                                 attr: {
                                     class: 'form-widget',
                                     'wire:model.debounce.500ms': 'dbSetupDTO.dbFreeradius',
-                                    placeholder: 'db_user'
-                                }
+                                    placeholder: 'db_user',
+                                },
                             }) }}
                             <div class="text-xs text-red-500 mt-1">{{ form_errors(form.dbFreeradiusUserName) }}</div>
                         </div>
@@ -205,8 +205,8 @@
                             {{ form_widget(form.dbFreeradiusPassword, {
                                 attr: {
                                     class: 'form-widget',
-                                    placeholder: '••••••••'
-                                }
+                                    placeholder: '••••••••',
+                                },
                             }) }}
                             <div class="text-xs text-red-500 mt-1">{{ form_errors(form.dbFreeradiusPassword) }}</div>
                         </div>
