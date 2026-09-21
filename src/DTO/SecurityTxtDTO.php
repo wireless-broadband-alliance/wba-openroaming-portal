@@ -20,7 +20,6 @@ class SecurityTxtDTO
     #[Assert\LessThan('+1 year')]
     public ?DateTimeImmutable $expires = null;
 
-    #[Assert\NotBlank]
     #[Assert\Regex(pattern: '/^(?:[0-9A-Fa-f]\s*){40}$/', message: 'securityFingerprintInvalid')]
     public ?string $pgpFingerprint = null;
 }
