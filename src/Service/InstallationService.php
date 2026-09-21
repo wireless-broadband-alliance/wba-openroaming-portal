@@ -3,7 +3,9 @@
 namespace App\Service;
 
 use App\DTO\InstallationProgressDTO;
+use App\DTO\SecurityTxtDTO;
 use App\Entity\InstallationProgress;
+use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\DataBaseSetupType;
 use App\Enum\DefaultUser;
@@ -20,6 +22,7 @@ use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use InvalidArgumentException;
 use Random\RandomException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -131,35 +134,42 @@ readonly class InstallationService
     public function getStep(InstallationProgress $installationProgress): string
     {
         if (
-            $installationProgress->getDbOpenRoaming() &&
-            $installationProgress->getDbFreeradius()
+            !$installationProgress->getDbOpenRoaming() ||
+            !$installationProgress->getDbFreeradius()
         ) {
-            if (
-                !$installationProgress->getTrustedProxies() ||
-                !$installationProgress->getTurnstileKey() ||
-                !$installationProgress->getTurnstileSecret()
-            ) {
-                return InstallationStep::SETTINGS->value;
-            }
+            return InstallationStep::DATABASE->value;
+        }
 
-            if (
-                $installationProgress->getEmailAdmin() &&
-                $installationProgress->isAdminConfirmed()
-            ) {
-                if (
-                    $this->checkDatabaseSettings($installationProgress) &&
-                    $this->checkSettingsValues($installationProgress)
-                ) {
-                    $installationProgress->setInstallationState(ProcessStatusType::COMPLETED);
-                    $this->entityManager->persist($installationProgress);
-                    $this->entityManager->flush();
-                    return InstallationStep::COMPLETED->value;
-                }
-                return InstallationStep::COMMAND->value;
-            }
+        if (
+            !$installationProgress->getTrustedProxies() ||
+            !$installationProgress->getTurnstileKey() ||
+            !$installationProgress->getTurnstileSecret()
+        ) {
+            return InstallationStep::SETTINGS->value;
+        }
+
+        if (!$this->isSecurityTxtConfigured()) {
+            return InstallationStep::SECURITY_TXT->value;
+        }
+
+        if (
+            !$installationProgress->getEmailAdmin() ||
+            !$installationProgress->isAdminConfirmed()
+        ) {
             return InstallationStep::ADMIN->value;
         }
-        return InstallationStep::DATABASE->value;
+
+        if (
+            $this->checkDatabaseSettings($installationProgress) &&
+            $this->checkSettingsValues($installationProgress)
+        ) {
+            $installationProgress->setInstallationState(ProcessStatusType::COMPLETED);
+            $this->entityManager->persist($installationProgress);
+            $this->entityManager->flush();
+            return InstallationStep::COMPLETED->value;
+        }
+
+        return InstallationStep::COMMAND->value;
     }
 
     /**
@@ -170,6 +180,7 @@ readonly class InstallationService
         $status = [
             InstallationWidgetStepsEnum::DATABASE->value => false,
             InstallationWidgetStepsEnum::SETTINGS->value => false,
+            InstallationWidgetStepsEnum::SECURITY_TXT->value => false,
             InstallationWidgetStepsEnum::ADMIN_CREDENTIALS->value => false,
             InstallationWidgetStepsEnum::SUMMARY->value => false,
         ];
@@ -177,13 +188,19 @@ readonly class InstallationService
         if ($step === InstallationStep::SETTINGS->value) {
             $status[InstallationWidgetStepsEnum::DATABASE->value] = true;
         }
+        if ($step === InstallationStep::SECURITY_TXT->value) {
+            $status[InstallationWidgetStepsEnum::DATABASE->value] = true;
+            $status[InstallationWidgetStepsEnum::SETTINGS->value] = true;
+        }
         if ($step === InstallationStep::ADMIN->value) {
             $status[InstallationWidgetStepsEnum::DATABASE->value] = true;
             $status[InstallationWidgetStepsEnum::SETTINGS->value] = true;
+            $status[InstallationWidgetStepsEnum::SECURITY_TXT->value] = true;
         }
         if ($step === InstallationStep::COMPLETED->value || $step === InstallationStep::COMMAND->value) {
             $status[InstallationWidgetStepsEnum::DATABASE->value] = true;
             $status[InstallationWidgetStepsEnum::SETTINGS->value] = true;
+            $status[InstallationWidgetStepsEnum::SECURITY_TXT->value] = true;
             $status[InstallationWidgetStepsEnum::ADMIN_CREDENTIALS->value] = true;
         }
 
@@ -477,6 +494,93 @@ readonly class InstallationService
             '" "' .
             $turnstileSecret .
             '"';
+    }
+
+    public function isSecurityTxtConfigured(): bool
+    {
+        foreach ([SettingName::SECURITY_CONTACT, SettingName::SECURITY_EXPIRES] as $name) {
+            $value = $this->settingRepository->findOneBy(['name' => $name->value])?->getValue();
+            if ($value === null || trim($value) === '') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Upgrade case: a completed installation exists, no wizard run is active,
+     * and the security.txt settings were never filled in.
+     */
+    public function isSecurityStepPending(): bool
+    {
+        if ($this->lastInstallation() instanceof InstallationProgress) {
+            return false; // an active run exists, getStep() drives it
+        }
+
+        if (!$this->installationProgressRepository->getLastCompleted() instanceof InstallationProgress) {
+            return false; // fresh install, normal wizard
+        }
+
+        return !$this->isSecurityTxtConfigured();
+    }
+
+    public function startSecurityStepFromLastCompleted(): ?InstallationProgress
+    {
+        $last = $this->installationProgressRepository->getLastCompleted();
+        if (!$last instanceof InstallationProgress) {
+            return null;
+        }
+
+        // Encrypted values are copied as-is, no decrypt/encrypt round trip
+        $clone = new InstallationProgress();
+        $clone->setDbOpenRoaming($last->getDbOpenRoaming());
+        $clone->setDbFreeradius($last->getDbFreeradius());
+        $clone->setTrustedProxies($last->getTrustedProxies());
+        $clone->setTurnstileKey($last->getTurnstileKey());
+        $clone->setTurnstileSecret($last->getTurnstileSecret());
+        $clone->setJwtPassphrase($last->getJwtPassphrase());
+        $clone->setEmailAdmin($last->getEmailAdmin());
+        $clone->setAdminConfirmed($last->isAdminConfirmed());
+        $clone->setInstallationState(ProcessStatusType::IN_PROGRESS);
+        $clone->setCreatedAt(new DateTime());
+        $clone->setUpdatedAt(new DateTime());
+
+        $this->entityManager->persist($clone);
+        $this->entityManager->flush();
+
+        return $clone;
+    }
+
+    public function saveSecurityTxtSettings(SecurityTxtDTO $dto): void
+    {
+        $expires = $dto->expires ?? throw new InvalidArgumentException('Expires date is required');
+
+        $values = [
+            SettingName::SECURITY_CONTACT->value => trim((string)$dto->contact),
+            SettingName::SECURITY_EXPIRES->value => $expires->setTime(
+                23,
+                59,
+                59
+            )->format(
+                DATE_ATOM
+            ),
+            SettingName::SECURITY_PGP_FINGERPRINT->value => strtoupper(
+                preg_replace('/\s+/', '', (string)$dto->pgpFingerprint)
+            ),
+        ];
+
+        foreach ($values as $name => $value) {
+            $setting = $this->settingRepository->findOneBy(['name' => $name]);
+            if (!$setting instanceof Setting) {
+                $setting = new Setting();
+                $setting->setName($name);
+            }
+            $setting->setValue($value);
+            $this->entityManager->persist($setting);
+        }
+
+        $this->entityManager->flush();
     }
 
     /**

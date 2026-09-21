@@ -8,6 +8,7 @@ enum InstallationWidgetStepsEnum: string
 {
     case DATABASE = 'database';
     case SETTINGS = 'settings';
+    case SECURITY_TXT = 'security_txt';
     case ADMIN_CREDENTIALS = 'admin_credentials';
     case SUMMARY = 'summary';
 }
