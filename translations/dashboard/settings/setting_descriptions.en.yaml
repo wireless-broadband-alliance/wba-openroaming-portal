@@ -96,3 +96,6 @@ EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS: 'Time window (in minutes) after which the
 EMAIL_ATTEMPTS_NUMBER: 'Maximum number of allowed requests within the defined time window'
 FOOTER_IMAGE_ENABLED: 'Shows the footer image on the landing page.'
 FOOTER_IMAGE: "The resource path or URL to the footer image"
+SECURITY_CONTACT: 'Email address or URL where security vulnerabilities should be reported (security.txt)'
+SECURITY_EXPIRES: 'Date after which the security.txt file expires (ISO 8601, at most one year ahead)'
+SECURITY_PGP_FINGERPRINT: 'Optional fingerprint of the PGP public key used to encrypt security reports'

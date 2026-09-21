@@ -94,7 +94,7 @@ class ResetAllSettingsCommand extends Command
                 'name' => SettingName::ADDITIONAL_LABEL->value,
                 'value' => 'This label it\'s to add extra content if necessary'
             ],
-            ['name' => SettingName::CONTACT_EMAIL->value, 'value' => 'openroaming-help@example.com'],
+            ['name' => SettingName::CONTACT_EMAIL->value, 'value' => 'openroaming@wballiance.com'],
 
             ['name' => SettingName::AUTH_METHOD_SAML_ENABLED->value, 'value' => 'false'],
             ['name' => SettingName::AUTH_METHOD_SAML_LABEL->value, 'value' => 'Login with SAML'],
@@ -213,6 +213,9 @@ class ResetAllSettingsCommand extends Command
             ['name' => SettingName::CLEANUP_EXPIRED_DATA_CRON_ENABLED->value, 'value' => 'OFF'],
             ['name' => SettingName::USER_RETENTION_DAYS->value, 'value' => '30'],
             ['name' => SettingName::OTP_EXPIRATION_HOURS->value, 'value' => '12'],
+            ['name' => SettingName::SECURITY_CONTACT->value, 'value' => ''],
+            ['name' => SettingName::SECURITY_EXPIRES->value, 'value' => ''],
+            ['name' => SettingName::SECURITY_PGP_FINGERPRINT->value, 'value' => ''],
         ];
 
         // phpcs:disable Generic.Files.LineLength.TooLong

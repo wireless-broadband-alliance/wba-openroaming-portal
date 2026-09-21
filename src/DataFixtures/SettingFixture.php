@@ -181,6 +181,10 @@ class SettingFixture extends Fixture
             ['name' => SettingName::CLEANUP_EXPIRED_DATA_CRON_ENABLED->value, 'value' => 'ON'],
             ['name' => SettingName::USER_RETENTION_DAYS->value, 'value' => '30'],
             ['name' => SettingName::OTP_EXPIRATION_HOURS->value, 'value' => '12'],
+
+            ['name' => SettingName::SECURITY_CONTACT->value, 'value' => ''],
+            ['name' => SettingName::SECURITY_EXPIRES->value, 'value' => ''],
+            ['name' => SettingName::SECURITY_PGP_FINGERPRINT->value, 'value' => ''],
         ];
 
         foreach ($settings as $settingData) {

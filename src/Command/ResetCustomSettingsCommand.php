@@ -72,7 +72,7 @@ class ResetCustomSettingsCommand extends Command
                 'name' => SettingName::ADDITIONAL_LABEL->value,
                 'value' => 'This label is used to add extra content if necessary'
             ],
-            ['name' => SettingName::CONTACT_EMAIL->value, 'value' => 'openroaming-help@example.com'],
+            ['name' => SettingName::CONTACT_EMAIL->value, 'value' => 'openroaming@wballiance.com'],
         ];
 
         // phpcs:disable Generic.Files.LineLength.TooLong
