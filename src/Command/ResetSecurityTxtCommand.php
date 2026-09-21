@@ -29,7 +29,12 @@ class ResetSecurityTxtCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset')
+            ->addOption(
+                'yes',
+                'y',
+                InputOption::VALUE_NONE,
+                'Automatically confirm the reset'
+            )
             ->addOption(
                 'only-missing',
                 null,
