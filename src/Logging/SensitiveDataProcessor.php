@@ -1,0 +1,56 @@
+<?php
+
+namespace App\Logging;
+
+use Monolog\LogRecord;
+use Monolog\Processor\ProcessorInterface;
+
+class SensitiveDataProcessor implements ProcessorInterface
+{
+    private array $sensitiveKeys = [
+        'password',
+        'token',
+        'secret',
+        'bearer',
+        'authorization',
+    ];
+
+    public function __invoke(LogRecord|array $record): LogRecord|array
+    {
+        if ($record instanceof LogRecord) {
+            $context = $this->redact($record->context);
+            $extra = $this->redact($record->extra);
+
+            return $record->with(context: $context, extra: $extra);
+        }
+
+        $record['context'] = $this->redact($record['context'] ?? []);
+        $record['extra'] = $this->redact($record['extra'] ?? []);
+
+        return $record;
+    }
+
+    private function redact(array $data): array
+    {
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                $data[$key] = $this->redact($value);
+            } elseif (is_string($key) && $this->isSensitiveKey($key)) {
+                $data[$key] = 'REDACTED';
+            }
+        }
+
+        return $data;
+    }
+
+    private function isSensitiveKey(string $key): bool
+    {
+        foreach ($this->sensitiveKeys as $pattern) {
+            if (stripos($key, $pattern) !== false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
