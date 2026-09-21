@@ -22,7 +22,7 @@ class SecurityTxtController extends AbstractController
      * @throws \DateMalformedStringException
      */
     #[Route('/.well-known/security.txt', name: 'app_security_txt', methods: ['GET'])]
-    public function __invoke(Request $request): Response
+    public function securityTxtDisplay(Request $request): Response
     {
         $settings = $this->getSettings->getSpecificSettings([
             SettingName::SECURITY_CONTACT->value,
