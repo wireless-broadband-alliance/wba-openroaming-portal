@@ -39,7 +39,11 @@ class CommandStepController extends AbstractController
     /**
      * @throws EncryptionException
      */
-    #[Route('/commands', name: 'admin_dashboard_settings_certs_installation_command')]
+    #[Route(
+        '/commands',
+        name: 'admin_dashboard_settings_certs_installation_command',
+        methods: ['GET', 'POST']
+    )]
     public function __invoke(Request $request): Response
     {
         $lastInstallation = $this->installationService->lastInstallation();
@@ -48,12 +52,15 @@ class CommandStepController extends AbstractController
         }
 
         $step = $this->installationService->getStep($lastInstallation);
+
+        // Redirect away if the active step is NOT Command
         $redirect = $this->installationFlow->redirectIfStep(
             $step,
             InstallationStep::DATABASE,
             InstallationStep::SETTINGS,
             InstallationStep::SECURITY_TXT,
             InstallationStep::ADMIN,
+            InstallationStep::COMPLETED,
         );
         if ($redirect instanceof RedirectResponse) {
             return $redirect;
@@ -73,7 +80,7 @@ class CommandStepController extends AbstractController
                     'success',
                     $this->translator->trans('settingsApplied', [], 'controllers')
                 );
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_summary');
+                return $this->installationFlow->redirectTo(InstallationStep::COMPLETED);
             }
 
             /** @var User $user */
@@ -94,7 +101,7 @@ class CommandStepController extends AbstractController
                 'error',
                 $this->translator->trans('settingsNotApplied', [], 'controllers')
             );
-            return $this->redirectToRoute('admin_dashboard_settings_certs_installation_command');
+            return $this->installationFlow->redirectTo(InstallationStep::COMMAND);
         }
 
         $commands = [

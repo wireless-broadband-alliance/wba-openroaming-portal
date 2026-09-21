@@ -49,21 +49,27 @@ class DatabaseStepController extends AbstractController
     /**
      * @throws EncryptionException
      */
-    #[Route('', name: 'admin_dashboard_settings_certs_installation')]
+    #[Route(
+        '',
+        name: 'admin_dashboard_settings_certs_installation',
+        methods: ['GET', 'POST']
+    )]
     public function __invoke(Request $request): Response
     {
         $lastInstallation = $this->installationService->lastInstallation();
-        $step = InstallationStep::DATABASE->value;
+        $computedStep = InstallationStep::DATABASE;
 
         if ($lastInstallation instanceof InstallationProgress) {
-            $step = $this->installationService->getStep($lastInstallation);
+            $computedStep = $this->installationService->getStep($lastInstallation);
             $redirect = $this->installationFlow->redirectIfStep(
-                $step,
+                $computedStep,
                 InstallationStep::SETTINGS,
                 InstallationStep::SECURITY_TXT,
                 InstallationStep::ADMIN,
                 InstallationStep::COMMAND,
+                InstallationStep::COMPLETED,
             );
+
             if ($redirect instanceof RedirectResponse) {
                 return $redirect;
             }
@@ -72,7 +78,6 @@ class DatabaseStepController extends AbstractController
         $data = $this->getSettings->getSettings();
 
         $dbDTO = new DbSetupDTO();
-
         $dbDTO->dbOpenRoamingUserName = 'openroaming';
         $dbDTO->dbOpenRoamingIp = '127.0.0.1';
         $dbDTO->dbOpenRoamingPort = 3306;
@@ -113,13 +118,13 @@ class DatabaseStepController extends AbstractController
             $frConnection = $this->databaseConnectionService->testDatabaseConnection($freeradiusDb);
 
             $connectionsFailed = [];
-
             if (!$orConnection) {
                 $connectionsFailed[] = 'OpenRoaming';
             }
             if (!$frConnection) {
                 $connectionsFailed[] = 'Freeradius';
             }
+
             if ($connectionsFailed !== []) {
                 $this->addFlash(
                     'error',
@@ -129,7 +134,7 @@ class DatabaseStepController extends AbstractController
                         'controllers'
                     )
                 );
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
+                return $this->installationFlow->redirectTo(InstallationStep::DATABASE);
             }
 
             if (
@@ -141,7 +146,7 @@ class DatabaseStepController extends AbstractController
                 $lastInstallation->setCreatedAt(new DateTime());
             }
 
-            // Encrypt the raw connection strings before storing in the database
+            // Encrypt connection strings before storing in the database
             $encryptedOpenRoamingDb = $this->encryptionService->encrypt($openRoamingDb);
             $encryptedFreeradiusDb = $this->encryptionService->encrypt($freeradiusDb);
 
@@ -167,7 +172,7 @@ class DatabaseStepController extends AbstractController
                 );
             }
 
-            // Write raw unencrypted DSN to .env for Symfony/Doctrine usage
+            // Write raw unencrypted DSN to .env
             $orResult = $this->databaseConnectionService->writeDatabaseUrlToEnv(
                 $openRoamingDb,
                 DataBaseSetupType::DATABASE_URL->value
@@ -178,7 +183,11 @@ class DatabaseStepController extends AbstractController
             );
 
             if (!$orResult || !$radiusResult) {
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('envPermissionDenied', [], 'controllers')
+                );
+                return $this->installationFlow->redirectTo(InstallationStep::DATABASE);
             }
 
             $this->eventActions->saveEvent(
@@ -194,14 +203,10 @@ class DatabaseStepController extends AbstractController
 
             $this->addFlash(
                 'success',
-                $this->translator->trans(
-                    'dbConnectionApplied',
-                    [],
-                    'controllers'
-                )
+                $this->translator->trans('dbConnectionApplied', [], 'controllers')
             );
 
-            return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+            return $this->installationFlow->redirectTo(InstallationStep::SETTINGS);
         }
 
         return $this->render(
@@ -210,7 +215,7 @@ class DatabaseStepController extends AbstractController
                 'data' => $data,
                 'form' => $form->createView(),
                 'formDTO' => $dbDTO,
-                'stages' => $this->installationService->getStepperStatus($step)
+                'stages' => $this->installationService->getStepperStatus($computedStep),
             ]
         );
     }

@@ -122,6 +122,7 @@ enum AnalyticalEventType: string
     case CERTIFICATE_VALIDATION_RAN = 'CERTIFICATE_VALIDATION_RAN';
     case INSTALLATION_DATABASE_CONFIG = 'INSTALLATION_DATABASE_CONFIG';
     case INSTALLATION_SETTINGS_CONFIG = 'INSTALLATION_SETTINGS_CONFIG';
+    case INSTALLATION_SECURITY_TXT_CONFIG = 'INSTALLATION_SECURITY_TXT_CONFIG';
     case INSTALLATION_ADMIN_CONFIG = 'INSTALLATION_ADMIN_CONFIG';
     case INSTALLATION_COMMAND_CONFIG = 'INSTALLATION_COMMAND_CONFIG';
     case INSTALLATION_CONFIG_ABORTED = 'INSTALLATION_CONFIG_ABORTED';
@@ -280,6 +281,7 @@ enum AnalyticalEventType: string
             // Installation
             self::INSTALLATION_DATABASE_CONFIG => 'Installation: Database Config',
             self::INSTALLATION_SETTINGS_CONFIG => 'Installation: Settings Config',
+            self::INSTALLATION_SECURITY_TXT_CONFIG => 'Installation: Security Txt Config',
             self::INSTALLATION_ADMIN_CONFIG => 'Installation: Admin Config',
             self::INSTALLATION_COMMAND_CONFIG => 'Installation: Commands Config',
             self::INSTALLATION_CONFIG_ABORTED => 'Installation: Aborted',

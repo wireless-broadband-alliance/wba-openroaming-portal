@@ -41,7 +41,11 @@ class AdminStepController extends AbstractController
     /**
      * @throws EncryptionException
      */
-    #[Route('/admin', name: 'admin_dashboard_settings_certs_installation_admin')]
+    #[Route(
+        '/admin',
+        name: 'admin_dashboard_settings_certs_installation_admin',
+        methods: ['GET', 'POST']
+    )]
     public function __invoke(Request $request): Response
     {
         $lastInstallation = $this->installationService->lastInstallation();
@@ -50,12 +54,15 @@ class AdminStepController extends AbstractController
         }
 
         $step = $this->installationService->getStep($lastInstallation);
+
+        // Redirect away if the active step is NOT Admin
         $redirect = $this->installationFlow->redirectIfStep(
             $step,
             InstallationStep::DATABASE,
             InstallationStep::SETTINGS,
             InstallationStep::SECURITY_TXT,
             InstallationStep::COMMAND,
+            InstallationStep::COMPLETED,
         );
         if ($redirect instanceof RedirectResponse) {
             return $redirect;
@@ -64,7 +71,6 @@ class AdminStepController extends AbstractController
         $data = $this->getSettings->getSettings();
 
         $adminConfigDTO = new AdminConfigDTO();
-
         if ($lastInstallation->getEmailAdmin() !== null) {
             $adminConfigDTO->email = $lastInstallation->getEmailAdmin();
         }
@@ -75,15 +81,13 @@ class AdminStepController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $adminUser = $this->userRepository->findSuperAdmin();
 
-            $adminEmail = $adminConfigDTO->email;
-            $adminPassword = $adminConfigDTO->password;
-
             if ($adminUser instanceof User) {
-                $hashedPassword = $this->userPasswordHasher->hashPassword($adminUser, $adminPassword);
+                $hashedPassword = $this->userPasswordHasher->hashPassword($adminUser, $adminConfigDTO->password);
                 $adminUser->setPassword($hashedPassword);
                 $this->entityManager->persist($adminUser);
+
                 $lastInstallation->setUpdatedAt(new DateTime());
-                $lastInstallation->setEmailAdmin($adminEmail);
+                $lastInstallation->setEmailAdmin($adminConfigDTO->email);
                 $lastInstallation->setInstallationState(ProcessStatusType::IN_PROGRESS);
                 $this->entityManager->persist($lastInstallation);
                 $this->entityManager->flush();
@@ -98,7 +102,7 @@ class AdminStepController extends AbstractController
                 'data' => $data,
                 'form' => $form->createView(),
                 'formDTO' => $adminConfigDTO,
-                'stages' => $this->installationService->getStepperStatus($step)
+                'stages' => $this->installationService->getStepperStatus($step),
             ]
         );
     }

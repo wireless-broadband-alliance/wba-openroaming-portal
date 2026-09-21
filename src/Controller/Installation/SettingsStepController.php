@@ -35,7 +35,6 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-
 #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
 #[Route('/dashboard/settings/certificatesManagement/installation')]
 class SettingsStepController extends AbstractController
@@ -60,7 +59,7 @@ class SettingsStepController extends AbstractController
     #[Route(
         '/settings',
         name: 'admin_dashboard_settings_certs_installation_settings',
-        methods: ['POST']
+        methods: ['GET', 'POST']
     )]
     public function __invoke(Request $request): Response
     {
@@ -68,17 +67,23 @@ class SettingsStepController extends AbstractController
         if (!$lastInstallation instanceof InstallationProgress) {
             return $this->installationFlow->redirectTo(InstallationStep::DATABASE);
         }
+
         $step = $this->installationService->getStep($lastInstallation);
-        $redirect = $this->installationFlow->redirectIfStep($step, InstallationStep::DATABASE);
+
+        // Redirect away if the active step is NOT Settings
+        $redirect = $this->installationFlow->redirectIfStep(
+            $step,
+            InstallationStep::DATABASE,
+            InstallationStep::SECURITY_TXT,
+            InstallationStep::ADMIN,
+            InstallationStep::COMMAND,
+            InstallationStep::COMPLETED
+        );
         if ($redirect instanceof RedirectResponse) {
             return $redirect;
         }
-        if ($step === InstallationStep::ADMIN->value && !$lastInstallation->getEmailAdmin()) {
-            return $this->installationFlow->redirectTo(InstallationStep::ADMIN);
-        }
 
         $data = $this->getSettings->getSettings();
-
         $settingsDTO = new SettingsDTO();
 
         $form = $this->createForm(SettingsType::class, $settingsDTO);
@@ -92,7 +97,7 @@ class SettingsStepController extends AbstractController
                     'error',
                     $this->translator->trans('captchaValidationFailed', [], 'controllers')
                 );
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+                return $this->installationFlow->redirectTo(InstallationStep::SETTINGS);
             }
 
             $lastInstallation->setUpdatedAt(new DateTime());
@@ -113,21 +118,21 @@ class SettingsStepController extends AbstractController
             $this->entityManager->flush();
 
             if ($settingsDTO->trustedProxies) {
-                $trustedProxiesPermissions = $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                $this->databaseConnectionService->writeDatabaseUrlToEnv(
                     implode(',', $settingsDTO->trustedProxies),
                     SettingsConfigType::TRUSTED_PROXIES->value
                 );
             }
 
             if ($settingsDTO->turnstileKey) {
-                $turnstileKeyPermissions = $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                $this->databaseConnectionService->writeDatabaseUrlToEnv(
                     $settingsDTO->turnstileKey,
                     SettingsConfigType::TURNSTILE_KEY->value
                 );
             }
 
             if ($settingsDTO->turnstileSecret) {
-                $turnstileSecretPermissions = $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                $this->databaseConnectionService->writeDatabaseUrlToEnv(
                     $settingsDTO->turnstileSecret,
                     SettingsConfigType::TURNSTILE_SECRET->value
                 );
@@ -185,8 +190,7 @@ class SettingsStepController extends AbstractController
                             str_starts_with(
                                 trim($publicKeyContent),
                                 '-----BEGIN PUBLIC KEY-----'
-                            )
-                        )
+                            ))
                     ) {
                         $success = true;
                     }
@@ -211,20 +215,21 @@ class SettingsStepController extends AbstractController
                         'success',
                         $this->translator->trans('jwtSuccessfully', [], 'controllers')
                     );
-                    return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
+                } else {
+                    $this->addFlash(
+                        'error',
+                        $this->translator->trans('jwtFailed', [], 'controllers')
+                    );
                 }
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('jwtFailed', [], 'controllers')
-                );
 
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
+                // Move to SECURITY_TXT step in the wizard
+                return $this->installationFlow->redirectTo(InstallationStep::SECURITY_TXT);
             } catch (Exception) {
                 $this->addFlash(
                     'error',
                     $this->translator->trans('jwtFailed', [], 'controllers')
                 );
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+                return $this->installationFlow->redirectTo(InstallationStep::SETTINGS);
             }
         }
 
@@ -234,12 +239,12 @@ class SettingsStepController extends AbstractController
                 'data' => $data,
                 'form' => $form->createView(),
                 'formDTO' => $settingsDTO,
-                'stages' => $this->installationService->getStepperStatus($step),
+                'stages' => $this->installationService->getStepperStatus(InstallationStep::SETTINGS->value),
                 'message' => $this->translator->trans(
                     'canSkipThisPage',
                     [],
                     'controllers'
-                )
+                ),
             ]
         );
     }

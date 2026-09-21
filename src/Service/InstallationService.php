@@ -105,7 +105,6 @@ readonly class InstallationService
             $installationProgress->setAdminConfirmed(true);
         }
 
-        $this->getStep($installationProgress);
         $this->entityManager->persist($installationProgress);
         $this->entityManager->flush();
 
@@ -129,15 +128,16 @@ readonly class InstallationService
     }
 
     /**
+     * Read-only calculation of the active installation step.
      * @throws EncryptionException
      */
-    public function getStep(InstallationProgress $installationProgress): string
+    public function getStep(InstallationProgress $installationProgress): InstallationStep
     {
         if (
             !$installationProgress->getDbOpenRoaming() ||
             !$installationProgress->getDbFreeradius()
         ) {
-            return InstallationStep::DATABASE->value;
+            return InstallationStep::DATABASE;
         }
 
         if (
@@ -145,38 +145,37 @@ readonly class InstallationService
             !$installationProgress->getTurnstileKey() ||
             !$installationProgress->getTurnstileSecret()
         ) {
-            return InstallationStep::SETTINGS->value;
+            return InstallationStep::SETTINGS;
         }
 
-        if (!$this->isSecurityTxtConfigured()) {
-            return InstallationStep::SECURITY_TXT->value;
+        if (
+            !$this->checkDatabaseSettings($installationProgress) ||
+            !$this->checkSettingsValues($installationProgress)
+        ) {
+            return InstallationStep::COMMAND;
+        }
+
+        if (!$installationProgress->isSecurityTxtValid()) {
+            return InstallationStep::SECURITY_TXT;
         }
 
         if (
             !$installationProgress->getEmailAdmin() ||
             !$installationProgress->isAdminConfirmed()
         ) {
-            return InstallationStep::ADMIN->value;
+            return InstallationStep::ADMIN;
         }
 
-        if (
-            $this->checkDatabaseSettings($installationProgress) &&
-            $this->checkSettingsValues($installationProgress)
-        ) {
-            $installationProgress->setInstallationState(ProcessStatusType::COMPLETED);
-            $this->entityManager->persist($installationProgress);
-            $this->entityManager->flush();
-            return InstallationStep::COMPLETED->value;
-        }
-
-        return InstallationStep::COMMAND->value;
+        return InstallationStep::COMPLETED;
     }
 
     /**
      * @return array<string, bool>
      */
-    public function getStepperStatus(string $step): array
+    public function getStepperStatus(InstallationStep|string $step): array
     {
+        $stepValue = $step instanceof InstallationStep ? $step->value : $step;
+
         $status = [
             InstallationWidgetStepsEnum::DATABASE->value => false,
             InstallationWidgetStepsEnum::SETTINGS->value => false,
@@ -185,19 +184,19 @@ readonly class InstallationService
             InstallationWidgetStepsEnum::SUMMARY->value => false,
         ];
 
-        if ($step === InstallationStep::SETTINGS->value) {
+        if ($stepValue === InstallationStep::SETTINGS->value) {
             $status[InstallationWidgetStepsEnum::DATABASE->value] = true;
         }
-        if ($step === InstallationStep::SECURITY_TXT->value) {
+        if ($stepValue === InstallationStep::SECURITY_TXT->value) {
             $status[InstallationWidgetStepsEnum::DATABASE->value] = true;
             $status[InstallationWidgetStepsEnum::SETTINGS->value] = true;
         }
-        if ($step === InstallationStep::ADMIN->value) {
+        if ($stepValue === InstallationStep::ADMIN->value) {
             $status[InstallationWidgetStepsEnum::DATABASE->value] = true;
             $status[InstallationWidgetStepsEnum::SETTINGS->value] = true;
             $status[InstallationWidgetStepsEnum::SECURITY_TXT->value] = true;
         }
-        if ($step === InstallationStep::COMPLETED->value || $step === InstallationStep::COMMAND->value) {
+        if ($stepValue === InstallationStep::COMPLETED->value || $stepValue === InstallationStep::COMMAND->value) {
             $status[InstallationWidgetStepsEnum::DATABASE->value] = true;
             $status[InstallationWidgetStepsEnum::SETTINGS->value] = true;
             $status[InstallationWidgetStepsEnum::SECURITY_TXT->value] = true;
@@ -496,35 +495,6 @@ readonly class InstallationService
             '"';
     }
 
-    public function isSecurityTxtConfigured(): bool
-    {
-        foreach ([SettingName::SECURITY_CONTACT, SettingName::SECURITY_EXPIRES] as $name) {
-            $value = $this->settingRepository->findOneBy(['name' => $name->value])?->getValue();
-            if ($value === null || trim($value) === '') {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Upgrade case: a completed installation exists, no wizard run is active,
-     * and the security.txt settings were never filled in.
-     */
-    public function isSecurityStepPending(): bool
-    {
-        if ($this->lastInstallation() instanceof InstallationProgress) {
-            return false; // an active run exists, getStep() drives it
-        }
-
-        if (!$this->installationProgressRepository->getLastCompleted() instanceof InstallationProgress) {
-            return false; // fresh install, normal wizard
-        }
-
-        return !$this->isSecurityTxtConfigured();
-    }
-
     public function startSecurityStepFromLastCompleted(): ?InstallationProgress
     {
         $last = $this->installationProgressRepository->getLastCompleted();
@@ -540,6 +510,9 @@ readonly class InstallationService
         $clone->setTurnstileKey($last->getTurnstileKey());
         $clone->setTurnstileSecret($last->getTurnstileSecret());
         $clone->setJwtPassphrase($last->getJwtPassphrase());
+        $clone->setSecurityContact($last->getSecurityContact());
+        $clone->setSecurityExpires($last->getSecurityExpires());
+        $clone->setSecurityPgpFingerprint($last->getSecurityPgpFingerprint());
         $clone->setEmailAdmin($last->getEmailAdmin());
         $clone->setAdminConfirmed($last->isAdminConfirmed());
         $clone->setInstallationState(ProcessStatusType::IN_PROGRESS);
@@ -552,19 +525,23 @@ readonly class InstallationService
         return $clone;
     }
 
-    public function saveSecurityTxtSettings(SecurityTxtDTO $dto): void
+    public function saveSecurityTxtSettings(SecurityTxtDTO $dto, InstallationProgress $installationProgress): void
     {
         $expires = $dto->expires ?? throw new InvalidArgumentException('Expires date is required');
+        $expiresFormatted = (clone $expires)->setTime(23, 59, 59);
 
+        // Update InstallationProgress Entity
+        $installationProgress->setSecurityContact($dto->contact);
+        $installationProgress->setSecurityExpires($expiresFormatted);
+        $installationProgress->setSecurityPgpFingerprint($dto->pgpFingerprint);
+        $installationProgress->setUpdatedAt(new DateTime());
+        $installationProgress->setInstallationState(ProcessStatusType::IN_PROGRESS);
+        $this->entityManager->persist($installationProgress);
+
+        // Update Setting table
         $values = [
             SettingName::SECURITY_CONTACT->value => trim((string)$dto->contact),
-            SettingName::SECURITY_EXPIRES->value => $expires->setTime(
-                23,
-                59,
-                59
-            )->format(
-                DATE_ATOM
-            ),
+            SettingName::SECURITY_EXPIRES->value => $expiresFormatted->format(DATE_ATOM),
             SettingName::SECURITY_PGP_FINGERPRINT->value => strtoupper(
                 preg_replace('/\s+/', '', (string)$dto->pgpFingerprint)
             ),

@@ -34,9 +34,9 @@ readonly class InstallationFlow
      * Redirects to the current step's page, but only when the current step
      * is one of the given steps. Returns null when the page may be shown.
      */
-    public function redirectIfStep(string $currentStep, InstallationStep ...$steps): ?RedirectResponse
+    public function redirectIfStep(InstallationStep|string $currentStep, InstallationStep ...$steps): ?RedirectResponse
     {
-        $step = InstallationStep::from($currentStep);
+        $step = $currentStep instanceof InstallationStep ? $currentStep : InstallationStep::from($currentStep);
 
         return in_array($step, $steps, true) ? $this->redirectTo($step) : null;
     }
