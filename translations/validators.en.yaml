@@ -115,3 +115,5 @@ passwordCannotBeShorterThan: 'The password cannot be shorter than {{ limit }} ch
 passwordIsCompromised: 'This password has appeared in a data breach and cannot be used.'
 passwordIsTooWeak: 'This password is too weak. Please use a stronger combination of characters.'
 currentPasswordIncorrect: "Your current password is incorrect."
+invalidEmailFormat: 'The entered email address is invalid.'
+invalidDateFormat: 'The entered date is invalid.'

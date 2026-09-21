@@ -239,3 +239,4 @@ sms_provider_test:
 coverageMapDisabled: 'The coverage map is currently disabled.'
 cannotResetExternalAuthProviderPassword: "Password reset is only allowed for Portal Accounts."
 encryptionError: 'An error occurred while encrypting data. Please try again.'
+securityConfigurationAppliedSuccessfully: 'Security settings have been updated successfully.'

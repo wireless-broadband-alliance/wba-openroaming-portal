@@ -115,3 +115,5 @@ passwordCannotBeShorterThan: 'A palavra-passe não pode ter menos de {{ limit }}
 passwordIsCompromised: 'Esta palavra-passe foi exposta numa fuga de dados e não pode ser utilizada.'
 passwordIsTooWeak: 'A palavra-passe é demasiado fraca. Por favor, utilize uma combinação de caracteres mais forte.'
 currentPasswordIncorrect: "A sua palavra-passe atual está incorreta."
+invalidEmailFormat: 'O endereço de e-mail introduzido não é válido.'
+invalidDateFormat: 'A data introduzida é inválida.'
