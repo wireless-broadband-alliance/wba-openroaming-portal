@@ -1,3 +1,8 @@
 securityContact: 'Security Contact'
 securityExpires: 'Expiration Date'
 securityPgpFingerprint: 'PGP Fingerprint'
+securityTxtTitle: 'Security.txt Configuration'
+securityTxtDescription: 'Manage the settings for your security.txt file, which allows security researchers to easily report vulnerabilities in compliance with RFC 9116.'
+securityContactDescription: 'The email address (e.g., mailto:security@example.com) or URI where security researchers can reach you.'
+securityExpiresDescription: 'The date when this security.txt file is no longer valid. It is recommended to update it regularly (e.g., yearly).'
+securityPgpFingerprintDescription: 'The PGP fingerprint of the public key used to encrypt communications and verify security signatures.'
