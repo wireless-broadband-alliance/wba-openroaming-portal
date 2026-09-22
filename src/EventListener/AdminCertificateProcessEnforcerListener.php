@@ -69,6 +69,7 @@ readonly class AdminCertificateProcessEnforcerListener
             // Installation pages
             '#^/dashboard/settings/certificatesManagement/installation$#',
             '#^/dashboard/settings/certificatesManagement/installation/commands$#',
+            '#^/dashboard/settings/certificatesManagement/installation/security-txt$#',
             '#^/dashboard/settings/certificatesManagement/installation/settings$#',
             '#^/dashboard/settings/certificatesManagement/installation/admin$#',
             '#^/dashboard/settings/certificatesManagement/installation/admin/sendCode$#',
