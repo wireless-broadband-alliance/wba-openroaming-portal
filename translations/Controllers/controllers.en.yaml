@@ -240,3 +240,6 @@ coverageMapDisabled: 'The coverage map is currently disabled.'
 cannotResetExternalAuthProviderPassword: "Password reset is only allowed for Portal Accounts."
 encryptionError: 'An error occurred while encrypting data. Please try again.'
 securityConfigurationAppliedSuccessfully: 'Security settings have been updated successfully.'
+securityTxtSaveSuccess: "Security.txt configuration saved successfully."
+securityTxtSaveError: "An error occurred while saving the Security.txt configuration."
+securityTxtFormError: "Please correct the errors in the form before proceeding."

@@ -498,7 +498,9 @@ readonly class InstallationService
     public function saveSecurityTxtSettings(SecurityTxtDTO $dto, InstallationProgress $installationProgress): void
     {
         $expires = $dto->expires ?? throw new InvalidArgumentException('Expires date is required');
-        $expiresFormatted = (clone $expires)->setTime(23, 59, 59);
+
+        // Convert DateTimeImmutable to \DateTime (mutable)
+        $expiresFormatted = DateTime::createFromInterface($expires)->setTime(23, 59, 59);
 
         // Update InstallationProgress Entity
         $installationProgress->setSecurityContact($dto->contact);
@@ -506,27 +508,8 @@ readonly class InstallationService
         $installationProgress->setSecurityPgpFingerprint($dto->pgpFingerprint);
         $installationProgress->setUpdatedAt(new DateTime());
         $installationProgress->setInstallationState(ProcessStatusType::IN_PROGRESS);
+
         $this->entityManager->persist($installationProgress);
-
-        // Update Setting table
-        $values = [
-            SettingName::SECURITY_CONTACT->value => trim((string)$dto->contact),
-            SettingName::SECURITY_EXPIRES->value => $expiresFormatted->format(DATE_ATOM),
-            SettingName::SECURITY_PGP_FINGERPRINT->value => strtoupper(
-                preg_replace('/\s+/', '', (string)$dto->pgpFingerprint)
-            ),
-        ];
-
-        foreach ($values as $name => $value) {
-            $setting = $this->settingRepository->findOneBy(['name' => $name]);
-            if (!$setting instanceof Setting) {
-                $setting = new Setting();
-                $setting->setName($name);
-            }
-            $setting->setValue($value);
-            $this->entityManager->persist($setting);
-        }
-
         $this->entityManager->flush();
     }
 

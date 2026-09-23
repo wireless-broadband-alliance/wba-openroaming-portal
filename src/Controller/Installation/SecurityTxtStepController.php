@@ -17,6 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Throwable;
 
 #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
 #[Route('/dashboard/settings/certificatesManagement/installation')]
@@ -63,13 +64,30 @@ class SecurityTxtStepController extends AbstractController
         }
 
         $dto = new SecurityTxtDTO();
+        // Pre-fill DTO from existing entity if present
+        if ($lastInstallation->getSecurityContact()) {
+            $dto->contact = $lastInstallation->getSecurityContact();
+            $dto->expires = $lastInstallation->getSecurityExpires();
+            $dto->pgpFingerprint = $lastInstallation->getSecurityPgpFingerprint();
+        }
+
         $form = $this->createForm(SecurityTxtType::class, $dto);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->installationService->saveSecurityTxtSettings($dto, $lastInstallation);
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                try {
+                    $this->installationService->saveSecurityTxtSettings($dto, $lastInstallation);
 
-            return $this->installationFlow->redirectTo(InstallationStep::ADMIN);
+                    $this->addFlash('success', 'securityTxtSaveSuccess');
+
+                    return $this->installationFlow->redirectTo(InstallationStep::ADMIN);
+                } catch (Throwable) {
+                    $this->addFlash('error', 'securityTxtSaveError');
+                }
+            } else {
+                $this->addFlash('warning', 'securityTxtFormError');
+            }
         }
 
         return $this->render(
