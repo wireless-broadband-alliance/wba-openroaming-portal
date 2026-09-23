@@ -51,11 +51,11 @@ class CommandStepController extends AbstractController
             return $this->installationFlow->redirectTo(InstallationStep::DATABASE);
         }
 
-        $step = $this->installationService->getStep($lastInstallation);
+        $computedStep = $this->installationService->getStep($lastInstallation);
 
         // Redirect away if the active step is NOT Command
         $redirect = $this->installationFlow->redirectIfStep(
-            $step,
+            $computedStep,
             InstallationStep::DATABASE,
             InstallationStep::SETTINGS,
             InstallationStep::SECURITY_TXT,
@@ -137,7 +137,7 @@ class CommandStepController extends AbstractController
             . 'installation/manualInstallation/manual_installation.html.twig',
             [
                 'data' => $data,
-                'stages' => $this->installationService->getStepperStatus($step),
+                'stages' => $this->installationService->getStepperStatus($computedStep, $lastInstallation),
                 'commands' => $commands,
                 'form' => $form->createView(),
             ]

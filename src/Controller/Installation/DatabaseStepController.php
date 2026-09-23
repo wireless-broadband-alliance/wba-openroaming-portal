@@ -215,7 +215,7 @@ class DatabaseStepController extends AbstractController
                 'data' => $data,
                 'form' => $form->createView(),
                 'formDTO' => $dbDTO,
-                'stages' => $this->installationService->getStepperStatus($computedStep),
+                'stages' => $this->installationService->getStepperStatus($computedStep, $lastInstallation),
             ]
         );
     }

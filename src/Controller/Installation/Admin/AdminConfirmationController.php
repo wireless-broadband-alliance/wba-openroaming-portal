@@ -55,9 +55,9 @@ class AdminConfirmationController extends AbstractController
             return $this->installationFlow->redirectTo(InstallationStep::DATABASE);
         }
 
-        $step = $this->installationService->getStep($lastInstallation);
+        $computedStep = $this->installationService->getStep($lastInstallation);
         $redirect = $this->installationFlow->redirectIfStep(
-            $step,
+            $computedStep,
             InstallationStep::DATABASE,
             InstallationStep::SETTINGS,
             InstallationStep::SECURITY_TXT,
@@ -65,7 +65,7 @@ class AdminConfirmationController extends AbstractController
         if ($redirect instanceof RedirectResponse) {
             return $redirect;
         }
-        if ($step === InstallationStep::ADMIN->value && !$lastInstallation->getEmailAdmin()) {
+        if ($computedStep === InstallationStep::ADMIN->value && !$lastInstallation->getEmailAdmin()) {
             return $this->installationFlow->redirectTo(InstallationStep::ADMIN);
         }
 
@@ -128,7 +128,7 @@ class AdminConfirmationController extends AbstractController
             [
                 'data' => $data,
                 'form' => $form->createView(),
-                'stages' => $this->installationService->getStepperStatus($step)
+                'stages' => $this->installationService->getStepperStatus($computedStep, $lastInstallation),
             ]
         );
     }

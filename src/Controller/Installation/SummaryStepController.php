@@ -41,11 +41,11 @@ class SummaryStepController extends AbstractController
             return $this->installationFlow->redirectTo(InstallationStep::DATABASE);
         }
 
-        $step = $this->installationService->getStep($lastInstallation);
+        $computedStep = $this->installationService->getStep($lastInstallation);
 
         // Redirect away if the active step is any incomplete step prior to Summary/Completed
         $redirect = $this->installationFlow->redirectIfStep(
-            $step,
+            $computedStep,
             InstallationStep::DATABASE,
             InstallationStep::SETTINGS,
             InstallationStep::SECURITY_TXT,
@@ -61,7 +61,7 @@ class SummaryStepController extends AbstractController
             [
                 'data' => $this->getSettings->getSettings(),
                 'Installation' => $this->installationService->fillDto($lastInstallation),
-                'stages' => $this->installationService->getStepperStatus($step),
+                'stages' => $this->installationService->getStepperStatus($computedStep, $lastInstallation),
             ]
         );
     }

@@ -107,7 +107,7 @@ class SecurityTxtStepController extends AbstractController
                 'data' => $this->getSettings->getSettings(),
                 'form' => $form->createView(),
                 'formDTO' => $dto,
-                'stages' => $this->installationService->getStepperStatus($computedStep),
+                'stages' => $this->installationService->getStepperStatus($computedStep, $lastInstallation),
             ]
         );
     }

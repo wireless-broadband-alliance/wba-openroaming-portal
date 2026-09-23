@@ -5,7 +5,6 @@ namespace App\Service;
 use App\DTO\InstallationProgressDTO;
 use App\DTO\SecurityTxtDTO;
 use App\Entity\InstallationProgress;
-use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\DataBaseSetupType;
 use App\Enum\DefaultUser;
@@ -172,8 +171,24 @@ readonly class InstallationService
     /**
      * @return array<string, bool>
      */
-    public function getStepperStatus(InstallationStep|string $step): array
+    public function getStepperStatus(InstallationStep|string $step, ?InstallationProgress $progress = null): array
     {
+        if ($progress instanceof InstallationProgress) {
+            return [
+                InstallationWidgetStepsEnum::DATABASE->value => $progress->getDbOpenRoaming(
+                    ) !== null || $progress->getDbFreeradius() !== null,
+                InstallationWidgetStepsEnum::SETTINGS->value => $progress->getTrustedProxies(
+                    ) !== null || $progress->getTurnstileKey() !== null,
+                InstallationWidgetStepsEnum::SECURITY_TXT->value => $progress->getSecurityContact(
+                    ) !== null && $progress->getSecurityExpires() !== null,
+                InstallationWidgetStepsEnum::ADMIN_CREDENTIALS->value => $progress->getEmailAdmin(
+                    ) !== null && $progress->isAdminConfirmed(),
+                InstallationWidgetStepsEnum::SUMMARY->value => $progress->getInstallationState(
+                    ) === ProcessStatusType::COMPLETED,
+            ];
+        }
+
+        // Fallback sequential logic if $progress is not passed
         $stepValue = $step instanceof InstallationStep ? $step->value : $step;
 
         $status = [

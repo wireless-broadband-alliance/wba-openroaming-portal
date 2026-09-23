@@ -53,11 +53,11 @@ class AdminStepController extends AbstractController
             return $this->installationFlow->redirectTo(InstallationStep::DATABASE);
         }
 
-        $step = $this->installationService->getStep($lastInstallation);
+        $computedStep = $this->installationService->getStep($lastInstallation);
 
         // Redirect away if the active step is NOT Admin
         $redirect = $this->installationFlow->redirectIfStep(
-            $step,
+            $computedStep,
             InstallationStep::DATABASE,
             InstallationStep::SETTINGS,
             InstallationStep::SECURITY_TXT,
@@ -102,7 +102,7 @@ class AdminStepController extends AbstractController
                 'data' => $data,
                 'form' => $form->createView(),
                 'formDTO' => $adminConfigDTO,
-                'stages' => $this->installationService->getStepperStatus($step),
+                'stages' => $this->installationService->getStepperStatus($computedStep, $lastInstallation),
             ]
         );
     }
