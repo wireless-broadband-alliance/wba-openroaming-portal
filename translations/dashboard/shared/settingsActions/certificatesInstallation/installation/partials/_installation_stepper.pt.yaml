@@ -5,6 +5,9 @@ step:
   settings:
     title: "Definições da Aplicação"
     description: "Configure as definições principais e parâmetros essenciais da aplicação."
+  security_txt:
+    title: "Configuração do Security.txt"
+    description: "Configure os dados de contacto de segurança e a validade do ficheiro."
   admin_credentials:
     title: "Credenciais do Administrador"
     description: "Crie a conta de administrador para aceder ao painel de gestão."
