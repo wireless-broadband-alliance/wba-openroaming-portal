@@ -51,7 +51,6 @@ class CertificateManagementController extends AbstractController
         private readonly InstallationProgressRepository $installationProgressRepository,
         private readonly CertificateSetupProcessRepository $certificateSetupProcessRepository,
         private readonly EventActions $eventActions,
-        private readonly InstallationService $installationService,
         private readonly CertificateFreeradiusInfoService $certificateFreeradiusInfoService,
         private readonly CertificateRadsecproxyInfoService $certificateRadsecproxyInfoService,
         private readonly SettingsService $settingsService,

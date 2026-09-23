@@ -168,8 +168,9 @@
     <div class="mt-6 flex w-full justify-end items-center gap-2">
         {% set SYSTEM_RESET_REQUEST = constant('App\\Enum\\SessionStatus::SYSTEM_RESET_REQUEST').value %}
 
-        {% if not app.session.has(SYSTEM_RESET_REQUEST) %}
-            <a href="{{ path('admin_dashboard_settings_certs_management') }}"
+        {# If there is NO system reset request OR if certificate process was already completed previously #}
+        {% if not app.session.has(SYSTEM_RESET_REQUEST) or (hasCompletedCertProcess is defined and hasCompletedCertProcess) %}
+            <a href="{{ path('admin_dashboard_settings_certs_installation_complete') }}"
                class="w-[160px] btn-primary flex justify-center items-center">
                 {{ 'finish'|trans({}, 'summary') }}
             </a>

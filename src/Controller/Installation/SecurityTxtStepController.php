@@ -6,11 +6,13 @@ use App\DTO\SecurityTxtDTO;
 use App\Entity\InstallationProgress;
 use App\Enum\AdminRoleType;
 use App\Enum\InstallationStep;
+use App\Enum\ProcessStatusType;
 use App\Exception\EncryptionException;
 use App\Form\SecurityTxtType;
 use App\Service\GetSettings;
 use App\Service\InstallationFlow;
 use App\Service\InstallationService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,6 +31,7 @@ class SecurityTxtStepController extends AbstractController
         private readonly InstallationFlow $installationFlow,
         private readonly GetSettings $getSettings,
         private readonly TranslatorInterface $translator,
+        private readonly EntityManagerInterface $entityManager,
     ) {
     }
 
@@ -86,18 +89,16 @@ class SecurityTxtStepController extends AbstractController
                         $this->translator->trans('securityTxt.saveSuccess', [], 'controllers')
                     );
 
-                    return $this->installationFlow->redirectTo(InstallationStep::ADMIN);
+                    // Re-calculate the next step dynamically!
+                    $nextStep = $this->installationService->getStep($lastInstallation);
+
+                    return $this->installationFlow->redirectTo($nextStep);
                 } catch (Throwable) {
                     $this->addFlash(
                         'error',
                         $this->translator->trans('securityTxt.saveError', [], 'controllers')
                     );
                 }
-            } else {
-                $this->addFlash(
-                    'warning',
-                    $this->translator->trans('securityTxt.formError', [], 'controllers')
-                );
             }
         }
 
