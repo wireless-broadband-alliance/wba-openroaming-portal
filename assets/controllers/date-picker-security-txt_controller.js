@@ -25,11 +25,19 @@ export default class extends Controller {
         document.addEventListener('click', this.boundClickOutside);
 
         if (this.hasInputTarget && this.inputTarget.value) {
-            const parsed = new Date(this.inputTarget.value);
-            if (!isNaN(parsed.getTime())) {
-                this.#selectedDate = parsed;
-                this.#viewYear = parsed.getFullYear();
-                this.#viewMonth = parsed.getMonth();
+            // Split YYYY-MM-DD manually to prevent UTC timezone date shifts
+            const parts = this.inputTarget.value.split('-');
+            if (parts.length === 3) {
+                const year = parseInt(parts[0], 10);
+                const month = parseInt(parts[1], 10) - 1;
+                const day = parseInt(parts[2], 10);
+
+                const parsed = new Date(year, month, day);
+                if (!isNaN(parsed.getTime())) {
+                    this.#selectedDate = parsed;
+                    this.#viewYear = year;
+                    this.#viewMonth = month;
+                }
             }
         }
 
@@ -42,10 +50,8 @@ export default class extends Controller {
     }
 
     handleClickOutside(event) {
-        // IGNORE clicks on elements that were detached/removed from DOM during calendar re-render
         if (!event.target.isConnected) return;
 
-        // Close only if click was truly outside the controller element
         if (!this.element.contains(event.target)) {
             this.closePicker();
         }
@@ -104,6 +110,10 @@ export default class extends Controller {
         this.#selectedDate = null;
         if (this.hasInputTarget) {
             this.inputTarget.value = '';
+
+            // Dispatch events so form listeners / Live Component catch the update
+            this.inputTarget.dispatchEvent(new Event('input', { bubbles: true }));
+            this.inputTarget.dispatchEvent(new Event('change', { bubbles: true }));
         }
         this.#updateLabel();
         this.#renderCalendar();
@@ -113,6 +123,11 @@ export default class extends Controller {
         if (event) event.stopPropagation();
         if (this.#selectedDate && this.hasInputTarget) {
             this.inputTarget.value = this.#formatDate(this.#selectedDate);
+
+            // Dispatch events so form listeners / Live Component catch the update
+            this.inputTarget.dispatchEvent(new Event('input', { bubbles: true }));
+            this.inputTarget.dispatchEvent(new Event('change', { bubbles: true }));
+
             this.#updateLabel();
         }
         this.closePicker();

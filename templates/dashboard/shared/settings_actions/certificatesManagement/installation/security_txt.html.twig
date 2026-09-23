@@ -86,7 +86,8 @@
                 </div>
 
                 {{ include('dashboard/shared/_date_picker.html.twig', {
-                    field: form.expires
+                    field: form.expires,
+                    controller: 'date-picker-security-txt'
                 }) }}
             </div>
 

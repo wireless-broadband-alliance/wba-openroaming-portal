@@ -1,5 +1,15 @@
 {% set controller = controller|default('date-picker-security-txt') %}
 
+{# Parse initial value from form field for server-side rendering #}
+{% set formattedValue = '' %}
+{% if field.vars.value is not empty %}
+    {% if field.vars.value.timestamp is defined %}
+        {% set formattedValue = field.vars.value|date('Y-m-d') %}
+    {% else %}
+        {% set formattedValue = field.vars.value %}
+    {% endif %}
+{% endif %}
+
 {% set translations = {
     pickRange: 'pickRange'|trans({}, '_date_filter'),
     selected: 'selected'|trans({}, '_date_filter'),
@@ -35,11 +45,17 @@
                 <rect x="1.5" y="3" width="13" height="11" rx="2" />
                 <path d="M5 1v4M11 1v4M1.5 7h13" />
             </svg>
-            <span data-{{ controller }}-target="dateLabel" class="text-gray-500 text-xs"></span>
+
+            {# Render value directly from Twig so Live Component re-renders preserve the label #}
+            <span data-{{ controller }}-target="dateLabel"
+                  class="text-xs {{ formattedValue ? 'text-gray-800 font-medium' : 'text-gray-500' }}">
+                {{ formattedValue ?: ('pickRange'|trans({}, '_date_filter')) }}
+            </span>
+
             <span data-{{ controller }}-target="pickerArrow" class="ml-auto text-[10px] text-gray-400">▼</span>
         </button>
 
-        {# --- UPDATED DROPDOWN CONTAINER --- #}
+        {# --- DROPDOWN CONTAINER --- #}
         <div data-{{ controller }}-target="pickerDropdown"
              class="hidden absolute left-0 top-full mt-2 z-[9999] bg-white border border-gray-200 rounded-xl p-4 pb-5 shadow-2xl w-[300px]">
 

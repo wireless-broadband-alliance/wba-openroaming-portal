@@ -42,11 +42,9 @@
             {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.SECURITY_EXPIRES.description}) }}
             <div class="flex items-center space-x-2 mt-5">
                 {{ include('dashboard/shared/_date_picker.html.twig', {
-                    field: form.securityExpires
+                    field: form.securityExpires,
+                    controller: 'date-picker-security-txt'
                 }) }}
-            </div>
-            <div class="mt-2 -mb-2 text-center text-red-500 text-base">
-                {{ form_errors(form.securityExpires) }}
             </div>
         </div>
 
@@ -70,6 +68,21 @@
             </div>
         </div>
 
+    </div>
+
+    {# --- INFO BANNER --- #}
+    <div class="mt-2 mr-2 p-2 text-base font-semibold w-full">
+        <div class="flex bg-infoBgColor/50 rounded-lg p-4 text-xs md:text-sm text-infoTextColor" role="alert">
+            <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3 fill-current" />
+
+            <span class="font-medium">
+                {{ 'securityTxtCheckMessage'|trans({}, '_securityTxt') }}
+                <a href="{{ app.request.schemeAndHttpHost ~ app.request.baseUrl }}/.well-known/security.txt"
+                   target="_blank" class="underline font-bold">
+                    {{ app.request.schemeAndHttpHost ~ app.request.baseUrl }}/.well-known/security.txt
+                </a>
+            </span>
+        </div>
     </div>
 
     <div class="mt-8 divider-solid"></div>
