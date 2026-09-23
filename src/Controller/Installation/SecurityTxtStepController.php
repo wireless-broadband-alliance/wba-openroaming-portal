@@ -83,20 +83,20 @@ class SecurityTxtStepController extends AbstractController
 
                     $this->addFlash(
                         'success',
-                        $this->translator->trans('security_txt.save_success', [], 'controllers')
+                        $this->translator->trans('securityTxt.saveSuccess', [], 'controllers')
                     );
 
                     return $this->installationFlow->redirectTo(InstallationStep::ADMIN);
                 } catch (Throwable) {
                     $this->addFlash(
                         'error',
-                        $this->translator->trans('security_txt.save_error', [], 'controllers')
+                        $this->translator->trans('securityTxt.saveError', [], 'controllers')
                     );
                 }
             } else {
                 $this->addFlash(
                     'warning',
-                    $this->translator->trans('security_txt.form_error', [], 'controllers')
+                    $this->translator->trans('securityTxt.formError', [], 'controllers')
                 );
             }
         }
