@@ -9,11 +9,11 @@ export default class extends Controller {
         'calendarGrid',
         'footerSummary',
         'dateLabel',
-        'pickerArrow'
+        'pickerArrow',
     ];
 
     static values = {
-        translations: Object
+        translations: Object,
     };
 
     #selectedDate = null;
@@ -140,9 +140,9 @@ export default class extends Controller {
     #sameDay(d1, d2) {
         if (!d1 || !d2) return false;
         return (
-          d1.getFullYear() === d2.getFullYear() &&
-          d1.getMonth() === d2.getMonth() &&
-          d1.getDate() === d2.getDate()
+            d1.getFullYear() === d2.getFullYear() &&
+            d1.getMonth() === d2.getMonth() &&
+            d1.getDate() === d2.getDate()
         );
     }
 
@@ -182,13 +182,27 @@ export default class extends Controller {
         if (!this.hasCalendarGridTarget) return;
 
         const DAYS = [
-            this.t('daySu'), this.t('dayMo'), this.t('dayTu'), this.t('dayWe'),
-            this.t('dayTh'), this.t('dayFr'), this.t('daySa')
+            this.t('daySu'),
+            this.t('dayMo'),
+            this.t('dayTu'),
+            this.t('dayWe'),
+            this.t('dayTh'),
+            this.t('dayFr'),
+            this.t('daySa'),
         ];
         const MONTHS = [
-            this.t('monthJan'), this.t('monthFeb'), this.t('monthMar'), this.t('monthApr'),
-            this.t('monthMay'), this.t('monthJun'), this.t('monthJul'), this.t('monthAug'),
-            this.t('monthSep'), this.t('monthOct'), this.t('monthNov'), this.t('monthDec')
+            this.t('monthJan'),
+            this.t('monthFeb'),
+            this.t('monthMar'),
+            this.t('monthApr'),
+            this.t('monthMay'),
+            this.t('monthJun'),
+            this.t('monthJul'),
+            this.t('monthAug'),
+            this.t('monthSep'),
+            this.t('monthOct'),
+            this.t('monthNov'),
+            this.t('monthDec'),
         ];
 
         const year = this.#viewYear;
@@ -221,7 +235,8 @@ export default class extends Controller {
             const isSelected = this.#sameDay(date, this.#selectedDate);
             const isToday = this.#sameDay(date, today);
 
-            let cls = 'w-full aspect-square flex items-center justify-center text-[11px] transition-colors duration-75 ';
+            let cls =
+                'w-full aspect-square flex items-center justify-center text-[11px] transition-colors duration-75 ';
             if (isSelected) {
                 cls += 'bg-[#7DB928] text-white font-medium rounded-md cursor-pointer ';
             } else if (isToday) {
