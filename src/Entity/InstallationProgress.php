@@ -201,7 +201,7 @@ class InstallationProgress
             return false;
         }
 
-        if ($this->securityExpires === null) {
+        if (!$this->securityExpires instanceof \DateTimeInterface) {
             return false;
         }
 

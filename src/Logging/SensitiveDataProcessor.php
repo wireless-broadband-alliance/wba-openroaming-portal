@@ -45,12 +45,6 @@ class SensitiveDataProcessor implements ProcessorInterface
 
     private function isSensitiveKey(string $key): bool
     {
-        foreach ($this->sensitiveKeys as $pattern) {
-            if (stripos($key, $pattern) !== false) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($this->sensitiveKeys, fn($pattern) => stripos($key, (string) $pattern) !== false);
     }
 }

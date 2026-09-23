@@ -180,7 +180,7 @@ readonly class InstallationService
                 InstallationWidgetStepsEnum::SETTINGS->value => $progress->getTrustedProxies(
                 ) !== null || $progress->getTurnstileKey() !== null,
                 InstallationWidgetStepsEnum::SECURITY_TXT->value => $progress->getSecurityContact(
-                ) !== null && $progress->getSecurityExpires() !== null,
+                ) !== null && $progress->getSecurityExpires() instanceof \DateTimeInterface,
                 InstallationWidgetStepsEnum::ADMIN_CREDENTIALS->value => $progress->getEmailAdmin(
                 ) !== null && $progress->isAdminConfirmed(),
                 InstallationWidgetStepsEnum::SUMMARY->value => $progress->getInstallationState(
