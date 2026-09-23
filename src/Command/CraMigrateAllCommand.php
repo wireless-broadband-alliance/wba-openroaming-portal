@@ -56,7 +56,7 @@ class CraMigrateAllCommand extends Command
         }
 
         $commands = [
-            'app:cra:encrypt-oauth-ids'             => ['--yes' => true],
+            'app:cra:hash-oauth-ids'             => ['--yes' => true],
             'app:cra:encrypt-settings'              => ['--yes' => true],
             'app:cra:encrypt-radius-legacy-tokens' => ['--yes' => true],
             'app:cra:encrypt-otp-codes'             => ['--yes' => true],

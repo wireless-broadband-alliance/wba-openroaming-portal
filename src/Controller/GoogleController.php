@@ -13,9 +13,9 @@ use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
-use App\Service\EncryptionService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
+use App\Service\HashArgon2idService;
 use App\Service\UserStatusChecker;
 use DateTime;
 use DateTimeInterface;
@@ -55,7 +55,7 @@ class GoogleController extends AbstractController
         private readonly TranslatorInterface $translator,
         private readonly CsrfTokenManagerInterface $csrfTokenManager,
         private readonly SettingRepository $settingRepository,
-        private readonly EncryptionService $encryptionService,
+        private readonly HashArgon2idService $hashArgon2IdService,
     ) {
     }
 
@@ -259,7 +259,7 @@ class GoogleController extends AbstractController
         $userAuth = new UserExternalAuth();
         $userAuth->setUser($user)
             ->setProvider(UserProvider::GOOGLE_ACCOUNT->value)
-            ->setProviderId($this->encryptionService->encrypt($googleUserId));
+            ->setProviderId($this->hashArgon2IdService->hash($googleUserId));
 
         $user->setPassword('notused');
 
