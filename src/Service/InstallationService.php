@@ -176,15 +176,15 @@ readonly class InstallationService
         if ($progress instanceof InstallationProgress) {
             return [
                 InstallationWidgetStepsEnum::DATABASE->value => $progress->getDbOpenRoaming(
-                    ) !== null || $progress->getDbFreeradius() !== null,
+                ) !== null || $progress->getDbFreeradius() !== null,
                 InstallationWidgetStepsEnum::SETTINGS->value => $progress->getTrustedProxies(
-                    ) !== null || $progress->getTurnstileKey() !== null,
+                ) !== null || $progress->getTurnstileKey() !== null,
                 InstallationWidgetStepsEnum::SECURITY_TXT->value => $progress->getSecurityContact(
-                    ) !== null && $progress->getSecurityExpires() !== null,
+                ) !== null && $progress->getSecurityExpires() !== null,
                 InstallationWidgetStepsEnum::ADMIN_CREDENTIALS->value => $progress->getEmailAdmin(
-                    ) !== null && $progress->isAdminConfirmed(),
+                ) !== null && $progress->isAdminConfirmed(),
                 InstallationWidgetStepsEnum::SUMMARY->value => $progress->getInstallationState(
-                    ) === ProcessStatusType::COMPLETED,
+                ) === ProcessStatusType::COMPLETED,
             ];
         }
 

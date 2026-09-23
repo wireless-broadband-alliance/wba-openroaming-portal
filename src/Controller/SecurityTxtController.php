@@ -80,8 +80,8 @@ class SecurityTxtController extends AbstractController
 
         if ($fingerprint !== null) {
             $lines[] = 'Encryption: openpgp4fpr:' . strtoupper(
-                    preg_replace('/\s+/', '', $fingerprint)
-                );
+                preg_replace('/\s+/', '', $fingerprint)
+            );
         }
 
         $lines[] = 'Canonical: ' . $request->getSchemeAndHttpHost() . '/.well-known/security.txt';

@@ -35,7 +35,11 @@ final class SecurityTxtSettingsForm extends AbstractController
     {
         $canWrite = $this->isGranted('ROLE_SUPER_ADMIN');
 
-        return $this->createForm(SecurityTxtSettingsType::class, $this->securityTxtSettingsDTO, ['disabled' => !$canWrite]);
+        return $this->createForm(
+            SecurityTxtSettingsType::class,
+            $this->securityTxtSettingsDTO,
+            ['disabled' => !$canWrite]
+        );
     }
 
     #[LiveAction]

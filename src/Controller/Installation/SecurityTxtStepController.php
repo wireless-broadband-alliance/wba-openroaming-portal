@@ -38,12 +38,14 @@ class SecurityTxtStepController extends AbstractController
     /**
      * @throws EncryptionException
      */
-    #[Route('/security-txt',
+    #[Route(
+        '/security-txt',
         name: 'admin_dashboard_settings_certs_installation_security_txt',
         methods: [
             'GET',
             'POST'
-        ])]
+        ]
+    )]
     public function __invoke(Request $request): Response
     {
         $lastInstallation = $this->installationService->lastInstallation();
