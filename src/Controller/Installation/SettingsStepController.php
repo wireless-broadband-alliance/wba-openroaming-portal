@@ -68,11 +68,11 @@ class SettingsStepController extends AbstractController
             return $this->installationFlow->redirectTo(InstallationStep::DATABASE);
         }
 
-        $step = $this->installationService->getStep($lastInstallation);
+        $computedStep = $this->installationService->getStep($lastInstallation);
 
         // Redirect away if the active step is NOT Settings
         $redirect = $this->installationFlow->redirectIfStep(
-            $step,
+            $computedStep,
             InstallationStep::DATABASE,
             InstallationStep::SECURITY_TXT,
             InstallationStep::ADMIN,

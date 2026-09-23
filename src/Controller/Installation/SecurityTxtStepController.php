@@ -6,13 +6,13 @@ use App\DTO\SecurityTxtDTO;
 use App\Entity\InstallationProgress;
 use App\Enum\AdminRoleType;
 use App\Enum\InstallationStep;
-use App\Enum\ProcessStatusType;
 use App\Exception\EncryptionException;
 use App\Form\SecurityTxtType;
 use App\Service\GetSettings;
 use App\Service\InstallationFlow;
 use App\Service\InstallationService;
-use Doctrine\ORM\EntityManagerInterface;
+use DateTimeImmutable;
+use DateTimeInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,7 +31,6 @@ class SecurityTxtStepController extends AbstractController
         private readonly InstallationFlow $installationFlow,
         private readonly GetSettings $getSettings,
         private readonly TranslatorInterface $translator,
-        private readonly EntityManagerInterface $entityManager,
     ) {
     }
 
@@ -43,7 +42,7 @@ class SecurityTxtStepController extends AbstractController
         name: 'admin_dashboard_settings_certs_installation_security_txt',
         methods: [
             'GET',
-            'POST'
+            'POST',
         ]
     )]
     public function __invoke(Request $request): Response
@@ -74,7 +73,12 @@ class SecurityTxtStepController extends AbstractController
         // Pre-fill DTO from existing entity if present
         if ($lastInstallation->getSecurityContact()) {
             $dto->contact = $lastInstallation->getSecurityContact();
-            $dto->expires = $lastInstallation->getSecurityExpires();
+
+            $securityExpires = $lastInstallation->getSecurityExpires();
+            $dto->expires = $securityExpires instanceof DateTimeInterface
+                ? DateTimeImmutable::createFromInterface($securityExpires)
+                : null;
+
             $dto->pgpFingerprint = $lastInstallation->getSecurityPgpFingerprint();
         }
 

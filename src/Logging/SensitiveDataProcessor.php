@@ -7,6 +7,9 @@ use Monolog\Processor\ProcessorInterface;
 
 class SensitiveDataProcessor implements ProcessorInterface
 {
+    /**
+     * @var list<string>
+     */
     private array $sensitiveKeys = [
         'password',
         'token',
@@ -15,6 +18,10 @@ class SensitiveDataProcessor implements ProcessorInterface
         'authorization',
     ];
 
+    /**
+     * @param LogRecord|array<string, mixed> $record
+     * @return LogRecord|array<string, mixed>
+     */
     public function __invoke(LogRecord|array $record): LogRecord|array
     {
         if ($record instanceof LogRecord) {
@@ -30,6 +37,10 @@ class SensitiveDataProcessor implements ProcessorInterface
         return $record;
     }
 
+    /**
+     * @param array<mixed, mixed> $data
+     * @return array<mixed, mixed>
+     */
     private function redact(array $data): array
     {
         foreach ($data as $key => $value) {

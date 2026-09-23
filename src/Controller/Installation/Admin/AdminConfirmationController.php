@@ -65,7 +65,8 @@ class AdminConfirmationController extends AbstractController
         if ($redirect instanceof RedirectResponse) {
             return $redirect;
         }
-        if ($computedStep === InstallationStep::ADMIN->value && !$lastInstallation->getEmailAdmin()) {
+
+        if ($computedStep === InstallationStep::ADMIN && !$lastInstallation->getEmailAdmin()) {
             return $this->installationFlow->redirectTo(InstallationStep::ADMIN);
         }
 
@@ -87,9 +88,9 @@ class AdminConfirmationController extends AbstractController
                 if ($adminUser instanceof User) {
                     $adminUser->setEmail($lastInstallation->getEmailAdmin());
                     $adminUser->setUuid($lastInstallation->getEmailAdmin());
+                    $this->entityManager->persist($adminUser);
                 }
 
-                $this->entityManager->persist($adminUser);
                 $this->entityManager->persist($lastInstallation);
                 $this->entityManager->flush();
 
