@@ -17,6 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Throwable;
 
 #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
@@ -27,6 +28,7 @@ class SecurityTxtStepController extends AbstractController
         private readonly InstallationService $installationService,
         private readonly InstallationFlow $installationFlow,
         private readonly GetSettings $getSettings,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -79,14 +81,23 @@ class SecurityTxtStepController extends AbstractController
                 try {
                     $this->installationService->saveSecurityTxtSettings($dto, $lastInstallation);
 
-                    $this->addFlash('success', 'securityTxtSaveSuccess');
+                    $this->addFlash(
+                        'success',
+                        $this->translator->trans('security_txt.save_success', [], 'controllers')
+                    );
 
                     return $this->installationFlow->redirectTo(InstallationStep::ADMIN);
                 } catch (Throwable) {
-                    $this->addFlash('error', 'securityTxtSaveError');
+                    $this->addFlash(
+                        'error',
+                        $this->translator->trans('security_txt.save_error', [], 'controllers')
+                    );
                 }
             } else {
-                $this->addFlash('warning', 'securityTxtFormError');
+                $this->addFlash(
+                    'warning',
+                    $this->translator->trans('security_txt.form_error', [], 'controllers')
+                );
             }
         }
 
