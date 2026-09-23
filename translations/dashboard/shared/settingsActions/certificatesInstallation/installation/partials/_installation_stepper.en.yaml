@@ -5,6 +5,9 @@ step:
   settings:
     title: "Application Settings"
     description: "Configure the main application settings and required parameters."
+  security_txt:
+    title: "Security.txt Configuration"
+    description: "Configure the security contact details and expiration settings."
   admin_credentials:
     title: "Admin Credentials"
     description: "Create the administrator account used to access the management panel."
