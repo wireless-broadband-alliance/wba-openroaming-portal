@@ -19,7 +19,7 @@
   - Designed to run as a scheduled cron job using the non-interactive option:
 
 ```bash
-    php bin/console app:cleanup-expired-data --yes
+    php bin/console clear:expired-user-data --yes
 ```
 
 - **Landing Page Authentication Rework**: Refactored landing page authentication buttons, adding dedicated support for
@@ -64,7 +64,7 @@
 
 - **TOTP Secret Encryption (CRA Annex I §1.3)**: Legacy plain-text TOTP 2FA secrets (`User.twoFAsecret`) are now
   encrypted at rest using AES-256-CBC encryption instead of being stored unencrypted.
-  - **Required action:** Run the `app:cra:encrypt-totp-secrets` command to encrypt any existing plain-text TOTP
+  - **Required action:** Run the `app:cra:encrypt-2fa-data` command to encrypt any existing plain-text TOTP
     secrets in the database. This command is idempotent and safe to re-run.
 ```bash
     php bin/console app:cra:encrypt-2fa-data
