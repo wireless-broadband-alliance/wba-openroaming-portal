@@ -117,3 +117,4 @@ passwordIsTooWeak: 'A palavra-passe é demasiado fraca. Por favor, utilize uma c
 currentPasswordIncorrect: "A sua palavra-passe atual está incorreta."
 invalidEmailFormat: 'O endereço de e-mail introduzido não é válido.'
 invalidDateFormat: 'A data introduzida é inválida.'
+securityFingerprintInvalid: 'A impressão digital PGP deve conter exatamente 40 carateres hexadecimais.'

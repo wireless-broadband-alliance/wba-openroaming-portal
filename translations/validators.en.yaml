@@ -117,3 +117,4 @@ passwordIsTooWeak: 'This password is too weak. Please use a stronger combination
 currentPasswordIncorrect: "Your current password is incorrect."
 invalidEmailFormat: 'The entered email address is invalid.'
 invalidDateFormat: 'The entered date is invalid.'
+securityFingerprintInvalid: 'The PGP fingerprint must consist of exactly 40 hexadecimal characters.'
