@@ -32,7 +32,7 @@
      data-{{ controller }}-translations-value="{{ translations|json_encode }}">
 
     {{ form_widget(field, {
-        attr: { class: 'hidden', ('data-' ~ controller ~ '-target'): 'input' },
+        attr: {class: 'hidden', ('data-' ~ controller ~ '-target'): 'input'},
     }) }}
 
     <div class="relative" data-{{ controller }}-target="pickerWrap">
