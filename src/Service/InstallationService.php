@@ -333,6 +333,11 @@ readonly class InstallationService
 
         $dto->emailAdmin = $installationProgress->getEmailAdmin();
 
+        // Map security.txt properties onto the DTO
+        $dto->securityContact = $installationProgress->getSecurityContact();
+        $dto->securityExpires = $installationProgress->getSecurityExpires();
+        $dto->securityPgpFingerprint = $installationProgress->getSecurityPgpFingerprint();
+
         $dto->createdAt = $installationProgress->getCreatedAt();
         $dto->updatedAt = $installationProgress->getUpdatedAt();
 

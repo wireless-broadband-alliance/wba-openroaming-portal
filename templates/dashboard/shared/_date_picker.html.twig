@@ -17,7 +17,7 @@
     monthNov: 'monthNov'|trans({}, '_date_filter'), monthDec: 'monthDec'|trans({}, '_date_filter'),
 } %}
 
-<div class="space-y-2 flex-1 flex flex-col justify-start"
+<div class="space-y-2 flex-1 flex flex-col justify-start relative z-20"
      data-controller="{{ controller }}"
      data-{{ controller }}-translations-value="{{ translations|json_encode }}">
 
@@ -39,8 +39,9 @@
             <span data-{{ controller }}-target="pickerArrow" class="ml-auto text-[10px] text-gray-400">▼</span>
         </button>
 
+        {# --- UPDATED DROPDOWN CONTAINER --- #}
         <div data-{{ controller }}-target="pickerDropdown"
-             class="hidden absolute left-0 bottom-full mb-2 z-50 bg-white border border-gray-200 rounded-xl p-4 shadow-lg w-[300px]">
+             class="hidden absolute left-0 top-full mt-2 z-[9999] bg-white border border-gray-200 rounded-xl p-4 pb-5 shadow-2xl w-[300px]">
 
             <div data-{{ controller }}-target="calendarGrid"></div>
 
@@ -49,12 +50,13 @@
                 <div class="flex gap-2">
                     <button type="button"
                             data-action="click->{{ controller }}#clearDate"
-                            class="text-xs border border-gray-200 rounded-md px-3 py-1.5 text-gray-500 hover:border-gray-400 hover:text-gray-700 transition-colors">
+                            data-action-target="clear"
+                            class="text-xs border border-gray-200 rounded-md px-3 py-1.5 text-gray-500 hover:border-gray-400 hover:text-gray-700 transition-colors cursor-pointer">
                         {{ 'clear'|trans({}, '_date_filter') }}
                     </button>
                     <button type="button"
                             data-action="click->{{ controller }}#applyDate"
-                            class="text-xs bg-[#7DB928] text-white rounded-md px-4 py-1.5 font-medium hover:opacity-90 transition-opacity">
+                            class="text-xs bg-[#7DB928] text-white rounded-md px-4 py-1.5 font-medium hover:opacity-90 transition-opacity cursor-pointer">
                         {{ 'applyRange'|trans({}, '_date_filter') }}
                     </button>
                 </div>

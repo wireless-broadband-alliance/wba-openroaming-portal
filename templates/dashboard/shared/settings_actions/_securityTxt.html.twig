@@ -41,7 +41,9 @@
             </div>
             {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.SECURITY_EXPIRES.description}) }}
             <div class="flex items-center space-x-2 mt-5">
-                {{ form_widget(form.securityExpires, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
+                {{ include('dashboard/shared/_date_picker.html.twig', {
+                    field: form.securityExpires
+                }) }}
             </div>
             <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                 {{ form_errors(form.securityExpires) }}
@@ -72,7 +74,7 @@
 
     <div class="mt-8 divider-solid"></div>
 
-    {% if is_granted('ROLE_ADMIN') %}
+    {% if is_granted(constant('App\\Enum\\AdminRoleType::ROLE_SUPER_ADMIN').value) %}
         <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
             <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingSecurity'}) }}"
                data-confirm="{{ 'resetMessage'|trans({}, 'settings_actions_general')|e('html_attr') }}"
