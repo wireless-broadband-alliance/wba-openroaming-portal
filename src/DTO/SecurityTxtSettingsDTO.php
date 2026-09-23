@@ -12,6 +12,8 @@ class SecurityTxtSettingsDTO
     public ?string $securityContact = null;
 
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    #[Assert\GreaterThan('today')]
+    #[Assert\LessThan('+1 year')]
     #[Assert\Type(type: \DateTimeInterface::class, message: 'invalidDateFormat')]
     public ?\DateTimeImmutable $securityExpires = null;
 

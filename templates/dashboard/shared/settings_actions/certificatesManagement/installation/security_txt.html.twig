@@ -1,21 +1,21 @@
 {% extends 'dashboard/shared/settings_actions/certificatesManagement/installation/base.html.twig' %}
 
 {% block title %}
-
+    {{ 'adminPageWBA'|trans({}, '_header_admin') }}
 {% endblock %}
 
 {% block installation_content %}
 
     <div class="mt-6 leading-7">
-        <p class="font-bold text-base sm:text-lg md:text-xl lg:text-2xl">
+        <p class="font-bold text-base sm:text-lg md:text-xl lg:text-2xl text-gray-900">
             {{ 'securityTxtTitle'|trans({}, '_securityTxt') }}
         </p>
-        <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
+        <p class="mt-2 text-sm sm:text-base text-gray-600">
             {{ 'securityTxtDescription'|trans({}, '_securityTxt') }}
         </p>
     </div>
 
-    <div class="my-[25px] divider"></div>
+    <div class="my-6 border-t border-gray-200"></div>
 
     {% if message is defined and message %}
         {{ include('shared/_toast.html.twig', {
@@ -24,124 +24,121 @@
         }) }}
     {% endif %}
 
-    {{ form_start(form, {attr: {autocomplete: 'off'}}) }}
+    <twig:SecurityTxtForm :form="form" :securityTxtDTO="formDTO">
+        {{ form_start(form, {attr: {autocomplete: 'off'}}) }}
 
-    <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
+        <div class="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
 
-        {# --- Contact Card --- #}
-        <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5" {{ stimulus_controller('card') }}>
-            <div class="flex flex-row justify-between">
-                <div class="text-base font-medium text-center break-normal md:break-all">
-                    <h1 class="text-base md:text-lg whitespace-nowrap">
-                        {{ 'securityContact'|trans({}, '_securityTxt') }}
-                    </h1>
+            {# --- Contact Card --- #}
+            <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 flex flex-col" {{ stimulus_controller('card') }}>
+                <div class="min-h-[4.5rem]">
+                    <div class="flex flex-row justify-between items-center mb-3">
+                        <h1 class="text-base font-semibold text-gray-800">
+                            {{ 'securityContact'|trans({}, '_securityTxt') }}
+                        </h1>
+                        <label class="flex items-center">
+                            <img class="w-5 h-5 cursor-pointer opacity-60 hover:opacity-100 transition-opacity"
+                                    {{ stimulus_target('card', 'button') }}
+                                    {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                                 src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon" />
+                        </label>
+                    </div>
+
+                    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                        description: 'SECURITY_CONTACT'|trans({}, 'setting_descriptions'),
+                    }) }}
                 </div>
-                <label class="flex items-center bg-opacity-40">
-                    <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
-                            {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
-                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
-                </label>
+
+                <div class="space-y-2 flex-1 flex flex-col justify-start">
+                    {{ form_widget(form.contact, {
+                        attr: {
+                            class: 'form-widget mt-1 block w-full rounded-md border-gray-200 p-2',
+                            placeholder: 'mailto:security@example.com',
+                        },
+                    }) }}
+
+                    {% if form_errors(form.contact) %}
+                        <div class="text-xs text-red-500 font-medium mt-1">
+                            {{ form_errors(form.contact) }}
+                        </div>
+                    {% endif %}
+                </div>
             </div>
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
-                description: 'SECURITY_CONTACT'|trans({}, 'setting_descriptions'),
-            }) }}
+            {# --- Expires Card --- #}
+            <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 flex flex-col" {{ stimulus_controller('card') }}>
+                <div class="min-h-[4.5rem]">
+                    <div class="flex flex-row justify-between items-center mb-3">
+                        <h1 class="text-base font-semibold text-gray-800">
+                            {{ 'securityExpires'|trans({}, '_securityTxt') }}
+                        </h1>
+                        <label class="flex items-center">
+                            <img class="w-5 h-5 cursor-pointer opacity-60 hover:opacity-100 transition-opacity"
+                                    {{ stimulus_target('card', 'button') }}
+                                    {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                                 src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon" />
+                        </label>
+                    </div>
 
-            <div class="flex items-center space-x-2 mt-5">
-                {{ form_widget(form.contact, {
-                    attr: {
-                        class: 'form-widget mt-1 block w-full rounded-md border-gray-200 p-2',
-                    },
+                    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                        description: 'SECURITY_EXPIRES'|trans({}, 'setting_descriptions'),
+                    }) }}
+                </div>
+
+                {{ include('dashboard/shared/_date_picker.html.twig', {
+                    field: form.expires
                 }) }}
             </div>
 
-            <div class="mt-2 text-center text-red-500 text-base">
-                {{ form_errors(form.contact) }}
-            </div>
-        </div>
+            {# --- PGP Fingerprint Card --- #}
+            <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 flex flex-col" {{ stimulus_controller('card') }}>
+                <div class="min-h-[4.5rem]">
+                    <div class="flex flex-row justify-between items-center mb-3">
+                        <h1 class="text-base font-semibold text-gray-800">
+                            {{ 'securityPgpFingerprint'|trans({}, '_securityTxt') }}
+                        </h1>
+                        <label class="flex items-center">
+                            <img class="w-5 h-5 cursor-pointer opacity-60 hover:opacity-100 transition-opacity"
+                                    {{ stimulus_target('card', 'button') }}
+                                    {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                                 src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon" />
+                        </label>
+                    </div>
 
-        {# --- Expires Card --- #}
-        <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5" {{ stimulus_controller('card') }}>
-            <div class="flex flex-row justify-between">
-                <div class="text-base font-medium text-center break-normal md:break-all">
-                    <h1 class="text-base md:text-lg whitespace-nowrap">
-                        {{ 'securityExpires'|trans({}, '_securityTxt') }}
-                    </h1>
+                    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                        description: 'SECURITY_PGP_FINGERPRINT'|trans({}, 'setting_descriptions'),
+                    }) }}
                 </div>
-                <label class="flex items-center bg-opacity-40">
-                    <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
-                            {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
-                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
-                </label>
-            </div>
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
-                description: 'SECURITY_EXPIRES'|trans({}, 'setting_descriptions'),
-            }) }}
+                <div class="space-y-2 flex-1 flex flex-col justify-start">
+                    {{ form_widget(form.pgpFingerprint, {
+                        attr: {
+                            class: 'form-widget mt-1 block w-full rounded-md border-gray-200 p-2',
+                        },
+                    }) }}
 
-            <div class="flex items-center space-x-2 mt-5">
-                {{ form_widget(form.expires, {
-                    attr: {
-                        class: 'form-widget mt-1 block w-full rounded-md border-gray-200 p-2',
-                    },
-                }) }}
-            </div>
-
-            <div class="mt-2 text-center text-red-500 text-base">
-                {{ form_errors(form.expires) }}
-            </div>
-        </div>
-
-        {# --- PGP Fingerprint Card --- #}
-        <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5" {{ stimulus_controller('card') }}>
-            <div class="flex flex-row justify-between">
-                <div class="text-base font-medium text-center break-normal md:break-all">
-                    <h1 class="text-base md:text-lg whitespace-nowrap">
-                        {{ 'securityPgpFingerprint'|trans({}, '_securityTxt') }}
-                    </h1>
+                    {% if form_errors(form.pgpFingerprint) %}
+                        <div class="text-xs text-red-500 font-medium mt-1">
+                            {{ form_errors(form.pgpFingerprint) }}
+                        </div>
+                    {% endif %}
                 </div>
-                <label class="flex items-center bg-opacity-40">
-                    <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
-                            {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
-                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
-                </label>
             </div>
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
-                description: 'SECURITY_PGP_FINGERPRINT'|trans({}, 'setting_descriptions'),
-            }) }}
-
-            <div class="flex items-center space-x-2 mt-5">
-                {{ form_widget(form.pgpFingerprint, {
-                    attr: {
-                        class: 'form-widget mt-1 block w-full rounded-md border-gray-200 p-2',
-                    },
-                }) }}
-            </div>
-
-            <div class="mt-2 text-center text-red-500 text-base">
-                {{ form_errors(form.pgpFingerprint) }}
-            </div>
         </div>
 
-    </div>
+        <div class="my-8 border-t border-gray-200"></div>
 
-    <div class="mt-8 divider-solid"></div>
+        <div class="flex justify-end">
+            <button type="submit"
+                    class="px-6 py-2.5 bg-lime-600 hover:bg-lime-700 text-white font-medium text-sm rounded-lg shadow transition-all cursor-pointer"
+                    onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general') }}')">
+                {{ 'saveChanges'|trans({}, 'settings_actions_general') }}
+            </button>
+        </div>
 
-    <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
-        {# Como adicionaste o SubmitType ao formulário, renderizamos a partir do widget,
-           aplicando a classe CSS correta para manter o design do botão #}
-        {{ form_widget(form.submit, {
-            label: 'saveChanges'|trans({}, 'settings_actions_general'),
-            attr: {
-                class: 'btn-primary',
-                onclick: "return confirm('" ~ 'saveChangesMessage'|trans({}, 'settings_actions_general') ~ "')"
-            }
-        }) }}
-    </div>
-
-    {{ form_row(form._token) }}
-    {{ form_end(form, {render_rest: false}) }}
+        {{ form_row(form._token) }}
+        {{ form_end(form, {render_rest: false}) }}
+    </twig:SecurityTxtForm>
 
 {% endblock %}
-

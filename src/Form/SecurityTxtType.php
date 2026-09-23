@@ -20,8 +20,7 @@ class SecurityTxtType extends AbstractType
                 'widget' => 'single_text',
                 'input' => 'datetime_immutable',
             ])
-            ->add('pgpFingerprint', TextType::class, ['required' => false])
-            ->add('submit', SubmitType::class);
+            ->add('pgpFingerprint', TextType::class, ['required' => false]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

@@ -495,36 +495,6 @@ readonly class InstallationService
             '"';
     }
 
-    public function startSecurityStepFromLastCompleted(): ?InstallationProgress
-    {
-        $last = $this->installationProgressRepository->getLastCompleted();
-        if (!$last instanceof InstallationProgress) {
-            return null;
-        }
-
-        // Encrypted values are copied as-is, no decrypt/encrypt round trip
-        $clone = new InstallationProgress();
-        $clone->setDbOpenRoaming($last->getDbOpenRoaming());
-        $clone->setDbFreeradius($last->getDbFreeradius());
-        $clone->setTrustedProxies($last->getTrustedProxies());
-        $clone->setTurnstileKey($last->getTurnstileKey());
-        $clone->setTurnstileSecret($last->getTurnstileSecret());
-        $clone->setJwtPassphrase($last->getJwtPassphrase());
-        $clone->setSecurityContact($last->getSecurityContact());
-        $clone->setSecurityExpires($last->getSecurityExpires());
-        $clone->setSecurityPgpFingerprint($last->getSecurityPgpFingerprint());
-        $clone->setEmailAdmin($last->getEmailAdmin());
-        $clone->setAdminConfirmed($last->isAdminConfirmed());
-        $clone->setInstallationState(ProcessStatusType::IN_PROGRESS);
-        $clone->setCreatedAt(new DateTime());
-        $clone->setUpdatedAt(new DateTime());
-
-        $this->entityManager->persist($clone);
-        $this->entityManager->flush();
-
-        return $clone;
-    }
-
     public function saveSecurityTxtSettings(SecurityTxtDTO $dto, InstallationProgress $installationProgress): void
     {
         $expires = $dto->expires ?? throw new InvalidArgumentException('Expires date is required');
