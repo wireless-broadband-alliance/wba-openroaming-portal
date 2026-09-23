@@ -24,7 +24,7 @@ final class Version20260827134715 extends AbstractMigration
             "
             INSERT INTO Setting (name, value) VALUES
             ('CLEANUP_EXPIRED_DATA_CRON', '* 5 * * *'),
-            ('CLEANUP_EXPIRED_DATA_CRON_ENABLED', 'ON'),
+            ('CLEANUP_EXPIRED_DATA_CRON_ENABLED', 'OFF'),
             ('USER_RETENTION_DAYS', '30'),
             ('OTP_EXPIRATION_HOURS', '12')
         "
