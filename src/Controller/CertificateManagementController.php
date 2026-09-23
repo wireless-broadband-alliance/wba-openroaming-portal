@@ -283,68 +283,6 @@ class CertificateManagementController extends AbstractController
     }
 
     #[Route(
-        '/dashboard/settings/certificatesManagement/systemReset',
-        name: 'admin_dashboard_settings_certs_management_system_reset',
-        methods: ['POST']
-    )]
-    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
-    public function settingsCertificatesManagementSystemReset(Request $request): Response
-    {
-        /** @var User $user */
-        $user = $this->getUser();
-
-        // Abort pending Installation process if exists
-        $installationProcess = $this->installationProgressRepository->getLast();
-        if (
-            $installationProcess &&
-            $installationProcess->getInstallationState() !== ProcessStatusType::COMPLETED
-        ) {
-            $installationProcess->setInstallationState(ProcessStatusType::ABORTED);
-            $installationProcess->setUpdatedAt(new DateTime());
-            $this->entityManager->persist($installationProcess);
-
-            // Reset system to last valid installation config
-            $this->installationService->resetToLastInstallation();
-        }
-
-        // Abort pending Certificate process if exists
-        $certificateProcess = $this->certificateProcessCheckerService->getCurrentProcess();
-        if ($certificateProcess instanceof \App\Entity\CertificateSetupProcess) {
-            $certificateProcess->setStatus(ProcessStatusType::ABORTED);
-            $certificateProcess->setUpdatedAt(new DateTimeImmutable());
-            $this->entityManager->persist($certificateProcess);
-        }
-
-        $this->entityManager->flush();
-
-        // Set session to redirect the user
-        $session = $request->getSession();
-        $session->set(SessionStatus::SYSTEM_RESET_REQUEST->value, 'admin_dashboard_settings_certs_installation');
-
-        $this->eventActions->saveEvent(
-            $user,
-            AnalyticalEventType::SYSTEM_RESET_REQUEST_STARTED->value,
-            new DateTime(),
-            [
-                EventMetadataKeysType::IP->value => $request->getClientIp(),
-                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-                EventMetadataKeysType::UUID->value => $user->getUuid(),
-            ]
-        );
-
-        $this->addFlash(
-            'success',
-            $this->translator->trans(
-                'systemResetRequestStarted',
-                [],
-                'controllers'
-            )
-        );
-
-        return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
-    }
-
-    #[Route(
         '/dashboard/settings/certificatesManagement/verifyIdentity/{type}',
         name: 'admin_dashboard_settings_certs_installation_verify',
         requirements: [
