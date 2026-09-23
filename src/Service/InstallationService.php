@@ -504,8 +504,17 @@ readonly class InstallationService
 
         // Update InstallationProgress Entity
         $installationProgress->setSecurityContact($dto->contact);
+        $securityContact = $this->settingRepository->findOneBy(['name' => SettingName::SECURITY_CONTACT->value]);
+        $securityContact->setValue($dto->contact);
+        $this->entityManager->persist($securityContact);
         $installationProgress->setSecurityExpires($expiresFormatted);
+        $securityExpires = $this->settingRepository->findOneBy(['name' => SettingName::SECURITY_EXPIRES->value]);
+        $securityExpires->setValue($expiresFormatted->format('Y-m-d H:i:s'));
+        $this->entityManager->persist($securityExpires);
         $installationProgress->setSecurityPgpFingerprint($dto->pgpFingerprint);
+        $pgpFingerprint = $this->settingRepository->findOneBy(['name' => SettingName::SECURITY_PGP_FINGERPRINT->value]);
+        $pgpFingerprint->setValue($dto->pgpFingerprint);
+        $this->entityManager->persist($pgpFingerprint);
         $installationProgress->setUpdatedAt(new DateTime());
         $installationProgress->setInstallationState(ProcessStatusType::IN_PROGRESS);
 
