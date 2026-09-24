@@ -216,10 +216,17 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
                     );
 
                     if ($session instanceof Session) {
+                        // Determine if user is SMS based on UserExternalAuth provider_id or missing email
+                        $firstAuth = $user->getUserExternalAuths()->first();
+                        $isSmsUser = ($firstAuth && $firstAuth->getProviderId() === UserProvider::PHONE_NUMBER->value)
+                            || ($user->getPhoneNumber() && !$user->getEmail());
+
+                        $messageKey = $isSmsUser ? 'verificationCodeSentSms' : 'verificationCodeSent';
+
                         $session->getFlashBag()->add(
                             'success',
                             $this->translator->trans(
-                                'verificationCodeSent',
+                                $messageKey,
                                 [],
                                 'controllers'
                             )

@@ -31,8 +31,7 @@ class HashedStringType extends Type
             return $stringValue;
         }
 
-        $hashService = new HashArgon2idService();
-        return $hashService->hash($stringValue);
+        return new HashArgon2idService()->hash($stringValue);
     }
 
     public function convertToPHPValue($value, AbstractPlatform $platform): ?string
