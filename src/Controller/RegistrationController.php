@@ -385,41 +385,40 @@ class RegistrationController extends AbstractController
             && $verificationCode !== ''
             && $this->hashArgon2idService->verifyHash($verificationCode, $user->getTwoFAcode());
 
-        if (
-            $user && $user->getUuid() === $uuid && $isCodeValid &&
-            $this->magicLinkService->linkCanBeUsed($user, AnalyticalEventType::USER_CREATION->value)
-        ) {
-            $this->addFlash(
-                'error',
-                $this->translator->trans(
-                    'invalidVerificationCodeLink',
-                    [],
-                    'controllers'
-                )
-            );
+        if ($user && $user->getUuid() === $uuid && $isCodeValid) {
+            // UUID-only logins (authLocal) don't create a USER_CREATION event, so validate
+            // against the moment the code was generated. Registration keeps the event check.
+            $isLinkExpired = $isUuidOnly
+                ? !$this->magicLinkService->linkValidity($user)
+                : $this->magicLinkService->linkCanBeUsed($user, AnalyticalEventType::USER_CREATION->value);
 
-            return $this->redirectToRoute('app_landing');
+            if ($isLinkExpired) {
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans(
+                        'invalidVerificationCodeLink',
+                        [],
+                        'controllers'
+                    )
+                );
+
+                return $this->redirectToRoute('app_landing');
+            }
         }
 
         if ($isCodeValid) {
             try {
-                // Create a token manually for the user
                 $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
-
-                // Set the token in the token storage
                 $this->tokenStorage->setToken($token);
 
-                // Dispatch the login event
                 $event = new InteractiveLoginEvent($request, $token);
                 $this->eventDispatcher->dispatch($event);
 
-                // Update the verified status and save the user
                 $user->setIsVerified(true);
                 $this->userRepository->save($user, true);
                 $session = $this->requestStack->getSession();
                 $session->set(SessionStatus::VERIFIED->value, true);
 
-                // Defines the Event to the table
                 $eventMetaData = [
                     EventMetadataKeysType::IP->value => $request->getClientIp(),
                     EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),

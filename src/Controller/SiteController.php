@@ -550,6 +550,7 @@ class SiteController extends AbstractController
             'formRevokeProfiles' => $formRevokeProfiles->createView(),
             'data' => $data,
             'user' => $currentUser,
+            'context' => FirewallType::LANDING->value
         ]);
     }
 
