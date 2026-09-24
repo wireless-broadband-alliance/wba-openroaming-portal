@@ -322,9 +322,10 @@
                 <div class="py-2 mt-1 bg-lightGray rounded-md duration-300 shadow {{ (app.request.attributes.get('_route') in securityRoutes) ? '' : 'hidden' }}" {{ stimulus_target('nav-submenu', 'container') }}>
                     <ul class="mx-2">
                         {{ include('dashboard/shared/_sidebar_item.html.twig', {
-                            label: 'txtConfiguration'|trans({}, '_header_admin'),
+                            label: 'cvdConfiguration'|trans({}, '_header_admin'),
                             routes: ['admin_dashboard_settings_security_txt'],
-                            icon: 'wba:txt-configuration',
+                            icon: 'wba:mail-shield',
+                            iconClass: 'fill-current stroke-none'
                         }) }}
                     </ul>
                 </div>
