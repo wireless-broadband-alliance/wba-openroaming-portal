@@ -380,7 +380,7 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_login', ['uuid' => $uuid]);
         }
 
-        $isCodeValid = $user !== null
+        $isCodeValid = $user instanceof User
             && $user->getTwoFAcode() !== null
             && $verificationCode !== ''
             && $this->hashArgon2idService->verifyHash($verificationCode, $user->getTwoFAcode());
