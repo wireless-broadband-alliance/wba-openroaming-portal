@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\Doctrine\Type\EncryptedStringType;
+use App\Doctrine\Type\HashedStringType;
 use App\Enum\DefaultUser;
 use App\Repository\UserRepository;
 use App\Security\CustomSamlUserFactory;
@@ -103,13 +105,13 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     /** @phpstan-ignore-next-line */
     private ?bool $isDisabled = false;
 
-    #[ORM\Column(type: 'encrypted_string', nullable: true)]
+    #[ORM\Column(type: EncryptedStringType::NAME, nullable: true)]
     private ?string $twoFAsecret = null;
 
     #[ORM\Column(length: 255)]
     private int $twoFAtype = 0;
 
-    #[ORM\Column(type: 'hashed_string', length: 255, nullable: true)]
+    #[ORM\Column(type: HashedStringType::NAME, length: 255, nullable: true)]
     private ?string $twoFAcode = null;
 
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
