@@ -6,3 +6,5 @@ copy: 'Copy'
 download: 'Download'
 print: 'Print'
 done: 'Done'
+warning_title: "Important:"
+warning_message: "This page will only be displayed once. Make sure to copy, download, or print your codes before leaving."

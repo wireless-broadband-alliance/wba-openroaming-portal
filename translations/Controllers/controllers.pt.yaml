@@ -237,3 +237,4 @@ importErrorInvalidMimeType: 'O conteúdo do ficheiro não é um CSV válido (MIM
 coverageMapDisabled: 'O mapa de cobertura está desativado no momento.'
 cannotResetExternalAuthProviderPassword: "A redefinição de palavra-passe só é permitida para Contas Portal."
 encryptionError: 'Ocorreu um erro ao encriptar os dados. Por favor, tente novamente.'
+otpCodesAlreadyViewed: 'Já visualizou os seus códigos de recuperação. Esta página só pode ser acedida uma vez.'

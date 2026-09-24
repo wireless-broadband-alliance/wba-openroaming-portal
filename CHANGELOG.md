@@ -56,10 +56,10 @@
 
 - **OTP Backup Code Encryption (CRA Annex I §1.3)**: Legacy plain-text OTP backup codes (`OTPcode.code`) are now
   encrypted at rest using AES-256-CBC encryption instead of being stored unencrypted.
-  - **Required action:** Run the `app:cra:encrypt-otp-codes` command to encrypt any existing plain-text OTP
+  - **Required action:** Run the `app:cra:hash-otp-codes` command to encrypt any existing plain-text OTP
     backup codes in the database. This command is idempotent and safe to re-run.
 ```bash
-    php bin/console app:cra:encrypt-otp-codes
+    php bin/console app:cra:hash-otp-codes
 ```
 
 - **TOTP Secret Encryption (CRA Annex I §1.3)**: Legacy plain-text TOTP 2FA secrets (`User.twoFAsecret`) are now
