@@ -22,6 +22,7 @@ use App\Service\AuthAPIResponseService;
 use App\Service\CaptchaValidator;
 use App\Service\EmailGenerator;
 use App\Service\EventActions;
+use App\Service\HashArgon2idService;
 use App\Service\JWTTokenGenerator;
 use App\Service\MagicLinkService;
 use App\Service\SamlResolverService;
@@ -67,7 +68,8 @@ class AuthController extends AbstractController
         private readonly AuthAPIResponseService $authAPIResponseService,
         private readonly TwoFAAPIService $twoFAAPIService,
         private readonly TwoFAService $twoFAService,
-        private readonly TOTPService $TOTPService
+        private readonly TOTPService $TOTPService,
+        private readonly HashArgon2idService $hashArgon2idService
     ) {
     }
 
@@ -269,10 +271,22 @@ class AuthController extends AbstractController
             $providerId = $firstAuth ? $firstAuth->getProviderId() : UserProvider::EMAIL->value;
 
             if ($providerId === UserProvider::EMAIL->value) {
-                $this->emailGenerator->sendRegistrationEmail($user, null, true);
-                $this->addFlash(
-                    'success',
-                    'A login link has been sent to your email address.'
+                // Generate a raw random code
+                $rawTwoFaCode = (string)random_int(100000, 999999);
+
+                // Hash the code and store it in the user entity
+                $hashedCode = $this->hashArgon2idService->hash($rawTwoFaCode);
+                $user->setTwoFAcode($hashedCode);
+                $user->setTwoFAcodeIsActive(true);
+                $user->setTwoFAcodeGeneratedAt(new DateTime());
+                $this->userRepository->save($user, true);
+
+                // Send email with the unhashed raw code passed as the 4th argument
+                $this->emailGenerator->sendRegistrationEmail(
+                    $user,
+                    null,
+                    true,
+                    $rawTwoFaCode
                 );
             } else {
                 $link = $this->magicLinkService->magicToken($user);
