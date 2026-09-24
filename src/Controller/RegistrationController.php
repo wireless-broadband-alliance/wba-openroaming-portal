@@ -18,6 +18,7 @@ use App\Repository\UserRepository;
 use App\Service\EmailGenerator;
 use App\Service\EventActions;
 use App\Service\GetSettings;
+use App\Service\HashArgon2idService;
 use App\Service\MagicLinkService;
 use App\Service\SendSMS;
 use App\Service\UserCreationService;
@@ -74,7 +75,8 @@ class RegistrationController extends AbstractController
         private readonly EventDispatcherInterface $eventDispatcher,
         private readonly PhoneNumberUtil $phoneNumberUtil,
         private readonly RateLimiterFactoryInterface $verifyAccountLimiter,
-        private readonly SettingRepository $settingRepository
+        private readonly SettingRepository $settingRepository,
+        private readonly HashArgon2idService $hashArgon2idService
     ) {
     }
 
@@ -296,7 +298,6 @@ class RegistrationController extends AbstractController
                 $request
             );
 
-
             // Send SMS
             $message = $this->translator->trans('yourAccountPasswordIs', [], 'controllers')
                 . $randomPassword
@@ -337,7 +338,7 @@ class RegistrationController extends AbstractController
     public function confirmAccount(
         Request $request,
     ): Response {
-        $uuid = $request->query->get('uuid');
+        $uuid = (string)$request->query->get('uuid');
         $key = $request->getClientIp() . '_' . $uuid;
 
         $limiter = $this->verifyAccountLimiter->create($key);
@@ -357,7 +358,7 @@ class RegistrationController extends AbstractController
             );
         }
         // Get the email and verification code from the URL query parameters
-        $verificationCode = $request->query->get('twoFaCode');
+        $verificationCode = (string)$request->query->get('twoFaCode');
         $source = $request->query->get('source', 'portal');
         $isApiSource = $source === 'api';
 
@@ -379,8 +380,13 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_login', ['uuid' => $uuid]);
         }
 
+        $isCodeValid = $user !== null
+            && $user->getTwoFAcode() !== null
+            && $verificationCode !== ''
+            && $this->hashArgon2idService->verifyHash($verificationCode, $user->getTwoFAcode());
+
         if (
-            $user && $user->getUuid() === $uuid && $user->getTwoFAcode() === $verificationCode &&
+            $user && $user->getUuid() === $uuid && $isCodeValid &&
             $this->magicLinkService->linkCanBeUsed($user, AnalyticalEventType::USER_CREATION->value)
         ) {
             $this->addFlash(
@@ -394,7 +400,8 @@ class RegistrationController extends AbstractController
 
             return $this->redirectToRoute('app_landing');
         }
-        if ($user && $user->getTwoFAcode() === $verificationCode) {
+
+        if ($isCodeValid) {
             try {
                 // Create a token manually for the user
                 $token = new UsernamePasswordToken($user, 'main', $user->getRoles());

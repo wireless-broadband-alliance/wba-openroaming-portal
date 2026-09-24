@@ -32,7 +32,8 @@ readonly class EmailGenerator
     public function sendRegistrationEmail(
         User $user,
         ?string $password = null,
-        bool $returnAppsRegistration = false
+        bool $returnAppsRegistration = false,
+        ?string $rawTwoFaCode = null
     ): void {
         $settings = $this->fetchSettings([
             SettingName::PAGE_TITLE,
@@ -57,7 +58,7 @@ readonly class EmailGenerator
             'uuid' => $user->getEmail(),
             'supportTeam' => $supportTeam,
             'contactEmail' => $contactEmail,
-            'twoFaCode' => $user->getTwoFAcode(),
+            'twoFaCode' => $rawTwoFaCode ?? $user->getTwoFAcode(),
             'password' => $password ?? null,
         ];
 
@@ -139,7 +140,7 @@ readonly class EmailGenerator
     /**
      * @throws TransportExceptionInterface
      */
-    public function sendForgotPasswordEmail(User $user): void
+    public function sendForgotPasswordEmail(User $user, ?string $rawTwoFaCode = null): void
     {
         $settings = $this->fetchStandardSettings();
 
@@ -151,7 +152,7 @@ readonly class EmailGenerator
             'uuid' => $user->getUuid(),
             'emailTitle' => $emailTitle,
             'contactEmail' => $contactEmail,
-            'verificationCode' => $user->getTwoFAcode(),
+            'verificationCode' => $rawTwoFaCode ?? $user->getTwoFAcode(),
             'context' => FirewallType::LANDING->value,
         ];
 
