@@ -78,9 +78,9 @@ class AdminConfirmationController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var array{code: string} $formData */
             $formData = $form->getData();
-            $code = $formData['code'];
+            $code = $formData["code"];
 
-            if ($code === $lastInstallation->getConfirmCodeAdmin()) {
+            if ($this->installationService->validateAdminConfirmationCode($lastInstallation, $code)) {
                 $adminUser = $this->userRepository->findSuperAdmin();
 
                 $lastInstallation->setAdminConfirmed(true);
@@ -88,9 +88,9 @@ class AdminConfirmationController extends AbstractController
                 if ($adminUser instanceof User) {
                     $adminUser->setEmail($lastInstallation->getEmailAdmin());
                     $adminUser->setUuid($lastInstallation->getEmailAdmin());
-                    $this->entityManager->persist($adminUser);
                 }
 
+                $this->entityManager->persist($adminUser);
                 $this->entityManager->persist($lastInstallation);
                 $this->entityManager->flush();
 
