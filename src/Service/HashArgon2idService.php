@@ -21,5 +21,4 @@ class HashArgon2idService
     {
         return password_verify($plainText, $hash);
     }
-
 }

@@ -48,7 +48,8 @@ class HashLegacyOTPCodesCommand extends Command
             assert($helper instanceof QuestionHelper);
 
             $question = new ConfirmationQuestion(
-                'This action will convert all legacy plain-text and encrypted OTP backup codes to Argon2id hashes. [y/N] ',
+                'This action will convert all legacy plain-text and encrypted 
+                OTP backup codes to Argon2id hashes. [y/N] ',
                 false
             );
             /** @var QuestionHelper $helper */
