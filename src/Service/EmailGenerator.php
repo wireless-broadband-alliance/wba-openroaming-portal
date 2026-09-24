@@ -63,7 +63,7 @@ readonly class EmailGenerator
         ];
 
         // Switch template depending on login mode or return apps setting
-        if ($loginWithUUID === 'true') {
+        if ($loginWithUUID === 'true' && !$returnAppsRegistration) {
             $template = 'email/user_registration_login_uuid.html.twig';
             $translationDomain = 'user_registration_login_uuid';
 

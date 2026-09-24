@@ -462,7 +462,7 @@ class RegistrationController extends AbstractController
             // Example at the end of registration success
             if ($request->query->get('source') === 'api') {
                 $session = $request->getSession();
-                $session->set('app_return', [
+                $session->set(SessionStatus::APP_RETURN->value, [
                     'timestamp' => time(),
                     'ttl' => 300, // 5 minutes
                 ]);

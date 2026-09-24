@@ -269,7 +269,7 @@ class AuthController extends AbstractController
             $providerId = $firstAuth ? $firstAuth->getProviderId() : UserProvider::EMAIL->value;
 
             if ($providerId === UserProvider::EMAIL->value) {
-                $this->emailGenerator->sendRegistrationEmail($user);
+                $this->emailGenerator->sendRegistrationEmail($user, null, true);
                 $this->addFlash(
                     'success',
                     'A login link has been sent to your email address.'

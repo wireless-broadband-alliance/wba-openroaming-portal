@@ -16,4 +16,5 @@ enum SessionStatus: string
     case INSTALLATION_VERIFICATION = 'installation_verification';
     case CERTIFICATE_VERIFICATION = 'certificate_verification';
     case FREERADIUS_SETUP_PROCESS_TYPE = 'freeradiusSetupProcessType';
+    case APP_RETURN = 'app_return';
 }
