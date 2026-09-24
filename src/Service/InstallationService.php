@@ -44,6 +44,7 @@ readonly class InstallationService
         private UserRepository $userRepository,
         private CaptchaValidator $captchaValidator,
         private EncryptionService $encryptionService,
+        private HashArgon2idService $hashArgon2idService,
     ) {
     }
 
@@ -228,8 +229,12 @@ readonly class InstallationService
     public function sendAdminConfirmationCode(InstallationProgress $installationProgress): void
     {
         $verificationCode = (string)random_int(100000, 999999);
-        $installationProgress->setConfirmCodeAdmin($verificationCode);
+
+        // Hash the code before saving to DB
+        $hashedCode = $this->hashArgon2idService->hash($verificationCode);
+        $installationProgress->setConfirmCodeAdmin($hashedCode);
         $installationProgress->setUpdatedAt(new DateTime());
+
         $this->entityManager->persist($installationProgress);
         $this->entityManager->flush();
 
@@ -281,6 +286,18 @@ readonly class InstallationService
         }
 
         $this->mailer->send($email);
+    }
+
+    public function validateAdminConfirmationCode(
+        InstallationProgress $installationProgress,
+        string $submittedCode
+    ): bool {
+        $storedHash = $installationProgress->getConfirmCodeAdmin();
+        if ($storedHash === null) {
+            return false;
+        }
+
+        return $this->hashArgon2idService->verifyHash($submittedCode, $storedHash);
     }
 
     public function canSendCode(string $eventType, User $user): bool

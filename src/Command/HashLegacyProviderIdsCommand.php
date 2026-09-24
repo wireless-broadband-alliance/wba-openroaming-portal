@@ -4,7 +4,7 @@ namespace App\Command;
 
 use App\Entity\UserExternalAuth;
 use App\Enum\UserProvider;
-use App\Service\EncryptionService;
+use App\Service\HashArgon2idService;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -17,14 +17,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
-    name: 'app:cra:encrypt-oauth-ids',
+    name: 'app:cra:hash-oauth-ids',
     description: 'Encrypts legacy plain-text OAuth provider IDs for Google and Microsoft accounts to comply with CRA.',
 )]
-class EncryptLegacyProviderIdsCommand extends Command
+class HashLegacyProviderIdsCommand extends Command
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
-        private readonly EncryptionService $encryptionService,
+        private readonly HashArgon2idService $hashArgon2IdService,
     ) {
         parent::__construct();
     }
@@ -83,7 +83,7 @@ class EncryptLegacyProviderIdsCommand extends Command
                     continue;
                 }
 
-                $hashedValue = $this->encryptionService->encrypt($originalValue);
+                $hashedValue = $this->hashArgon2IdService->hash($originalValue);
 
                 $updateSql = sprintf('UPDATE %s SET provider_id = :provider_id WHERE id = :id', $tableName);
                 $connection->executeStatement(

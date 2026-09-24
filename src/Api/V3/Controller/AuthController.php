@@ -22,6 +22,7 @@ use App\Service\AuthAPIResponseService;
 use App\Service\CaptchaValidator;
 use App\Service\EmailGenerator;
 use App\Service\EventActions;
+use App\Service\HashArgon2idService;
 use App\Service\JWTTokenGenerator;
 use App\Service\MagicLinkService;
 use App\Service\SamlResolverService;
@@ -67,7 +68,8 @@ class AuthController extends AbstractController
         private readonly AuthAPIResponseService $authAPIResponseService,
         private readonly TwoFAAPIService $twoFAAPIService,
         private readonly TwoFAService $twoFAService,
-        private readonly TOTPService $TOTPService
+        private readonly TOTPService $TOTPService,
+        private readonly HashArgon2idService $hashArgon2idService
     ) {
     }
 
@@ -85,23 +87,23 @@ class AuthController extends AbstractController
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException) {
-            return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); # Bad Request Response
+            return new BaseResponse(400, null, 'Invalid JSON format')->toResponse();
         }
 
         $turnstileSetting = $this->settingRepository->findOneBy([
             'name' => SettingName::TURNSTILE_CHECKER->value
-        ])->getValue();
+        ]);
         if (!$turnstileSetting) {
             throw new RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
 
-        if ($turnstileSetting === OperationMode::ON->value) {
+        if ($turnstileSetting->getValue() === OperationMode::ON->value) {
             if (!isset($data['turnstile_token'])) {
                 return new BaseResponse(
                     400,
                     null,
                     'CAPTCHA validation failed'
-                )->toResponse(); # Bad Request Response
+                )->toResponse();
             }
 
             $turnstileValidation = $this->captchaValidator->validate(
@@ -117,14 +119,15 @@ class AuthController extends AbstractController
         }
 
         $errors = [];
-        // Check for missing fields and add them to the array errors
         if (empty($data['uuid'])) {
             $errors[] = 'uuid';
         }
 
-        $isLoginWithUUIDOnly = $this->settingRepository->findOneBy([
+        $uuidOnlySetting = $this->settingRepository->findOneBy([
             'name' => SettingName::LOGIN_WITH_UUID_ONLY->value
-        ])->getValue();
+        ]);
+        $isLoginWithUUIDOnly = $uuidOnlySetting ? $uuidOnlySetting->getValue() : 'false';
+
         if ($isLoginWithUUIDOnly === 'false' && empty($data['password'])) {
             $errors[] = 'password';
         }
@@ -137,16 +140,19 @@ class AuthController extends AbstractController
             )->toResponse();
         }
 
-        // Check if user exists are valid
+        // Check if user exists and is valid
         $user = $this->userRepository->findOneBy(['uuid' => $data['uuid']]);
 
         if (!$user instanceof User) {
             return new BaseResponse(401, null, 'Invalid credentials')->toResponse();
-            // Bad Request Response
         }
 
-        if (!$this->passwordHasher->isPasswordValid($user, $data['password'])) {
-            return new BaseResponse(401, null, 'Invalid credentials')->toResponse(); # Unauthorized Request Response
+        // ONLY validate password if UUID-only login is disabled
+        if ($isLoginWithUUIDOnly === 'false') {
+            $password = (string)($data['password'] ?? '');
+            if (!$this->passwordHasher->isPasswordValid($user, $password)) {
+                return new BaseResponse(401, null, 'Invalid credentials')->toResponse();
+            }
         }
 
         $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
@@ -163,73 +169,73 @@ class AuthController extends AbstractController
             )->toResponse();
         }
 
-        $twoFAEnforcementResult = $this->twoFAAPIService->twoFAEnforcementChecker(
-            $user,
-            $request->attributes->get('_route')
-        );
+        // ONLY enforce 2FA code validation if UUID-only login is disabled
+        if ($isLoginWithUUIDOnly === 'false') {
+            $twoFAEnforcementResult = $this->twoFAAPIService->twoFAEnforcementChecker(
+                $user,
+                $request->attributes->get('_route')
+            );
 
-        if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
-            // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
-            return new BaseResponse(
-                400,
-                null,
-                $twoFAEnforcementResult['message']
-            )->toResponse();
-        }
-
-        if ($twoFAEnforcementResult['canSkip2FA'] === false) {
-            if (empty($data['twoFACode'])) {
-                $errors[] = 'twoFACode';
-            }
-
-            if ($errors !== []) {
+            if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
                 return new BaseResponse(
                     400,
-                    ['missing_fields' => $errors],
-                    'Invalid data: Missing required fields.'
+                    null,
+                    $twoFAEnforcementResult['message']
                 )->toResponse();
             }
 
-            // --- TOTP / OTP validation ---
-            if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
-                $isValidBackupCode = $this->twoFAService->validateOTPCodes(
-                    $user,
-                    $data['twoFACode']
-                );
-                $isValidTotpCode = $this->TOTPService->verifyTOTP(
-                    $user->getTwoFAsecret(),
-                    $data['twoFACode']
-                );
+            if ($twoFAEnforcementResult['canSkip2FA'] === false) {
+                if (empty($data['twoFACode'])) {
+                    $errors[] = 'twoFACode';
+                }
 
-                if (!$isValidBackupCode && !$isValidTotpCode) {
+                if ($errors !== []) {
                     return new BaseResponse(
-                        401,
-                        null,
-                        $twoFAEnforcementResult['message']
+                        400,
+                        ['missing_fields' => $errors],
+                        'Invalid data: Missing required fields.'
                     )->toResponse();
                 }
-            } else { // --- Email/SMS / OTP validation ---
-                $isValidBackupCode = $this->twoFAService->validateOTPCodes(
-                    $user,
-                    $data['twoFACode']
-                );
-                $isValid2FACode = $this->twoFAService->validate2FACode(
-                    $user,
-                    $data['twoFACode']
-                );
 
-                if (!$isValidBackupCode && !$isValid2FACode) {
-                    return new BaseResponse(
-                        401,
-                        null,
-                        $twoFAEnforcementResult['message']
-                    )->toResponse();
+                // --- TOTP / OTP validation ---
+                if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
+                    $isValidBackupCode = $this->twoFAService->validateOTPCodes(
+                        $user,
+                        $data['twoFACode']
+                    );
+                    $isValidTotpCode = $this->TOTPService->verifyTOTP(
+                        $user->getTwoFAsecret(),
+                        $data['twoFACode']
+                    );
+
+                    if (!$isValidBackupCode && !$isValidTotpCode) {
+                        return new BaseResponse(
+                            401,
+                            null,
+                            $twoFAEnforcementResult['message']
+                        )->toResponse();
+                    }
+                } else { // --- Email/SMS / OTP validation ---
+                    $isValidBackupCode = $this->twoFAService->validateOTPCodes(
+                        $user,
+                        $data['twoFACode']
+                    );
+                    $isValid2FACode = $this->twoFAService->validate2FACode(
+                        $user,
+                        $data['twoFACode']
+                    );
+
+                    if (!$isValidBackupCode && !$isValid2FACode) {
+                        return new BaseResponse(
+                            401,
+                            null,
+                            $twoFAEnforcementResult['message']
+                        )->toResponse();
+                    }
                 }
             }
-        }
 
-        if ($isLoginWithUUIDOnly === 'false') {
-            // If the login with uuid is disabled generate JWT Token
+            // Generate JWT Token when UUID-only login is disabled
             $token = $this->JWTTokenGenerator->generateToken($user);
             if (is_array($token) && $token['success'] === false) {
                 $errorMessage = $token['error'] ?? 'Token generation failed.';
@@ -238,7 +244,6 @@ class AuthController extends AbstractController
                 return new BaseResponse($statusCode, null, $errorMessage)->toResponse();
             }
 
-            // Defines the Event to the table
             $eventMetaData = [
                 EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
                 EventMetadataKeysType::UUID->value => $user->getUuid(),
@@ -252,24 +257,36 @@ class AuthController extends AbstractController
                 $eventMetaData
             );
 
-            // Prepare response data
             $responseData = $user->toApiResponse([
                 'token' => $token,
             ]);
 
-            // Return success response using BaseResponse
-            return new BaseResponse(200, $responseData)->toResponse(); # Success Response
+            return new BaseResponse(200, $responseData)->toResponse();
         }
 
-        // If login with UUID is enabled, generate the SMS or email with the login link
+        // Handle Magic Link / SMS / Email sending for UUID-only login
         $event = $this->magicLinkService->canSendLink($user);
         if (!($event instanceof Event)) {
-            $providerId = $user->getUserExternalAuths()[0]->getProviderId();
+            $firstAuth = $user->getUserExternalAuths()->first();
+            $providerId = $firstAuth ? $firstAuth->getProviderId() : UserProvider::EMAIL->value;
+
             if ($providerId === UserProvider::EMAIL->value) {
-                $this->emailGenerator->sendRegistrationEmail($user);
-                $this->addFlash(
-                    'success',
-                    'A login link has been sent to your email address.'
+                // Generate a raw random code
+                $rawTwoFaCode = (string)random_int(100000, 999999);
+
+                // Hash the code and store it in the user entity
+                $hashedCode = $this->hashArgon2idService->hash($rawTwoFaCode);
+                $user->setTwoFAcode($hashedCode);
+                $user->setTwoFAcodeIsActive(true);
+                $user->setTwoFAcodeGeneratedAt(new DateTime());
+                $this->userRepository->save($user, true);
+
+                // Send email with the unhashed raw code passed as the 4th argument
+                $this->emailGenerator->sendRegistrationEmail(
+                    $user,
+                    null,
+                    true,
+                    $rawTwoFaCode
                 );
             } else {
                 $link = $this->magicLinkService->magicToken($user);

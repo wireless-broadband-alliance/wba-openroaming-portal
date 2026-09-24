@@ -10,7 +10,8 @@ use RuntimeException;
 class EncryptedStringType extends Type
 {
     public const NAME = 'encrypted_string';
-    private const string CIPHER = 'aes-256-cbc';
+    private const string CIPHER = 'aes-256-gcm';
+    private const int TAG_LENGTH = 16;
 
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
@@ -25,7 +26,7 @@ class EncryptedStringType extends Type
             return $value;
         }
 
-        $ivLength = openssl_cipher_iv_length(self::CIPHER);
+        $ivLength = openssl_cipher_iv_length(self::CIPHER); // 12 bytes for GCM
         if ($ivLength < 1) {
             throw new RuntimeException('Unable to determine valid IV length for cipher.');
         }
@@ -38,19 +39,24 @@ class EncryptedStringType extends Type
 
         $secretKey = $this->getSecretKey();
 
+        $tag = '';
         $encryptedRaw = openssl_encrypt(
             (string) $value,
             self::CIPHER,
             $secretKey,
             OPENSSL_RAW_DATA,
-            $iv
+            $iv,
+            $tag,
+            '',
+            self::TAG_LENGTH
         );
 
         if ($encryptedRaw === false) {
             throw new RuntimeException('Encryption failed during database conversion.');
         }
 
-        return base64_encode($iv . $encryptedRaw);
+        // Pack IV (12b) + Tag (16b) + Ciphertext into Base64
+        return base64_encode($iv . $tag . $encryptedRaw);
     }
 
     public function convertToPHPValue($value, AbstractPlatform $platform): ?string
@@ -60,22 +66,25 @@ class EncryptedStringType extends Type
         }
 
         $decoded = base64_decode((string) $value, true);
-        $ivLength = openssl_cipher_iv_length(self::CIPHER);
+        $ivLength = openssl_cipher_iv_length(self::CIPHER); // 12 bytes
+        $tagLength = self::TAG_LENGTH; // 16 bytes
 
-        if ($decoded === false || $ivLength < 1 || strlen($decoded) <= $ivLength) {
+        if ($decoded === false || strlen($decoded) <= ($ivLength + $tagLength)) {
             return (string) $value;
         }
 
         $secretKey = $this->getSecretKey();
         $iv = substr($decoded, 0, $ivLength);
-        $ciphertext = substr($decoded, $ivLength);
+        $tag = substr($decoded, $ivLength, $tagLength);
+        $ciphertext = substr($decoded, $ivLength + $tagLength);
 
         $decrypted = openssl_decrypt(
             $ciphertext,
             self::CIPHER,
             $secretKey,
             OPENSSL_RAW_DATA,
-            $iv
+            $iv,
+            $tag
         );
 
         return $decrypted !== false ? $decrypted : (string) $value;

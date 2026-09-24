@@ -16,7 +16,6 @@ use libphonenumber\NumberParseException;
 use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
 use PixelOpen\CloudflareTurnstileBundle\Http\CloudflareTurnstileHttpClient;
-use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -62,7 +61,7 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
         $password = (string) ($loginData['password'] ?? '');
 
         if ($loginMethod === UserProvider::EMAIL->value) {
-            $identifier = $formData['login']['email'];
+            $identifier = (string)($loginData['email'] ?? '');
             $userLoader = fn(string $id) => $this->userRepository->findOneBy([
                 'email' => $id,
                 'deletedAt' => null,
@@ -70,10 +69,15 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
             ]);
         } elseif ($loginMethod === UserProvider::PHONE_NUMBER->value) {
             $phoneUtil = PhoneNumberUtil::getInstance();
-            $phoneData = $formData['login']['phoneNumber'];
-            if (!empty($phoneData['country']) && !empty($phoneData['number'])) {
+            /** @var array<string, mixed> $phoneData */
+            $phoneData = (array)($loginData['phoneNumber'] ?? []);
+
+            $country = (string)($phoneData['country'] ?? '');
+            $number = (string)($phoneData['number'] ?? '');
+
+            if (!empty($country) && !empty($number)) {
                 try {
-                    $phoneNumberObj = $phoneUtil->parse($phoneData['number'], $phoneData['country']);
+                    $phoneNumberObj = $phoneUtil->parse($number, $country);
                     // Use E164 format as identifier
                     $identifier = $phoneUtil->format($phoneNumberObj, PhoneNumberFormat::E164);
                 } catch (NumberParseException) {
@@ -164,6 +168,7 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
                 $user->setDisabled(true);
                 $this->userRepository->save($user, true);
             }
+
             if ($user->isForgotPasswordRequest()) {
                 $session = $this->requestStack->getSession();
 
@@ -182,29 +187,26 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
                 );
             }
 
-            $twoFAPlatformStatus = $this->settingRepository->findOneBy([
-                'name' => SettingName::TWO_FACTOR_AUTH_STATUS->value
-            ])->getValue();
-
-            $verification = $user->isVerified();
             // Check if the user is verified
-            if (!$verification) {
+            if (!$user->isVerified()) {
                 return new RedirectResponse($this->urlGenerator->generate('app_login_confirmation'));
             }
 
+            $twoFAStatusSetting = $this->settingRepository->findOneBy([
+                'name' => SettingName::TWO_FACTOR_AUTH_STATUS->value
+            ]);
+            $twoFAPlatformStatus = $twoFAStatusSetting ? $twoFAStatusSetting->getValue(
+            ) : TwoFAType::NOT_ENFORCED->value;
+
             return $this->handleTwoFactorRedirection(
+                $request,
                 $user,
-                $twoFAPlatformStatus
+                $twoFAPlatformStatus,
+                $firewallName
             );
         }
 
-        // Handle other users
-        if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
-            return new RedirectResponse($targetPath);
-        }
-
-        // Default redirection for non-admin users
-        return new RedirectResponse($this->urlGenerator->generate('admin_page'));
+        return $this->getDefaultSuccessRedirect($request, $firewallName);
     }
 
     protected function getLoginUrl(Request $request): string
@@ -213,12 +215,14 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
     }
 
     protected function handleTwoFactorRedirection(
+        Request $request,
         User $user,
         string $twoFAPlatformStatus,
+        string $firewallName
     ): Response {
         // Handle NOT_ENFORCED TwoFA status
         if ($twoFAPlatformStatus === TwoFAType::NOT_ENFORCED->value) {
-            return $this->redirectBasedOnTwoFAType($user);
+            return $this->redirectBasedOnTwoFAType($request, $user, $firewallName);
         }
 
         // Handle ENFORCED_FOR_LOCAL or ENFORCED_FOR_ALL statuses
@@ -226,22 +230,19 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
             $twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_LOCAL->value ||
             $twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_ALL->value
         ) {
-            if (
-                $user->getTwoFAType() === UserTwoFactorAuthenticationStatus::DISABLED->value
-            ) {
+            if ($user->getTwoFAType() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
                 return new RedirectResponse($this->urlGenerator->generate('app_configure2FA', [
                     'context' => FirewallType::DASHBOARD->value,
                 ]));
             }
 
-            return $this->redirectBasedOnTwoFAType($user);
+            return $this->redirectBasedOnTwoFAType($request, $user, $firewallName);
         }
 
-        // Fallback default redirection
-        return new RedirectResponse($this->urlGenerator->generate('admin_page'));
+        return $this->getDefaultSuccessRedirect($request, $firewallName);
     }
 
-    protected function redirectBasedOnTwoFAType(User $user): Response
+    protected function redirectBasedOnTwoFAType(Request $request, User $user, string $firewallName): Response
     {
         // Check if the user's 2FA type is SMS or EMAIL and redirect accordingly
         if (
@@ -260,7 +261,15 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
             ]));
         }
 
-        // Redirect to admin_page as a fallback
+        return $this->getDefaultSuccessRedirect($request, $firewallName);
+    }
+
+    private function getDefaultSuccessRedirect(Request $request, string $firewallName): Response
+    {
+        if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
+            return new RedirectResponse($targetPath);
+        }
+
         return new RedirectResponse($this->urlGenerator->generate('admin_page'));
     }
 }

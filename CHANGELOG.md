@@ -29,11 +29,11 @@
 - **OAuth `provider_id` Encryption (CRA Annex I §1.3, §1.5)**: Google and Microsoft `provider_id` values are now
   hashed (HMAC-SHA256) via a new `ProviderIdHasher` service before being persisted, instead of being stored in
   plaintext.
-  - **Required action:** Run the new `app:cra:encrypt-oauth-ids` command to hash any existing legacy
+  - **Required action:** Run the new `app:cra:hash-oauth-ids` command to hash any existing legacy
     plaintext `provider_id` values for Google and Microsoft accounts. This command is idempotent and safe to
     re-run.
 ```bash
-    php bin/console app:cra:encrypt-oauth-ids
+    php bin/console app:cra:hash-oauth-ids
 ```
 
 - **Sensitive System Settings Encryption (CRA Annex I §1.3)**: System configuration parameters (including LDAP
@@ -56,10 +56,10 @@
 
 - **OTP Backup Code Encryption (CRA Annex I §1.3)**: Legacy plain-text OTP backup codes (`OTPcode.code`) are now
   encrypted at rest using AES-256-CBC encryption instead of being stored unencrypted.
-  - **Required action:** Run the `app:cra:encrypt-otp-codes` command to encrypt any existing plain-text OTP
+  - **Required action:** Run the `app:cra:hash-otp-codes` command to encrypt any existing plain-text OTP
     backup codes in the database. This command is idempotent and safe to re-run.
 ```bash
-    php bin/console app:cra:encrypt-otp-codes
+    php bin/console app:cra:hash-otp-codes
 ```
 
 - **TOTP Secret Encryption (CRA Annex I §1.3)**: Legacy plain-text TOTP 2FA secrets (`User.twoFAsecret`) are now

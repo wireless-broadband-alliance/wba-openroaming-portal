@@ -44,7 +44,8 @@ readonly class TwoFAService
         private EventActions $eventActions,
         private EventRepository $eventRepository,
         private TranslatorInterface $translator,
-        private EncryptionService $encryptionService
+        private EncryptionService $encryptionService,
+        private HashArgon2idService $hashArgon2idService,
     ) {
     }
 
@@ -63,9 +64,9 @@ readonly class TwoFAService
         if ($diff >= $timeToExpireCode) {
             return false;
         }
-        $hashedFormCode = hash('sha256', $formCode);
+
         $savedCode = $user->getTwoFACode();
-        if ($savedCode && hash_equals($savedCode, $hashedFormCode)) {
+        if ($savedCode !== null && $this->hashArgon2idService->verifyHash($formCode, $savedCode)) {
             $user->setTwoFAcodeIsActive(false);
             return true;
         }
@@ -80,7 +81,7 @@ readonly class TwoFAService
         // Generate a random verification code with 6 digits
         $verificationCode = (string)random_int(100000, 999999);
 
-        $hashedCode = hash('sha256', $verificationCode);
+        $hashedCode = $this->hashArgon2idService->hash($verificationCode);
 
         $user->setTwoFACode($hashedCode);
         $user->setTwoFACodeGeneratedAt(new DateTime());
@@ -135,9 +136,9 @@ readonly class TwoFAService
             $plainTextCodes[] = $plainCode;
 
             $otpCode = new OTPcode();
-            $otpCode->setCode($this->encryptionService->encrypt($plainCode));
+            $otpCode->setCode($this->hashArgon2idService->hash($plainCode));
             $otpCode->setUser($user);
-            $otpCode->setActive(false);
+            $otpCode->setActive(true);
             $otpCode->setCreatedAt(new DateTime());
 
             $user->addOTPcode($otpCode);
@@ -184,20 +185,14 @@ readonly class TwoFAService
                 continue;
             }
 
-            $storedCode = $code->getCode();
-            if (!is_string($storedCode)) {
+            $storedHash = $code->getCode();
+            if (!is_string($storedHash)) {
                 continue;
             }
 
-            try {
-                $plainCode = $this->encryptionService->decrypt($storedCode);
-            } catch (EncryptionException) {
-                // Skip values that cannot be decrypted (e.g. legacy or corrupted rows)
-                continue;
-            }
-
-            if (hash_equals($plainCode, $formCode)) {
-                // As we can only use the code once, we have to deactivate it after it is used.
+            // Verify the submitted code against the stored Argon2id hash
+            if ($this->hashArgon2idService->verifyHash($formCode, $storedHash)) {
+                // Deactivate the single-use OTP code after successful verification
                 $code->setActive(false);
                 $this->entityManager->persist($code);
                 $this->entityManager->flush();

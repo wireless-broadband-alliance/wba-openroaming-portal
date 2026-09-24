@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Enum\BudgetSMS\BudgetSmsErrorCode;
 use App\Enum\ParamType;
 use App\Service\SMSProvider\SMSProviderInterface;
+use InvalidArgumentException;
 use libphonenumber\PhoneNumber;
 use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
@@ -36,7 +37,16 @@ final readonly class BudgetSMSProviderService implements SMSProviderInterface
      */
     public static function sendSMS(SMSProvider $provider, string $message, User $user): string
     {
-        $recipient = $user->getPhoneNumber()->getCountryCode() . $user->getPhoneNumber()->getNationalNumber();
+        $phoneNumber = $user->getPhoneNumber();
+        if (!$phoneNumber instanceof PhoneNumber) {
+            throw new InvalidArgumentException('User does not have a valid phone number entity.');
+        }
+
+        // Format to standard E.164 and strip leading '+' to comply with BudgetSMS requirements
+        $recipient = ltrim(
+            PhoneNumberUtil::getInstance()->format($phoneNumber, PhoneNumberFormat::E164),
+            '+'
+        );
 
         $queryParams = array_merge(
             self::getProviderParams($provider),

@@ -10,7 +10,8 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 class EncryptionService
 {
-    private string $cipher = "aes-256-cbc";
+    private string $cipher = "aes-256-gcm";
+    private const int TAG_LENGTH = 16; // 128-bit authentication tag
 
     public function __construct(
         #[Autowire(env: 'APP_SECRET')]
@@ -23,10 +24,12 @@ class EncryptionService
      */
     public function encrypt(string $plainText): string
     {
-        $ivLength = openssl_cipher_iv_length($this->cipher);
+        $ivLength = openssl_cipher_iv_length($this->cipher); // 12 bytes for GCM
 
         if (!is_int($ivLength) || $ivLength <= 0) {
-            throw new EncryptionException('Unable to determine IV length for cipher "' . $this->cipher . '".');
+            throw new EncryptionException(
+                'Unable to determine IV length for cipher "' . $this->cipher . '".'
+            );
         }
 
         try {
@@ -39,19 +42,24 @@ class EncryptionService
             );
         }
 
+        $tag = ''; // Passed by reference; filled by openssl_encrypt
         $encryptedRaw = openssl_encrypt(
             $plainText,
             $this->cipher,
             $this->encryptionSecret,
             OPENSSL_RAW_DATA,
-            $iv
+            $iv,
+            $tag,
+            '',
+            self::TAG_LENGTH
         );
 
         if (!is_string($encryptedRaw)) {
             throw new EncryptionException('Encryption failed.');
         }
 
-        return base64_encode($iv . $encryptedRaw);
+        // Bundle IV (12 bytes) + Tag (16 bytes) + Ciphertext into base64
+        return base64_encode($iv . $tag . $encryptedRaw);
     }
 
     /**
@@ -65,7 +73,7 @@ class EncryptionService
             throw new EncryptionException('Invalid base64-encoded value.');
         }
 
-        $ivLength = openssl_cipher_iv_length($this->cipher);
+        $ivLength = openssl_cipher_iv_length($this->cipher); // 12 bytes for GCM
 
         if (!is_int($ivLength) || $ivLength <= 0) {
             throw new EncryptionException(
@@ -73,35 +81,30 @@ class EncryptionService
             );
         }
 
-        if (strlen($decoded) <= $ivLength) {
-            throw new EncryptionException('Encrypted value is too short to contain a valid IV.');
+        $tagLength = self::TAG_LENGTH; // 16 bytes
+
+        if (strlen($decoded) <= ($ivLength + $tagLength)) {
+            throw new EncryptionException('Encrypted value is too short to contain a valid IV and Tag.');
         }
 
+        // Extract IV, Tag, and Ciphertext
         $iv = substr($decoded, 0, $ivLength);
-        $ciphertext = substr($decoded, $ivLength);
+        $tag = substr($decoded, $ivLength, $tagLength);
+        $ciphertext = substr($decoded, $ivLength + $tagLength);
 
-        $data = openssl_decrypt($ciphertext, $this->cipher, $this->encryptionSecret, OPENSSL_RAW_DATA, $iv);
+        $data = openssl_decrypt(
+            $ciphertext,
+            $this->cipher,
+            $this->encryptionSecret,
+            OPENSSL_RAW_DATA,
+            $iv,
+            $tag
+        );
 
         if (!is_string($data)) {
-            throw new EncryptionException('Unable to decrypt value.');
+            throw new EncryptionException('Unable to decrypt value or authentication tag validation failed.');
         }
 
         return $data;
-    }
-
-    /**
-     * Generates an irreversible Argon2id hash for validation-only secrets.
-     */
-    public function hash(string $plainText): string
-    {
-        return password_hash($plainText, PASSWORD_ARGON2ID);
-    }
-
-    /**
-     * Verifies if a plain text value matches an Argon2id hash.
-     */
-    public function verifyHash(string $plainText, string $hash): bool
-    {
-        return password_verify($plainText, $hash);
     }
 }

@@ -633,9 +633,21 @@ class TwoFAController extends AbstractController
             );
             return $this->redirectToRoute('app_dashboard_login');
         }
+        $session = $request->getSession();
+        if (!($user->getOTPcodes()->isEmpty())) {
+            $session_admin = $session->get('session_admin');
+            $this->addFlash(
+                'error',
+                $this->translator->trans('otpCodesAlreadyViewed', [], 'controllers')
+            );
+            if ($session_admin) {
+                return $this->redirectToRoute('admin_page');
+            }
+            return $this->redirectToRoute('app_landing');
+        }
 
         $data = $this->getSettings->getSettings();
-        $session = $request->getSession();
+
 
         if ($this->twoFAService->hasValidOTPCodes($user)) {
             return $this->redirectToRoute('app_landing');
@@ -649,11 +661,7 @@ class TwoFAController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($user->getOTPcodes()->isEmpty()) {
-            $plainTextCodes = $this->twoFAService->generateOTPCodes($user);
-        } else {
-            $plainTextCodes = $this->twoFAService->getPlainTextOTPCodes($user);
-        }
+        $plainTextCodes = $this->twoFAService->generateOTPCodes($user);
 
         return $this->render('landing/twoFAAuthentication/otpCodes.html.twig', [
             'data' => $data,
@@ -697,7 +705,6 @@ class TwoFAController extends AbstractController
             return $this->redirectToRoute('app_dashboard_login');
         }
 
-        $this->twoFAService->saveCodes($user);
         $this->twoFAService->event2FA(
             $request->getClientIp(),
             $user,
@@ -934,9 +941,10 @@ class TwoFAController extends AbstractController
         ],
         defaults: [
             'context' => FirewallType::LANDING->value
-        ]
+        ],
+        methods: ['POST']
     )]
-    public function downloadCodes(string $context): Response
+    public function downloadCodes(Request $request, string $context): Response
     {
         $user = $this->getUser();
         // Ensure the user is logged in
@@ -957,7 +965,8 @@ class TwoFAController extends AbstractController
             return $this->redirectToRoute('app_dashboard_login');
         }
 
-        $codes = $this->twoFAService->getPlainTextOTPCodes($user);
+        /** @var array<string> $codes */
+        $codes = $request->request->all('codes');
 
         // Create the content of the file
         $fileContent = implode("\n", $codes);

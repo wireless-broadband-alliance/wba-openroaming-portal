@@ -488,7 +488,7 @@ class SiteController extends AbstractController
     public function appApiLanding(Request $request): Response
     {
         $session = $request->getSession();
-        $appReturn = $session->get('app_return');
+        $appReturn = $session->get(SessionStatus::APP_RETURN->value);
 
         // Check if session exists
         if (!$appReturn) {
@@ -550,6 +550,7 @@ class SiteController extends AbstractController
             'formRevokeProfiles' => $formRevokeProfiles->createView(),
             'data' => $data,
             'user' => $currentUser,
+            'context' => FirewallType::LANDING->value
         ]);
     }
 
