@@ -44,7 +44,8 @@ readonly class TwoFAService
         private EventActions $eventActions,
         private EventRepository $eventRepository,
         private TranslatorInterface $translator,
-        private EncryptionService $encryptionService
+        private EncryptionService $encryptionService,
+        private HashArgon2idService $hashArgon2idService,
     ) {
     }
 
@@ -63,9 +64,9 @@ readonly class TwoFAService
         if ($diff >= $timeToExpireCode) {
             return false;
         }
-        $hashedFormCode = hash('sha256', $formCode);
+
         $savedCode = $user->getTwoFACode();
-        if ($savedCode && hash_equals($savedCode, $hashedFormCode)) {
+        if ($savedCode !== null && $this->hashArgon2idService->verifyHash($formCode, $savedCode)) {
             $user->setTwoFAcodeIsActive(false);
             return true;
         }
@@ -80,7 +81,7 @@ readonly class TwoFAService
         // Generate a random verification code with 6 digits
         $verificationCode = (string)random_int(100000, 999999);
 
-        $hashedCode = hash('sha256', $verificationCode);
+        $hashedCode = $this->hashArgon2idService->hash($verificationCode);
 
         $user->setTwoFACode($hashedCode);
         $user->setTwoFACodeGeneratedAt(new DateTime());

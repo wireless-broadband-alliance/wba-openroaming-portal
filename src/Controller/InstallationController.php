@@ -739,11 +739,11 @@ class InstallationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var array{code: string} $data */
-            $data = $form->getData();
-            $code = $data["code"];
+            /** @var array{code: string} $formData */
+            $formData = $form->getData();
+            $code = $formData["code"];
 
-            if ($code === $lastInstallation->getConfirmCodeAdmin()) {
+            if ($this->installationService->validateAdminConfirmationCode($lastInstallation, $code)) {
                 $adminUser = $this->userRepository->findSuperAdmin();
 
                 $lastInstallation->setAdminConfirmed(true);
@@ -781,6 +781,7 @@ class InstallationController extends AbstractController
 
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_summary');
             }
+
             $this->addFlash(
                 'error',
                 $this->translator->trans('invalidCodeMessage', [], 'controllers')
