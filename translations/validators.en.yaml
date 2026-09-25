@@ -118,3 +118,4 @@ currentPasswordIncorrect: "Your current password is incorrect."
 invalidEmailFormat: 'The entered email address is invalid.'
 invalidDateFormat: 'The entered date is invalid.'
 securityFingerprintInvalid: 'The PGP fingerprint must consist of exactly 40 hexadecimal characters.'
+invalidSecurityContactFormat: 'The security contact must be a valid URI starting with mailto:, https://, or tel: (e.g., mailto:security@example.com, https://example.com/security, or tel:+123456789).'
