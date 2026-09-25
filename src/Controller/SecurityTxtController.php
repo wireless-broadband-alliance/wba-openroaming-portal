@@ -99,6 +99,7 @@ class SecurityTxtController extends AbstractController
             Response::HTTP_OK,
             [
                 'Content-Type' => 'text/plain; charset=utf-8',
+                'Cache-Control' => 'public, max-age=86400, s-maxage=86400',
             ]
         );
     }
