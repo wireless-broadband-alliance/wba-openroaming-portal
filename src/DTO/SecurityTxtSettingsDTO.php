@@ -21,7 +21,7 @@ class SecurityTxtSettingsDTO
             new Assert\Url(protocols: ['https']),
             new Assert\Regex(pattern: '/^tel:\+?[0-9\-\s\(\)]+$/'),
         ],
-        message: 'invalidFormat'
+        message: 'invalidSecurityContactFormat'
     )]
     public ?string $securityContact = null;
 
