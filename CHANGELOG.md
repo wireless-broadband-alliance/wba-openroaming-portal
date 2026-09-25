@@ -34,8 +34,8 @@
     ```
 
 - **All-in-One CRA Data Encryption Migration (`app:cra:migrate-all`)**: Added a master console command to execute the
-  full suite of CRA encryption tasks in sequence (OAuth IDs, System Settings, RADIUS tokens, OTP codes, SMS parameters,
-  and 2FA data).
+  full suite of CRA encryption tasks in sequence (OAuth IDs, System Settings, Installation Progress URIs, RADIUS tokens,
+  OTP codes, SMS parameters, and 2FA data).
   - **Required Action:** Run the master migration command to encrypt all legacy plaintext data across the platform in a
     single step:
     ```bash
@@ -47,6 +47,9 @@
     `ProviderIdHasher`. (`php bin/console app:cra:hash-oauth-ids`)
   - **Sensitive System Settings Encryption**: Parameters (LDAP credentials, server endpoints, break-glass accounts,
     Cloudflare tokens) are encrypted at rest via AES-256-CBC. (`php bin/console app:cra:encrypt-settings`)
+  - **Installation Progress Data Encryption**: Sensitive database URIs (`dbOpenRoaming`, `dbFreeradius`), Cloudflare
+    Turnstile keys/secrets, and JWT passphrases in `InstallationProgress` are encrypted at rest via AES-256-GCM. (
+    `php bin/console app:cra:encrypt-installation-progress`)
   - **RADIUS Token Encryption**: Legacy plain-text RADIUS tokens (`radius_token`) are encrypted at rest via
     AES-256-CBC. (`php bin/console app:cra:encrypt-radius-legacy-tokens`)
   - **OTP Backup Code Encryption**: Legacy plain-text OTP backup codes (`OTPcode.code`) are encrypted at rest via
