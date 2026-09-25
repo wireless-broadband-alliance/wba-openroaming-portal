@@ -82,7 +82,7 @@ enum AdminPermissionsType: string
             self::DOMAINS_BLACKLIST_READ, self::DOMAINS_BLACKLIST_WRITE => 'domainsBlacklist',
             self::PORTAL_STATISTICS_READ => 'portalStatistics',
             self::CONNECTIVITY_STATISTICS_READ => 'connectivityStatistics',
-            self::ACTIVITY_LOGS_READ, self::ACTIVITY_LOGS_WRITE => 'activityLogs',
+            self::ACTIVITY_LOGS_READ => 'activityLogs',
         };
     }
 

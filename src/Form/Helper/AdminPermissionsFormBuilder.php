@@ -74,7 +74,7 @@ readonly class AdminPermissionsFormBuilder
             $this->translator->trans('read', [], 'UserAddType') => PermissionLevel::READ,
         ];
 
-        if (!in_array($field, ['connectivityStatistics', 'portalStatistics'], true)) {
+        if (!in_array($field, ['connectivityStatistics', 'portalStatistics', 'activityLogs'], true)) {
             $choices[$this->translator->trans('write', [], 'UserAddType')] = PermissionLevel::WRITE;
         }
 
