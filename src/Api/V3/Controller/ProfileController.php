@@ -9,11 +9,13 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\SettingName;
 use App\Enum\UserRadiusProfileStatus;
+use App\Exception\EncryptionException;
 use App\RadiusDb\Entity\RadiusUser;
 use App\RadiusDb\Repository\RadiusUserRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRadiusProfileRepository;
+use App\Service\EncryptionService;
 use App\Service\EventActions;
 use App\Service\ExpirationProfileService;
 use App\Service\JWTTokenGenerator;
@@ -43,12 +45,15 @@ class ProfileController extends AbstractController
         private readonly ExpirationProfileService $expirationProfileService,
         private readonly RsaEncryptionService $rsaEncryptionService,
         private readonly UserStatusChecker $userStatusChecker,
-        private readonly CertificateProcessExtension $certificateProcessExtension
+        private readonly CertificateProcessExtension $certificateProcessExtension,
+        private readonly EncryptionService $encryptionService,
     ) {
     }
 
     /**
      * @throws RandomException
+     * @throws EncryptionException
+     * @throws \Exception
      */
     #[Route('/config/profile/android', name: 'api_v3_config_profile_android', methods: ['POST'])]
     public function getProfileAndroid(Request $request): JsonResponse
@@ -115,9 +120,11 @@ class ProfileController extends AbstractController
             $username = $this->generateToken($androidLimit - $realmSize) . "@" . $this->getSettingValueRaw(
                 SettingName::RADIUS_REALM_NAME->value
             );
-            $token = $this->generateToken($androidLimit - $realmSize);
+            $plainToken = $this->generateToken($androidLimit - $realmSize);
+            $encryptedToken = $this->encryptionService->encrypt($plainToken);
+
             $radiusProfile->setUser($currentUser);
-            $radiusProfile->setRadiusToken($token);
+            $radiusProfile->setRadiusToken($encryptedToken);
             $radiusProfile->setRadiusUser($username);
             $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE->value);
             $radiusProfile->setIssuedAt(new DateTime());
@@ -137,13 +144,13 @@ class ProfileController extends AbstractController
             $radiusUser->setUsername($username);
             $radiusUser->setAttribute('Cleartext-Password');
             $radiusUser->setOp(':=');
-            $radiusUser->setValue($token);
+            $radiusUser->setValue($plainToken);
             $this->radiusUserRepository->save($radiusUser, true);
             $this->userRadiusProfileRepository->save($radiusProfile, true);
         }
 
         // Encrypt the password with the provided PGP public key
-        $radiusPassword = $radiusProfile->getRadiusToken();
+        $radiusPassword = $this->decryptToken((string)$radiusProfile->getRadiusToken());
         $encryptionResult = $this->rsaEncryptionService->encryptApi($dataRequest['public_key'], $radiusPassword);
 
         if (!$encryptionResult['success']) {
@@ -195,6 +202,7 @@ class ProfileController extends AbstractController
 
     /**
      * @throws RandomException
+     * @throws EncryptionException
      */
     #[Route('/config/profile/ios', name: 'api_v3_config_profile_ios', methods: ['POST'])]
     public function getProfileIos(Request $request): JsonResponse
@@ -256,9 +264,11 @@ class ProfileController extends AbstractController
             $username = $this->generateToken($androidLimit - $realmSize) . "@" . $this->getSettingValueRaw(
                 SettingName::RADIUS_REALM_NAME->value
             );
-            $token = $this->generateToken($androidLimit - $realmSize);
+            $plainToken = $this->generateToken($androidLimit - $realmSize);
+            $encryptedToken = $this->encryptionService->encrypt($plainToken);
+
             $radiusProfile->setUser($currentUser);
-            $radiusProfile->setRadiusToken($token);
+            $radiusProfile->setRadiusToken($encryptedToken);
             $radiusProfile->setRadiusUser($username);
             $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE->value);
             $radiusProfile->setIssuedAt(new DateTime());
@@ -278,13 +288,13 @@ class ProfileController extends AbstractController
             $radiusUser->setUsername($username);
             $radiusUser->setAttribute('Cleartext-Password');
             $radiusUser->setOp(':=');
-            $radiusUser->setValue($token);
+            $radiusUser->setValue($plainToken);
             $this->radiusUserRepository->save($radiusUser, true);
             $this->userRadiusProfileRepository->save($radiusProfile, true);
         }
 
         // Encrypt the password with the provided PGP public key
-        $radiusPassword = $radiusProfile->getRadiusToken();
+        $radiusPassword = $this->decryptToken((string)$radiusProfile->getRadiusToken());
         $encryptionResult = $this->rsaEncryptionService->encryptApi($dataRequest['public_key'], $radiusPassword);
 
         if (!$encryptionResult['success']) {
@@ -340,6 +350,18 @@ class ProfileController extends AbstractController
         );
 
         return new BaseResponse(200, $data)->toResponse();
+    }
+
+    /**
+     * Safely decrypt radius token while remaining backwards-compatible with legacy unencrypted tokens.
+     */
+    private function decryptToken(string $token): string
+    {
+        try {
+            return $this->encryptionService->decrypt($token);
+        } catch (EncryptionException) {
+            return $token;
+        }
     }
 
     private function getSettingValueRaw(string $settingName): string

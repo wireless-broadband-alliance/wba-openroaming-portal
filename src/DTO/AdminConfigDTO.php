@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\DTO;
 
+use App\Validator\Constraints\PasswordsMatch;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
+#[PasswordsMatch(message: 'passwordNotMatch')]
 class AdminConfigDTO
 {
     #[Assert\NotBlank(message: 'fieldNotBlank')]
@@ -15,15 +16,21 @@ class AdminConfigDTO
     public ?string $email = null;
 
     #[Assert\NotBlank(message: 'fieldNotBlank')]
-    #[Assert\Length(min: 8, max: 100, minMessage: 'minCharacters', maxMessage: 'maxCharacters')]
+    #[Assert\Length(
+        min: 16,
+        max: 255,
+        minMessage: 'passwordCannotBeShorterThan',
+        maxMessage: 'passwordCannotBeLongerThan'
+    )]
+    #[Assert\PasswordStrength(
+        minScore: Assert\PasswordStrength::STRENGTH_MEDIUM,
+        message: 'passwordIsTooWeak'
+    )]
+    #[Assert\NotCompromisedPassword(
+        message: 'passwordIsCompromised'
+    )]
     public ?string $password = null;
 
     #[Assert\NotBlank(message: 'fieldNotBlank')]
-    #[Assert\Length(min: 8, max: 100, minMessage: 'minCharacters', maxMessage: 'maxCharacters')]
-    #[Assert\Expression(
-        expression: "this.password == this.confirmPassword",
-        message: 'passwordNotMatch',
-        negate: true,
-    )]
     public ?string $confirmPassword = null;
 }

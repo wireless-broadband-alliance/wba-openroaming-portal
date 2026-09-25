@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-use App\Api\V2\BaseResponse;
+use App\Api\V3\BaseResponse;
 use App\Entity\User;
 use App\Enum\EventMetadataKeysType;
 use DateTime;

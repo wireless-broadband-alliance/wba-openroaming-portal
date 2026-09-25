@@ -10,14 +10,15 @@ use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
 use App\Repository\CertificateSetupProcessRepository;
 use App\Repository\InstallationProgressRepository;
-use App\Service\CertificateProcessCheckerService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[AsEventListener(event: KernelEvents::REQUEST)]
 readonly class AdminCertificateProcessEnforcerListener
@@ -27,7 +28,7 @@ readonly class AdminCertificateProcessEnforcerListener
         private InstallationProgressRepository $installationProgressRepository,
         private CertificateSetupProcessRepository $certificateSetupProcessRepository,
         private UrlGeneratorInterface $urlGenerator,
-        private CertificateProcessCheckerService $certificateProcessCheckerService,
+        private TranslatorInterface $translator,
     ) {
     }
 
@@ -36,7 +37,7 @@ readonly class AdminCertificateProcessEnforcerListener
      */
     public function __invoke(RequestEvent $event): void
     {
-        if (!$event->isMainRequest()) {
+        if (!$event->isMainRequest() || $event->hasResponse()) {
             return;
         }
 
@@ -106,7 +107,28 @@ readonly class AdminCertificateProcessEnforcerListener
 
             // Cloudflare
             '#^/dashboard/settings/certificatesManagement/freeradius/cloudflare/dnsChallenge$#',
-            '#^/dashboard/settings/certificatesManagement/freeradius/cloudflare/httpChallenge#'
+            '#^/dashboard/settings/certificatesManagement/freeradius/cloudflare/httpChallenge#',
+
+            // 2FA flow — must not be blocked while completing dashboard 2FA
+            '#^/dashboard/login$#',
+            '#^/dashboard/verify2FA$#',
+            '#^/dashboard/verify2FA/TOTP$#',
+            '#^/dashboard/generate2FACode$#',
+            '#^/dashboard/verify2FA/resend$#',
+            '#^/dashboard/configure2FA$#',
+            '#^/dashboard/enable2FA/TOTP$#',
+            '#^/dashboard/2FAFirstSetup/portal$#',
+            '#^/dashboard/2FAFirstSetup/verification$#',
+            '#^/dashboard/2FAFirstSetup/codes$#',
+            '#^/dashboard/2FAFirstSetup/codes/save$#',
+            '#^/dashboard/downloadCodes$#',
+            '#^/dashboard/generate2FACode/swapMethod$#',
+            '#^/dashboard/2FASwapMethod/disable/TOTP$#',
+            '#^/dashboard/2FASwapMethod/disableLocal$#',
+            '#^/dashboard/disable2FA/resend$#',
+            '#^/dashboard/enable2FA/resend$#',
+            '#^/dashboard/validate2FA/resend$#',
+            '#^/dashboard/forgot-password/checker$#',
         ];
         $allowed = array_any(
             $allowedPatterns,
@@ -141,25 +163,18 @@ readonly class AdminCertificateProcessEnforcerListener
             return;
         }
 
-        if (!($this->certificateSetupProcessRepository->getLatestProcess() instanceof CertificateSetupProcess)) {
-            $certProcess = $this->certificateProcessCheckerService->verifyCertificates();
-            if (
-                $certProcess instanceof CertificateSetupProcess &&
-                $certProcess->getStatus() === ProcessStatusType::COMPLETED
-            ) {
-                $this->redirectTo($event, 'admin_page');
-                return;
-            }
-        }
-
-        // Check certificates progress
         $certProcess = $this->certificateSetupProcessRepository->getLatestProcess();
+
         if (!$certProcess instanceof CertificateSetupProcess) {
             $session->set(
                 SessionStatus::SYSTEM_RESET_REQUEST->value,
                 'admin_dashboard_settings_certs_radsecproxy_upload'
             );
-            $this->redirectTo($event, 'admin_dashboard_settings_certs_radsecproxy_upload');
+            $this->redirectTo(
+                $event,
+                'admin_dashboard_settings_certs_radsecproxy_upload',
+                $this->translator->trans('missingCertificateProcess', [], 'eventListener')
+            );
             return;
         }
 
@@ -178,6 +193,7 @@ readonly class AdminCertificateProcessEnforcerListener
             && $certProcess->getFreeradiusTestResult() === CertificateTestResult::PASSED
         ) {
             $session->remove(SessionStatus::SYSTEM_RESET_REQUEST->value);
+            $session->remove('2fa_verified_dashboard'); // force re-check now that the process is fully complete
             return;
         }
 
@@ -191,12 +207,19 @@ readonly class AdminCertificateProcessEnforcerListener
             return;
         }
 
-        // Process fully complete
+        // Process fully complete (fallback path)
         $session->remove(SessionStatus::SYSTEM_RESET_REQUEST->value);
+        $session->remove('2fa_verified_dashboard');
     }
 
-    private function redirectTo(RequestEvent $event, string $routeName): void
+    private function redirectTo(RequestEvent $event, string $routeName, ?string $flashMessage = null): void
     {
+        if ($flashMessage !== null) {
+            $session = $event->getRequest()->getSession();
+            if ($session instanceof Session) {
+                $session->getFlashBag()->add('success', $flashMessage);
+            }
+        }
         $url = $this->urlGenerator->generate($routeName);
         $event->setResponse(new RedirectResponse($url));
     }

@@ -15,6 +15,7 @@ use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
+use App\Service\HashArgon2idService;
 use App\Service\UserStatusChecker;
 use DateTime;
 use DateTimeInterface;
@@ -24,14 +25,13 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
-use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -45,7 +45,6 @@ class MicrosoftController extends AbstractController
     public function __construct(
         private readonly ClientRegistry $clientRegistry,
         private readonly EntityManagerInterface $entityManager,
-        private readonly UserPasswordHasherInterface $passwordEncoder,
         private readonly TokenStorageInterface $tokenStorage,
         private readonly RequestStack $requestStack,
         private readonly EventDispatcherInterface $eventDispatcher,
@@ -57,6 +56,7 @@ class MicrosoftController extends AbstractController
         private readonly TranslatorInterface $translator,
         private readonly CsrfTokenManagerInterface $csrfTokenManager,
         private readonly SettingRepository $settingRepository,
+        private readonly HashArgon2idService $hashArgon2IdService,
     ) {
     }
 
@@ -70,15 +70,11 @@ class MicrosoftController extends AbstractController
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
-        // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
+        // Check if the platform is in demo mode
         if ($data[SettingName::PLATFORM_MODE->value]['value'] === PlatformMode::DEMO->value) {
             $this->addFlash(
                 'error',
-                $this->translator->trans(
-                    'portalInDemoMode',
-                    [],
-                    'controllers'
-                )
+                $this->translator->trans('portalInDemoMode', [], 'controllers')
             );
             return $this->redirectToRoute('app_landing');
         }
@@ -86,11 +82,7 @@ class MicrosoftController extends AbstractController
         if ($data[SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value]['value'] === "false") {
             $this->addFlash(
                 'error',
-                $this->translator->trans(
-                    'authenticationMethodNotEnabled',
-                    [],
-                    'controllers'
-                )
+                $this->translator->trans('authenticationMethodNotEnabled', [], 'controllers')
             );
             return $this->redirectToRoute('app_landing');
         }
@@ -104,16 +96,28 @@ class MicrosoftController extends AbstractController
             $client = $this->clientRegistry->getClient('microsoft_landing');
         }
 
-        // Define the minimal required scopes
+        // Get authorization URL with a custom state including `previousLoggedID` if available
+        $callbackRoute = match ($type) {
+            'dashboard' => 'dashboard_connect_microsoft_check',
+            default => 'connect_microsoft_check',
+        };
+
         $state = [
             'previousLoggedID' => $previousLoggedID,
         ];
 
-        // Get the authorization URL with scopes
-        return $client->redirect(
-            ['openid', 'profile', 'email', 'offline_access', 'User.Read'],
-            ['state' => json_encode($state, JSON_THROW_ON_ERROR)]
-        );
+        $redirectUrl = $client->getOAuth2Provider()->getAuthorizationUrl([
+            'scope' => ['openid', 'profile', 'email', 'offline_access', 'User.Read'],
+            'state' => json_encode($state, JSON_THROW_ON_ERROR),
+            'redirect_uri' => $this->generateUrl(
+                $callbackRoute,
+                [],
+                UrlGeneratorInterface::ABSOLUTE_URL
+            ),
+        ]);
+
+        // Redirect the user to the authorization URL
+        return $this->redirect($redirectUrl);
     }
 
     /**
@@ -136,29 +140,21 @@ class MicrosoftController extends AbstractController
         if ($code === null) {
             $this->addFlash(
                 'error',
-                $this->translator->trans(
-                    'authenticationProcessCancelled',
-                    [],
-                    'controllers'
-                )
+                $this->translator->trans('authenticationProcessCancelled', [], 'controllers')
             );
             return $this->redirectToRoute('app_landing');
         }
 
         // Retrieve the `state` parameter and decode it
         $state = $request->query->get('state');
-        $stateParams = $state !== null ? json_decode(
-            $state,
-            true,
-            512,
-            JSON_THROW_ON_ERROR
-        ) : [];
+        $stateParams = $state !== null ? json_decode($state, true, 512, JSON_THROW_ON_ERROR) : [];
         $previousLoggedID = $stateParams['previousLoggedID'] ?? null;
 
         // Exchange the authorization code for an access token
         $accessToken = $client->getOAuth2Provider()->getAccessToken('authorization_code', [
             'code' => $code,
         ]);
+
         $httpClient = new Client();
         $response = $httpClient->get(
             'https://graph.microsoft.com/v1.0/me',
@@ -178,11 +174,7 @@ class MicrosoftController extends AbstractController
         if (!$this->userStatusChecker->isValidEmail($email, UserProvider::MICROSOFT_ACCOUNT->value)) {
             $this->addFlash(
                 'error',
-                $this->translator->trans(
-                    'emailDomainNotAllowed',
-                    [],
-                    'controllers'
-                )
+                $this->translator->trans('emailDomainNotAllowed', [], 'controllers')
             );
             return $this->redirectToRoute('app_landing');
         }
@@ -199,11 +191,7 @@ class MicrosoftController extends AbstractController
         if ($user->getBannedAt() instanceof DateTimeInterface) {
             $this->addFlash(
                 'error',
-                $this->translator->trans(
-                    'accountBanned',
-                    [],
-                    'controllers'
-                )
+                $this->translator->trans('accountBanned', [], 'controllers')
             );
             return $this->redirectToRoute('app_landing');
         }
@@ -221,7 +209,6 @@ class MicrosoftController extends AbstractController
         // Authenticate the user
         $this->authenticateUserMicrosoft($user);
 
-
         if ($routeName === 'dashboard_connect_microsoft_check') {
             return $this->redirectToRoute('admin_page');
         }
@@ -229,7 +216,7 @@ class MicrosoftController extends AbstractController
     }
 
     /**
-     * @throws RandomException
+     * @throws Exception
      */
     private function findOrCreateMicrosoftUser(
         string $microsoftUserId,
@@ -243,7 +230,8 @@ class MicrosoftController extends AbstractController
 
         if ($userMicrosoft !== null) {
             $existingUserAuth = $this->userExternalAuthRepository->findOneBy([
-                'user' => $userMicrosoft
+                'user' => $userMicrosoft,
+                'provider' => UserProvider::MICROSOFT_ACCOUNT->value,
             ]);
 
             if (
@@ -255,11 +243,7 @@ class MicrosoftController extends AbstractController
 
             $this->addFlash(
                 'error',
-                $this->translator->trans(
-                    'emailIsAlreadyInUse',
-                    [],
-                    'controllers'
-                )
+                $this->translator->trans('emailIsAlreadyInUse', [], 'controllers')
             );
 
             return null;
@@ -277,11 +261,9 @@ class MicrosoftController extends AbstractController
         $userAuth = new UserExternalAuth();
         $userAuth->setUser($user)
             ->setProvider(UserProvider::MICROSOFT_ACCOUNT->value)
-            ->setProviderId($microsoftUserId);
+            ->setProviderId($this->hashArgon2IdService->hash($microsoftUserId));
 
-        $randomPassword = bin2hex(random_bytes(8));
-        $hashedPassword = $this->passwordEncoder->hashPassword($user, $randomPassword);
-        $user->setPassword($hashedPassword);
+        $user->setPassword('notused');
 
         $this->entityManager->persist($user);
         $this->entityManager->persist($userAuth);
@@ -331,7 +313,11 @@ class MicrosoftController extends AbstractController
             // Create a new token with the authenticated user
             $token = new UsernamePasswordToken($user, $firewallName, $user->getRoles());
 
-            // Set the new token in the token storage
+            if ($request && $request->hasSession()) {
+                $session = $request->getSession();
+                $session->set('_security_' . $firewallName, serialize($token));
+            }
+
             $this->tokenStorage->setToken($token);
 
             // Dispatch an interactive login event

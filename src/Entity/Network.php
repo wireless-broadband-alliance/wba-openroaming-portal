@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: NetworkRepository::class)]
+#[ORM\Index(name: 'idx_network_geometry', columns: ['geometry'], flags: ['spatial'])]
 class Network
 {
     #[ORM\Id]

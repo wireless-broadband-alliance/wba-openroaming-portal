@@ -3,8 +3,8 @@
 namespace App\Api\V3\Controller;
 
 use App\Api\V3\BaseResponse;
-use App\Service\JWTTokenGenerator;
 use App\Repository\UserRepository;
+use App\Service\JWTTokenGenerator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -40,10 +40,16 @@ class AuthRefreshController extends AbstractController
             return new BaseResponse(401, null, 'Invalid token')->toResponse();
         }
 
-        // Check token expiration
+        // Check token expiration and only allow refresh within the specific 24h period window:
         $exp = $decodedPayload['exp'] ?? null;
-        if (!$exp || $exp < time()) {
-            return new BaseResponse(401, null, 'Invalid token')->toResponse();
+        $refreshGracePeriod = 86400; // 24 hours in seconds
+
+        if (!$exp || (time() - $exp) > $refreshGracePeriod) {
+            return new BaseResponse(
+                401,
+                null,
+                'Refresh window expired. Please re-authenticate.'
+            )->toResponse();
         }
 
         // Find the user by UUID

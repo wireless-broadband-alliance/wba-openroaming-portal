@@ -5,12 +5,14 @@
 1. [Critical Warning: Read Before You Upgrade](#critical-warning-read-before-you-upgrade)
 2. [General Upgrade Path Guidelines](#general-upgrade-path-guidelines)
 3. [Upgrade Path Matrix](#upgrade-path-matrix)
-4. [Release-Specific Notes: Version 1.8.1](#release-specific-notes-version-181)
-5. [Release-Specific Notes: Version 1.7](#release-specific-notes-version-17x)
-6. [Upgrade Checklist](#upgrade-checklist)
-7. [Step-by-Step Procedure](#step-by-step-procedure)
-8. [Troubleshooting & Rollback](#troubleshooting--rollback)
-9. [Additional Resources](#additional-resources)
+4. [Release-Specific Notes: Version 1.13.2](#release-specific-notes-version-1132)
+5. [Release-Specific Notes: Version 1.13.0](#release-specific-notes-version-1130)
+6. [Release-Specific Notes: Version 1.8.1](#release-specific-notes-version-181)
+7. [Release-Specific Notes: Version 1.7.x](#release-specific-notes-version-17x)
+8. [Upgrade Checklist](#upgrade-checklist)
+9. [Step-by-Step Procedure](#step-by-step-procedure)
+10. [Troubleshooting & Rollback](#troubleshooting--rollback)
+11. [Additional Resources](#additional-resources)
 
 ---
 
@@ -36,7 +38,7 @@
 - **Review System Configurations**  
   Ensure that all necessary system adjustments are made before proceeding with the upgrade.
 
-**⚡ TAKE THIS SERIOUSLY ⚡**  
+**TAKE THIS SERIOUSLY**  
 Ignoring these steps could render your system unusable. Proceed with caution and always create backups before upgrading.
 
 ---
@@ -75,17 +77,20 @@ Upgrading your system requires caution and preparation. Follow these general gui
    Example for `<intermediate_version>`:
    ```bash
    php bin/console <command_placeholder>
-   ```  
-   > **Note:** Ensure these commands are run in the correct version as they might be removed or deprecated in later
-   versions.
+    ```
 
-5. **Proceed to the Target Version Upgrade**  
+> **Note:** Ensure these commands are run in the correct version as they might be removed or deprecated in later
+> versions.
+
+5. **Proceed to the Target Version Upgrade**
    Once prerequisites are met (backup, changelog review, and intermediate upgrades), you can safely upgrade to the
    target version.
 
 ---
 
 ## Upgrade Path Matrix
+
+Use this table to determine the exact upgrade steps based on your current version.
 
 | Current Version | Target Version | Required Actions                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 |-----------------|----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -102,9 +107,10 @@ Upgrading your system requires caution and preparation. Follow these general gui
 | 1.11.0          | 1.11.1         | Run `php bin/console doctrine:migrations:migrate`. To remove outdated settings from the database.                                                                                                                                                                                                                                                                                                                                                                                       |
 | 1.11.1          | 1.11.2         | No migrations required. Font files for Inter are now self-hosted under `public/fonts/inter/`. No additional steps required.                                                                                                                                                                                                                                                                                                                                                             |
 | 1.11.2          | 1.12.0         | Run `php bin/console doctrine:migrations:migrate` to apply new configuration settings.                                                                                                                                                                                                                                                                                                                                                                                                  |
-| 1.12.0          | 1.12.1         | Updated configuration variables default value to follow better practices (bool instead of ON & OFF, please consult the `env.sample` for more details)                                                                                                                                                                                                                                                                                                                                   |
+| 1.12.0          | 1.12.1         | Updated configuration variables default value to follow better practices (bool instead of ON & OFF, please consult the `env.sample` for more details).                                                                                                                                                                                                                                                                                                                                  |
 | 1.12.1          | 1.13.0         | Run `php bin/console doctrine:migrations:migrate` to set up the new `AccessPoint`, `Network`, and `SMSProvider`/`SMSProviderParam` tables. Then run `php bin/console prepare:multiSMSMigration` **once** to migrate existing BudgetSMS API credentials from the `Settings` table to the new dedicated `SMSProvider` management system. Perform both actions while the portal is **offline or restricted**.                                                                              |
-| 1.13.1          | 1.13.2         | Run `php bin/console doctrine:migrations:migrate` to update required Settings table structures for `LOGIN_WITH_UUID_ONLY` and authentication configuration changes.                                                                                                                                                                                                                                                                                                                     |
+| 1.13.0          | 1.13.1         | No migration or actions required.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| 1.13.1          | 1.14.0         | Run `php bin/console doctrine:migrations:migrate` to update database setting structures. Next, run `php bin/console app:cra:migrate-all --yes` to execute all CRA data encryption steps at once (or run the individual encryption commands if granular execution is required).                                                                                                                                                                                                          |
 
 Use this table to determine the exact upgrade steps based on your current version.
 
@@ -112,29 +118,32 @@ Use this table to determine the exact upgrade steps based on your current versio
 
 Use the following checklist before starting the upgrade process:
 
-- [ ] **Verify System Requirements**
-    - Confirm the target environment matches all required dependencies (e.g., PHP, MySQL).
+* [ ] **Verify System Requirements**
+* Confirm the target environment matches all required dependencies (e.g., PHP, MySQL).
 
-- [ ] **Create Backups**
-    - Database
-    - Configuration files
-    - User data
 
-- [ ] **Review Changelog**
-    - Read release notes or [CHANGELOG.md](../CHANGELOG.md) for breaking changes or mandatory steps.
+* [ ] **Create Backups**
+* Database
+* Configuration files
+* User data
 
-- [ ] **Complete Pre-Upgrade Steps**
-    - Ensure your current version aligns with the **Upgrade Path Matrix**.
-    - Run all pre-upgrade commands for intermediate versions.
+
+* [ ] **Review Changelog**
+* Read release notes or [CHANGELOG.md](https://www.google.com/search?q=../CHANGELOG.md) for breaking changes or
+  mandatory steps.
+
+
+* [ ] **Complete Pre-Upgrade Steps**
+* Ensure your current version aligns with the **Upgrade Path Matrix**.
+* Run all pre-upgrade commands for intermediate versions.
 
 ---
 
 ## Step-by-Step Procedure
 
-Follow these steps generic steps updating the portal:
+Follow these general steps when updating the portal:
 
 1. **Navigate to the project folder and pull the latest version**
-
    Navigate to the directory where the portal is installed on your server, then pull the latest version:
 
 ```bash
@@ -142,40 +151,99 @@ Follow these steps generic steps updating the portal:
    git pull
 ```
 
-> **Note:** Replace `/path/to/your/portal` with the actual path where the portal is installed on your server
+> **Note:** Replace `/path/to/your/portal` with the actual path where the portal is installed on your server.
 
 2. **Pull the latest Docker images**
 
 ```bash
-docker compose pull
+    docker compose pull
 ```
 
 3. **Restart the containers**
 
 ```bash
-docker compose up -d
+    docker compose up -d
 ```
 
-4. **Run any version-specific commands**  
-   Check the [Upgrade Path Matrix](#upgrade-path-matrix) for your current version and run any required commands inside
-   the container. Example:
+4. **Run any version-specific commands**
+   Check the [Upgrade Path Matrix](https://www.google.com/search?q=%23upgrade-path-matrix) for your current version and
+   run any required commands inside the container. Example:
 
 ```bash
-docker compose exec web php bin/console doctrine:migrations:migrate
+    docker compose exec web php bin/console doctrine:migrations:migrate
 ```
 
 5. **Clear the cache**
 
 ```bash
-docker compose exec web php bin/console cache:clear
+    docker compose exec web php bin/console cache:clear
 ```
 
-6. **Verify the portal is running correctly**  
+6. **Verify the portal is running correctly**
    Check logs for errors:
 
 ```bash
-docker compose logs -f web
+    docker compose logs -f web
 ```
+
+---
+
+## Release-Specific Notes: Version 1.14.0
+
+**Scenario**: Your current version is **1.13.1** (or earlier 1.13.x), and you want to upgrade to **1.14.0**.
+
+* **Required Database Migrations:**
+  Run Doctrine migrations to apply setting structure updates:
+
+```bash
+  php bin/console doctrine:migrations:migrate
+```
+
+* **Required One-Time Actions — Cyber Resilience Act (CRA Annex I §1.3) Data Encryption:**
+  To comply with CRA data protection mandates, existing plain-text sensitive data in the database must be encrypted.
+  **Option A: Master Encryption Suite (Recommended)**
+  Run the single master command to automatically execute all CRA encryption tasks in sequence:
+
+```bash
+  php bin/console app:cra:migrate-all --yes
+```
+
+**Option B: Granular Step-by-Step Execution**
+If you need to execute tasks individually, run the following commands in sequence:
+
+1. **OAuth Provider IDs Encryption:**
+```bash
+    php bin/console app:cra:encrypt-oauth-ids
+```
+
+2. **System Settings Encryption:**
+```bash
+    php bin/console app:cra:encrypt-settings
+```
+
+3. **Legacy RADIUS Tokens Encryption:**
+```bash
+    php bin/console app:cra:encrypt-radius-legacy-tokens
+```
+
+4. **Legacy OTP Backup Codes Encryption:**
+```bash
+    php bin/console app:cra:encrypt-otp-codes
+```
+
+5. **SMS Legacy Parameters Encryption:**
+```bash
+    php bin/console app:sms:encrypt-legacy-params
+```
+
+6. **2FA & TOTP Secrets Encryption:**
+
+```bash
+php bin/console app:cra:encrypt-2fa-data
+
+```
+
+> **Note:** All encryption commands are independent and safe to re-run if needed.
 
 ---
 
@@ -183,27 +251,30 @@ docker compose logs -f web
 
 **Scenario**: Your current version is **1.12.1**, and you want to upgrade to **1.13.0**.
 
-- **New Entities & Required Migrations:**
+* **New Entities & Required Migrations:**
   This release introduces the Coverage Map feature (`AccessPoint`, `Network` entities) and the new multi-provider
   `SMSProvider`/`SMSProviderParam` management system. You must run:
+
 ```bash
   php bin/console doctrine:migrations:migrate
 ```
 
-- **Required One-Time Action — SMS Credentials Migration:**
+* **Required One-Time Action — SMS Credentials Migration:**
   After the schema migration above, run the following command **once** to migrate your existing BudgetSMS API
   credentials from the `Settings` table into the new `SMSProvider` system:
+
 ```bash
   php bin/console prepare:multiSMSMigration
 ```
-> **Important:** This command must be executed only once, and while the portal is **offline or restricted**.
-> Once the migration is complete, SMS provider credentials are managed exclusively through the new
-> SMS Provider management page in the dashboard.
 
-- **No further manual steps** are required for the Coverage Map, FreeRADIUS Statistics optimization, user data
-  export, or TOTP/2FA changes in this release — these are available immediately after the migration completes.
+> **Important:** This command must be executed only once, and while the portal is **offline or restricted**. Once the
+> migration is complete, SMS provider credentials are managed exclusively through the new SMS Provider management page
+> in
+> the dashboard.
 
-- **Breaking Changes:**
+* **No further manual steps** are required for the Coverage Map, FreeRADIUS Statistics optimization, user data export,
+  or TOTP/2FA changes in this release — these are available immediately after the migration completes.
+* **Breaking Changes:**
   Please always review the [CHANGELOG.md](../CHANGELOG.md) for detailed information.
 
 ---
@@ -212,20 +283,23 @@ docker compose logs -f web
 
 **Scenario**: Your current version is **1.8.0,** and you want to upgrade to **1.8.1**.
 
-- **Removed Fields & Database Optimizations:**  
+* **Removed Fields & Database Optimizations:**
   In version **1.8.1**, the field `verificationCode` was removed as part of optimizations to improve account
   verification and 2FA configuration.
-  > **Important:** If upgrading from **1.8.0** or lower and your database still contains the `verificationCode` field,
-  ensure any necessary data migrations are handled before or during the upgrade.
 
-- **Required Migrations:**  
+> **Important:** If upgrading from **1.8.0** or lower and your database still contains the `verificationCode` field,
+> ensure any necessary data migrations are handled before or during the upgrade.
+
+* **Required Migrations:**
   To apply the database optimizations and update the `User` entity schema, you must run:
-  ```bash
+
+```bash
   php bin/console doctrine:migrations:migrate
 
-- **Breaking Changes:**  
-  Please always review the [CHANGELOG.md](../CHANGELOG.md) for
-  detailed information.
+```
+
+* **Breaking Changes:**
+  Please always review the [CHANGELOG.md](../CHANGELOG.md) for detailed information.
 
 ---
 
@@ -233,27 +307,32 @@ docker compose logs -f web
 
 **Scenario**: Your current version is **1.5,** and you want to upgrade to **1.7.x**.
 
-1. **Create a Full Backup**  
+1. **Create a Full Backup**
    Backup all critical data:
-    - Database
-    - Configuration files
-    - User data
 
-   This allows for rollback if issues arise.
+* Database
+* Configuration files
+* User data
 
+This allows for rollback if issues arise.
 2. **Upgrade to Version 1.6**
-    - If your current version is **1.5** or lower, first upgrade to **1.6**.
-   > **Important:** Skipping this step can break the upgrade path.
 
-3. **Run Pre-Upgrade Commands in Version 1.6**  
+* If your current version is **1.5** or lower, first upgrade to **1.6**.
+
+> **Important:** Skipping this step can break the upgrade path.
+
+3. **Run Pre-Upgrade Commands in Version 1.6**
    Execute the following command in your terminal after upgrading to **1.6**:
-   ```bash
-   php bin/console reset:allocate-providers
-   ```  
-   _This ensures deprecated fields (`googleId`, `saml_identifier`) are properly handled._
-   > **Note:** This command is removed in version **1.7.x**, so it must be run in **1.6**.
 
-4. **Proceed to Version 1.7.x**  
+```bash
+   php bin/console reset:allocate-providers
+```
+
+*This ensures deprecated fields (`googleId`, `saml_identifier`) are properly handled.*
+
+> **Note:** This command is removed in version **1.7.x**, so it must be run in **1.6**.
+
+4. **Proceed to Version 1.7.x**
    After completing the steps above, **upgrade to version 1.7.x** following the usual procedure.
 
 ---

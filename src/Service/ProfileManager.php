@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\User;
 use App\Entity\UserRadiusProfile;
 use App\Enum\UserRadiusProfileStatus;
+use App\Exception\EncryptionException;
 use App\RadiusDb\Entity\RadiusUser;
 use App\RadiusDb\Repository\RadiusUserRepository;
 use App\Repository\UserRadiusProfileRepository;
@@ -13,20 +14,19 @@ use App\Repository\UserRepository;
 readonly class ProfileManager
 {
     public function __construct(
-        private UserRadiusProfileRepository $userRadiusProfile,
+        private UserRadiusProfileRepository $userRadiusProfileRepository,
         private RadiusUserRepository $radiusUserRepository,
         private UserRepository $userRepository,
-        private UserRadiusProfileRepository $userRadiusProfileRepository
+        private EncryptionService $encryptionService
     ) {
     }
 
     private function updateProfiles(User $user, callable $updateCallback): void
     {
-        // reducing duplicated code
         $profiles = $user->getUserRadiusProfiles();
         foreach ($profiles as $profile) {
             if ($updateCallback($profile)) {
-                $this->userRadiusProfile->save($profile);
+                $this->userRadiusProfileRepository->save($profile);
             }
         }
     }
@@ -55,7 +55,7 @@ readonly class ProfileManager
             if ($radiusUser) {
                 $this->radiusUserRepository->remove($radiusUser);
             }
-            $this->userRadiusProfile->save($profile);
+
             return true;
         });
 
@@ -70,10 +70,6 @@ readonly class ProfileManager
 
     public function enableProfiles(User $user): void
     {
-        if (!$user->isDisabled()) {
-            return;
-        }
-
         $this->updateProfiles($user, function ($profile) {
             if ($profile->getStatus() === UserRadiusProfileStatus::ACTIVE->value) {
                 return false;
@@ -85,16 +81,22 @@ readonly class ProfileManager
                 $radiusUser->setUsername($profile->getRadiusUser());
                 $radiusUser->setAttribute('Cleartext-Password');
                 $radiusUser->setOp(':=');
-                $radiusUser->setValue($profile->getRadiusToken());
+
+                $plainPassword = $this->decryptToken((string)$profile->getRadiusToken());
+                $radiusUser->setValue($plainPassword);
+
                 $this->radiusUserRepository->save($radiusUser);
             }
             $profile->setStatus(UserRadiusProfileStatus::ACTIVE->value);
-            $this->userRadiusProfile->save($profile);
 
             return true;
         });
-        $user->setDisabled(false);
-        $this->userRepository->save($user, true);
+
+        if ($user->isDisabled()) {
+            $user->setDisabled(false);
+            $this->userRepository->save($user, true);
+        }
+
         $this->radiusUserRepository->flush();
     }
 
@@ -107,5 +109,17 @@ readonly class ProfileManager
             'user' => $user,
             'status' => UserRadiusProfileStatus::ACTIVE->value,
         ]);
+    }
+
+    /**
+     * Decrypt radius token safely, staying backwards-compatible with unencrypted legacy tokens.
+     */
+    private function decryptToken(string $token): string
+    {
+        try {
+            return $this->encryptionService->decrypt($token);
+        } catch (EncryptionException) {
+            return $token;
+        }
     }
 }

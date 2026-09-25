@@ -1,28 +1,137 @@
 # Changelog
 
-# Release V1.13.2
+# Release V1.14.0
+
+### Breaking Changes & API Clean-up
+
+- **Complete Removal of Legacy API v1 & v2**: All routes, controllers, configurations, and metadata related to API v1
+  and API v2 have been permanently removed.
+  * As previously announced in [Release V1.9.0](#api-deprecation-notice), API v1 and v2 reached their end-of-life and
+    are no longer available.
+  * **API v3** is now the sole supported API version for all portal integrations.
+  * Any clients or integrations still sending requests to `/api/v1` or `/api/v2` endpoints must update immediately to
+    `/api/v3`.
+
+- **Automated Data Retention & Expired OTP Cleanup (CRA Annex I §1.5)**: Added the `clear:expired-user-data` command to
+  enforce data retention and minimization. It permanently purges soft-deleted users older than the configured
+  threshold (default: 30 days) along with associated records (`Event`, `DeletedUserData`, `OTPcode`,
+  `UserRadiusProfile`), and clears expired 2FA/OTP codes older than the threshold (default: 12 hours).
+  - Designed to run as a scheduled cron job using the non-interactive option:
+
+```bash
+    php bin/console clear:expired-user-data --yes
+```
 
 - **Landing Page Authentication Rework**: Refactored landing page authentication buttons, adding dedicated support for
   Magic Link login alongside traditional authentication methods.
 - **Dashboard UI & Stimulus Fix**: Reworked the Authentication Methods management UI to distinctly separate Traditional
   Login and Magic Link (UUID-only) configuration.
-- Fix bug with attribute mapping during the cloudflareHttps request certs properties association with the portal. This
+- **OAuth `provider_id` Encryption (CRA Annex I §1.3, §1.5)**: Google and Microsoft `provider_id` values are now
+  hashed (HMAC-SHA256) via a new `ProviderIdHasher` service before being persisted, instead of being stored in
+  plaintext.
+  - **Required action:** Run the new `app:cra:hash-oauth-ids` command to hash any existing legacy
+    plaintext `provider_id` values for Google and Microsoft accounts. This command is idempotent and safe to
+    re-run.
+```bash
+    php bin/console app:cra:hash-oauth-ids
+```
+
+- **Sensitive System Settings Encryption (CRA Annex I §1.3)**: System configuration parameters (including LDAP
+  credentials, server endpoints, emergency administrative break-glass accounts, and Cloudflare tokens) are now encrypted
+  at rest using AES-256-CBC.
+  - **Required one-time action:** Run the `app:cra:encrypt-settings` command to encrypt any existing legacy plaintext
+    settings in the database. This command is idempotent and safe to re-run.
+```bash
+    php bin/console app:cra:encrypt-settings
+```
+
+- **RADIUS Token Encryption (CRA Annex I §1.3)**: Legacy plain-text RADIUS tokens (`radius_token`) associated with User
+  Radius Profiles are now encrypted at rest using AES-256-CBC encryption to protect Passpoint credentials.
+  - **Required one-time action:** Run the `app:cra:encrypt-radius-legacy-tokens` command to encrypt any existing plain-text
+    RADIUS
+    tokens in the database. This command is idempotent and safe to re-run.
+```bash
+    php bin/console app:cra:encrypt-radius-legacy-tokens
+```
+
+- **OTP Backup Code Encryption (CRA Annex I §1.3)**: Legacy plain-text OTP backup codes (`OTPcode.code`) are now
+  encrypted at rest using AES-256-CBC encryption instead of being stored unencrypted.
+  - **Required action:** Run the `app:cra:hash-otp-codes` command to encrypt any existing plain-text OTP
+    backup codes in the database. This command is idempotent and safe to re-run.
+```bash
+    php bin/console app:cra:hash-otp-codes
+```
+
+- **TOTP Secret Encryption (CRA Annex I §1.3)**: Legacy plain-text TOTP 2FA secrets (`User.twoFAsecret`) are now
+  encrypted at rest using AES-256-CBC encryption instead of being stored unencrypted.
+  - **Required action:** Run the `app:cra:encrypt-2fa-data` command to encrypt any existing plain-text TOTP
+    secrets in the database. This command is idempotent and safe to re-run.
+```bash
+    php bin/console app:cra:encrypt-2fa-data
+```
+
+- **All-in-One CRA Data Encryption Migration (`app:cra:migrate-all`)**: Added a master console command to execute the full
+suite of CRA encryption tasks in sequence (OAuth IDs, System Settings, RADIUS tokens, OTP codes, SMS parameters, and 2FA
+data).
+
+- **Required Action:** Run the master migration command to encrypt all legacy plaintext data across the platform in a
+  single step:
+
+```bash
+    php bin/console app:cra:migrate-all --yes
+```
+
+* Fix bug with attribute mapping during the cloudflareHttps request certs properties association with the portal. This
   happens during the certificate management wizard update.
-- Added customizable footer image support with display toggle and improved layout for the Landing Page Configuration.
-- Fix bug where the radsecproxy `chain.pem` was never regenerated after a certificate renewal, causing the old
+* Added customizable footer image support with display toggle and improved layout for the Landing Page Configuration.
+* Fix bug where the radsecproxy `chain.pem` was never regenerated after a certificate renewal, causing the old
   end-entity certificate to keep being served. The certificate management wizard now rebuilds `chain.pem` from the
   renewed client certificate and the bundled WBA CA chain, and removes the stale file as part of the renewal commands.
-- Fix bug in `PortalStatistics` when processing device download events threw a 500 error when event metadata was
+* Fix bug in `PortalStatistics` when processing device download events threw a 500 error when event metadata was
   returned as raw array data or unparsed JSON.
 
 Please make sure to execute the new migration to update and use the new required Settings details for this new usage of
 the LOGIN_WITH_UUID_ONLY setting.
 
-- Run the migrations with:
+* Run the migrations with:
 
 ```bash
   php bin/console doctrine:migrations:migrate
 ```
+
+* **JWT TTL Reduced (CRA Annex I §1.2)**: Reduced the `lexik_jwt_authentication.yaml` token TTL from 3600s (1 hour)
+  to 900s (15 minutes) for the privileged IAM API, and implemented token refresh endpoints. API static docs and the
+  auth refresh documentation were updated to reflect the new 900s TTL and the new error response messages.
+* **Metrics Endpoint Access Restricted (CRA Annex I §1.7)**: Fixed the `.env.sample` default for
+  `METRICS_ALLOWED_IPS`, which previously defaulted to `0.0.0.0/0`, allowing any IP to query Prometheus metrics
+  data if the metrics endpoint was enabled.
+* **Database Installation Interface Rework**: Database configuration template layout reviewed
+  with responsive grid for OpenRoaming and FreeRADIUS details during the installation process.
+
+### Other CRA compliance fixes in this release
+
+* InstallationService no longer stores the password hash inside the Progress object
+* `Setting.value` secrets are no longer stored unencrypted
+* Removed raw `exec()` usage vulnerable to command injection and path traversal
+* Certbot no longer hardcodes RSA-2048 keys
+* RSA now uses OAEP padding instead of PKCS#1 v1.5
+* SMS provider API keys are no longer stored in plaintext
+* RADIUS tokens are no longer stored in plaintext
+* Magic-link and 2FA email tokens are no longer stored in plaintext
+* OTP backup codes are no longer stored in plaintext
+* TOTP 2FA secrets are no longer stored in plaintext
+* Automated data retention & PII cleanup routine implemented
+* Enforced web server request payload caps and connection rate limiting
+* Enforced non-zero exit code checks in container vulnerability scanning
+* Machine-readable CycloneDX SBOM generation added to CI/CD
+* Configured strict session cookie protection flags
+* Remediated bypassed security firewalls on API routes
+* Enforced mandatory TLS (HSTS & database `sslmode=verify-full`)
+* Externalized database secrets and bound services to localhost in Docker Compose
+* Hardened web server security headers and eliminated permissive CSP
+* Applied secure defaults across the platform
+* Enforced non-root process execution and purged build tooling from container runtime
+* Only allow reset of password only for actual portal accounts created on the portal
 
 # Release V1.13.1
 
@@ -310,7 +419,7 @@ Failure to migrate before the end of the grace period may result in **loss of ac
   Run the migrations with:
 
 ```bash
-php bin/console doctrine:migrations:migrate
+  php bin/console doctrine:migrations:migrate
 ```
 
 # Release V1.8.0
@@ -324,7 +433,7 @@ php bin/console doctrine:migrations:migrate
 > this one:
 
 ```
-php:bin/console messenger:consume scheduler_default -vv
+  php:bin/console messenger:consume scheduler_default -vv
 ```
 
 - Update API for version 2, fix bug for iOS App's with invalid format for profile generation endpoint.
@@ -364,7 +473,7 @@ php:bin/console messenger:consume scheduler_default -vv
   Run the migrations with:
 
 ```bash
-php bin/console doctrine:migrations:migrate
+  php bin/console doctrine:migrations:migrate
 ```
 
 ---
@@ -442,7 +551,7 @@ php bin/console doctrine:migrations:migrate
 - **Note**: The Allocate Providers Command has been discontinued and has therefore been removed
 
 ```Bash
-php bin/console reset:allocate-providers
+  php bin/console reset:allocate-providers
 ```
 
 # Release V1.6.0
@@ -461,7 +570,7 @@ php bin/console reset:allocate-providers
 - Update READ.ME add new env's && settings
 - Auto delete unconfirmed users after a specific timeframe configurable by the admin
 - Added a new endpoint for Turnstile configuration required for the Android App's
-- **Clear Unverified Accounts Command**: `clear:deleteUnconfirmedUsers` Removes any records in the `User` and all the
+- **Clear Unverified Accounts Command**: `clear:delete-unconfirmed-users` Removes any records in the `User` and all the
   associated entity's that have an unverified accounts associated.
 
 > **Important**: This command will permanently delete any log or record in the `User` entity.
@@ -472,7 +581,7 @@ For more details on how this command works, please refer to the file at:
 To use this command, run the following root in the root folder of the project:
 
 ```bash
-php bin/console clear:deleteUnconfirmedUsers
+  php bin/console clear:delete-unconfirmed-users
 ```
 
 - **Notify User When Profile is about to Expire Command**: `notify:usersWhenProfileExpires` Sends a notification
@@ -484,7 +593,7 @@ For more details on how this command works, please refer to the file at:
 To use this command, run the following root in the root folder of the project:
 
 ```bash
-php bin/console notify:usersWhenProfileExpires
+  php bin/console notify:usersWhenProfileExpires
 ```
 
 # Release V1.5.0
@@ -517,7 +626,7 @@ For more details on how this command works, please refer to the file at:
 To use this command, run the following root in the root folder of the project:
 
 ```bash
-php bin/console clear:eventEntity
+  php bin/console clear:eventEntity
 ```
 
 - Rework Pagination on User Management Table
@@ -543,7 +652,7 @@ For more details on how this command works, please refer to the file at:
 To use this command, run the following code in the root folder of the project:
 
 ```bash
-php bin/console reset:allocate-providers
+  php bin/console reset:allocate-providers
 ```
 
 - Rework User delete - Add PGP encryption (Steps for configuration on the [Installation Guide](docs/INSTALATION.md),

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\DTO\NewPasswordAccountDTO;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
@@ -9,6 +10,7 @@ use App\Enum\EventMetadataKeysType;
 use App\Enum\FirewallType;
 use App\Enum\ForgotPasswordEnum;
 use App\Enum\PlatformMode;
+use App\Enum\SessionStatus;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Form\ForgotPasswordEmailType;
@@ -20,9 +22,11 @@ use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EmailGenerator;
+use App\Service\EncryptionService;
 use App\Service\EventActions;
 use App\Service\ForgotPasswordService;
 use App\Service\GetSettings;
+use App\Service\HashArgon2idService;
 use App\Service\MagicLinkService;
 use App\Service\PasswordResetRequestHandler;
 use App\Service\SendSMS;
@@ -65,6 +69,8 @@ class ForgotPasswordController extends AbstractController
         private readonly UserPasswordHasherInterface $userPasswordHasher,
         private readonly RateLimiterFactoryInterface $verifyAccountLimiter,
         private readonly ForgotPasswordService $forgotPasswordService,
+        private readonly EncryptionService $encryptionService,
+        private readonly HashArgon2idService $hashArgon2idService
     ) {
     }
 
@@ -123,12 +129,16 @@ class ForgotPasswordController extends AbstractController
                 return $this->redirectToRoute('app_site_forgot_password_email');
             }
 
-            if ($user->getEmail() === $data[SettingName::BREAKING_GLASS_ADMIN_EMAIL->value]['value']) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('emailDoesntExist', [], 'controllers')
-                );
-                return $this->redirectToRoute('app_site_forgot_password_email');
+            $breakingGlassSetting = $data[SettingName::BREAKING_GLASS_ADMIN_EMAIL->value]['value'] ?? null;
+            if (!empty($breakingGlassSetting)) {
+                $breakingGlassEmail = $this->encryptionService->decrypt($breakingGlassSetting);
+                if ($user->getEmail() === $breakingGlassEmail) {
+                    $this->addFlash(
+                        'error',
+                        $this->translator->trans('emailDoesntExist', [], 'controllers')
+                    );
+                    return $this->redirectToRoute('app_site_forgot_password_email');
+                }
             }
 
             // Check if the provider is "PORTAL_ACCOUNT" and the providerId "EMAIL"
@@ -161,7 +171,9 @@ class ForgotPasswordController extends AbstractController
                     $latestEventMetadata['lastVerificationCodeTime'] =
                         $currentTime->format(DateTimeInterface::ATOM);
                     $latestEvent->setEventMetadata($latestEventMetadata);
-                    $user->setTwoFAcode((string)random_int(100000, 999999));
+
+                    $rawCode = (string)random_int(100000, 999999);
+                    $user->setTwoFAcode($rawCode);
                     $user->setTwoFACodeGeneratedAt(new DateTime());
                     $user->setTwoFAcodeIsActive(true);
 
@@ -169,8 +181,8 @@ class ForgotPasswordController extends AbstractController
                     $this->entityManager->persist($user);
                     $this->entityManager->flush();
 
-                    // Send email for the user
-                    $this->emailGenerator->sendForgotPasswordEmail($user);
+                    // Send email with the raw plain-text 2FA code
+                    $this->emailGenerator->sendForgotPasswordEmail($user, $rawCode);
 
                     $message = $this->translator->trans(
                         'emailSentMessage',
@@ -313,7 +325,8 @@ class ForgotPasswordController extends AbstractController
                     $latestEventMetadata['verificationAttempts'] = $attempts;
                     $latestEvent->setEventMetadata($latestEventMetadata);
 
-                    $user->setTwoFAcode((string)random_int(100000, 999999));
+                    $rawCode = (string)random_int(100000, 999999);
+                    $user->setTwoFAcode($rawCode);
                     $user->setTwoFACodeGeneratedAt(new DateTime());
                     $user->setTwoFAcodeIsActive(true);
                     $this->eventRepository->save($latestEvent, true);
@@ -323,7 +336,7 @@ class ForgotPasswordController extends AbstractController
 
                     $message = $this->translator->trans(
                         'password_reset_code',
-                        ['%code%' => $user->getTwoFAcode()],
+                        ['%code%' => $rawCode],
                         'controllers'
                     );
                     $this->sendSMS->sendSmsNoValidation($user, $message);
@@ -410,8 +423,8 @@ class ForgotPasswordController extends AbstractController
     public function forgotPasswordLink(Request $request): Response
     {
         // Get the uuid and verification code from the URL query parameters
-        $uuid = $request->query->get('uuid');
-        $twoFaCode = $request->query->get('twoFaCode');
+        $uuid = (string)$request->query->get('uuid');
+        $twoFaCode = (string)$request->query->get('twoFaCode');
 
         $key = $request->getClientIp() . '_' . $uuid;
 
@@ -431,7 +444,6 @@ class ForgotPasswordController extends AbstractController
                 )
             );
         }
-
 
         // Get the user with the matching email, excluding admin users
         $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
@@ -454,7 +466,11 @@ class ForgotPasswordController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($user->getUuid() === $uuid && $user->getTwoFAcode() === $twoFaCode) {
+        $isCodeValid = $user->getTwoFAcode() !== null
+            && $twoFaCode !== ''
+            && $this->hashArgon2idService->verifyHash($twoFaCode, $user->getTwoFAcode());
+
+        if ($user->getUuid() === $uuid && $isCodeValid) {
             if (
                 $this->magicLinkService->linkCanBeUsed(
                     $user,
@@ -549,8 +565,12 @@ class ForgotPasswordController extends AbstractController
         $form = $this->createForm(ResetPasswordSMSConfirmationType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $code = $form->get('verificationCode')->getData();
-            if ($user->getUuid() === $uuid && $user->getTwoFAcode() === $code) {
+            $code = (string)$form->get('verificationCode')->getData();
+            $isCodeValid = $user->getTwoFAcode() !== null
+                && $code !== ''
+                && $this->hashArgon2idService->verifyHash($code, $user->getTwoFAcode());
+
+            if ($user->getUuid() === $uuid && $isCodeValid) {
                 // Create a token manually for the user
                 $this->passwordResetRequestHandler->handle($user);
 
@@ -650,31 +670,21 @@ class ForgotPasswordController extends AbstractController
             );
         }
 
+        $passwordDTO = new NewPasswordAccountDTO();
         $form = $this->createForm(
             NewPasswordAccountType::class,
-            $currentUser,
-            ['require_current_password' => false]
+            $passwordDTO,
+            [
+                'require_current_password' => false,
+            ]
         );
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($form->get('newPassword')->getData() !== $form->get('confirmPassword')->getData()) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('typeTheSamePasswordBothFields', [], 'controllers')
-                );
-
-                return $this->redirectToRoute(
-                    $context === FirewallType::DASHBOARD->value
-                        ? 'admin_page'
-                        : 'app_landing'
-                );
-            }
-
             $currentUser->setPassword(
                 $this->userPasswordHasher->hashPassword(
                     $currentUser,
-                    $form->get('newPassword')->getData()
+                    $passwordDTO->newPassword
                 )
             );
             $currentUser->setForgotPasswordRequest(false);
@@ -683,7 +693,7 @@ class ForgotPasswordController extends AbstractController
             $currentUser->setTwoFACodeGeneratedAt(new DateTime());
             $currentUser->setTwoFAcodeIsActive(true);
             $session = $request->getSession();
-            $session->set('session_verified', true);
+            $session->set(SessionStatus::VERIFIED->value, true);
 
             $this->entityManager->persist($currentUser);
             $this->entityManager->flush();

@@ -6,3 +6,5 @@ copy: 'Copiar'
 download: 'Transferir'
 print: 'Imprimir'
 done: 'Concluído'
+warning_title: "Importante:"
+warning_message: "Esta página só será exibida uma vez. Certifique-se de copiar, descarregar ou imprimir os seus códigos antes de sair."

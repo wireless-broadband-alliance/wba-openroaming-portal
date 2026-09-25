@@ -23,7 +23,7 @@ class SMSProviderParam
     #[ORM\Column(length: 255)]
     private ?string $paramType = null;
 
-    #[ORM\Column(type: Types::TEXT, length: 4294967295, nullable: true)]
+    #[ORM\Column(type: 'encrypted_string', nullable: true)]
     private ?string $value = null;
 
     #[ORM\Column]
@@ -64,7 +64,7 @@ class SMSProviderParam
         return $this->value;
     }
 
-    public function setValue(string $value): static
+    public function setValue(?string $value): static
     {
         $this->value = $value;
 

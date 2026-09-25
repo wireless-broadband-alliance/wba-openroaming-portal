@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace App\Form;
 
 use App\DTO\DbSetupDTO;
-use App\Repository\SettingRepository;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
@@ -23,6 +22,7 @@ class DbSetupType extends AbstractType
         private readonly TranslatorInterface $translator
     ) {
     }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -34,12 +34,13 @@ class DbSetupType extends AbstractType
             ])
             ->add('dbOpenRoamingPassword', PasswordType::class, [
                 'required' => false,
+                'always_empty' => false,
                 'toggle' => true,
                 'hidden_label' => null,
                 'visible_label' => null,
                 'attr' => [
                     'placeholder' => $this->translator->trans('dbOpenRoamingPassword', [], 'DbSetupType'),
-                    'data-live-ignore' => 'true',
+                    'data-model' => 'norender',
                 ],
             ])
             ->add('dbOpenRoamingDbName', TextType::class, [
@@ -68,12 +69,13 @@ class DbSetupType extends AbstractType
             ])
             ->add('dbFreeradiusPassword', PasswordType::class, [
                 'required' => false,
+                'always_empty' => false,
                 'toggle' => true,
                 'hidden_label' => null,
                 'visible_label' => null,
                 'attr' => [
                     'placeholder' => $this->translator->trans('dbFreeradiusPassword', [], 'DbSetupType'),
-                    'data-live-ignore' => 'true',
+                    'data-model' => 'norender',
                 ],
             ])
             ->add('dbFreeradiusDbName', TextType::class, [

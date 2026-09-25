@@ -56,8 +56,8 @@ class CertificateFreeradiusHTTPChallengeCommandsService
                     'docker compose down',
                     'certbot certonly --standalone '
                     . "-d {$domain} "
-                    . '--key-type rsa '
-                    . '--rsa-key-size 2048 '
+                    . '--key-type ecdsa '
+                    . '--elliptic-curve secp384r1 '
                     . '--agree-tos '
                     . "-m {$email}",
                 ],

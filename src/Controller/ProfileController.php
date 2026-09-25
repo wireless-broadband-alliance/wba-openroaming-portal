@@ -10,12 +10,14 @@ use App\Enum\OperationMode;
 use App\Enum\OSType;
 use App\Enum\SettingName;
 use App\Enum\UserRadiusProfileStatus;
+use App\Exception\EncryptionException;
 use App\RadiusDb\Entity\RadiusUser;
 use App\RadiusDb\Repository\RadiusUserRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRadiusProfileRepository;
 use App\Service\CertificateProcessCheckerService;
+use App\Service\EncryptionService;
 use App\Service\EventActions;
 use App\Service\ExpirationProfileService;
 use App\Service\TwoFAService;
@@ -56,6 +58,7 @@ class ProfileController extends AbstractController
         private readonly UserRadiusProfileRepository $radiusProfileRepository,
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly UserAgentOsDetector $userAgentOsDetector,
+        private readonly EncryptionService $encryptionService,
     ) {
     }
 
@@ -595,11 +598,12 @@ class ProfileController extends AbstractController
         if (!$radiusProfile) {
             // No active profile exists — create a fresh one (handles new users AND expired/revoked users)
             $username = $this->generateToken($androidLimit - $realmSize) . "@" . $realmName;
-            $token = $this->generateToken($androidLimit - $realmSize);
+            $plainToken = $this->generateToken($androidLimit - $realmSize);
+            $encryptedToken = $this->encryptionService->encrypt($plainToken);
 
             $radiusProfile = new UserRadiusProfile();
             $radiusProfile->setUser($user);
-            $radiusProfile->setRadiusToken($token);
+            $radiusProfile->setRadiusToken($encryptedToken);
             $radiusProfile->setRadiusUser($username);
             $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE->value);
             $radiusProfile->setIssuedAt(new DateTime());
@@ -619,7 +623,7 @@ class ProfileController extends AbstractController
             $radiusUser->setUsername($username);
             $radiusUser->setAttribute('Cleartext-Password');
             $radiusUser->setOp(':=');
-            $radiusUser->setValue($token);
+            $radiusUser->setValue($plainToken);
 
             $radiusUserRepository->save($radiusUser, true);
             $radiusProfileRepository->save($radiusProfile, true);
@@ -631,16 +635,30 @@ class ProfileController extends AbstractController
 
             if (!$radiusUser) {
                 // radcheck row was manually removed — restore it from the active profile
+                $plainToken = $this->decryptToken((string)$radiusProfile->getRadiusToken());
+
                 $radiusUser = new RadiusUser();
                 $radiusUser->setUsername($radiusProfile->getRadiusUser());
                 $radiusUser->setAttribute('Cleartext-Password');
                 $radiusUser->setOp(':=');
-                $radiusUser->setValue($radiusProfile->getRadiusToken());
+                $radiusUser->setValue($plainToken);
                 $radiusUserRepository->save($radiusUser, true);
             }
         }
 
         return $radiusUser;
+    }
+
+    /**
+     * Safely decrypt radius token while remaining backwards-compatible with legacy unencrypted tokens.
+     */
+    private function decryptToken(string $token): string
+    {
+        try {
+            return $this->encryptionService->decrypt($token);
+        } catch (EncryptionException) {
+            return $token;
+        }
     }
 
     private function checkUserStatus(User $user): bool

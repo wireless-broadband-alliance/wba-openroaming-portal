@@ -47,7 +47,7 @@ readonly class TermsAcceptanceListener
             '/api',
             '/_components',
             '/assets',
-            '/landing', // For different routes with two-factor
+            '/landing',
             '/dashboard',
             '/instructions',
             '/change-language',
@@ -69,8 +69,9 @@ readonly class TermsAcceptanceListener
             '/app/continue',
             '/return-to-app',
             '/map',
-            '/.well-known/assetlinks.json',
-            '/.well-known/apple-app-site-association'
+            '/.well-known/apple-app-site-association',
+            '/connect/google',
+            '/connect/microsoft',
         ];
 
         if (array_any($excludedPrefixes, fn($prefix) => str_starts_with($path, (string)$prefix))) {

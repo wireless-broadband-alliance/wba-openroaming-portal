@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Form;
 
-use App\Entity\User;
+use App\DTO\NewPasswordAccountDTO;
 use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Repository\SettingRepository;
@@ -10,11 +12,12 @@ use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * @extends AbstractType<User>
+ * @extends AbstractType<NewPasswordAccountDTO>
  */
 class NewPasswordAccountType extends AbstractType
 {
@@ -28,43 +31,51 @@ class NewPasswordAccountType extends AbstractType
     {
         $turnstileCheckerValue = $this->settingRepository->findOneBy(
             ['name' => SettingName::TURNSTILE_CHECKER->value]
-        )->getValue();
+        )?->getValue();
 
-        if ($options['require_current_password'] ?? true) {
+        if ($options['require_current_password']) {
             $builder->add('password', PasswordType::class, [
-                'label' => $this->translator->trans('currentPassword', [], 'NewPasswordAccountType'),
+                'label' => $this->translator->trans(
+                    'currentPassword',
+                    [],
+                    'NewPasswordAccountType'
+                ),
                 'required' => true,
-                'mapped' => false,
             ]);
         }
 
         $builder
             ->add('newPassword', PasswordType::class, [
-                'label' => $this->translator->trans('newPassword', [], 'NewPasswordAccountType'),
+                'label' => $this->translator->trans(
+                    'newPassword',
+                    [],
+                    'NewPasswordAccountType'
+                ),
                 'toggle' => true,
                 'hidden_label' => null,
                 'visible_label' => null,
                 'required' => true,
-                'mapped' => false,
             ])
             ->add('confirmPassword', PasswordType::class, [
-                'label' => $this->translator->trans('confirmNewPassword', [], 'NewPasswordAccountType'),
+                'label' => $this->translator->trans(
+                    'confirmNewPassword',
+                    [],
+                    'NewPasswordAccountType'
+                ),
                 'toggle' => true,
                 'hidden_label' => null,
                 'visible_label' => null,
                 'required' => true,
-                'mapped' => false,
             ]);
 
-        // Check if TURNSTILE_CHECKER value is ON
         if ($turnstileCheckerValue === OperationMode::ON->value) {
             $builder->add('security', TurnstileType::class, [
                 'attr' => [
                     'data-action' => 'contact',
                     'data-theme' => 'light',
-                    'data-language' => $this->translator->getLocale()
+                    'data-language' => $this->translator->getLocale(),
                 ],
-                'label' => false
+                'label' => false,
             ]);
         }
     }
@@ -72,8 +83,16 @@ class NewPasswordAccountType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => User::class,
-            'require_current_password' => true, // default is to require it
+            'data_class' => NewPasswordAccountDTO::class,
+            'require_current_password' => true,
+            'validation_groups' => function (FormInterface $form) {
+                $options = $form->getConfig()->getOptions();
+                $groups = ['Default'];
+                if ($options['require_current_password']) {
+                    $groups[] = 'current_password_required';
+                }
+                return $groups;
+            },
         ]);
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Validator\Constraints;
 
 use Symfony\Component\Validator\Constraint;
@@ -13,18 +15,24 @@ class PasswordsMatchValidator extends ConstraintValidator
             return;
         }
 
-        if (!property_exists($value, 'password') || !property_exists($value, 'confirmPassword')) {
+        $passwordField = $constraint->passwordField;
+        $confirmPasswordField = $constraint->confirmPasswordField;
+
+        if (!property_exists($value, $passwordField) || !property_exists($value, $confirmPasswordField)) {
             return;
         }
 
-        if ($value->password === null || $value->confirmPassword === null) {
+        $password = $value->$passwordField;
+        $confirmPassword = $value->$confirmPasswordField;
+
+        if ($password === null || $confirmPassword === null) {
             return;
         }
 
-        if ($value->password !== $value->confirmPassword) {
+        if ($password !== $confirmPassword) {
             $this->context->buildViolation($constraint->message)
-            ->atPath('confirmPassword')
-            ->addViolation();
+                ->atPath($confirmPasswordField)
+                ->addViolation();
         }
     }
 }

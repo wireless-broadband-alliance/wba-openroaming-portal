@@ -105,6 +105,24 @@ class ScheduleType extends AbstractType
                 'required' => false,
                 'disabled' => $this->disabled,
                 'label' => $this->translator->trans('enableCron', [], 'ScheduleType'),
+            ])
+            ->addDependent(
+                'cleanup_expired_data_cron',
+                'use_advanced_mode',
+                function (DependentField $field, ?bool $use_advanced_mode): void {
+                    $field->add(ScheduleSettingType::class, [
+                        'label' => false,
+                        'required' => false,
+                        'use_advanced_mode' => $use_advanced_mode,
+                        'settingName' => SettingName::CLEANUP_EXPIRED_DATA_CRON->value,
+                        'disabled' => $this->disabled,
+                    ]);
+                }
+            )
+            ->add('cleanup_expired_data_enabled', CheckboxType::class, [
+                'required' => false,
+                'disabled' => $this->disabled,
+                'label' => $this->translator->trans('enableCron', [], 'ScheduleType'),
             ]);
     }
 

@@ -42,6 +42,13 @@ class ScheduleSettingDTO
     #[GreaterThanOrEqual(value: 1, message: 'timerShouldNotBeLessThanProfileNotification')]
     public ?int $timeIntervalNotification = null;
 
+    #[Length(max: 3, maxMessage: 'fieldCannotBeLongerThan')]
+    #[GreaterThanOrEqual(value: 1, message: 'timerShouldNotBeLessThan')]
+    public ?int $userRetentionDays = null;
+
+    #[Length(max: 3, maxMessage: 'fieldCannotBeLongerThan')]
+    #[GreaterThanOrEqual(value: 1, message: 'timerShouldNotBeLessThan')]
+    public ?int $otpExpirationHours = null;
 
     public function __construct(
         ?string $setting = null,
@@ -99,6 +106,21 @@ class ScheduleSettingDTO
                 ]);
                 if ($deleteUnconfirmedUsers) {
                     $this->timeIntervalNotification = (int)$deleteUnconfirmedUsers->getValue();
+                }
+            }
+            if ($setting === SettingName::CLEANUP_EXPIRED_DATA_CRON->value) {
+                $userRetention = $settingRepository->findOneBy([
+                    'name' => SettingName::USER_RETENTION_DAYS->value
+                ]);
+                if ($userRetention) {
+                    $this->userRetentionDays = (int)$userRetention->getValue();
+                }
+
+                $otpExpiration = $settingRepository->findOneBy([
+                    'name' => SettingName::OTP_EXPIRATION_HOURS->value
+                ]);
+                if ($otpExpiration) {
+                    $this->otpExpirationHours = (int)$otpExpiration->getValue();
                 }
             }
         }

@@ -6,50 +6,73 @@
 
 {% block content %}
 
-    {# Toasts #}
-    {{ block('toast_messages') }}
+    {# Attach the prevent-leave controller to wrap the entire page view #}
+    <div data-controller="prevent-leave">
 
-    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
-        <p class="font-bold text-xl">{{ 'heading'|trans({}, 'otp_codes') }}</p>
-        <p class="text-lg">{{ 'description'|trans({}, 'otp_codes') }}</p>
-        <div data-controller="clipboard print">
-            <div class="mt-5 rounded-md">
-                <div id="codesBox"
-                     data-clipboard-target="code"
-                     class="p-4 bg-gray-100 text-base font-mono rounded-md overflow-x-auto text-left">
-                    <div class="flex justify-start space-x-4 mb-4">
-                        <button title="{{ 'copy'|trans({}, 'otp_codes') }}"
-                                data-action="clipboard#copyToClipboard">
-                            <twig:ux:icon class="w-4 fill-current" name="wba:copy" />
-                        </button>
-                        <a title="{{ 'download'|trans({}, 'otp_codes') }}"
-                           href="{{ path('app_download_codes', {context: context}) }}">
-                            <twig:ux:icon class="w-4 fill-current" name="wba:download" />
-                        </a>
-                        <button title="{{ 'print'|trans({}, 'otp_codes') }}"
-                                data-action="print#print">
-                            <twig:ux:icon class="w-4 fill-current" name="wba:printer" />
-                        </button>
-                    </div>
+        {# Toasts #}
+        {{ block('toast_messages') }}
+
+        <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
+            <p class="font-bold text-xl">{{ 'heading'|trans({}, 'otp_codes') }}</p>
+            <p class="text-lg">{{ 'description'|trans({}, 'otp_codes') }}</p>
+
+            {# Visual warning banner displayed directly on the page #}
+            <div class="mt-4 p-4 mb-4 text-sm text-amber-800 rounded-lg bg-amber-50 border border-amber-200" role="alert">
+                <span class="font-bold">{{ 'warning_title'|trans({}, 'otp_codes') }}</span> {{ 'warning_message'|trans({}, 'otp_codes') }}
+            </div>
+
+            <div data-controller="clipboard print">
+                <div class="mt-5 rounded-md">
                     <div id="codesBox"
-                         data-print-target="codesBox"
-                         class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-2">
-                        {% for code in codes %}
-                            <div class="p-2 border rounded-lg text-center">{{ code.code }}</div>
-                        {% endfor %}
-                    </div>
-                </div>
+                         data-clipboard-target="code"
+                         class="p-4 bg-gray-100 text-base font-mono rounded-md overflow-x-auto text-left">
+                        <div class="flex justify-start space-x-4 mb-4">
+                            <button title="{{ 'copy'|trans({}, 'otp_codes') }}"
+                                    data-action="clipboard#copyToClipboard">
+                                <twig:ux:icon class="w-4 fill-current" name="wba:copy" />
+                            </button>
 
+                            {# POST form sending codes array to the download controller #}
+                            <form action="{{ path('app_download_codes', {context: context}) }}" method="post" class="inline">
+                                {% for code in codes %}
+                                    <input type="hidden" name="codes[]" value="{{ code }}">
+                                {% endfor %}
+                                <button type="submit"
+                                        title="{{ 'download'|trans({}, 'otp_codes') }}"
+                                        data-action="prevent-leave#allowLeave">
+                                    <twig:ux:icon class="w-4 fill-current" name="wba:download" />
+                                </button>
+                            </form>
+
+                            <button title="{{ 'print'|trans({}, 'otp_codes') }}"
+                                    data-action="print#print">
+                                <twig:ux:icon class="w-4 fill-current" name="wba:printer" />
+                            </button>
+                        </div>
+                        <div id="codesBox"
+                             data-print-target="codesBox"
+                             class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-2">
+                            {% for code in codes %}
+                                <div class="p-2 border rounded-lg text-center">{{ code }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
+
+        {# Divider #}
+        <div>
+            {# Trigger allowLeave action on completion button #}
+            <a href="{{ path('app_otpCodes_save', {context: context}) }}"
+               class="mt-6 w-[180px] btn-primary"
+               data-action="prevent-leave#allowLeave">
+                {{ 'done'|trans({}, 'otp_codes') }}
+            </a>
+        </div>
+
+        {{ include('landing/shared/returnActions/_logout.html.twig') }}
+
     </div>
-
-    {# Divider #}
-    <div>
-        <a href="{{ path('app_otpCodes_save', {context: context}) }}"
-           class="mt-6 w-[180px] btn-primary">{{ 'done'|trans({}, 'otp_codes') }}</a>
-    </div>
-
-    {{ include('landing/shared/returnActions/_logout.html.twig') }}
-
 {% endblock %}

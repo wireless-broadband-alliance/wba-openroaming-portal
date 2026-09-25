@@ -194,7 +194,12 @@ such as CAPTCHA validation, that are integrated to protect user data and ensure 
 
 Please refer to the [API documentation](docs/Api/V3/index_v3.html) for detailed usage instructions and examples.
 
-Follow this link for more information on API documentation: [Api Guide](docs/APIGUI.md)
+The OpenRoaming Portal exclusively supports **API v3**.
+
+> **Legacy API Notice**:  
+> API v1 and API v2 were officially deprecated in "Release V1.9.0" and have been **completely removed**
+> as of "Release V1.13.2". Requests to `/api/v1` and `/api/v2` will return `404 Not Found`. Please refer
+> to the API v3 specifications for all client implementations.
 
 ## Upgrade Stop: Important Instructions for Future Updates
 
@@ -371,7 +376,7 @@ link: [Cloudflare Turnstile Production Guide]( https://developers.cloudflare.com
 For detailed instructions on the GeoLite GUI setup, operations, and usage, refer to
 the [GeoLite GUI Guide](docs/GEOLITEGUI.md).
 
-### API Platform
+### API
 
 The following configurations are required for the API of the project.
 
@@ -565,9 +570,13 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 94. `MAP_CENTER_LATITUDE`: Default latitude used to center the coverage map.
 95. `MAP_CENTER_LONGITUDE`: Default longitude used to center the coverage map.
 96. `MAP_CENTER_ZOOM`: Default zoom level used for the coverage map.
+97. `CLEANUP_EXPIRED_DATA_CRON`: Permanently purges soft-deleted users and clears expired OTP tokens in compliance with data retention policies.
+98. `CLEANUP_EXPIRED_DATA_CRON_ENABLED`: Enables or disables the Cleanup expired data cron.
+99. `USER_RETENTION_DAYS`: Number of days soft-deleted users are kept before being permanently purged from the database.
+100. `OTP_EXPIRATION_HOURS`: Number of hours a two-factor authentication code (OTP) remains valid before being cleared from the system.
 
-97. `FOOTER_IMAGE_ENABLED`: Shows the footer image on the landing page.
-98. `FOOTER_IMAGE`: The resource path or URL to the footer image
+101. `FOOTER_IMAGE_ENABLED`: Shows the footer image on the landing page.
+102. `FOOTER_IMAGE`: The resource path or URL to the footer image
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 

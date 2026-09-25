@@ -46,7 +46,8 @@ readonly class MagicLinkService
         $user->setTwoFAcodeGeneratedAt(new DateTime());
         $this->userRepository->save($user, true);
         return $this->urlGenerator->generate('app_login_magic_link', [
-            'token' => $user->getTwoFAcode(),
+            'uuid'  => $user->getUuid(),
+            'token' => $token,
         ], UrlGeneratorInterface::ABSOLUTE_URL);
     }
 

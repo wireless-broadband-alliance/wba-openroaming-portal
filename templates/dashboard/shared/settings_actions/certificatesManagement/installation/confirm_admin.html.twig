@@ -19,10 +19,11 @@
 
     {{ form_start(form, {attr: {autocomplete: 'off'}}) }}
 
-    <div class="w-full 2xl:w-1/2 bg-white rounded-md p-4">
+    {# Added mx-auto and max-w-xl to horizontally center the container #}
+    <div class="w-full max-w-xl mx-auto bg-white rounded-md p-4">
 
         {# --- Code Card --- #}
-        <div class="cert-upload-card col-span-1 sm:col-span-1 md:col-span-2 transition hover:shadow-lg hover:-translate-y-1 duration-200"
+        <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 flex flex-col"
                 {{ stimulus_target('radio-card', 'card') }}
                 {{ stimulus_controller('card') }}>
 
@@ -30,17 +31,15 @@
                 <h2 class="text-lg sm:text-xl font-medium text-gray-700">
                     {{ 'enterVerificationCode'|trans({}, 'confirm') }}
                 </h2>
-
             </div>
 
             <div class="mt-4 flex flex-col sm:flex-row items-center gap-3">
                 {{ form_widget(form.code, {
                     attr: {
-                        class: 'form-widget',
+                        class: 'form-widget w-full',
                         placeholder: 'codePlaceholder'|trans({}, 'admin_config'),
                     },
                 }) }}
-
             </div>
 
             <div class="mt-2 text-red-500 text-sm">
@@ -53,7 +52,6 @@
                         {{ 'generateNewEmail'|trans({'%url%': path('admin_dashboard_settings_certs_installation_admin_confirmation_resend')}, 'confirm')|raw }}
                     </p>
                 </div>
-
             </div>
 
         </div>
@@ -68,8 +66,8 @@
             {{ 'changeEmail'|trans({}, 'admin_config') }}
         </a>
         <button type="submit"
-                    class="btn-primary w-[200px]"
-                    onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'admin_config') }}')">
+                class="btn-primary w-[200px]"
+                onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'admin_config') }}')">
             {{ 'verify'|trans({}, 'confirm') }}
         </button>
     </div>

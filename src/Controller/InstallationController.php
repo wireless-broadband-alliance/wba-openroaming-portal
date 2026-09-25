@@ -17,6 +17,7 @@ use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
 use App\Enum\SettingName;
 use App\Enum\SettingsConfigType;
+use App\Exception\EncryptionException;
 use App\Form\AdminConfigType;
 use App\Form\DbSetupType;
 use App\Form\SettingsType;
@@ -28,6 +29,7 @@ use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
 use App\Service\DatabaseConnectionService;
+use App\Service\EncryptionService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\InstallationService;
@@ -70,9 +72,13 @@ class InstallationController extends AbstractController
         private readonly CaptchaValidator $captchaValidator,
         private readonly KernelInterface $kernel,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
+        private readonly EncryptionService $encryptionService,
     ) {
     }
 
+    /**
+     * @throws EncryptionException
+     */
     #[Route(
         '/dashboard/settings/certificatesManagement/installation',
         name: 'admin_dashboard_settings_certs_installation'
@@ -81,6 +87,7 @@ class InstallationController extends AbstractController
         Request $request,
     ): Response {
         $lastInstallation = $this->installationService->lastInstallation();
+
         if ($lastInstallation instanceof InstallationProgress) {
             $step = $this->installationService->getStep($lastInstallation);
             if ($step === InstallationStep::SETTINGS->value) {
@@ -100,10 +107,15 @@ class InstallationController extends AbstractController
 
         $dbDTO = new DbSetupDTO();
 
-        $dbDTO->dbOpenRoamingDbName = 'openroaming';
-        $dbDTO->dbFreeradiusDbName = 'radius';
+        $dbDTO->dbOpenRoamingUserName = 'openroaming';
+        $dbDTO->dbOpenRoamingIp = '127.0.0.1';
         $dbDTO->dbOpenRoamingPort = 3306;
+        $dbDTO->dbOpenRoamingDbName = 'openroaming';
+
+        $dbDTO->dbFreeradiusUserName = 'root';
+        $dbDTO->dbFreeradiusIp = '127.0.0.1';
         $dbDTO->dbFreeradiusPort = 3306;
+        $dbDTO->dbFreeradiusDbName = 'radius';
 
         $form = $this->createForm(DbSetupType::class, $dbDTO);
         $form->handleRequest($request);
@@ -163,10 +175,15 @@ class InstallationController extends AbstractController
                 $lastInstallation->setCreatedAt(new DateTime());
             }
 
+            // Encrypt the raw connection strings before storing in the database
+            $encryptedOpenRoamingDb = $this->encryptionService->encrypt($openRoamingDb);
+            $encryptedFreeradiusDb = $this->encryptionService->encrypt($freeradiusDb);
+
             $lastInstallation->setUpdatedAt(new DateTime());
-            $lastInstallation->setDbOpenRoaming($openRoamingDb);
-            $lastInstallation->setDbFreeradius($freeradiusDb);
+            $lastInstallation->setDbOpenRoaming($encryptedOpenRoamingDb);
+            $lastInstallation->setDbFreeradius($encryptedFreeradiusDb);
             $lastInstallation->setInstallationState(ProcessStatusType::IN_PROGRESS);
+
             $this->entityManager->persist($lastInstallation);
             $this->entityManager->flush();
 
@@ -184,6 +201,7 @@ class InstallationController extends AbstractController
                 );
             }
 
+            // Write raw unencrypted DSN to .env for Symfony/Doctrine usage
             $orResult = $this->databaseConnectionService->writeDatabaseUrlToEnv(
                 $openRoamingDb,
                 DataBaseSetupType::DATABASE_URL->value
@@ -383,9 +401,6 @@ class InstallationController extends AbstractController
             if ($step === InstallationStep::DATABASE->value) {
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
             }
-            if ($step === InstallationStep::SETTINGS->value) {
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
-            }
             if ($step === InstallationStep::ADMIN->value && !($lastInstallation->getEmailAdmin())) {
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
             }
@@ -413,10 +428,16 @@ class InstallationController extends AbstractController
 
             $lastInstallation->setUpdatedAt(new DateTime());
             $lastInstallation->setTrustedProxies($settingsDTO->trustedProxies);
-            $lastInstallation->setTurnstileKey($settingsDTO->turnstileKey ?? '');
-            $lastInstallation->setTurnstileSecret($settingsDTO->turnstileSecret ?? '');
+            $lastInstallation->setTurnstileKey(
+                $this->encryptionService->encrypt($settingsDTO->turnstileKey ?? '')
+            );
+            $lastInstallation->setTurnstileSecret(
+                $this->encryptionService->encrypt($settingsDTO->turnstileSecret ?? '')
+            );
             if ($settingsDTO->jwtPassphraseEnable) {
-                $lastInstallation->setJwtPassphrase($settingsDTO->jwtPassphrase);
+                $lastInstallation->setJwtPassphrase(
+                    $this->encryptionService->encrypt($settingsDTO->jwtPassphrase)
+                );
             }
             $lastInstallation->setInstallationState(ProcessStatusType::IN_PROGRESS);
             $this->entityManager->persist($lastInstallation);
@@ -596,9 +617,10 @@ class InstallationController extends AbstractController
 
             if ($adminUser instanceof User) {
                 $hashedPassword = $this->userPasswordHasher->hashPassword($adminUser, $adminPassword);
+                $adminUser->setPassword($hashedPassword);
+                $this->entityManager->persist($adminUser);
                 $lastInstallation->setUpdatedAt(new DateTime());
                 $lastInstallation->setEmailAdmin($adminEmail);
-                $lastInstallation->setPasswordAdmin($hashedPassword);
                 $lastInstallation->setInstallationState(ProcessStatusType::IN_PROGRESS);
                 $this->entityManager->persist($lastInstallation);
                 $this->entityManager->flush();
@@ -717,16 +739,17 @@ class InstallationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var array{code: string} $data */
-            $data = $form->getData();
-            $code = $data["code"];
+            /** @var array{code: string} $formData */
+            $formData = $form->getData();
+            $code = $formData["code"];
 
-            if ($code === $lastInstallation->getConfirmCodeAdmin()) {
+            if ($this->installationService->validateAdminConfirmationCode($lastInstallation, $code)) {
                 $adminUser = $this->userRepository->findSuperAdmin();
-                $lastInstallation->setAdminConfirmation(true);
+
+                $lastInstallation->setAdminConfirmed(true);
+
                 if ($adminUser instanceof User) {
                     $adminUser->setEmail($lastInstallation->getEmailAdmin());
-                    $adminUser->setPassword($lastInstallation->getPasswordAdmin());
                     $adminUser->setUuid($lastInstallation->getEmailAdmin());
                 }
 
@@ -758,6 +781,7 @@ class InstallationController extends AbstractController
 
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_summary');
             }
+
             $this->addFlash(
                 'error',
                 $this->translator->trans('invalidCodeMessage', [], 'controllers')
