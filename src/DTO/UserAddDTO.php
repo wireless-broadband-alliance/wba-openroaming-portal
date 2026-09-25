@@ -34,12 +34,21 @@ class UserAddDTO
     #[Assert\NotBlank(message: 'fieldCannotBeBlank', groups: [UserProvider::PHONE_NUMBER->value])]
     public ?PhoneNumber $phoneNumber = null;
 
-    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    #[Assert\NotBlank(
+        message: 'fieldCannotBeBlank'
+    )]
     #[Assert\Length(
         min: 16,
         max: 255,
-        minMessage: 'fieldCannotBeShorterThan',
-        maxMessage: 'fieldCannotBeLongerThan'
+        minMessage: 'passwordCannotBeShorterThan',
+        maxMessage: 'passwordCannotBeLongerThan'
+    )]
+    #[Assert\PasswordStrength(
+        minScore: Assert\PasswordStrength::STRENGTH_MEDIUM,
+        message: 'passwordIsTooWeak'
+    )]
+    #[Assert\NotCompromisedPassword(
+        message: 'passwordIsCompromised'
     )]
     public ?string $password = null;
 
