@@ -40,6 +40,15 @@ readonly class TermsAcceptanceListener
             return;
         }
 
+        // Bypass if accessing /forgot-password/email specifically coming from /dashboard/login
+        $restrictedRoutes = ['/forgot-password/sms', '/forgot-password/email'];
+        if (array_any($restrictedRoutes, fn($route) => str_starts_with($path, $route))) {
+            $referer = (string) $request->headers->get('referer');
+            if (str_contains($referer, '/dashboard/login')) {
+                return;
+            }
+        }
+
         // Paths that DO NOT require terms acceptance
         $excludedPrefixes = [
             '/_profiler',
