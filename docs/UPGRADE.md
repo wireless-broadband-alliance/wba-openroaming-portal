@@ -273,7 +273,7 @@ If you need to execute tasks individually, run the following commands in sequenc
 
 5. **SMS Legacy Parameters:**
 ```bash
-    php bin/console app:sms:encrypt-legacy-params
+    php bin/console app:cra:encrypt-legacy-sms-params
 ```
 
 6. **2FA & TOTP Secrets (`User.twoFAsecret`, AES-256-CBC):**

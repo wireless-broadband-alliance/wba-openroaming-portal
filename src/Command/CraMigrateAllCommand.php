@@ -60,7 +60,7 @@ class CraMigrateAllCommand extends Command
             'app:cra:hash-otp-codes' => ['--yes' => true],
             'app:cra:encrypt-settings'              => ['--yes' => true],
             'app:cra:encrypt-radius-legacy-tokens' => ['--yes' => true],
-            'app:sms:encrypt-legacy-params'         => ['--yes' => true],
+            'app:cra:encrypt-legacy-sms-params'         => ['--yes' => true],
             'app:cra:encrypt-2fa-data'              => ['--yes' => true],
         ];
 
