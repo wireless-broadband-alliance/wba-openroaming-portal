@@ -17,7 +17,8 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
     name: 'app:cra:migrate-all',
-    description: 'Executes the full suite of CRA data encryption migrations (OAuth, Settings, RADIUS, OTP, SMS, 2FA).',
+    description: 'Executes the full suite of CRA data encryption migrations 
+    (OAuth, Settings, Installation Progress, RADIUS, OTP, SMS, 2FA).',
 )]
 class CraMigrateAllCommand extends Command
 {
@@ -38,7 +39,8 @@ class CraMigrateAllCommand extends Command
             $helper = $this->getHelper('question');
             $question = new ConfirmationQuestion(
                 'This action will encrypt all legacy OAuth IDs, 
-                system settings, RADIUS tokens, OTP codes, SMS parameters, and 2FA data. Continue? [y/N] ',
+                system settings, installation progress 
+                URIs, RADIUS tokens, OTP codes, SMS parameters, and 2FA data. Continue? [y/N] ',
                 false
             );
 
@@ -56,11 +58,12 @@ class CraMigrateAllCommand extends Command
         }
 
         $commands = [
-            'app:cra:hash-oauth-ids'             => ['--yes' => true],
+            'app:cra:hash-oauth-ids' => ['--yes' => true],
             'app:cra:hash-otp-codes' => ['--yes' => true],
             'app:cra:encrypt-settings'              => ['--yes' => true],
+            'app:cra:encrypt-installation-progress' => ['--yes' => true],
             'app:cra:encrypt-radius-legacy-tokens' => ['--yes' => true],
-            'app:cra:encrypt-legacy-sms-params'         => ['--yes' => true],
+            'app:cra:encrypt-legacy-sms-params' => ['--yes' => true],
             'app:cra:encrypt-2fa-data'              => ['--yes' => true],
         ];
 
@@ -90,8 +93,8 @@ class CraMigrateAllCommand extends Command
 
 
 <info>Success:</info> All CRA data encryption migration tasks were completed successfully.
-<comment>Note:</comment> OAuth IDs, system settings, RADIUS tokens, OTP backup codes, 
-SMS parameters, and 2FA user data are now fully protected in compliance with CRA guidelines.
+<comment>Note:</comment> OAuth IDs, system settings, installation progress URIs, RADIUS tokens, 
+OTP backup codes, SMS parameters, and 2FA user data are now fully protected in compliance with CRA guidelines.
 EOL;
 
         $output->write($message);
