@@ -83,7 +83,7 @@ class EncryptLegacyInstallationProgressCommand extends Command
                 $params = ['id' => $row['id']];
 
                 foreach (self::TARGET_FIELDS as $field) {
-                    if (!isset($row[$field]) || $row[$field] === null || $row[$field] === '') {
+                    if (!isset($row[$field]) || $row[$field] === '') {
                         continue;
                     }
 
