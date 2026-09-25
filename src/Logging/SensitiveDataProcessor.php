@@ -18,6 +18,10 @@ class SensitiveDataProcessor implements ProcessorInterface
         'authorization',
     ];
 
+    public function __construct(private readonly int $maxDepth = 10)
+    {
+    }
+
     /**
      * @param LogRecord|array<string, mixed> $record
      * @return LogRecord|array<string, mixed>
@@ -41,11 +45,15 @@ class SensitiveDataProcessor implements ProcessorInterface
      * @param array<mixed, mixed> $data
      * @return array<mixed, mixed>
      */
-    private function redact(array $data): array
+    private function redact(array $data, int $depth = 0): array
     {
+        if ($depth >= $this->maxDepth) {
+            return ['[MAX_DEPTH_REACHED]'];
+        }
+
         foreach ($data as $key => $value) {
             if (is_array($value)) {
-                $data[$key] = $this->redact($value);
+                $data[$key] = $this->redact($value, $depth + 1);
             } elseif (is_string($key) && $this->isSensitiveKey($key)) {
                 $data[$key] = 'REDACTED';
             }

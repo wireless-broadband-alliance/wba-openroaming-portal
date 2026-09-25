@@ -21,6 +21,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Throwable;
 
 class SecurityTxtController extends AbstractController
 {
@@ -32,9 +33,6 @@ class SecurityTxtController extends AbstractController
     ) {
     }
 
-    /**
-     * @throws \DateMalformedStringException
-     */
     #[Route('/.well-known/security.txt', name: 'app_security_txt', methods: ['GET'])]
     public function securityTxtDisplay(Request $request): Response
     {
@@ -65,13 +63,18 @@ class SecurityTxtController extends AbstractController
             throw $this->createNotFoundException();
         }
 
+        // Fallback for legacy database records missing URI scheme
         if (!preg_match('#^(mailto:|https://|tel:)#i', $contact)) {
             $contact = 'mailto:' . $contact;
         }
 
-        $expiresUtc = new DateTimeImmutable($expires)
-            ->setTimezone(new DateTimeZone('UTC'))
-            ->format('Y-m-d\TH:i:s.000\Z');
+        try {
+            $expiresUtc = new DateTimeImmutable($expires)
+                ->setTimezone(new DateTimeZone('UTC'))
+                ->format('Y-m-d\TH:i:s.000\Z');
+        } catch (Throwable) {
+            throw $this->createNotFoundException();
+        }
 
         $lines = [
             'Contact: ' . $contact,
@@ -79,9 +82,14 @@ class SecurityTxtController extends AbstractController
         ];
 
         if ($fingerprint !== null) {
-            $lines[] = 'Encryption: openpgp4fpr:' . strtoupper(
-                preg_replace('/\s+/', '', $fingerprint)
-            );
+            $cleanFingerprint = preg_replace('/\s+/', '', $fingerprint);
+
+            // RFC 9116 §2.5.4: Handle direct URIs (https://, openpgp4fpr:, dns:) vs raw 40-character hex fingerprints
+            if (preg_match('#^(https://|dns:|openpgp4fpr:)#i', $cleanFingerprint)) {
+                $lines[] = 'Encryption: ' . $cleanFingerprint;
+            } elseif (preg_match('/^[0-9a-fa-f]{40}$/i', $cleanFingerprint)) {
+                $lines[] = 'Encryption: openpgp4fpr:' . strtoupper($cleanFingerprint);
+            }
         }
 
         $lines[] = 'Canonical: ' . $request->getSchemeAndHttpHost() . '/.well-known/security.txt';
@@ -91,6 +99,7 @@ class SecurityTxtController extends AbstractController
             Response::HTTP_OK,
             [
                 'Content-Type' => 'text/plain; charset=utf-8',
+                'Cache-Control' => 'public, max-age=86400, s-maxage=86400',
             ]
         );
     }
@@ -127,7 +136,7 @@ class SecurityTxtController extends AbstractController
         $form = $this->createForm(SecurityTxtSettingsType::class, $dto, ['disabled' => !$canWrite]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
+        if ($canWrite && $form->isSubmitted() && $form->isValid()) {
             /** @var SecurityTxtSettingsDTO $dto */
             $dto = $form->getData();
 
@@ -138,7 +147,8 @@ class SecurityTxtController extends AbstractController
             // Log the event
             $this->eventActions->saveEvent(
                 $currentUser,
-                AnalyticalEventType::SETTING_SECURITY_TXT_CONF_REQUEST->value ?? 'SETTING_SECURITY_TXT_CONF_REQUEST',
+                AnalyticalEventType::SETTING_SECURITY_TXT_CONF_REQUEST->value
+                ?? 'SETTING_SECURITY_TXT_CONF_REQUEST',
                 new DateTime(),
                 [
                     EventMetadataKeysType::IP->value => $request->getClientIp(),
