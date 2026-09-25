@@ -18,11 +18,8 @@ class SensitiveDataProcessor implements ProcessorInterface
         'authorization',
     ];
 
-    private int $maxDepth;
-
-    public function __construct(int $maxDepth = 10)
+    public function __construct(private readonly int $maxDepth = 10)
     {
-        $this->maxDepth = $maxDepth;
     }
 
     /**
@@ -46,7 +43,6 @@ class SensitiveDataProcessor implements ProcessorInterface
 
     /**
      * @param array<mixed, mixed> $data
-     * @param int $depth
      * @return array<mixed, mixed>
      */
     private function redact(array $data, int $depth = 0): array
