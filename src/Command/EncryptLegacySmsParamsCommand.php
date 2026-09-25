@@ -18,7 +18,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
-    name: 'app:sms:encrypt-legacy-params',
+    name: 'app:cra:encrypt-legacy-sms-params',
     description: 'Encrypts legacy plain-text SMS provider params to comply with CRA.',
 )]
 class EncryptLegacySmsParamsCommand extends Command
