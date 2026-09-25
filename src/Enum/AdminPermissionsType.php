@@ -57,7 +57,6 @@ enum AdminPermissionsType: string
     case CONNECTIVITY_STATISTICS_READ = 'CONNECTIVITY_STATISTICS_READ';
     // Activity Logs page
     case ACTIVITY_LOGS_READ = 'ACTIVITY_LOGS_READ';
-    case ACTIVITY_LOGS_WRITE = 'ACTIVITY_LOGS_WRITE';
     case MAP_READ = 'MAP_READ';
     case MAP_WRITE = 'MAP_WRITE';
 
