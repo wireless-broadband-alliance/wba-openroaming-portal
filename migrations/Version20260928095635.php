@@ -26,10 +26,10 @@ final class Version20260928095635 extends AbstractMigration
     public function up(Schema $schema): void
     {
         $rowCount = (int) $this->connection->fetchOne('SELECT COUNT(*) FROM ' . self::TABLE);
+
+        // Keep the most recent row, using the same "latest" rule as the repository's getLast()
         $keepId = $rowCount > 0
-            ? (int) $this->connection->fetchOne(
-                'SELECT id FROM ' . self::TABLE . ' ORDER BY (installationState IN (0, 1)) DESC, id DESC LIMIT 1'
-            )
+            ? (int)$this->connection->fetchOne('SELECT id FROM ' . self::TABLE . ' ORDER BY id DESC LIMIT 1')
             : null;
 
         $hasDuplicates = $rowCount > 1;
@@ -43,10 +43,11 @@ final class Version20260928095635 extends AbstractMigration
         );
 
         if ($hasDuplicates) {
-            $this->write(sprintf('Found %d InstallationProgress rows, keeping id %d.', $rowCount, $keepId));
+            $this->write(sprintf('Found %d InstallationProgress rows, keeping latest (id %d).', $rowCount, $keepId));
             $this->addSql('DELETE FROM ' . self::TABLE . ' WHERE id <> ?', [$keepId]);
         }
 
+        // Renumber the survivor so the entity's fixed id = 1 finds it
         if ($wrongId) {
             $this->addSql('UPDATE ' . self::TABLE . ' SET id = 1 WHERE id = ?', [$keepId]);
         }
