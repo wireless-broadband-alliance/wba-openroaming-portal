@@ -11,10 +11,8 @@ use Doctrine\ORM\Mapping as ORM;
 class InstallationProgress
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
     #[ORM\Column]
-    /** @phpstan-ignore-next-line */
-    private ?int $id = null;
+    private int $id = 1;
 
     #[ORM\Column(nullable: true, enumType: ProcessStatusType::class)]
     private ?ProcessStatusType $installationState = ProcessStatusType::IN_PROGRESS;
@@ -64,7 +62,7 @@ class InstallationProgress
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
 
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }

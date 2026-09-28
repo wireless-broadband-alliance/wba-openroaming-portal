@@ -57,58 +57,75 @@ readonly class InstallationService
      */
     public function verifyEnvSettings(): InstallationProgress
     {
-        $installationProgress = new InstallationProgress();
-        $installationProgress->setInstallationState(ProcessStatusType::IN_PROGRESS);
-        $installationProgress->setCreatedAt(new DateTime());
-        $installationProgress->setUpdatedAt(new DateTime());
+        $progress = $this->installationProgressRepository->getLast();
 
+        if ($progress instanceof InstallationProgress) {
+            // Mid-wizard/aborted rows hold pending values on purpose (getStep() compares them against .env)
+            if ($progress->getInstallationState() !== ProcessStatusType::COMPLETED) {
+                return $progress;
+            }
+        } else {
+            $progress = new InstallationProgress();
+            $progress->setInstallationState(ProcessStatusType::IN_PROGRESS);
+            $progress->setCreatedAt(new DateTime());
+        }
+
+        $progress->setUpdatedAt(new DateTime());
+
+        // Each block checks "is it missing?" first, so no connection tests run for fields already filled
         $databaseUrl = $this->parameterBag->get('app.database_url');
-        if ($databaseUrl && $this->databaseConnectionService->testDatabaseConnection($databaseUrl)) {
-            $installationProgress->setDbOpenRoaming($this->encryptionService->encrypt($databaseUrl));
+        if (
+            $databaseUrl &&
+            $progress->getDbOpenRoaming() === null &&
+            $this->databaseConnectionService->testDatabaseConnection($databaseUrl)
+        ) {
+            $progress->setDbOpenRoaming($this->encryptionService->encrypt($databaseUrl));
         }
 
         $databaseFreeRadiusUrl = $this->parameterBag->get('app.database_freeradius_url');
-        if (
-            $databaseFreeRadiusUrl &&
+        if ($databaseFreeRadiusUrl &&
+            $progress->getDbFreeradius() === null &&
             $this->databaseConnectionService->testDatabaseConnection($databaseFreeRadiusUrl)
         ) {
-            $installationProgress->setDbFreeradius($this->encryptionService->encrypt($databaseFreeRadiusUrl));
+            $progress->setDbFreeradius($this->encryptionService->encrypt($databaseFreeRadiusUrl));
         }
 
         $trustedProxies = $this->parameterBag->get('app.trusted_proxies');
-        if ($trustedProxies) {
-            $trustedProxiesArray = array_map(trim(...), explode(',', $trustedProxies));
-            $installationProgress->setTrustedProxies($trustedProxiesArray);
+        if ($trustedProxies && $progress->getTrustedProxies() === null) {
+            $progress->setTrustedProxies(array_map(trim(...), explode(',', $trustedProxies)));
         }
 
         $turnstileKey = $this->parameterBag->get('app.turnstile_key');
-        if ($turnstileKey) {
-            $installationProgress->setTurnstileKey($this->encryptionService->encrypt($turnstileKey));
+        if ($turnstileKey && $progress->getTurnstileKey() === null) {
+            $progress->setTurnstileKey($this->encryptionService->encrypt($turnstileKey));
         }
 
         $turnstileSecret = $this->parameterBag->get('app.turnstile_secret');
-        if ($turnstileSecret) {
-            $captchaValidation = $this->captchaValidator->validateCredentials($turnstileSecret);
-            if ($captchaValidation['success']) {
-                $installationProgress->setTurnstileSecret($this->encryptionService->encrypt($turnstileSecret));
-            }
+        if ($turnstileSecret &&
+            $progress->getTurnstileSecret() === null &&
+            $this->captchaValidator->validateCredentials($turnstileSecret)['success']
+        ) {
+            $progress->setTurnstileSecret($this->encryptionService->encrypt($turnstileSecret));
         }
 
         $jwtPassphrase = $this->parameterBag->get('app.jwt_passphrase');
-        if ($jwtPassphrase) {
-            $installationProgress->setJwtPassphrase($this->encryptionService->encrypt($jwtPassphrase));
+        if ($jwtPassphrase &&
+            $progress->getJwtPassphrase() === null) {
+            $progress->setJwtPassphrase($this->encryptionService->encrypt($jwtPassphrase));
         }
 
-        $superAdmin = $this->userRepository->findSuperAdmin();
-        if ($superAdmin && $superAdmin->getEmail() !== DefaultUser::ADMIN->value) {
-            $installationProgress->setEmailAdmin($superAdmin->getEmail());
-            $installationProgress->setAdminConfirmed(true);
+        if ($progress->getEmailAdmin() === null) {
+            $superAdmin = $this->userRepository->findSuperAdmin();
+            if ($superAdmin && $superAdmin->getEmail() !== DefaultUser::ADMIN->value) {
+                $progress->setEmailAdmin($superAdmin->getEmail());
+                $progress->setAdminConfirmed(true);
+            }
         }
 
-        $this->entityManager->persist($installationProgress);
+        $this->entityManager->persist($progress);
         $this->entityManager->flush();
 
-        return $installationProgress;
+        return $progress;
     }
 
     public function lastInstallation(): ?InstallationProgress
