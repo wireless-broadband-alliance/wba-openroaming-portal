@@ -83,7 +83,8 @@ readonly class InstallationService
         }
 
         $databaseFreeRadiusUrl = $this->parameterBag->get('app.database_freeradius_url');
-        if ($databaseFreeRadiusUrl &&
+        if (
+            $databaseFreeRadiusUrl &&
             $progress->getDbFreeradius() === null &&
             $this->databaseConnectionService->testDatabaseConnection($databaseFreeRadiusUrl)
         ) {
@@ -101,7 +102,8 @@ readonly class InstallationService
         }
 
         $turnstileSecret = $this->parameterBag->get('app.turnstile_secret');
-        if ($turnstileSecret &&
+        if (
+            $turnstileSecret &&
             $progress->getTurnstileSecret() === null &&
             $this->captchaValidator->validateCredentials($turnstileSecret)['success']
         ) {
@@ -109,8 +111,10 @@ readonly class InstallationService
         }
 
         $jwtPassphrase = $this->parameterBag->get('app.jwt_passphrase');
-        if ($jwtPassphrase &&
-            $progress->getJwtPassphrase() === null) {
+        if (
+            $jwtPassphrase &&
+            $progress->getJwtPassphrase() === null
+        ) {
             $progress->setJwtPassphrase($this->encryptionService->encrypt($jwtPassphrase));
         }
 
