@@ -8,7 +8,7 @@ use App\Enum\ProcessStatusType;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
-final class Version20260921154415 extends AbstractMigration
+final class Version20260928164410 extends AbstractMigration
 {
     private const TABLE = 'InstallationProgress';
 
