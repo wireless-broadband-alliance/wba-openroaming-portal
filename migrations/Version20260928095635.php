@@ -14,7 +14,7 @@ final class Version20260928095635 extends AbstractMigration
 
     public function getDescription(): string
     {
-        return 'Ensures InstallationProgress holds at most one row with fixed id = 1, only changing what is needed.';
+        return 'Ensures InstallationProgress holds at most one row with fixed id = 1, keeping the first row, only changing what is needed.';
     }
 
     // MySQL DDL causes implicit commits, so a transaction gives no protection here
@@ -27,9 +27,9 @@ final class Version20260928095635 extends AbstractMigration
     {
         $rowCount = (int) $this->connection->fetchOne('SELECT COUNT(*) FROM ' . self::TABLE);
 
-        // Keep the most recent row, using the same "latest" rule as the repository's getLast()
+        // Keep the first row (ORDER BY id ASC)
         $keepId = $rowCount > 0
-            ? (int)$this->connection->fetchOne('SELECT id FROM ' . self::TABLE . ' ORDER BY id DESC LIMIT 1')
+            ? (int)$this->connection->fetchOne('SELECT id FROM ' . self::TABLE . ' ORDER BY id ASC LIMIT 1')
             : null;
 
         $hasDuplicates = $rowCount > 1;
@@ -43,7 +43,7 @@ final class Version20260928095635 extends AbstractMigration
         );
 
         if ($hasDuplicates) {
-            $this->write(sprintf('Found %d InstallationProgress rows, keeping latest (id %d).', $rowCount, $keepId));
+            $this->write(sprintf('Found %d InstallationProgress rows, keeping first (id %d).', $rowCount, $keepId));
             $this->addSql('DELETE FROM ' . self::TABLE . ' WHERE id <> ?', [$keepId]);
         }
 

@@ -14,7 +14,7 @@ final class Version20260921154415 extends AbstractMigration
 
     public function getDescription(): string
     {
-        return 'Adds security.txt columns to InstallationProgress and, if the latest installation is completed '
+        return 'Adds security.txt columns to InstallationProgress and, if the first installation is completed '
             . 'without a security contact, reopens it to force configuration.';
     }
 
@@ -41,21 +41,21 @@ final class Version20260921154415 extends AbstractMigration
             $this->addSql(sprintf('ALTER TABLE %s %s', self::TABLE, implode(', ', $additions)));
         }
 
-        // Only the latest installation matters (same rule as the repository's getLast())
-        $latest = $this->connection->fetchAssociative(
-            'SELECT id, installationState FROM ' . self::TABLE . ' ORDER BY id DESC LIMIT 1'
+        // Fetch the FIRST installation (ORDER BY id ASC)
+        $first = $this->connection->fetchAssociative(
+            'SELECT id, installationState FROM ' . self::TABLE . ' ORDER BY id ASC LIMIT 1'
         );
 
-        if ($latest === false) {
+        if ($first === false) {
             $this->write('No InstallationProgress row found, nothing to reopen.');
             return;
         }
 
-        if ((int)$latest['installationState'] !== ProcessStatusType::COMPLETED->value) {
+        if ((int)$first['installationState'] !== ProcessStatusType::COMPLETED->value) {
             $this->write(
                 sprintf(
-                    'Latest installation (id %d) is not COMPLETED, leaving its state untouched.',
-                    $latest['id']
+                    'First installation (id %d) is not COMPLETED, leaving its state untouched.',
+                    $first['id']
                 )
             );
             return;
@@ -67,7 +67,7 @@ final class Version20260921154415 extends AbstractMigration
             'UPDATE ' . self::TABLE . ' SET installationState = ? WHERE id = ? AND installationState = ? AND securityContact IS NULL',
             [
                 ProcessStatusType::IN_PROGRESS->value,
-                (int)$latest['id'],
+                (int)$first['id'],
                 ProcessStatusType::COMPLETED->value,
             ]
         );
