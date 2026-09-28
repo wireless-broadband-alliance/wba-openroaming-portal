@@ -47,9 +47,9 @@ readonly class FirstSystemResetRequestListener
         if (!$user instanceof User || !$this->security->isGranted(AdminRoleType::ROLE_ADMIN->value, $user)) {
             return;
         }
-        if (!($this->installationProgressRepository->getLast() instanceof InstallationProgress)) {
-            $this->installationService->verifyEnvSettings();
-        }
+
+        // Now this component is independent and will always work with only the single row of the InstallationProgress
+        $this->installationService->verifyEnvSettings();
 
         $completedInstallation = $this->installationProgressRepository->findOneBy([
             'installationState' => ProcessStatusType::COMPLETED
