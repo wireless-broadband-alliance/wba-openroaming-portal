@@ -94,7 +94,7 @@ class SettingsStepController extends AbstractController
             if (!empty($settingsDTO->turnstileSecret)) {
                 $captchaValidation = $this->captchaValidator->validateCredentials($settingsDTO->turnstileSecret);
 
-                if (!($captchaValidation['success'] ?? false)) {
+                if (!($captchaValidation['success'])) {
                     $this->addFlash(
                         'error',
                         $this->translator->trans('captchaValidationFailed', [], 'controllers')
