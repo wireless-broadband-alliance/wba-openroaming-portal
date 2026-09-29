@@ -186,9 +186,9 @@ class SettingsStepController extends AbstractController
                     $hasValidPrivateKeyHeader = $settingsDTO->jwtPassphraseEnable
                         ? str_starts_with($privateKeyContent, '-----BEGIN ENCRYPTED PRIVATE KEY-----')
                         : (str_starts_with($privateKeyContent, '-----BEGIN PRIVATE KEY-----') || str_starts_with(
-                                $privateKeyContent,
-                                '-----BEGIN RSA PRIVATE KEY-----'
-                            ));
+                            $privateKeyContent,
+                            '-----BEGIN RSA PRIVATE KEY-----'
+                        ));
 
                     $hasValidPublicKeyHeader = str_starts_with($publicKeyContent, '-----BEGIN PUBLIC KEY-----');
 
