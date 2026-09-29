@@ -90,17 +90,21 @@ class SettingsStepController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $captchaValidation = $this->captchaValidator->validateCredentials($settingsDTO->turnstileSecret);
+            // Validate Turnstile only if a secret has actually been entered
+            if (!empty($settingsDTO->turnstileSecret)) {
+                $captchaValidation = $this->captchaValidator->validateCredentials($settingsDTO->turnstileSecret);
 
-            if (!$captchaValidation['success']) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('captchaValidationFailed', [], 'controllers')
-                );
-                return $this->installationFlow->redirectTo(InstallationStep::SETTINGS);
+                if (!($captchaValidation['success'])) {
+                    $this->addFlash(
+                        'error',
+                        $this->translator->trans('captchaValidationFailed', [], 'controllers')
+                    );
+                    return $this->installationFlow->redirectTo(InstallationStep::SETTINGS);
+                }
             }
 
             $lastInstallation->setUpdatedAt(new DateTime());
+            $lastInstallation->setIsSettingsCompleted(true);
             $lastInstallation->setTrustedProxies($settingsDTO->trustedProxies);
             $lastInstallation->setTurnstileKey(
                 $this->encryptionService->encrypt($settingsDTO->turnstileKey ?? '')
@@ -108,68 +112,67 @@ class SettingsStepController extends AbstractController
             $lastInstallation->setTurnstileSecret(
                 $this->encryptionService->encrypt($settingsDTO->turnstileSecret ?? '')
             );
-            if ($settingsDTO->jwtPassphraseEnable) {
+
+            if ($settingsDTO->jwtPassphraseEnable && !empty($settingsDTO->jwtPassphrase)) {
                 $lastInstallation->setJwtPassphrase(
                     $this->encryptionService->encrypt($settingsDTO->jwtPassphrase)
                 );
             }
+
             $lastInstallation->setInstallationState(ProcessStatusType::IN_PROGRESS);
             $this->entityManager->persist($lastInstallation);
             $this->entityManager->flush();
 
-            if ($settingsDTO->trustedProxies) {
+            if ($settingsDTO->trustedProxies !== []) {
                 $this->databaseConnectionService->writeDatabaseUrlToEnv(
                     implode(',', $settingsDTO->trustedProxies),
                     SettingsConfigType::TRUSTED_PROXIES->value
                 );
             }
 
-            if ($settingsDTO->turnstileKey) {
+            if (!empty($settingsDTO->turnstileKey)) {
                 $this->databaseConnectionService->writeDatabaseUrlToEnv(
                     $settingsDTO->turnstileKey,
                     SettingsConfigType::TURNSTILE_KEY->value
                 );
             }
 
-            if ($settingsDTO->turnstileSecret) {
+            if (!empty($settingsDTO->turnstileSecret)) {
                 $this->databaseConnectionService->writeDatabaseUrlToEnv(
                     $settingsDTO->turnstileSecret,
                     SettingsConfigType::TURNSTILE_SECRET->value
                 );
             }
 
-            if ($settingsDTO->jwtPassphraseEnable) {
+            if ($settingsDTO->jwtPassphraseEnable && !empty($settingsDTO->jwtPassphrase)) {
                 $this->databaseConnectionService->writeDatabaseUrlToEnv(
                     $settingsDTO->jwtPassphrase,
                     SettingsConfigType::JWT_PASSPHRASE->value
                 );
             }
 
-            // JWT Verification
+            // JWT Key Pair Generation
             try {
                 $application = new Application($this->kernel);
                 $application->setAutoExit(false);
 
-                if ($settingsDTO->jwtPassphraseEnable) {
-                    $input = new ArrayInput([
-                        'command' => 'lexik:jwt:generate-keypair',
-                        '--overwrite' => true,
-                        '--passphrase' => $settingsDTO->jwtPassphrase,
-                    ]);
-                } else {
-                    $input = new ArrayInput([
-                        'command' => 'lexik:jwt:generate-keypair',
-                        '--overwrite' => true,
-                    ]);
+                $commandArgs = [
+                    'command' => 'lexik:jwt:generate-keypair',
+                    '--overwrite' => true,
+                ];
+
+                if ($settingsDTO->jwtPassphraseEnable && !empty($settingsDTO->jwtPassphrase)) {
+                    $commandArgs['--passphrase'] = $settingsDTO->jwtPassphrase;
                 }
 
+                $input = new ArrayInput($commandArgs);
                 $output = new BufferedOutput();
+
                 if (!defined('STDIN')) {
                     define('STDIN', fopen('php://stdin', 'rb'));
                 }
 
                 $application->run($input, $output);
-                // $result = $output->fetch();
 
                 $privateKeyPath = $this->getParameter('kernel.project_dir') . '/config/jwt/private.pem';
                 $publicKeyPath = $this->getParameter('kernel.project_dir') . '/config/jwt/public.pem';
@@ -177,21 +180,19 @@ class SettingsStepController extends AbstractController
                 $success = false;
 
                 if (file_exists($privateKeyPath) && file_exists($publicKeyPath)) {
-                    $privateKeyContent = file_get_contents($privateKeyPath);
-                    $publicKeyContent = file_get_contents($publicKeyPath);
+                    $privateKeyContent = trim((string)file_get_contents($privateKeyPath));
+                    $publicKeyContent = trim((string)file_get_contents($publicKeyPath));
 
-                    if (
-                        is_string($privateKeyContent) &&
-                        is_string($publicKeyContent) &&
-                        (str_starts_with(
-                            trim($privateKeyContent),
-                            '-----BEGIN ENCRYPTED PRIVATE KEY-----'
-                        ) &&
-                            str_starts_with(
-                                trim($publicKeyContent),
-                                '-----BEGIN PUBLIC KEY-----'
-                            ))
-                    ) {
+                    $hasValidPrivateKeyHeader = $settingsDTO->jwtPassphraseEnable
+                        ? str_starts_with($privateKeyContent, '-----BEGIN ENCRYPTED PRIVATE KEY-----')
+                        : (str_starts_with($privateKeyContent, '-----BEGIN PRIVATE KEY-----') || str_starts_with(
+                            $privateKeyContent,
+                            '-----BEGIN RSA PRIVATE KEY-----'
+                        ));
+
+                    $hasValidPublicKeyHeader = str_starts_with($publicKeyContent, '-----BEGIN PUBLIC KEY-----');
+
+                    if ($hasValidPrivateKeyHeader && $hasValidPublicKeyHeader) {
                         $success = true;
                     }
                 }

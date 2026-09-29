@@ -161,11 +161,8 @@ readonly class InstallationService
             return InstallationStep::DATABASE;
         }
 
-        if (
-            !$installationProgress->getTrustedProxies() ||
-            !$installationProgress->getTurnstileKey() ||
-            !$installationProgress->getTurnstileSecret()
-        ) {
+        // Check if the settings step has been submitted/completed (instead of requiring all keys to be non-null)
+        if (!$installationProgress->isSettingsCompleted()) {
             return InstallationStep::SETTINGS;
         }
 
@@ -406,39 +403,49 @@ readonly class InstallationService
      */
     public function checkSettingsValues(InstallationProgress $installationProgress): bool
     {
+        // Only check trusted proxies if set
+        $trustedProxies = $installationProgress->getTrustedProxies();
         if (
+            !empty($trustedProxies) &&
             !$this->envValueMatches(
                 SettingsConfigType::TRUSTED_PROXIES->value,
-                implode(',', $installationProgress->getTrustedProxies() ?? [])
+                implode(',', $trustedProxies)
             )
         ) {
             return false;
         }
 
+        // Only check turnstile key if set
+        $turnstileKey = $this->decryptOrNull($installationProgress->getTurnstileKey());
         if (
+            $turnstileKey !== null &&
             !$this->envValueMatches(
                 SettingsConfigType::TURNSTILE_KEY->value,
-                $this->decryptOrNull($installationProgress->getTurnstileKey())
+                $turnstileKey
             )
         ) {
             return false;
         }
 
+        // Only check turnstile secret if set
+        $turnstileSecret = $this->decryptOrNull($installationProgress->getTurnstileSecret());
         if (
+            $turnstileSecret !== null &&
             !$this->envValueMatches(
                 SettingsConfigType::TURNSTILE_SECRET->value,
-                $this->decryptOrNull($installationProgress->getTurnstileSecret())
+                $turnstileSecret
             )
         ) {
             return false;
         }
 
-        $jwtPassphrase = $installationProgress->getJwtPassphrase();
+        // Use decryptOrNull instead of direct decrypt call to avoid EncryptionException crash
+        $jwtPassphrase = $this->decryptOrNull($installationProgress->getJwtPassphrase());
         if (
             $jwtPassphrase !== null &&
             !$this->envValueMatches(
                 SettingsConfigType::JWT_PASSPHRASE->value,
-                $this->encryptionService->decrypt($jwtPassphrase)
+                $jwtPassphrase
             )
         ) {
             return false;
@@ -589,10 +596,18 @@ readonly class InstallationService
     }
 
     /**
-     * @throws EncryptionException
+     * Safely decrypt value or return null on failure or empty input.
      */
     private function decryptOrNull(?string $encryptedValue): ?string
     {
-        return $encryptedValue !== null ? $this->encryptionService->decrypt($encryptedValue) : null;
+        if ($encryptedValue === null || trim($encryptedValue) === '') {
+            return null;
+        }
+
+        try {
+            return $this->encryptionService->decrypt($encryptedValue);
+        } catch (EncryptionException) {
+            return null;
+        }
     }
 }
