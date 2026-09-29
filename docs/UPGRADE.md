@@ -7,12 +7,13 @@
 3. [Upgrade Path Matrix](#upgrade-path-matrix)
 4. [Upgrade Checklist](#upgrade-checklist)
 5. [Step-by-Step Procedure](#step-by-step-procedure)
-6. [Release-Specific Notes: Version 1.14.0](#release-specific-notes-version-1140)
-7. [Release-Specific Notes: Version 1.13.0](#release-specific-notes-version-1130)
-8. [Release-Specific Notes: Version 1.8.1](#release-specific-notes-version-181)
-9. [Release-Specific Notes: Version 1.7.x](#release-specific-notes-version-17x)
-10. [Troubleshooting & Rollback](#troubleshooting--rollback)
-11. [Additional Resources](#additional-resources)
+6. [Release-Specific Notes: Version 1.15.0](#release-specific-notes-version-1150)
+7. [Release-Specific Notes: Version 1.14.0](#release-specific-notes-version-1140)
+8. [Release-Specific Notes: Version 1.13.0](#release-specific-notes-version-1130)
+9. [Release-Specific Notes: Version 1.8.1](#release-specific-notes-version-181)
+10. [Release-Specific Notes: Version 1.7.x](#release-specific-notes-version-17x)
+11. [Troubleshooting & Rollback](#troubleshooting--rollback)
+12. [Additional Resources](#additional-resources)
 
 ---
 
@@ -111,6 +112,7 @@ Use this table to determine the exact upgrade steps based on your current versio
 | 1.12.1          | 1.13.0         | Run `php bin/console doctrine:migrations:migrate` to set up the new `AccessPoint`, `Network`, and `SMSProvider`/`SMSProviderParam` tables. Then run `php bin/console prepare:multiSMSMigration` **once** to migrate existing BudgetSMS API credentials from the `Settings` table to the new dedicated `SMSProvider` management system. Perform both actions while the portal is **offline or restricted**.                                                                                                                                                                                                                                                       |
 | 1.13.0          | 1.13.1         | No migration or actions required.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | 1.13.1          | 1.14.0         | Run `php bin/console doctrine:migrations:migrate` (this also sets the installation progress back to `IN_PROGRESS`). Next, run `php bin/console app:cra:migrate-all --yes` to execute all CRA data encryption steps at once (including Installation Progress data). Then complete the mandatory **Security.txt Configuration** step in the Installation Wizard. **Breaking:** API v1 and v2 are removed (use `/api/v3`) and the JWT TTL is now 15 minutes. Review your `.env` and Docker Compose setup (see [Release-Specific Notes: Version 1.14.0](#release-specific-notes-version-1140)). Perform these actions while the portal is **offline or restricted**. |
+| 1.14.0          | 1.15.0         | Run `php bin/console doctrine:migrations:migrate` to add the new `ADMIN_ALLOWED_IPS` setting. No one-time data commands are required. Optionally, configure the **Admin IP Restriction** in the Admin Dashboard settings (see [Release-Specific Notes: Version 1.15.0](#release-specific-notes-version-1150)). **Important:** add your own IP before saving, otherwise you can lock yourself out (recovery: `php bin/console reset:adminIpRestriction --yes`).                                                                                                                                                                                                   |
 
 Use this table to determine the exact upgrade steps based on your current version.
 
@@ -184,6 +186,67 @@ Follow these general steps when updating the portal:
 ```bash
     docker compose logs -f web
 ```
+
+---
+
+## Release-Specific Notes: Version 1.15.0
+
+**Scenario**: Your current version is **1.14.0**, and you want to upgrade to **1.15.0**.
+
+> **Important:** Make sure you have a fresh database backup before running the migration.
+
+### 1. Required Database Migration
+
+Run Doctrine migrations to add the new `ADMIN_ALLOWED_IPS` setting:
+
+```bash
+  php bin/console doctrine:migrations:migrate
+```
+
+> **Note:** No data is rewritten. The setting is created empty, so **the upgrade does not change who can access the
+> dashboard** until an administrator configures the allowlist.
+
+### 2. New Feature — Dashboard Admin IP Restriction
+
+All `/dashboard` routes (and the admin-only Live Components) can now be restricted to an IP allowlist.
+
+* **Where to configure:** Admin Dashboard settings, in the new Admin IP Restriction setting.
+* **Accepted values:** IPv4 and IPv6 addresses and CIDR subnets, as plain text (comma- or newline-separated) or a JSON
+  array, e.g. `["192.0.2.10", "10.0.0.0/8", "2001:db8::/32"]`.
+* **Validation:** invalid IPs or subnets are rejected when saving.
+* **Empty list:** no restriction is applied.
+
+> **Warning:** Before enabling the restriction, add the IP address you are currently using to the list. Once saved,
+> requests to `/dashboard` (including `/dashboard/login`) from any other IP are denied.
+
+> **Reverse proxy / load balancer:** the restriction uses the client IP seen by the application. If the portal runs
+> behind a reverse proxy, make sure the proxy is trusted (`trusted_proxies`) and forwards `X-Forwarded-For`, otherwise
+> the portal will see the proxy's IP instead of the administrator's.
+
+### 3. Emergency Lockout Recovery
+
+If an administrator is locked out, clear the configured allowlist from the server:
+
+```bash
+  docker compose exec web php bin/console reset:adminIpRestriction --yes
+```
+
+This removes the configured IPs, so the dashboard becomes accessible again from any address.
+
+### 4. Other Fixes in This Release
+
+* Resetting a password from the dashboard no longer fails for users created via Magic Link and later promoted to admin.
+* Fixed a 500 error caused by a non-existent admin permission value (`ACTIVITY_LOGS_WRITE`). No action required.
+
+### 5. Post-Upgrade Verification
+
+* [ ] The migration ran and the Admin IP Restriction setting is visible in the dashboard settings.
+* [ ] If you enabled the allowlist, your own IP (and any other admin networks) are in the list.
+* [ ] `/dashboard` is reachable from an allowed IP and returns 403 from a non-allowed IP.
+* [ ] Behind a reverse proxy, the client IP shown in the logs is the real one, not the proxy's.
+
+> **Breaking Changes:**
+> Please always review the [CHANGELOG.md](../CHANGELOG.md) for detailed information.
 
 ---
 
@@ -429,19 +492,21 @@ This allows for rollback if issues arise.
 
 ## Troubleshooting & Rollback
 
-| Issue                                                  | Cause                                                   | Solution                                                                                                         |
-|--------------------------------------------------------|---------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|
-| Errors running migrations                              | Invalid or old `Event` records                          | Run `php bin/console clear:eventEntity` to clean up.                                                             |
-| Missing JWT keypair                                    | Skipped step during 1.4.0                               | Run `php bin/console lexik:jwt:generate-keypair`.                                                                |
-| `reset:allocate-providers` missing                     | Skipped upgrade to 1.6                                  | Upgrade to 1.6 and then run the command.                                                                         |
-| Schema mismatch                                        | Schema updates not applied                              | Run `php bin/console doctrine:schema:update --force`.                                                            |
-| Cache issues                                           | Stale or old cache files                                | Run `php bin/console cache:clear`.                                                                               |
-| Installation Wizard shows up again after 1.14.0        | The migration resets `InstallProgress` to `IN_PROGRESS` | Expected behaviour. Complete the mandatory Security.txt Configuration step in the wizard.                        |
-| API clients get 404 on `/api/v1` or `/api/v2`          | API v1 and v2 were removed in 1.14.0                    | Update the integration to `/api/v3`.                                                                             |
-| API tokens stop working after about 15 minutes         | JWT TTL reduced to 900s in 1.14.0                       | Use the token refresh endpoints described in the API documentation.                                              |
-| Users or admins cannot log in after the encryption     | An encryption step failed or ran partially              | Check the command output, then re-run `php bin/console app:cra:migrate-all --yes` (commands are safe to re-run). |
-| Installation Wizard steps fail to decrypt after 1.14.0 | `InstallationProgress` still holds plaintext values     | Run `php bin/console app:cra:encrypt-installation-progress` (or the full `app:cra:migrate-all --yes` suite).     |
-| `/metrics` returns 403 after 1.14.0                    | `METRICS_ALLOWED_IPS` no longer defaults to `0.0.0.0/0` | Add your monitoring hosts to `METRICS_ALLOWED_IPS` in `.env`.                                                    |
+| Issue                                                               | Cause                                                   | Solution                                                                                                          |
+|---------------------------------------------------------------------|---------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
+| Errors running migrations                                           | Invalid or old `Event` records                          | Run `php bin/console clear:eventEntity` to clean up.                                                              |
+| Missing JWT keypair                                                 | Skipped step during 1.4.0                               | Run `php bin/console lexik:jwt:generate-keypair`.                                                                 |
+| `reset:allocate-providers` missing                                  | Skipped upgrade to 1.6                                  | Upgrade to 1.6 and then run the command.                                                                          |
+| Schema mismatch                                                     | Schema updates not applied                              | Run `php bin/console doctrine:schema:update --force`.                                                             |
+| Cache issues                                                        | Stale or old cache files                                | Run `php bin/console cache:clear`.                                                                                |
+| Installation Wizard shows up again after 1.14.0                     | The migration resets `InstallProgress` to `IN_PROGRESS` | Expected behaviour. Complete the mandatory Security.txt Configuration step in the wizard.                         |
+| API clients get 404 on `/api/v1` or `/api/v2`                       | API v1 and v2 were removed in 1.14.0                    | Update the integration to `/api/v3`.                                                                              |
+| API tokens stop working after about 15 minutes                      | JWT TTL reduced to 900s in 1.14.0                       | Use the token refresh endpoints described in the API documentation.                                               |
+| Users or admins cannot log in after the encryption                  | An encryption step failed or ran partially              | Check the command output, then re-run `php bin/console app:cra:migrate-all --yes` (commands are safe to re-run).  |
+| Installation Wizard steps fail to decrypt after 1.14.0              | `InstallationProgress` still holds plaintext values     | Run `php bin/console app:cra:encrypt-installation-progress` (or the full `app:cra:migrate-all --yes` suite).      |
+| `/metrics` returns 403 after 1.14.0                                 | `METRICS_ALLOWED_IPS` no longer defaults to `0.0.0.0/0` | Add your monitoring hosts to `METRICS_ALLOWED_IPS` in `.env`.                                                     |
+| Cannot access `/dashboard` (403) after configuring the IP allowlist | Your IP is not in the Admin IP Restriction list         | Run `php bin/console reset:adminIpRestriction --yes` on the server, then re-configure the list including your IP. |
+| Everyone gets 403 on `/dashboard` behind a reverse proxy            | The portal sees the proxy's IP, not the client's        | Configure `trusted_proxies` and forward `X-Forwarded-For`, or add the proxy's IP to the list temporarily.         |
 
 ### Rollback Procedure
 
