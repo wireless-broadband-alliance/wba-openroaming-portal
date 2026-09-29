@@ -69,12 +69,14 @@ readonly class AdminCertificateProcessEnforcerListener
             // Installation pages
             '#^/dashboard/settings/certificatesManagement/installation$#',
             '#^/dashboard/settings/certificatesManagement/installation/commands$#',
+            '#^/dashboard/settings/certificatesManagement/installation/security-txt$#',
             '#^/dashboard/settings/certificatesManagement/installation/settings$#',
             '#^/dashboard/settings/certificatesManagement/installation/admin$#',
             '#^/dashboard/settings/certificatesManagement/installation/admin/sendCode$#',
             '#^/dashboard/settings/certificatesManagement/installation/admin/confirmation$#',
             '#^/dashboard/settings/certificatesManagement/installation/admin/confirmation/resend$#',
             '#^/dashboard/settings/certificatesManagement/installation/summary$#',
+            '#^/dashboard/settings/certificatesManagement/installation/summary/complete$#',
             '#^/dashboard/settings/certificatesManagement/installation/abortProcess$#',
 
             // Verify identity (installation | certificates)

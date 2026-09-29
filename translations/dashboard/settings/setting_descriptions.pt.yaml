@@ -96,3 +96,6 @@ EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS: 'Janela de tempo (em minutos) após a qua
 EMAIL_ATTEMPTS_NUMBER: 'Número máximo de pedidos permitidos dentro da janela de tempo definida'
 FOOTER_IMAGE_ENABLED: 'Mostra a imagem de rodapé na página inicial.'
 FOOTER_IMAGE: "O caminho do recurso ou URL para a imagem de rodapé"
+SECURITY_CONTACT: 'URI de contacto onde devem ser comunicadas as vulnerabilidades de segurança. Deve incluir o esquema (ex.: mailto:seguranca@exemplo.com, https://exemplo.com/seguranca ou tel:+123456789)'
+SECURITY_EXPIRES: 'Data e hora após a qual o ficheiro security.txt expira (ISO 8601, deve ser no futuro e no máximo até um ano a contar de hoje)'
+SECURITY_PGP_FINGERPRINT: 'Impressão digital (fingerprint) opcional da chave PGP (40 carateres hexadecimais) ou URI de encriptação (ex.: openpgp4fpr:... ou https://...) para relatórios de segurança encriptados'

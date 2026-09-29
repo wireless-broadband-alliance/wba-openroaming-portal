@@ -239,3 +239,8 @@ coverageMapDisabled: 'O mapa de cobertura está desativado no momento.'
 cannotResetExternalAuthProviderPassword: "A redefinição de palavra-passe só é permitida para Contas Portal."
 encryptionError: 'Ocorreu um erro ao encriptar os dados. Por favor, tente novamente.'
 otpCodesAlreadyViewed: 'Já visualizou os seus códigos de recuperação. Esta página só pode ser acedida uma vez.'
+securityConfigurationAppliedSuccessfully: 'As configurações de segurança foram atualizadas com sucesso.'
+securityTxt:
+  saveSuccess: "Configuração do Security.txt guardada com sucesso."
+  saveError: "Ocorreu um erro ao guardar a configuração do Security.txt."
+  formError: "Por favor, corrija os erros no formulário antes de continuar."

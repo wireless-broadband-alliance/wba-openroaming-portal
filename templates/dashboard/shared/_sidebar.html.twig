@@ -48,6 +48,9 @@
             'admin_dashboard_settings_two_fa',
             'admin_dashboard_settings_domains',
         ]|merge(smsRoutes) %}
+        {% set securityRoutes = [
+            'admin_dashboard_settings_security_txt',
+        ] %}
         {% set portalStatisticsRoutes = [
             'admin_dashboard_statistics',
             'admin_dashboard_statistics_freeradius',
@@ -297,6 +300,33 @@
                                 iconClass: 'w-5 mr-2 fill-none stroke-current',
                             }) }}
                         {% endif %}
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if is_granted(constant('App\\Enum\\AdminRoleType::ROLE_SUPER_ADMIN').value) %}
+            <div class="relative" {{ stimulus_controller('nav-submenu') }}>
+                <button type="button" class="w-full duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
+                {% if app.request.attributes.get('_route') in securityRoutes %}selected{% endif %}" {{ stimulus_action('nav-submenu', 'toggle') }}>
+                    <div class="flex items-center space-x-2">
+                        <twig:ux:icon name="wba:security-rounded" class="w-5 mr-2 fill-current stroke-none" />
+                        {{ 'security'|trans({}, '_header_admin') }}
+                    </div>
+
+                    <twig:ux:icon name="wba:right"
+                                  class="w-4 fill-none stroke-current transition ease-in {{ (app.request.attributes.get('_route') in securityRoutes) ? 'rotate-90' : '' }}"
+                                  data-nav-submenu-target="icon"/>
+                </button>
+
+                <div class="py-2 mt-1 bg-lightGray rounded-md duration-300 shadow {{ (app.request.attributes.get('_route') in securityRoutes) ? '' : 'hidden' }}" {{ stimulus_target('nav-submenu', 'container') }}>
+                    <ul class="mx-2">
+                        {{ include('dashboard/shared/_sidebar_item.html.twig', {
+                            label: 'cvdConfiguration'|trans({}, '_header_admin'),
+                            routes: ['admin_dashboard_settings_security_txt'],
+                            icon: 'wba:mail-shield',
+                            iconClass: 'fill-current stroke-none',
+                        }) }}
                     </ul>
                 </div>
             </div>

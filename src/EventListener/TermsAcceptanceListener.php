@@ -72,6 +72,7 @@ readonly class TermsAcceptanceListener
             '/.well-known/apple-app-site-association',
             '/connect/google',
             '/connect/microsoft',
+            '/.well-known/security.txt'
         ];
 
         if (array_any($excludedPrefixes, fn($prefix) => str_starts_with($path, (string)$prefix))) {

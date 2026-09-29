@@ -1,0 +1,6 @@
+securityContact: 'Contacto de Segurança'
+securityExpires: 'Data de Validade'
+securityPgpFingerprint: 'Impressão Digital PGP'
+securityTxtTitle: 'Configuração do Security.txt'
+securityTxtDescription: 'Gira as definições do seu ficheiro security.txt, que permite aos investigadores de segurança reportarem vulnerabilidades facilmente, em conformidade com a norma RFC 9116.'
+securityTxtCheckMessage: 'Para verificar se as suas alterações foram aplicadas, aceda a: '

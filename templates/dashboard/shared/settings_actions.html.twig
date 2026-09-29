@@ -33,5 +33,7 @@
         {{ include('dashboard/shared/settings_actions/_map.html.twig') }}
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_map_networks' %}
             {{ include('dashboard/shared/settings_actions/_networks.html.twig') }}
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_security_txt' %}
+        {{ include('dashboard/shared/settings_actions/_securityTxt.html.twig') }}
     {% endif %}
 {% endblock %}

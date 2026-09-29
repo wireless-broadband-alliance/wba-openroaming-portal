@@ -1,24 +1,33 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ['first', 'second'];
+    // Add 'select' and 'item' targets
+    static targets = ['first', 'second', 'select', 'item'];
 
     connect() {
-        this.update();
+        // Only run update on connect if a select target actually exists
+        if (this.hasSelectTarget) {
+            this.update();
+        }
     }
 
     update() {
+        // Guard clause in case update() is triggered manually without a select target
+        if (!this.hasSelectTarget) return;
+
         const value = this.selectTarget.value;
 
-        this.itemTargets.forEach((element) => {
-            const expectedValue = element.dataset.visibilityValue;
+        if (this.hasItemTargets) {
+            this.itemTargets.forEach((element) => {
+                const expectedValue = element.dataset.visibilityValue;
 
-            if (expectedValue === value) {
-                element.classList.remove('hidden');
-            } else {
-                element.classList.add('hidden');
-            }
-        });
+                if (expectedValue === value) {
+                    element.classList.remove('hidden');
+                } else {
+                    element.classList.add('hidden');
+                }
+            });
+        }
     }
 
     toggle() {

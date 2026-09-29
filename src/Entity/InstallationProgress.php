@@ -11,10 +11,8 @@ use Doctrine\ORM\Mapping as ORM;
 class InstallationProgress
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
     #[ORM\Column]
-    /** @phpstan-ignore-next-line */
-    private ?int $id = null;
+    private int $id = 1;
 
     #[ORM\Column(nullable: true, enumType: ProcessStatusType::class)]
     private ?ProcessStatusType $installationState = ProcessStatusType::IN_PROGRESS;
@@ -41,6 +39,15 @@ class InstallationProgress
     private ?string $jwtPassphrase = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    private ?string $securityContact = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $securityExpires = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $securityPgpFingerprint = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $emailAdmin = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -55,7 +62,7 @@ class InstallationProgress
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
 
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }
@@ -145,6 +152,58 @@ class InstallationProgress
         $this->jwtPassphrase = $jwtPassphrase;
 
         return $this;
+    }
+
+    public function getSecurityContact(): ?string
+    {
+        return $this->securityContact;
+    }
+
+    public function setSecurityContact(?string $securityContact): static
+    {
+        $this->securityContact = $securityContact;
+
+        return $this;
+    }
+
+    public function getSecurityExpires(): ?\DateTimeInterface
+    {
+        return $this->securityExpires;
+    }
+
+    public function setSecurityExpires(?\DateTimeInterface $securityExpires): static
+    {
+        $this->securityExpires = $securityExpires;
+
+        return $this;
+    }
+
+    public function getSecurityPgpFingerprint(): ?string
+    {
+        return $this->securityPgpFingerprint;
+    }
+
+    public function setSecurityPgpFingerprint(?string $securityPgpFingerprint): static
+    {
+        $this->securityPgpFingerprint = $securityPgpFingerprint;
+
+        return $this;
+    }
+
+    /**
+     * Checks if contact is present and expiration date is in the future.
+     */
+    public function isSecurityTxtValid(): bool
+    {
+        if ($this->securityContact === null || trim($this->securityContact) === '') {
+            return false;
+        }
+
+        if (!$this->securityExpires instanceof \DateTimeInterface) {
+            return false;
+        }
+
+        return $this->securityExpires > new \DateTime();
     }
 
     public function getEmailAdmin(): ?string

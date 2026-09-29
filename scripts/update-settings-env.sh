@@ -1,6 +1,8 @@
 #!/bin/bash
 
-ENV_FILE="/var/www/openroaming/.env"
+# Dynamically resolves the .env path based on the script's directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ENV_FILE="${SCRIPT_DIR}/../.env"
 
 if [ "$#" -eq 3 ]; then
     JWT_PASSPHRASE=""
