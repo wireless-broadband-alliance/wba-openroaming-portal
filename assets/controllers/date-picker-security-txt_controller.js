@@ -162,7 +162,7 @@ export default class extends Controller {
             this.dateLabelTarget.classList.remove('text-gray-500');
             this.dateLabelTarget.classList.add('text-gray-800', 'font-medium');
         } else {
-            this.dateLabelTarget.textContent = this.t('pickRange') || 'Pick a date';
+            this.dateLabelTarget.textContent = this.t('pickDate') || 'Pick a date';
             this.dateLabelTarget.classList.remove('text-gray-800', 'font-medium');
             this.dateLabelTarget.classList.add('text-gray-500');
         }
@@ -174,7 +174,7 @@ export default class extends Controller {
         if (this.#selectedDate) {
             this.footerSummaryTarget.textContent = `${this.t('selected')}: ${this.#formatDate(this.#selectedDate)}`;
         } else {
-            this.footerSummaryTarget.textContent = this.t('pickRange') || '';
+            this.footerSummaryTarget.textContent = this.t('pickDate') || '';
         }
     }
 
