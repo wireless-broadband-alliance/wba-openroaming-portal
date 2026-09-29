@@ -123,7 +123,7 @@ class SettingsStepController extends AbstractController
             $this->entityManager->persist($lastInstallation);
             $this->entityManager->flush();
 
-            if (!empty($settingsDTO->trustedProxies)) {
+            if ($settingsDTO->trustedProxies !== []) {
                 $this->databaseConnectionService->writeDatabaseUrlToEnv(
                     implode(',', $settingsDTO->trustedProxies),
                     SettingsConfigType::TRUSTED_PROXIES->value
