@@ -58,16 +58,6 @@ class AdminIPRestrictionController extends AbstractController
             $changeset = $this->settingsService->updateSettingsFromArray($dto->toArray());
             $this->settingsService->flush();
 
-            // Write trusted proxies / IP restrictions to .env if set
-            if (!empty($dto->trustedProxies)) {
-                $trustedProxiesValue = implode(',', $dto->trustedProxies);
-
-                $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                    $trustedProxiesValue,
-                    SettingsConfigType::TRUSTED_PROXIES->value
-                );
-            }
-
             // Log the event
             $this->eventActions->saveEvent(
                 $currentUser,

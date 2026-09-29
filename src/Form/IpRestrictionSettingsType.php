@@ -6,11 +6,11 @@ namespace App\Form;
 
 use App\DTO\IpRestrictionSettingsDTO;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\UX\LiveComponent\Form\Type\LiveCollectionType;
 
 /**
  * @extends AbstractType<IpRestrictionSettingsDTO>
@@ -25,7 +25,7 @@ class IpRestrictionSettingsType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('allowedIps', CollectionType::class, [
+            ->add('allowedIps', LiveCollectionType::class, [
                 'entry_type' => TextType::class,
                 'allow_add' => true,
                 'allow_delete' => true,

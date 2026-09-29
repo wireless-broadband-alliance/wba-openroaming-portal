@@ -9,19 +9,19 @@ use App\Form\IpRestrictionSettingsType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
-use Symfony\UX\LiveComponent\Attribute\LiveAction;
-use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\ComponentWithFormTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
+use Symfony\UX\LiveComponent\LiveCollectionTrait;
 
 #[AsLiveComponent]
 class IpRestrictionSettingsForm extends AbstractController
 {
     use DefaultActionTrait;
     use ComponentWithFormTrait;
+    use LiveCollectionTrait;
 
-    #[LiveProp(writable: true)]
+    #[LiveProp]
     public ?IpRestrictionSettingsDTO $ipRestrictionSettingsDTO = null;
 
     /**
@@ -36,18 +36,5 @@ class IpRestrictionSettingsForm extends AbstractController
             IpRestrictionSettingsType::class,
             $this->ipRestrictionSettingsDTO
         );
-    }
-
-    #[LiveAction]
-    public function addAllowedIp(): void
-    {
-        $this->ipRestrictionSettingsDTO->allowedIps[] = '';
-    }
-
-    #[LiveAction]
-    public function removeAllowedIp(#[LiveArg] int $index): void
-    {
-        unset($this->ipRestrictionSettingsDTO->allowedIps[$index]);
-        $this->ipRestrictionSettingsDTO->allowedIps = array_values($this->ipRestrictionSettingsDTO->allowedIps);
     }
 }
