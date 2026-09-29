@@ -185,6 +185,7 @@ class SettingFixture extends Fixture
             ['name' => SettingName::SECURITY_CONTACT->value, 'value' => ''],
             ['name' => SettingName::SECURITY_EXPIRES->value, 'value' => ''],
             ['name' => SettingName::SECURITY_PGP_FINGERPRINT->value, 'value' => ''],
+            ['name' => SettingName::ADMIN_ALLOWED_IPS->value, 'value' => ''],
         ];
 
         foreach ($settings as $settingData) {
