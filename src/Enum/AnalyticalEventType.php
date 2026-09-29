@@ -151,6 +151,7 @@ enum AnalyticalEventType: string
     case SMS_PROVIDER_ACTIVATED = 'SMS_PROVIDER_ACTIVATED';
     case SMS_PROVIDER_DEACTIVATED = 'SMS_PROVIDER_DEACTIVATED';
     case SETTING_SECURITY_TXT_CONF_REQUEST = 'SETTING_SECURITY_TXT_CONF_REQUEST';
+    case SETTING_IP_RESTRICTION_CONF_REQUEST = 'SETTING_IP_RESTRICTION_CONF_REQUEST';
 
     public function getLabel(): string
     {
@@ -320,7 +321,8 @@ enum AnalyticalEventType: string
             self::BREAKING_GLASS_ACCOUNT_RESET => 'Breaking Glass Account Reset',
             self::EXPORT_ACTIVITY_LOGS_REQUEST => 'Export Activity Logs Request',
             self::SETTING_MAP_REQUEST => 'Settings Map Request',
-            self::SETTING_SECURITY_TXT_CONF_REQUEST => 'Security Tx Conflict Request',
+            self::SETTING_SECURITY_TXT_CONF_REQUEST => 'Security TxT Configuration Request',
+            self::SETTING_IP_RESTRICTION_CONF_REQUEST => 'IP Restriction Configuration Request',
         };
     }
 }
