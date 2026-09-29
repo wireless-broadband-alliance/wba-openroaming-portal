@@ -118,6 +118,18 @@ readonly class InstallationService
             $progress->setJwtPassphrase($this->encryptionService->encrypt($jwtPassphrase));
         }
 
+        // Mark settings as completed if the installation is already COMPLETED
+        // or if settings were auto-discovered/populated from existing env parameters
+        if (
+            $progress->getInstallationState() === ProcessStatusType::COMPLETED ||
+            $progress->getTrustedProxies() !== null ||
+            $progress->getTurnstileKey() !== null ||
+            $progress->getTurnstileSecret() !== null ||
+            $progress->getJwtPassphrase() !== null
+        ) {
+            $progress->setIsSettingsCompleted(true);
+        }
+
         if ($progress->getEmailAdmin() === null) {
             $superAdmin = $this->userRepository->findSuperAdmin();
             if ($superAdmin && $superAdmin->getEmail() !== DefaultUser::ADMIN->value) {
