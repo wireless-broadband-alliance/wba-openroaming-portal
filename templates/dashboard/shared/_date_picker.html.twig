@@ -11,7 +11,7 @@
 {% endif %}
 
 {% set translations = {
-    pickRange: 'pickRange'|trans({}, '_date_filter'),
+    pickDate: 'pickDate'|trans({}, '_date_filter'),
     selected: 'selected'|trans({}, '_date_filter'),
     clear: 'clear'|trans({}, '_date_filter'),
     apply: 'applyRange'|trans({}, '_date_filter'),
@@ -49,7 +49,7 @@
             {# Render value directly from Twig so Live Component re-renders preserve the label #}
             <span data-{{ controller }}-target="dateLabel"
                   class="text-xs {{ formattedValue ? 'text-gray-800 font-medium' : 'text-gray-500' }}">
-                {{ formattedValue ?: ('pickRange'|trans({}, '_date_filter')) }}
+                {{ formattedValue ?: ('pickDate'|trans({}, '_date_filter')) }}
             </span>
 
             <span data-{{ controller }}-target="pickerArrow" class="ml-auto text-[10px] text-gray-400">▼</span>
