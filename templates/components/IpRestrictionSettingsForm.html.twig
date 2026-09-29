@@ -1,0 +1,100 @@
+<div {{ attributes }}>
+    {{ form_start(form) }}
+    {{ form_widget(form._token) }}
+
+    <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
+
+        {# ALLOWED IPS / SUBNETS CARD #}
+        <div class="transition bg-white rounded-md p-6 w-full col-span-full xl:col-span-2" {{ stimulus_controller('card') }}>
+            <div class="flex flex-row justify-between items-center">
+                <h1 class="text-base md:text-lg font-medium whitespace-nowrap">
+                    {{ 'allowedIpsLabel'|trans({}, 'IpRestrictionType') }}
+                </h1>
+                <label class="flex items-center bg-opacity-40">
+                    <img class="w-6 cursor-pointer"
+                            {{ stimulus_target('card', 'button') }}
+                            {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon" />
+                </label>
+            </div>
+
+            {% if data.ALLOWED_IPS.description is defined %}
+                {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.ALLOWED_IPS.description}) }}
+            {% endif %}
+
+            <div class="mt-4 flex justify-between items-center">
+                <button type="button"
+                        class="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition"
+                        data-action="live#action:prevent"
+                        data-live-action-param="addAllowedIp">
+                    + {{ 'addIp'|trans({}, 'IpRestrictionType') }}
+                </button>
+            </div>
+
+            <div class="space-y-3 mt-4">
+                {% for key, ipForm in form.allowedIps %}
+                    <div class="flex items-center space-x-2">
+                        <div class="flex-1 flex flex-col">
+                            {{ form_widget(ipForm, {
+                                attr: {
+                                    class: 'form-widget',
+                                    autocomplete: 'off',
+                                    'data-model': 'on(change)|*[' ~ key ~ ']'
+                                }
+                            }) }}
+                            <div class="text-red-500 text-sm mt-1">
+                                {{ form_errors(ipForm) }}
+                            </div>
+                        </div>
+                        <div>
+                            <button type="button"
+                                    class="px-2 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+                                    data-action="live#action:prevent"
+                                    data-live-action-param="removeAllowedIp"
+                                    data-live-index-param="{{ key }}">
+                                <twig:ux:icon name="wba:cross-circle-rounded" class="w-5 h-auto fill-current" />
+                            </button>
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="text-sm text-gray-500 italic mt-2">
+                        {{ 'noAllowedIpsConfigured'|trans({}, 'IpRestrictionType') }}
+                    </p>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+    {# --- INFO BANNER --- #}
+    <div class="mt-2 mr-2 p-2 text-base font-semibold w-full">
+        <div class="flex bg-infoBgColor/50 rounded-lg p-4 text-xs md:text-sm text-infoTextColor" role="alert">
+            <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3 fill-current" />
+            <span class="font-medium">
+                {{ 'ipRestrictionWarningMessage'|trans({}, 'IpRestrictionType') }}
+                <span class="font-bold underline">{{ app.request.clientIp }}</span>
+            </span>
+        </div>
+    </div>
+
+    <div class="mt-8 divider-solid"></div>
+
+    {# --- ACTION BUTTONS --- #}
+    {% if is_granted(constant('App\\Enum\\AdminRoleType::ROLE_SUPER_ADMIN').value) %}
+        <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
+            <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingIpRestriction'}) }}"
+               data-confirm="{{ 'resetMessage'|trans({}, 'settings_actions_general')|e('html_attr') }}"
+               class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
+                {{ 'reset'|trans({}, 'settings_actions_general') }}
+            </a>
+
+            <button type="submit" class="btn-primary"
+                    onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general') }}')">
+                {{ 'saveChanges'|trans({}, 'settings_actions_general') }}
+            </button>
+        </div>
+    {% endif %}
+
+    {{ form_rest(form) }}
+    {{ form_end(form, {render_rest: false}) }}
+</div>

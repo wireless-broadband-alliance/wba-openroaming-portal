@@ -6,7 +6,6 @@ namespace App\Form;
 
 use App\DTO\IpRestrictionSettingsDTO;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -26,23 +25,6 @@ class IpRestrictionSettingsType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('enableIpRestriction', CheckboxType::class, [
-                'required' => false,
-                'label' => $this->translator->trans('enableIpRestriction', [], 'IpRestrictionType'),
-            ])
-            ->add('trustedProxies', CollectionType::class, [
-                'entry_type' => TextType::class,
-                'allow_add' => true,
-                'allow_delete' => true,
-                'prototype' => true,
-                'by_reference' => false,
-                'label' => $this->translator->trans('trustedProxiesLabel', [], 'IpRestrictionType'),
-                'entry_options' => [
-                    'attr' => [
-                        'placeholder' => $this->translator->trans('trustedProxiesPlaceholder', [], 'IpRestrictionType'),
-                    ],
-                ],
-            ])
             ->add('allowedIps', CollectionType::class, [
                 'entry_type' => TextType::class,
                 'allow_add' => true,
