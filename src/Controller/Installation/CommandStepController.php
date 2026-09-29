@@ -107,11 +107,11 @@ class CommandStepController extends AbstractController
         $commands = [
             [
                 'description' => $this->translator->trans('chmodDbScript', [], 'controllers'),
-                'command' => 'chmod +x /var/www/openroaming/scripts/update-db-env.sh',
+                'command' => 'chmod +x scripts/update-db-env.sh',
             ],
             [
                 'description' => $this->translator->trans('chmodSettingsScript', [], 'controllers'),
-                'command' => 'chmod +x /var/www/openroaming/scripts/update-settings-env.sh',
+                'command' => 'chmod +x scripts/update-settings-env.sh',
             ],
             [
                 'description' => $this->translator->trans('writeDbSettingsEnv', [], 'controllers'),
@@ -123,7 +123,7 @@ class CommandStepController extends AbstractController
             ],
             [
                 'description' => $this->translator->trans('createJwtPair', [], 'controllers'),
-                'command' => 'php bin/console lexik:jwt:generate-keypair --overwrite',
+                'command' => 'docker compose exec web php bin/console lexik:jwt:generate-keypair --overwrite',
             ],
         ];
 
