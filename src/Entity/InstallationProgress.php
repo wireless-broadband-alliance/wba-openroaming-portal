@@ -38,6 +38,9 @@ class InstallationProgress
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $jwtPassphrase = null;
 
+    #[ORM\Column(type: Types::BOOLEAN)]
+    private bool $isSettingsCompleted = false;
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $securityContact = null;
 
@@ -150,6 +153,18 @@ class InstallationProgress
     public function setJwtPassphrase(?string $jwtPassphrase): static
     {
         $this->jwtPassphrase = $jwtPassphrase;
+
+        return $this;
+    }
+
+    public function isSettingsCompleted(): bool
+    {
+        return $this->isSettingsCompleted;
+    }
+
+    public function setIsSettingsCompleted(bool $isSettingsCompleted): static
+    {
+        $this->isSettingsCompleted = $isSettingsCompleted;
 
         return $this;
     }
