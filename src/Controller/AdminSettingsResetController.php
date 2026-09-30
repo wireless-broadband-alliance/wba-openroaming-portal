@@ -186,7 +186,7 @@ class AdminSettingsResetController extends AbstractController
                 'voter' => UserAuthenticationVoter::CRON_SCHEDULE_WRITE,
                 'command' => 'reset:ScheduleSettings',
                 'flash' => 'configurationScheduleClearSuccessfully',
-                'event' => AnalyticalEventType::SETTING_CRON_SCHEDULE_CONF_RESET_REQUEST->value,
+                'event' => AnalyticalEventType::SETTING_SCHEDULE_CONF_RESET_REQUEST->value,
                 'route' => 'admin_dashboard_settings_schedule',
             ],
             SettingType::RETURN_APPS => [
