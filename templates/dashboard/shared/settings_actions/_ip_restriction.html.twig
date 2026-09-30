@@ -24,7 +24,7 @@
 
         {# DESCRIPTION FETCHED FROM $data.ADMIN_ALLOWED_IPS #}
         {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
-            description: data.ADMIN_ALLOWED_IPS.description ?? ('ADMIN_ALLOWED_IPS'|trans({}, 'setting_descriptions'))
+            description: data.ADMIN_ALLOWED_IPS.description ?? ('ADMIN_ALLOWED_IPS'|trans({}, 'setting_descriptions')),
         }) }}
 
         {# ADD ITEM BUTTON #}
