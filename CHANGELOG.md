@@ -122,6 +122,7 @@
 - Applied secure defaults across the platform.
 - Enforced non-root process execution and purged build tooling from container runtime.
 - Password resets are now restricted strictly to accounts created directly on the portal.
+
 # Release V1.13.1
 
 - Added a toggle to enable/disable the Coverage Map feature from the admin dashboard (Map Settings)

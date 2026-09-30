@@ -7,13 +7,12 @@
 3. [Upgrade Path Matrix](#upgrade-path-matrix)
 4. [Upgrade Checklist](#upgrade-checklist)
 5. [Step-by-Step Procedure](#step-by-step-procedure)
-6. [Release-Specific Notes: Version 1.15.0](#release-specific-notes-version-1150)
-7. [Release-Specific Notes: Version 1.14.0](#release-specific-notes-version-1140)
-8. [Release-Specific Notes: Version 1.13.0](#release-specific-notes-version-1130)
-9. [Release-Specific Notes: Version 1.8.1](#release-specific-notes-version-181)
-10. [Release-Specific Notes: Version 1.7.x](#release-specific-notes-version-17x)
-11. [Troubleshooting & Rollback](#troubleshooting--rollback)
-12. [Additional Resources](#additional-resources)
+6. [Release-Specific Notes: Version 1.14.0](#release-specific-notes-version-1140)
+7. [Release-Specific Notes: Version 1.13.0](#release-specific-notes-version-1130)
+8. [Release-Specific Notes: Version 1.8.1](#release-specific-notes-version-181)
+9. [Release-Specific Notes: Version 1.7.x](#release-specific-notes-version-17x)
+10. [Troubleshooting & Rollback](#troubleshooting--rollback)
+11. [Additional Resources](#additional-resources)
 
 ---
 
@@ -93,26 +92,25 @@ Upgrading your system requires caution and preparation. Follow these general gui
 
 Use this table to determine the exact upgrade steps based on your current version.
 
-| Current Version | Target Version | Required Actions                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-|-----------------|----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `< 1.4.0`       | 1.4.0          | Run `php bin/console clear:eventEntity` to remove invalid legacy records before continuing.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| 1.4.0           | 1.7.0          | Run `php bin/console lexik:jwt:generate-keypair` **before upgrading**.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| 1.5.0           | 1.7.0          | Run `php bin/console reset:allocate-providers` before proceeding.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| 1.6.0           | 1.7.0          | No additional steps required; proceed directly after reviewing the changelog.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| 1.7.x           | 1.8.0          | Run `php bin/console doctrine:schema:update --force` to apply required schema changes.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| ≤ 1.8.0         | 1.8.1          | Run `php bin/console doctrine:migrations:migrate` to apply optimizations and remove the deprecated `verificationCode` field.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| 1.8.1           | 1.9.0          | Run `php bin/console doctrine:migrations:migrate`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| 1.9.0           | 1.9.1          | Minor patch release — no commands required.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| 1.9.1           | 1.10.0         | Run `php bin/console doctrine:migrations:migrate`. After upgrading, run `php bin/console prepare-release:v1100` **once** to migrate existing administrator permissions to the new Super Admin role hierarchy. Then fix VichUploader cache permissions: `chown -R www-data:www-data /var/www/openroaming/var/cache/prod/vich_uploader && chmod -R 777 /var/www/openroaming/var/cache/prod/vich_uploader`. All actions should be performed while the portal is **offline or restricted**.                                                                                                                                                                          |
-| 1.10.x          | 1.11.0         | No migrations required. Update `.env` file: change `serverVersion=8` to `serverVersion=8.0.44` (or your actual MySQL version) in both `DATABASE_URL` and `DATABASE_FREERADIUS_URL`. Refer to `.env.sample` for reference.                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| 1.11.0          | 1.11.1         | Run `php bin/console doctrine:migrations:migrate`. To remove outdated settings from the database.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| 1.11.1          | 1.11.2         | No migrations required. Font files for Inter are now self-hosted under `public/fonts/inter/`. No additional steps required.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| 1.11.2          | 1.12.0         | Run `php bin/console doctrine:migrations:migrate` to apply new configuration settings.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| 1.12.0          | 1.12.1         | Updated configuration variables default value to follow better practices (bool instead of ON & OFF, please consult the `env.sample` for more details).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| 1.12.1          | 1.13.0         | Run `php bin/console doctrine:migrations:migrate` to set up the new `AccessPoint`, `Network`, and `SMSProvider`/`SMSProviderParam` tables. Then run `php bin/console prepare:multiSMSMigration` **once** to migrate existing BudgetSMS API credentials from the `Settings` table to the new dedicated `SMSProvider` management system. Perform both actions while the portal is **offline or restricted**.                                                                                                                                                                                                                                                       |
-| 1.13.0          | 1.13.1         | No migration or actions required.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| 1.13.1          | 1.14.0         | Run `php bin/console doctrine:migrations:migrate` (this also sets the installation progress back to `IN_PROGRESS`). Next, run `php bin/console app:cra:migrate-all --yes` to execute all CRA data encryption steps at once (including Installation Progress data). Then complete the mandatory **Security.txt Configuration** step in the Installation Wizard. **Breaking:** API v1 and v2 are removed (use `/api/v3`) and the JWT TTL is now 15 minutes. Review your `.env` and Docker Compose setup (see [Release-Specific Notes: Version 1.14.0](#release-specific-notes-version-1140)). Perform these actions while the portal is **offline or restricted**. |
-| 1.14.0          | 1.15.0         | Run `php bin/console doctrine:migrations:migrate` to add the new `ADMIN_ALLOWED_IPS` setting. No one-time data commands are required. Optionally, configure the **Admin IP Restriction** in the Admin Dashboard settings (see [Release-Specific Notes: Version 1.15.0](#release-specific-notes-version-1150)). **Important:** add your own IP before saving, otherwise you can lock yourself out (recovery: `php bin/console reset:adminIpRestriction --yes`).                                                                                                                                                                                                   |
+| Current Version | Target Version | Required Actions                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+|-----------------|----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `< 1.4.0`       | 1.4.0          | Run `php bin/console clear:eventEntity` to remove invalid legacy records before continuing.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| 1.4.0           | 1.7.0          | Run `php bin/console lexik:jwt:generate-keypair` **before upgrading**.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| 1.5.0           | 1.7.0          | Run `php bin/console reset:allocate-providers` before proceeding.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| 1.6.0           | 1.7.0          | No additional steps required; proceed directly after reviewing the changelog.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| 1.7.x           | 1.8.0          | Run `php bin/console doctrine:schema:update --force` to apply required schema changes.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ≤ 1.8.0         | 1.8.1          | Run `php bin/console doctrine:migrations:migrate` to apply optimizations and remove the deprecated `verificationCode` field.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| 1.8.1           | 1.9.0          | Run `php bin/console doctrine:migrations:migrate`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| 1.9.0           | 1.9.1          | Minor patch release — no commands required.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| 1.9.1           | 1.10.0         | Run `php bin/console doctrine:migrations:migrate`. After upgrading, run `php bin/console prepare-release:v1100` **once** to migrate existing administrator permissions to the new Super Admin role hierarchy. Then fix VichUploader cache permissions: `chown -R www-data:www-data /var/www/openroaming/var/cache/prod/vich_uploader && chmod -R 777 /var/www/openroaming/var/cache/prod/vich_uploader`. All actions should be performed while the portal is **offline or restricted**.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| 1.10.x          | 1.11.0         | No migrations required. Update `.env` file: change `serverVersion=8` to `serverVersion=8.0.44` (or your actual MySQL version) in both `DATABASE_URL` and `DATABASE_FREERADIUS_URL`. Refer to `.env.sample` for reference.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| 1.11.0          | 1.11.1         | Run `php bin/console doctrine:migrations:migrate`. To remove outdated settings from the database.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| 1.11.1          | 1.11.2         | No migrations required. Font files for Inter are now self-hosted under `public/fonts/inter/`. No additional steps required.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| 1.11.2          | 1.12.0         | Run `php bin/console doctrine:migrations:migrate` to apply new configuration settings.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| 1.12.0          | 1.12.1         | Updated configuration variables default value to follow better practices (bool instead of ON & OFF, please consult the `env.sample` for more details).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| 1.12.1          | 1.13.0         | Run `php bin/console doctrine:migrations:migrate` to set up the new `AccessPoint`, `Network`, and `SMSProvider`/`SMSProviderParam` tables. Then run `php bin/console prepare:multiSMSMigration` **once** to migrate existing BudgetSMS API credentials from the `Settings` table to the new dedicated `SMSProvider` management system. Perform both actions while the portal is **offline or restricted**.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| 1.13.0          | 1.13.1         | No migration or actions required.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| 1.13.1          | 1.14.0         | Run `php bin/console doctrine:migrations:migrate` (this also sets the installation progress back to `IN_PROGRESS` and adds the new, empty `ADMIN_ALLOWED_IPS` setting). Next, run `php bin/console app:cra:migrate-all --yes` to execute all CRA data encryption steps at once (including Installation Progress data). Then complete the mandatory **Security.txt Configuration** step in the Installation Wizard. Optionally, configure the **Admin IP Restriction** in the Admin Dashboard settings; **add your own IP before saving**, otherwise you can lock yourself out (recovery: `php bin/console reset:adminIpRestriction --yes`). **Breaking:** API v1 and v2 are removed (use `/api/v3`) and the JWT TTL is now 15 minutes. Review your `.env` and Docker Compose setup (see [Release-Specific Notes: Version 1.14.0](#release-specific-notes-version-1140)). Perform these actions while the portal is **offline or restricted**. |
 
 Use this table to determine the exact upgrade steps based on your current version.
 
@@ -189,67 +187,6 @@ Follow these general steps when updating the portal:
 
 ---
 
-## Release-Specific Notes: Version 1.15.0
-
-**Scenario**: Your current version is **1.14.0**, and you want to upgrade to **1.15.0**.
-
-> **Important:** Make sure you have a fresh database backup before running the migration.
-
-### 1. Required Database Migration
-
-Run Doctrine migrations to add the new `ADMIN_ALLOWED_IPS` setting:
-
-```bash
-  php bin/console doctrine:migrations:migrate
-```
-
-> **Note:** No data is rewritten. The setting is created empty, so **the upgrade does not change who can access the
-> dashboard** until an administrator configures the allowlist.
-
-### 2. New Feature — Dashboard Admin IP Restriction
-
-All `/dashboard` routes (and the admin-only Live Components) can now be restricted to an IP allowlist.
-
-* **Where to configure:** Admin Dashboard settings, in the new Admin IP Restriction setting.
-* **Accepted values:** IPv4 and IPv6 addresses and CIDR subnets, as plain text (comma- or newline-separated) or a JSON
-  array, e.g. `["192.0.2.10", "10.0.0.0/8", "2001:db8::/32"]`.
-* **Validation:** invalid IPs or subnets are rejected when saving.
-* **Empty list:** no restriction is applied.
-
-> **Warning:** Before enabling the restriction, add the IP address you are currently using to the list. Once saved,
-> requests to `/dashboard` (including `/dashboard/login`) from any other IP are denied.
-
-> **Reverse proxy / load balancer:** the restriction uses the client IP seen by the application. If the portal runs
-> behind a reverse proxy, make sure the proxy is trusted (`trusted_proxies`) and forwards `X-Forwarded-For`, otherwise
-> the portal will see the proxy's IP instead of the administrator's.
-
-### 3. Emergency Lockout Recovery
-
-If an administrator is locked out, clear the configured allowlist from the server:
-
-```bash
-  docker compose exec web php bin/console reset:adminIpRestriction --yes
-```
-
-This removes the configured IPs, so the dashboard becomes accessible again from any address.
-
-### 4. Other Fixes in This Release
-
-* Resetting a password from the dashboard no longer fails for users created via Magic Link and later promoted to admin.
-* Fixed a 500 error caused by a non-existent admin permission value (`ACTIVITY_LOGS_WRITE`). No action required.
-
-### 5. Post-Upgrade Verification
-
-* [ ] The migration ran and the Admin IP Restriction setting is visible in the dashboard settings.
-* [ ] If you enabled the allowlist, your own IP (and any other admin networks) are in the list.
-* [ ] `/dashboard` is reachable from an allowed IP and returns 403 from a non-allowed IP.
-* [ ] Behind a reverse proxy, the client IP shown in the logs is the real one, not the proxy's.
-
-> **Breaking Changes:**
-> Please always review the [CHANGELOG.md](../CHANGELOG.md) for detailed information.
-
----
-
 ## Release-Specific Notes: Version 1.14.0
 
 **Scenario**: Your current version is **1.13.1** (or earlier 1.13.x), and you want to upgrade to **1.14.0**.
@@ -294,6 +231,10 @@ Run Doctrine migrations to apply the setting structure updates:
 > **Note:** This migration automatically changes the installation progress state (`InstallProgress`) from `COMPLETED`
 > back to `IN_PROGRESS`. This is expected: the Installation Wizard will ask for the new mandatory step described in
 > section 4.
+
+> **Note:** The same migration also adds the new `ADMIN_ALLOWED_IPS` setting (see section 6). No data is rewritten for
+> it: the setting is created empty, so **the upgrade does not change who can access the dashboard** until an
+> administrator configures the allowlist.
 
 ### 3. Required One-Time Actions — Cyber Resilience Act (CRA Annex I §1.3, §1.5) Data Encryption
 
@@ -352,9 +293,9 @@ If you need to execute tasks individually, run the following commands in sequenc
 ```
 
 > **Note:** All encryption commands are independent and safe to re-run if needed.
-`app:cra:encrypt-installation-progress`
-> skips any field that is empty or already looks encrypted, so re-running it is a no-op unless new plaintext data is
-> found (pass `--force` on that command only if you specifically need to re-encrypt already-encrypted values).
+> `app:cra:encrypt-installation-progress` skips any field that is empty or already looks encrypted, so re-running it is
+> a no-op unless new plaintext data is found (pass `--force` on that command only if you specifically need to
+> re-encrypt already-encrypted values).
 
 ### 4. Required Action — Security.txt Configuration (Coordinated Vulnerability Disclosure)
 
@@ -384,7 +325,39 @@ It is designed to run as a scheduled cron job, using the non-interactive option:
 
 > **Important:** This command permanently deletes data. Confirm the retention thresholds before scheduling it.
 
-### 6. Post-Upgrade Verification
+### 6. Optional — Dashboard Admin IP Restriction
+
+All `/dashboard` routes (and the admin-only Live Components) can now be restricted to an IP allowlist.
+
+* **Where to configure:** Admin Dashboard settings, in the new Admin IP Restriction setting.
+* **Accepted values:** IPv4 and IPv6 addresses and CIDR subnets, as plain text (comma- or newline-separated) or a JSON
+  array, e.g. `["192.0.2.10", "10.0.0.0/8", "2001:db8::/32"]`.
+* **Validation:** invalid IPs or subnets are rejected when saving.
+* **Empty list:** no restriction is applied.
+
+> **Warning:** Before enabling the restriction, add the IP address you are currently using to the list. Once saved,
+> requests to `/dashboard` (including `/dashboard/login`) from any other IP are denied.
+
+> **Reverse proxy / load balancer:** the restriction uses the client IP seen by the application. If the portal runs
+> behind a reverse proxy, make sure the proxy is trusted (`trusted_proxies`) and forwards `X-Forwarded-For`, otherwise
+> the portal will see the proxy's IP instead of the administrator's.
+
+### 7. Emergency Lockout Recovery
+
+If an administrator is locked out by the Admin IP Restriction, clear the configured allowlist from the server:
+
+```bash
+  docker compose exec web php bin/console reset:adminIpRestriction --yes
+```
+
+This removes the configured IPs, so the dashboard becomes accessible again from any address.
+
+### 8. Other Fixes in This Release
+
+* Resetting a password from the dashboard no longer fails for users created via Magic Link and later promoted to admin.
+* Fixed a 500 error caused by a non-existent admin permission value (`ACTIVITY_LOGS_WRITE`). No action required.
+
+### 9. Post-Upgrade Verification
 
 * [ ] The Installation Wizard was completed and the Security.txt configuration is saved.
 * [ ] Integrations authenticate against `/api/v3` and handle the 15-minute JWT lifetime (token refresh).
@@ -393,6 +366,10 @@ It is designed to run as a scheduled cron job, using the non-interactive option:
 * [ ] Logins with Google, Microsoft, SAML, 2FA and TOTP still work for existing users.
 * [ ] `dbOpenRoaming`, `dbFreeradius`, `turnstileKey`, `turnstileSecret` and `jwtPassphrase` on `InstallationProgress`
   are stored as encrypted values, not plaintext.
+* [ ] The Admin IP Restriction setting is visible in the dashboard settings.
+* [ ] If you enabled the allowlist, your own IP (and any other admin networks) are in the list, `/dashboard` is
+  reachable from an allowed IP and returns 403 from a non-allowed IP.
+* [ ] Behind a reverse proxy, the client IP shown in the logs is the real one, not the proxy's.
 
 > **Breaking Changes:**
 > Please always review the [CHANGELOG.md](../CHANGELOG.md) for detailed information.
