@@ -1,36 +1,3 @@
-## Release V1.15.0
-
-### Security Requirements & Features
-
-* **Dashboard Admin IP Restriction & Management**: Added support for restricting access to all `/dashboard`
-  administrative routes based on a configurable IP allowlist supporting both IPv4 and IPv6 addresses and CIDR subnets.
-* **Dashboard Management:** Administrators can now view, configure, and update allowed IP addresses directly from the
-  Admin Dashboard settings interface. Inputs support plain text (comma- or newline-separated) and JSON arrays (
-  `["192.0.0.1", "10.0.0.0/8"]`).
-* **Access Control & Request Subscriber:** Implemented `AdminIpRestrictionSubscriber` to intercept administrative
-  request flows and block unauthorized IPs while maintaining seamless access for required internal Symfony UX Live
-  Components.
-* **IP List Validation:** Added `IpListConstraint` and `IpListConstraintValidator` for strict field-level validation of
-  IP addresses and CIDR subnets across dashboard settings forms.
-* **Emergency Lockout Recovery Command:** Added the `reset:adminIpRestriction` CLI console command to clear configured
-  IP restriction settings if an administrator accidentally gets locked out:
-    ```bash
-    php bin/console reset:adminIpRestriction --yes
-    ```
-
-* **Database Migration Required:** Executing the database migration introduces the new `ADMIN_ALLOWED_IPS` configuration
-  setting:
-    ```bash
-    php bin/console doctrine:migrations:migrate
-    ```
-
-### Improvements & Bug Fixes
-
-* **Admin Password Reset Fix for Promoted Users**: Resolved an issue where resetting a password from the admin dashboard
-  failed/crashed for users created via Magic Link and later promoted to the Admin role.
-* **Admin Permissions Enum Cleanup**: Fixed a 500 Internal Server Error caused by referencing a non-existent permission
-  value (`ACTIVITY_LOGS_WRITE`) by removing the invalid backing value from `AdminPermissionsType`.
-
 ## Release V1.14.0
 
 ### Breaking Changes & Security Requirements
@@ -50,9 +17,26 @@
     Expiration Date, and optional PGP Fingerprint).
   - **Dashboard Section:** After initial setup, these parameters can also be reviewed and updated at any time in the new
     **Coordinated Vulnerability Disclosure Configuration** section on the Admin Dashboard.
-  - Execute the database migration with:
+  - Execute the database migration with (this same migration also introduces the new `ADMIN_ALLOWED_IPS` configuration
+    setting described below):
     ```bash
     php bin/console doctrine:migrations:migrate
+    ```
+
+- **Dashboard Admin IP Restriction & Management**: Added support for restricting access to all `/dashboard`
+  administrative routes based on a configurable IP allowlist supporting both IPv4 and IPv6 addresses and CIDR subnets.
+  - **Dashboard Management:** Administrators can now view, configure, and update allowed IP addresses directly from the
+    Admin Dashboard settings interface. Inputs support plain text (comma- or newline-separated) and JSON arrays (
+    `["192.0.0.1", "10.0.0.0/8"]`).
+  - **Access Control & Request Subscriber:** Implemented `AdminIpRestrictionSubscriber` to intercept administrative
+    request flows and block unauthorized IPs while maintaining seamless access for required internal Symfony UX Live
+    Components.
+  - **IP List Validation:** Added `IpListConstraint` and `IpListConstraintValidator` for strict field-level validation
+    of IP addresses and CIDR subnets across dashboard settings forms.
+  - **Emergency Lockout Recovery Command:** Added the `reset:adminIpRestriction` CLI console command to clear
+    configured IP restriction settings if an administrator accidentally gets locked out:
+    ```bash
+    php bin/console reset:adminIpRestriction --yes
     ```
 
 - **Automated Data Retention & Expired OTP Cleanup (CRA Annex I §1.5)**: Added the `clear:expired-user-data` command to
@@ -112,6 +96,10 @@
   while removing stale files.
 - **Portal Statistics Parsing Fix**: Resolved a 500 server error in `PortalStatistics` caused by device download events
   returning metadata as raw array data or unparsed JSON.
+- **Admin Password Reset Fix for Promoted Users**: Resolved an issue where resetting a password from the admin dashboard
+  failed/crashed for users created via Magic Link and later promoted to the Admin role.
+- **Admin Permissions Enum Cleanup**: Fixed a 500 Internal Server Error caused by referencing a non-existent permission
+  value (`ACTIVITY_LOGS_WRITE`) by removing the invalid backing value from `AdminPermissionsType`.
 
 ### Other CRA Compliance Fixes
 
@@ -134,7 +122,6 @@
 - Applied secure defaults across the platform.
 - Enforced non-root process execution and purged build tooling from container runtime.
 - Password resets are now restricted strictly to accounts created directly on the portal.
-
 # Release V1.13.1
 
 - Added a toggle to enable/disable the Coverage Map feature from the admin dashboard (Map Settings)
