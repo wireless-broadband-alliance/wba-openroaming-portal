@@ -6,7 +6,7 @@ export default class extends Controller {
         polygonsUrl: String,
         showAccessPoints: { type: Boolean, default: false },
         markerIcon: { type: String, default: '' },
-        zoomThreshold: { type: Number, default: 12 },
+        zoomThreshold: { type: Number, default: 12 }
     };
 
     connect() {
@@ -59,9 +59,9 @@ export default class extends Controller {
                     ">${childCount}</div>`,
                     className: 'custom-standalone-cluster coverage-network-marker',
                     iconSize: [40, 40],
-                    iconAnchor: [20, 20],
+                    iconAnchor: [20, 20]
                 });
-            },
+            }
         }).addTo(this.map);
 
         this.moveEndHandler = () => {
@@ -92,7 +92,7 @@ export default class extends Controller {
             const response = await fetch(`${this.polygonsUrlValue}?${params}`);
             if (!response.ok) return;
             data = await response.json();
-        } catch (e) {
+        } catch {
             return;
         }
 
@@ -108,18 +108,22 @@ export default class extends Controller {
         (data.networks ?? []).forEach((network) => {
             try {
                 this.drawNetwork(network, showPolygons);
-            } catch (e) {}
+            } catch {
+                /* ignore */
+            }
         });
 
         if (this.showAccessPointsValue && showPolygons) {
             (data.accessPoints ?? []).forEach((ap) => {
                 try {
                     this.drawAccessPoint(ap);
-                } catch (e) {}
+                } catch {
+                    /* ignore */
+                }
             });
         }
 
-        const validMarkers = this.pendingMarkers.filter((marker) => {
+        const validMarkers = this.pendingMarkers.filter(marker => {
             const latLng = marker.getLatLng();
             return latLng && this._isValidCoord(latLng.lat) && this._isValidCoord(latLng.lng);
         });
@@ -155,36 +159,27 @@ export default class extends Controller {
                     .bindPopup(network.name || 'Network Area');
             };
 
-            if (geometry.type === 'Polygon')
-                drawSinglePolygon(geometry.coordinates.map(toLatLngRing));
-            else if (geometry.type === 'MultiPolygon')
-                geometry.coordinates.forEach((polygonRings) =>
-                    drawSinglePolygon(polygonRings.map(toLatLngRing))
-                );
+            if (geometry.type === 'Polygon') drawSinglePolygon(geometry.coordinates.map(toLatLngRing));
+            else if (geometry.type === 'MultiPolygon') geometry.coordinates.forEach((polygonRings) => drawSinglePolygon(polygonRings.map(toLatLngRing)));
         } else {
             const drawCentroidMarker = (polygonCoordinates) => {
                 try {
                     const outerRing = polygonCoordinates[0];
                     if (!outerRing || outerRing.length === 0) return;
-                    const latLngs = outerRing
-                        .map(([lng, lat]) => [parseFloat(lat), parseFloat(lng)])
-                        .filter(([lat, lng]) => this._isValidCoord(lat) && this._isValidCoord(lng));
+                    const latLngs = outerRing.map(([lng, lat]) => [parseFloat(lat), parseFloat(lng)]).filter(([lat, lng]) => this._isValidCoord(lat) && this._isValidCoord(lng));
                     if (latLngs.length === 0) return;
                     const center = L.polygon(latLngs).getBounds().getCenter();
                     if (!this._isValidCoord(center.lat) || !this._isValidCoord(center.lng)) return;
 
-                    const marker = L.marker([center.lat, center.lng], {
-                        icon: this._getIcon(),
-                    }).bindPopup(`<b>${network.name || 'Network'}</b>`);
+                    const marker = L.marker([center.lat, center.lng], { icon: this._getIcon() }).bindPopup(`<b>${network.name || 'Network'}</b>`);
                     this.pendingMarkers.push(marker);
-                } catch (e) {}
+                } catch {
+                    /* ignore */
+                }
             };
 
             if (geometry.type === 'Polygon') drawCentroidMarker(geometry.coordinates);
-            else if (geometry.type === 'MultiPolygon')
-                geometry.coordinates.forEach((polygonCoordinates) =>
-                    drawCentroidMarker(polygonCoordinates)
-                );
+            else if (geometry.type === 'MultiPolygon') geometry.coordinates.forEach((polygonCoordinates) => drawCentroidMarker(polygonCoordinates));
         }
     }
 
@@ -192,9 +187,7 @@ export default class extends Controller {
         const lat = parseFloat(ap.lat);
         const lng = parseFloat(ap.lng);
         if (!this._isValidCoord(lat) || !this._isValidCoord(lng)) return;
-        const marker = L.marker([lat, lng], { icon: this._getIcon() }).bindPopup(
-            `<b>${ap.name || 'Access Point'}</b>`
-        );
+        const marker = L.marker([lat, lng], { icon: this._getIcon() }).bindPopup(`<b>${ap.name || 'Access Point'}</b>`);
         this.pendingMarkers.push(marker);
     }
 
@@ -210,10 +203,7 @@ export default class extends Controller {
         `;
 
         return L.divIcon({
-            html:
-                this.hasMarkerIconValue && this.markerIconValue
-                    ? this.markerIconValue
-                    : defaultPinHtml,
+            html: this.hasMarkerIconValue && this.markerIconValue ? this.markerIconValue : defaultPinHtml,
             className: 'custom-pin-icon coverage-network-marker',
             iconSize: [30, 36],
             iconAnchor: [15, 36],
