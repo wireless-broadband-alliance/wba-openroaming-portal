@@ -65,7 +65,7 @@ class ResetSecurityTxtCommand extends Command
         }
 
         $settings = [
-            ['name' => SettingName::SECURITY_CONTACT->value, 'value' => ''],
+            ['name' => SettingName::SECURITY_CONTACT->value, 'value' => 'mailto:security@example.com'],
             ['name' => SettingName::SECURITY_EXPIRES->value, 'value' => ''],
             ['name' => SettingName::SECURITY_PGP_FINGERPRINT->value, 'value' => ''],
         ];

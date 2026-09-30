@@ -1,0 +1,5 @@
+allowedIps: "Allowed IP Addresses"
+allowedIpsDescription: "Specify the IP addresses or CIDR subnets allowed to access the admin dashboard. Leave empty to allow access from any IP address."
+addIp: "Add IP Address"
+noAllowedIps: "No IP restrictions configured. Access is open to all IPs."
+ipRestrictionInfoMessage: "If no IP addresses are configured, restriction is disabled. WARNING: Adding IPs will block any administrative requests originating from outside the allowed list. If you lock yourself out, run 'php bin/console reset:admin-ip-restriction' inside the 'web' container to clear all registered IPs."

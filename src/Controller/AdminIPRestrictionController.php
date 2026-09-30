@@ -7,14 +7,14 @@ use App\Entity\User;
 use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
-use App\Enum\SettingsConfigType;
 use App\Form\IpRestrictionSettingsType;
-use App\Service\DatabaseConnectionService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\SettingsService;
 use DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\IpUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -28,10 +28,12 @@ class AdminIPRestrictionController extends AbstractController
         private readonly TranslatorInterface $translator,
         private readonly SettingsService $settingsService,
         private readonly EventActions $eventActions,
-        private readonly DatabaseConnectionService $databaseConnectionService,
     ) {
     }
 
+    /**
+     * @throws \JsonException
+     */
     #[Route('/dashboard/settings/ip-restriction', name: 'admin_dashboard_settings_ip_restriction')]
     #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function settingsSecurity(Request $request): Response
@@ -41,43 +43,59 @@ class AdminIPRestrictionController extends AbstractController
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        $canWrite = $this->isGranted(AdminRoleType::ROLE_SUPER_ADMIN->value);
 
-        // Initialize DTO from settings
         $dto = new IpRestrictionSettingsDTO($data);
-
-        // Create form bound to DTO
-        $form = $this->createForm(IpRestrictionSettingsType::class, $dto, ['disabled' => !$canWrite]);
+        $form = $this->createForm(IpRestrictionSettingsType::class, $dto);
         $form->handleRequest($request);
 
-        if ($canWrite && $form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             /** @var IpRestrictionSettingsDTO $dto */
             $dto = $form->getData();
+            $allowedIps = $dto->getAllowedIps();
+            $clientIp = (string)$request->getClientIp();
 
-            // Save updated settings in Database
-            $changeset = $this->settingsService->updateSettingsFromArray($dto->toArray());
-            $this->settingsService->flush();
+            // Expand local loopback check to handle IPv4 + IPv6 localhost seamlessly
+            $checkIps = $allowedIps;
+            if (in_array(
+                    '127.0.0.1',
+                    $allowedIps,
+                    true
+                ) && !in_array('::1', $allowedIps, true)) {
+                $checkIps[] = '::1';
+            }
 
-            // Log the event
-            $this->eventActions->saveEvent(
-                $currentUser,
-                AnalyticalEventType::SETTING_IP_RESTRICTION_CONF_REQUEST->value
-                ?? 'SETTING_IP_RESTRICTION_CONF_REQUEST',
-                new DateTime(),
-                [
-                    EventMetadataKeysType::IP->value => $request->getClientIp(),
-                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
-                    EventMetadataKeysType::CHANGESET->value => $changeset,
-                ]
-            );
+            // Lockout prevention check
+            if ($allowedIps !== [] && !IpUtils::checkIp($clientIp, $checkIps)) {
+                $errorMsg = $this->translator->trans('ipRestrictionLockout', ['%ip%' => $clientIp], 'controllers');
 
-            $this->addFlash(
-                'success',
-                $this->translator->trans('securityConfigurationAppliedSuccessfully', [], 'controllers')
-            );
+                // Show flash message if your layout uses flash banners
+                $this->addFlash('error', $errorMsg);
 
-            return $this->redirectToRoute('admin_dashboard_settings_ip_restriction');
+                // Attach to field so it shows right under the IP inputs
+                $form->get('allowedIps')->addError(new FormError($errorMsg));
+            } else {
+                $changeset = $this->settingsService->updateSettingsFromArray($dto->toArray());
+                $this->settingsService->flush();
+
+                $this->eventActions->saveEvent(
+                    $currentUser,
+                    AnalyticalEventType::SETTING_IP_RESTRICTION_CONF_REQUEST->value,
+                    new DateTime(),
+                    [
+                        EventMetadataKeysType::IP->value => $clientIp,
+                        EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                        EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
+                        EventMetadataKeysType::CHANGESET->value => $changeset,
+                    ]
+                );
+
+                $this->addFlash(
+                    'success',
+                    $this->translator->trans('securityConfigurationAppliedSuccessfully', [], 'controllers')
+                );
+
+                return $this->redirectToRoute('admin_dashboard_settings_ip_restriction');
+            }
         }
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [

@@ -96,13 +96,13 @@ These are some of the most important tools used on the development of this proje
 Technical support is strictly limited to deployments that follow baseline deployment:
 
 * **Supported Environments Only:** Assistance is exclusively provided for environments meeting the
-   specified [Prerequisites](#prerequisites). Deployments on unsupported, custom, or undocumented environments are
-   strictly out of scope.
+  specified [Prerequisites](#prerequisites). Deployments on unsupported, custom, or undocumented environments are
+  strictly out of scope.
 * **Latest Production Release:** Support is only provided for the most recent stable version of the portal. Legacy
-   or outdated versions will not receive troubleshooting, bug fixes, or patch assistance.
+  or outdated versions will not receive troubleshooting, bug fixes, or patch assistance.
 * **Zero Core Code Modifications:** The application must run on standard repository code. Any custom modifications,
-   changes, or rewrites to the source code—excluding the documented environment variable configurations—will
-   completely void support eligibility.
+  changes, or rewrites to the source code—excluding the documented environment variable configurations—will
+  completely void support eligibility.
 
 ## How to get the Project
 
@@ -161,6 +161,8 @@ All the present items can be customizable:
 - **Profile Radius Configuration**
 - **User Engagement**
 - **SMS Configuration**
+- **Security Disclosure (security.txt)**
+- **Admin IP Restriction**
 
 ### Portal Statistics
 
@@ -292,11 +294,15 @@ The OpenRoaming Provisioning Portal expects to be deployed behind an **SSL offlo
 
 - **Traffic Flow**: HTTPS/TLS connections are terminated at the upstream load balancer. Traffic is then forwarded via HTTP to port `80` of the platform web container.
 - **Forwarded Headers Requirement**: The upstream load balancer MUST pass standard `X-Forwarded-*` headers:
-  - `X-Forwarded-Proto`: Set to `https` (required for Symfony HTTPS detection, SAML/OAuth redirect URL generation, and HSTS headers).
-  - `X-Forwarded-For`: Client IP address.
-  - `X-Forwarded-Host`: Original host requested by the client.
-  - `X-Forwarded-Port`: Port requested by the client (typically 443).
+    - `X-Forwarded-Proto`: Set to `https` (required for Symfony HTTPS detection, SAML/OAuth redirect URL generation, and HSTS headers).
+    - `X-Forwarded-For`: Client IP address.
+    - `X-Forwarded-Host`: Original host requested by the client.
+    - `X-Forwarded-Port`: Port requested by the client (typically 443).
 - **Trusted Proxies (`TRUSTED_PROXIES`)**: In your `.env` file, set `TRUSTED_PROXIES` to match the IP address or CIDR range of your SSL offloading load balancer / reverse proxy so Symfony trusts the incoming `X-Forwarded-*` headers.
+
+> **Note:** The [Admin IP Restriction](#admin-ip-restriction) feature relies on the client IP resolved by Symfony.
+> If `TRUSTED_PROXIES` is not configured correctly, the portal sees the proxy's IP instead of the real client IP,
+> and the allow list will not behave as expected.
 
 - `ENABLE_DELETE_USERS_UI`: Shows a button on the UI, to be able to remove users from the
   portal.
@@ -423,7 +429,8 @@ individual needs. Here's a rundown of several important variables and their func
 
 1. `RADIUS_REALM_NAME`: The realm name for your RADIUS server.
 2. `DISPLAY_NAME`: The name used on the profiles.
-3. `PAYLOAD_IDENTIFIER`: The identifier for the payload used on the profiles.
+3. `PAYLOAD_IDENTIFIER`: The identifier for the payload used on the profiles. This is only used to create iOS/macOS
+   profiles.
 4. `OPERATOR_NAME`: The operator name used on the profiles.
 5. `DOMAIN_NAME`: The domain name used for the service.
 6. `RADIUS_TLS_NAME`: The hostname of your RADIUS server used for TLS.
@@ -577,6 +584,33 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 
 101. `FOOTER_IMAGE_ENABLED`: Shows the footer image on the landing page.
 102. `FOOTER_IMAGE`: The resource path or URL to the footer image
+
+103. `SECURITY_CONTACT`: Contact URI where security vulnerabilities should be reported. It must include the scheme
+     (e.g. `mailto:security@example.com`, `https://example.com/security`, or `tel:+123456789`).
+104. `SECURITY_EXPIRES`: Date and time after which the security.txt file expires (ISO 8601). It must be in the future
+     and at most one year ahead.
+105. `SECURITY_PGP_FINGERPRINT`: Optional PGP key fingerprint (40 hex characters) or Encryption URI
+     (e.g. `openpgp4fpr:...` or `https://...`) used for encrypted security reports.
+
+106. `ADMIN_ALLOWED_IPS`: Allowed IPs/subnets for the admin dashboard access (e.g. `203.0.113.10` or
+     `198.51.100.0/24`). Leave empty to disable the restriction. See [Admin IP Restriction](#admin-ip-restriction).
+
+#### Admin IP Restriction
+
+When `ADMIN_ALLOWED_IPS` contains at least one entry, only clients whose IP matches one of the listed IP addresses or
+CIDR ranges can access the admin dashboard (`/dashboard` and every path below it). Any other client receives a
+`403 Access denied` response, and the denied attempt is logged as a warning.
+
+- **Where to configure it:** Dashboard → Settings → IP Restriction (Super Admin only). Each IP or CIDR range is added
+  as a separate entry.
+- **Accepted formats:** IPv4 and IPv6 addresses, and CIDR ranges (e.g. `10.0.0.0/8`).
+- **Stored format:** The list is stored in the setting as a JSON array, e.g. `["192.0.0.1", "10.0.0.0/8"]`. Comma,
+  semicolon or line-separated values are also accepted when read.
+- **Disabled by default:** An empty list disables the restriction.
+- **Lockout protection:** The form refuses to save a list that does not include the IP you are currently connecting
+  from.
+- **Behind a proxy:** The IP checked is the one resolved by Symfony, so `TRUSTED_PROXIES` must be configured
+  correctly (see [SSL Offloading & Reverse Proxy Configuration](#ssl-offloading--reverse-proxy-configuration)).
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 

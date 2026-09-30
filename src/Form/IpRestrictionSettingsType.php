@@ -31,7 +31,6 @@ class IpRestrictionSettingsType extends AbstractType
                 'allow_delete' => true,
                 'prototype' => true,
                 'by_reference' => false,
-                'label' => $this->translator->trans('allowedIpsLabel', [], 'IpRestrictionType'),
                 'entry_options' => [
                     'attr' => [
                         'placeholder' => $this->translator->trans('allowedIpsPlaceholder', [], 'IpRestrictionType'),

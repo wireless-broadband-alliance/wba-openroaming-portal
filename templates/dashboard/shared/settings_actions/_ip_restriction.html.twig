@@ -11,7 +11,7 @@
         {# CARD HEADER #}
         <div class="flex flex-row justify-between">
             <h1 class="text-base md:text-lg font-medium whitespace-nowrap">
-                {{ 'allowedIps'|trans({}, '_ipRestriction') }}
+                {{ 'allowedIps'|trans({}, '_ip_restriction') }}
             </h1>
 
             <label class="flex items-center bg-opacity-40">
@@ -22,8 +22,9 @@
             </label>
         </div>
 
+        {# DESCRIPTION FETCHED FROM $data.ADMIN_ALLOWED_IPS #}
         {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
-            description: data.ALLOWED_IPS.description ?? ('allowedIpsDescription'|trans({}, '_ipRestriction'))
+            description: data.ADMIN_ALLOWED_IPS.description ?? ('ADMIN_ALLOWED_IPS'|trans({}, 'setting_descriptions'))
         }) }}
 
         {# ADD ITEM BUTTON #}
@@ -32,7 +33,7 @@
                 data-action="live#action"
                 data-live-action-param="addCollectionItem"
                 data-live-name-param="{{ form.allowedIps.vars.full_name }}">
-            {{ 'addIp'|trans({}, '_ipRestriction') }}
+            {{ 'addIp'|trans({}, '_ip_restriction') }}
         </button>
 
         {# LIVE COLLECTION LIST #}
@@ -56,7 +57,7 @@
                 </div>
             {% else %}
                 <p class="text-sm text-gray-500 py-2 italic">
-                    {{ 'noAllowedIps'|trans({}, '_ipRestriction') }}
+                    {{ 'noAllowedIps'|trans({}, '_ip_restriction') }}
                 </p>
             {% endfor %}
         </div>
@@ -68,11 +69,11 @@
 
     {# --- INFO BANNER --- #}
     <div class="mt-4 p-2 text-base font-semibold w-full">
-        <div class="flex bg-infoBgColor/50 rounded-lg p-4 text-xs md:text-sm text-infoTextColor" role="alert">
+        <div class="toast-warning-dashboard" role="alert">
             <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3 fill-current shrink-0" />
 
             <span class="font-medium">
-                {{ 'ipRestrictionInfoMessage'|trans({}, '_ipRestriction') }}
+                {{ 'ipRestrictionInfoMessage'|trans({}, '_ip_restriction') }}
             </span>
         </div>
     </div>
@@ -81,7 +82,7 @@
 
     {% if is_granted(constant('App\\Enum\\AdminRoleType::ROLE_SUPER_ADMIN').value) %}
         <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
-            <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingIpRestriction'}) }}"
+            <a href="{{ path('app_dashboard_regenerate_code_admin', {type: constant('App\\Enum\\SettingType::ADMIN_IP_RESTRICTION').value}) }}"
                data-confirm="{{ 'resetMessage'|trans({}, 'settings_actions_general')|e('html_attr') }}"
                class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
                 {{ 'reset'|trans({}, 'settings_actions_general') }}
@@ -94,6 +95,5 @@
         </div>
     {% endif %}
 
-    {{ form_rest(form) }}
     {{ form_end(form, {render_rest: false}) }}
 </twig:IpRestrictionSettingsForm>

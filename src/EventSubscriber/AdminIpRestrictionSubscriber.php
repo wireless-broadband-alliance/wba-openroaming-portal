@@ -24,6 +24,9 @@ final readonly class AdminIpRestrictionSubscriber implements EventSubscriberInte
         return [KernelEvents::REQUEST => ['onRequest', 20]];
     }
 
+    /**
+     * @throws \JsonException
+     */
     public function onRequest(RequestEvent $event): void
     {
         if (!$event->isMainRequest()) {
@@ -41,7 +44,12 @@ final readonly class AdminIpRestrictionSubscriber implements EventSubscriberInte
             return; // feature disabled
         }
 
-        $clientIp = (string)$request->getClientIp();
+        // If 127.0.0.1 is allowed, automatically allow IPv6 ::1 as well
+        if (in_array('127.0.0.1', $allowed, true) && !in_array('::1', $allowed, true)) {
+            $allowed[] = '::1';
+        }
+
+        $clientIp = (string) $request->getClientIp();
 
         if (!IpUtils::checkIp($clientIp, $allowed)) {
             $this->logger->warning('Dashboard access denied by IP', [
