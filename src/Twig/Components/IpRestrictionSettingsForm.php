@@ -30,6 +30,9 @@ class IpRestrictionSettingsForm extends AbstractController
     #[LiveProp]
     public array $data = [];
 
+    /**
+     * @return FormInterface<IpRestrictionSettingsDTO>
+     */
     protected function instantiateForm(): FormInterface
     {
         return $this->createForm(
