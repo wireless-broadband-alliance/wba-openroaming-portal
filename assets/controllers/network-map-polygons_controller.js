@@ -39,9 +39,6 @@ export default class extends Controller {
             animate: false,
             iconCreateFunction: (cluster) => {
                 const childCount = cluster.getChildCount();
-                const center = cluster.getLatLng();
-
-                console.log(`🚨 [TESTE 1 - CRIAÇÃO] A gerar cluster em Lat ${center.lat} com ${childCount} pontos.`);
 
                 return L.divIcon({
                     html: `<div style="
@@ -60,7 +57,7 @@ export default class extends Controller {
                         box-sizing: border-box;
                         z-index: 999999;
                     ">${childCount}</div>`,
-                    className: 'custom-standalone-cluster',
+                    className: 'custom-standalone-cluster coverage-network-marker',
                     iconSize: [40, 40],
                     iconAnchor: [20, 20]
                 });
@@ -125,41 +122,10 @@ export default class extends Controller {
 
         if (validMarkers.length > 0) {
             this.clusterGroup.addLayers(validMarkers);
-
-            // =========================================================
-            // TESTE CRÍTICO DE DOM: O Leaflet desenhou mesmo a div?
-            // =========================================================
-            setTimeout(() => {
-                console.log(`\n--- [TESTE 2 - AVALIAÇÃO DO DOM DO BROWSER] ---`);
-                const clustersNoHTML = document.querySelectorAll('.custom-standalone-cluster');
-
-                console.log(`Encontrei ${clustersNoHTML.length} cluster(s) fisicamente no HTML da página.`);
-
-                if (clustersNoHTML.length > 0) {
-                    const elemento = clustersNoHTML[0];
-                    const rect = elemento.getBoundingClientRect();
-                    const estilos = window.getComputedStyle(elemento);
-
-                    console.log('Tamanho no ecrã (Largura x Altura):', rect.width, 'x', rect.height);
-                    console.log('Posição real no ecrã (X, Y):', rect.left, ',', rect.top);
-                    console.log('Visibilidade (Display):', estilos.display);
-                    console.log('Opacidade:', estilos.opacity);
-                    console.log('Z-Index:', estilos.zIndex);
-
-                    if (rect.width === 0 || rect.height === 0) {
-                        console.error('❌ ERRO: O cluster está no HTML mas tem tamanho 0x0. O browser está a escondê-lo ou falta o CSS base do Leaflet!');
-                    } else {
-                        console.log('✅ O cluster está no HTML e tem tamanho visível. Se não o vês, está tapado por alguma coisa ou fora das coordenadas do ecrã.');
-                    }
-                } else {
-                    console.error('❌ ERRO: O JS mandou criar o cluster, mas a div não foi injetada no HTML do mapa!');
-                }
-            }, 500); // 500ms é tempo suficiente para o mapa renderizar o HTML
         }
     }
 
     drawNetwork(network, showPolygons) {
-        // ... (código inalterado) ...
         const geometry = network.geometry;
         if (!geometry || !geometry.type || !geometry.coordinates) return;
 
@@ -173,8 +139,16 @@ export default class extends Controller {
         if (showPolygons) {
             const drawSinglePolygon = (rings) => {
                 if (!rings || rings.length === 0) return;
-                L.polygon(rings, { weight: 2, dashArray: '6, 8', color: '#7c3aed', fillColor: '#8b5cf6', fillOpacity: 0.18, fillRule: 'nonzero', })
-                    .addTo(this.polygonGroup).bindPopup(network.name || 'Network Area');
+                L.polygon(rings, {
+                    weight: 2,
+                    dashArray: '6, 8',
+                    color: '#7c3aed',
+                    fillColor: '#8b5cf6',
+                    fillOpacity: 0.18,
+                    fillRule: 'nonzero',
+                })
+                    .addTo(this.polygonGroup)
+                    .bindPopup(network.name || 'Network Area');
             };
 
             if (geometry.type === 'Polygon') drawSinglePolygon(geometry.coordinates.map(toLatLngRing));
@@ -207,11 +181,11 @@ export default class extends Controller {
         this.pendingMarkers.push(marker);
     }
 
-    _isValidCoord(val) { return typeof val === 'number' && !isNaN(val) && isFinite(val); }
+    _isValidCoord(val) {
+        return typeof val === 'number' && !isNaN(val) && isFinite(val);
+    }
 
     _getIcon() {
-        console.log(`[TESTE 3 - ÍCONE] O valor fornecido pelo Twig é: "${this.markerIconValue}" (Tamanho: ${this.markerIconValue.length} caracteres)`);
-
         const defaultPinHtml = `
             <svg width="30" height="36" viewBox="0 0 24 24" fill="#7c3aed" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#7c3aed"/>

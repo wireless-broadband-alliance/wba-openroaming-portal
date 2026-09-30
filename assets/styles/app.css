@@ -428,7 +428,7 @@
 /* Leaflet Coverage Map Overrides */
 @layer components {
     /* Only hide real AP markers (icon URL-based), not our custom divIcon pins */
-    .coverage-map-public .leaflet-marker-icon:not(.coverage-network-marker),
+    .coverage-map-public .leaflet-marker-icon:not(.coverage-network-marker):not(.custom-standalone-cluster):not(.marker-cluster),
     .coverage-map-public .leaflet-marker-shadow {
         @apply !hidden;
     }
