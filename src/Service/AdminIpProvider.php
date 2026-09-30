@@ -43,7 +43,7 @@ readonly class AdminIpProvider
             );
             if (is_array($decoded)) {
                 $ips = array_filter($decoded, fn($item) => is_string($item) && trim($item) !== '');
-                return array_values(array_unique(array_map('trim', $ips)));
+                return array_values(array_unique(array_map(trim(...), $ips)));
             }
         }
 

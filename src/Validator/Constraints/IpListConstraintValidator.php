@@ -20,7 +20,7 @@ final class IpListConstraintValidator extends ConstraintValidator
         }
 
         foreach (AdminIpProvider::parse((string)$value) as $entry) {
-            if (!self::isValidEntry($entry)) {
+            if (!$this->isValidEntry($entry)) {
                 $this->context->buildViolation($constraint->message)
                     ->setParameter('{{ value }}', $entry)
                     ->addViolation();
@@ -28,7 +28,7 @@ final class IpListConstraintValidator extends ConstraintValidator
         }
     }
 
-    private static function isValidEntry(string $entry): bool
+    private function isValidEntry(string $entry): bool
     {
         [$ip, $mask] = array_pad(explode('/', $entry, 2), 2, null);
 
