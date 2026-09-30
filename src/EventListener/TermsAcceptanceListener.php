@@ -14,14 +14,14 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class TermsAcceptanceListener
 {
-    private const FORGOT_PASSWORD_PREFIX = '/forgot-password';
-    private const FORGOT_PASSWORD_BYPASS_KEY = 'terms_bypass_forgot_password';
-    private const DASHBOARD_LOGIN_PATH = '/dashboard/login';
+    private const string FORGOT_PASSWORD_PREFIX = '/forgot-password';
+    private const string FORGOT_PASSWORD_BYPASS_KEY = 'terms_bypass_forgot_password';
+    private const string DASHBOARD_LOGIN_PATH = '/dashboard/login';
 
     /**
      * Paths that DO NOT require terms acceptance.
      */
-    private const EXCLUDED_PREFIXES = [
+    private const array EXCLUDED_PREFIXES = [
         '/_profiler',
         '/_wdt',
         '/api',
