@@ -56,11 +56,13 @@ class AdminIPRestrictionController extends AbstractController
 
             // Expand local loopback check to handle IPv4 + IPv6 localhost seamlessly
             $checkIps = $allowedIps;
-            if (in_array(
+            if (
+                in_array(
                     '127.0.0.1',
                     $allowedIps,
                     true
-                ) && !in_array('::1', $allowedIps, true)) {
+                ) && !in_array('::1', $allowedIps, true)
+            ) {
                 $checkIps[] = '::1';
             }
 
