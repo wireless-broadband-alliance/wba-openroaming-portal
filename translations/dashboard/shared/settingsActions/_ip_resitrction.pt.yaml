@@ -1,5 +1,0 @@
-allowedIps: "Endereços IP Permitidos"
-allowedIpsDescription: "Especifique os endereços IP ou gamas CIDR permitidos a aceder ao painel de administração. Deixe em branco para permitir o acesso a partir de qualquer endereço IP."
-addIp: "Adicionar Endereço IP"
-noAllowedIps: "Nenhuma restrição de IP configurada. O acesso está aberto a todos os IPs."
-ipRestrictionInfoMessage: "Se não existirem endereços IP configurados, a restrição está desativada. AVISO: Adicionar IPs irá bloquear quaisquer pedidos administrativos com origem fora da lista permitida. Caso fique bloqueado por engano, execute o comando 'php bin/console reset:admin-ip-restriction' no contentor 'web' para limpar todos os IPs registados."

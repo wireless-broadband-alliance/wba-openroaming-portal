@@ -216,7 +216,6 @@ class ResetAllSettingsCommand extends Command
             ['name' => SettingName::SECURITY_CONTACT->value, 'value' => ''],
             ['name' => SettingName::SECURITY_EXPIRES->value, 'value' => ''],
             ['name' => SettingName::SECURITY_PGP_FINGERPRINT->value, 'value' => ''],
-            ['name' => SettingName::ADMIN_ALLOWED_IPS->value, 'value' => ''],
         ];
 
         // phpcs:disable Generic.Files.LineLength.TooLong

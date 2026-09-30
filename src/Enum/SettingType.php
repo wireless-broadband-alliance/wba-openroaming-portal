@@ -21,7 +21,6 @@ enum SettingType: string implements TranslatableInterface
     case SCHEDULE = 'settingSchedule';
     case RETURN_APPS = 'settingReturnApps';
     case SECURITY_TXT = 'settingSecurityTxt';
-    case ADMIN_IP_RESTRICTION = 'settingAdminIpRestriction';
 
     public function trans(TranslatorInterface $translator, ?string $locale = null): string
     {

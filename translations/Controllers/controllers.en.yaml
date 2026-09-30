@@ -247,5 +247,3 @@ securityTxt:
   saveError: "An error occurred while saving the Security.txt configuration."
   formError: "Please correct the errors in the form before proceeding."
 securityTxtSettingsResetSuccessfully: "Settings have been reset successfully."
-ipRestrictionLockout: "Your current IP address (%ip%) is not included in the allowed IPs list. Saving these settings would lock you out of the admin panel."
-ipRestrictionResetSuccessfully: "IP restriction settings have been reset successfully."

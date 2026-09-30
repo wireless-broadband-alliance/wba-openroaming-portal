@@ -10,4 +10,3 @@ setting_type.settingSMS: SMS Configuration
 setting_type.settingSchedule: Schedule Automation
 setting_type.settingReturnApps: Return Apps
 setting_type.settingSecurityTxt: Coordinated Vulnerability Disclosure Configuration
-setting_type.settingAdminIpRestriction: Admin IP Restriction

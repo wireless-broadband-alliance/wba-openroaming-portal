@@ -1,5 +1,0 @@
-enableIpRestriction: "Ativar restrição de IP"
-trustedProxiesLabel: "Proxies de confiança"
-trustedProxiesPlaceholder: "ex.: 10.0.0.1 ou 10.0.0.0/24"
-allowedIpsLabel: "IPs / Sub-redes permitidos"
-allowedIpsPlaceholder: "ex.: 192.168.1.50 ou 192.168.1.0/24"

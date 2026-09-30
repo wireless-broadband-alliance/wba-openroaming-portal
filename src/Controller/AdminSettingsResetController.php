@@ -203,13 +203,6 @@ class AdminSettingsResetController extends AbstractController
                 'event' => AnalyticalEventType::SETTING_TERMS_RESET_REQUEST->value,
                 'route' => 'admin_dashboard_settings_security_txt',
             ],
-            SettingType::ADMIN_IP_RESTRICTION => [
-                'voter' => AdminRoleType::ROLE_SUPER_ADMIN->value,
-                'command' => 'reset:admin-ip-restriction',
-                'flash' => 'ipRestrictionResetSuccessfully',
-                'event' => AnalyticalEventType::SETTING_IP_RESTRICTION_CONF_REQUEST->value,
-                'route' => 'admin_dashboard_settings_ip_restriction',
-            ],
         };
     }
 
@@ -244,7 +237,6 @@ class AdminSettingsResetController extends AbstractController
                 SettingType::SCHEDULE->value,
                 SettingType::RETURN_APPS->value,
                 SettingType::SECURITY_TXT->value,
-                SettingType::ADMIN_IP_RESTRICTION->value,
             ], true)
         ) {
             $lastResend = $this->eventRepository->findLatest2FACodeAttemptEvent(

@@ -245,5 +245,3 @@ securityTxt:
   saveError: "Ocorreu um erro ao guardar a configuração do Security.txt."
   formError: "Por favor, corrija os erros no formulário antes de continuar."
 securityTxtSettingsResetSuccessfully: "As definições foram repostas com sucesso."
-ipRestrictionLockout: "O seu endereço IP atual (%ip%) não está incluído na lista de IPs permitidos. Guardar estas definições iria bloquear o seu acesso ao painel de administração."
-ipRestrictionResetSuccessfully: "As definições de restrição de IP foram repostas com sucesso."

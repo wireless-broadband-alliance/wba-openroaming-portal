@@ -99,4 +99,3 @@ FOOTER_IMAGE: "O caminho do recurso ou URL para a imagem de rodapé"
 SECURITY_CONTACT: 'URI de contacto onde devem ser comunicadas as vulnerabilidades de segurança. Deve incluir o esquema (ex.: mailto:seguranca@exemplo.com, https://exemplo.com/seguranca ou tel:+123456789)'
 SECURITY_EXPIRES: 'Data e hora após a qual o ficheiro security.txt expira (ISO 8601, deve ser no futuro e no máximo até um ano a contar de hoje)'
 SECURITY_PGP_FINGERPRINT: 'Impressão digital (fingerprint) opcional da chave PGP (40 carateres hexadecimais) ou URI de encriptação (ex.: openpgp4fpr:... ou https://...) para relatórios de segurança encriptados'
-ADMIN_ALLOWED_IPS: "IPs/sub-redes permitidos para a área de administração, um por linha (ex.: 203.0.113.10 ou 198.51.100.0/24). Deixe em branco para desativar."

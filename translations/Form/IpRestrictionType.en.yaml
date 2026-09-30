@@ -1,3 +1,0 @@
-enableIpRestriction: "Enable IP Restriction"
-allowedIpsLabel: "Allowed IPs / Subnets"
-allowedIpsPlaceholder: "e.g. 192.168.1.50 or 192.168.1.0/24"

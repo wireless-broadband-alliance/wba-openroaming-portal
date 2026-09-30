@@ -592,26 +592,6 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 105. `SECURITY_PGP_FINGERPRINT`: Optional PGP key fingerprint (40 hex characters) or Encryption URI
      (e.g. `openpgp4fpr:...` or `https://...`) used for encrypted security reports.
 
-106. `ADMIN_ALLOWED_IPS`: Allowed IPs/subnets for the admin dashboard access (e.g. `203.0.113.10` or
-     `198.51.100.0/24`). Leave empty to disable the restriction. See [Admin IP Restriction](#admin-ip-restriction).
-
-#### Admin IP Restriction
-
-When `ADMIN_ALLOWED_IPS` contains at least one entry, only clients whose IP matches one of the listed IP addresses or
-CIDR ranges can access the admin dashboard (`/dashboard` and every path below it). Any other client receives a
-`403 Access denied` response, and the denied attempt is logged as a warning.
-
-- **Where to configure it:** Dashboard → Settings → IP Restriction (Super Admin only). Each IP or CIDR range is added
-  as a separate entry.
-- **Accepted formats:** IPv4 and IPv6 addresses, and CIDR ranges (e.g. `10.0.0.0/8`).
-- **Stored format:** The list is stored in the setting as a JSON array, e.g. `["192.0.0.1", "10.0.0.0/8"]`. Comma,
-  semicolon or line-separated values are also accepted when read.
-- **Disabled by default:** An empty list disables the restriction.
-- **Lockout protection:** The form refuses to save a list that does not include the IP you are currently connecting
-  from.
-- **Behind a proxy:** The IP checked is the one resolved by Symfony, so `TRUSTED_PROXIES` must be configured
-  correctly (see [SSL Offloading & Reverse Proxy Configuration](#ssl-offloading--reverse-proxy-configuration)).
-
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 
 ## Contact Information?

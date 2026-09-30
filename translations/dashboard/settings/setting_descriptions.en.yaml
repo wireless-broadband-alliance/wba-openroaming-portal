@@ -99,4 +99,3 @@ FOOTER_IMAGE: "The resource path or URL to the footer image"
 SECURITY_CONTACT: 'Contact URI where security vulnerabilities should be reported. Must include scheme (e.g. mailto:security@example.com, https://example.com/security, or tel:+123456789)'
 SECURITY_EXPIRES: 'Date and time after which the security.txt file expires (ISO 8601, must be in the future and at most one year ahead)'
 SECURITY_PGP_FINGERPRINT: 'Optional PGP key fingerprint (40 hex characters) or Encryption URI (e.g., openpgp4fpr:... or https://...) for encrypted security reports'
-ADMIN_ALLOWED_IPS: "Allowed IPs/subnets for the admin dashboard access, one per line (e.g. 203.0.113.10 or 198.51.100.0/24). Leave empty to disable."
