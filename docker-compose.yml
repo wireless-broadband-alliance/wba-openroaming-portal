@@ -1,7 +1,7 @@
 ---
 services:
   web:
-    image: ghcr.io/wireless-broadband-alliance/wba-openroaming-portal:1.13.1
+    image: ghcr.io/wireless-broadband-alliance/wba-openroaming-portal:1.14.0
     security_opt:
       - no-new-privileges:true
     env_file:
