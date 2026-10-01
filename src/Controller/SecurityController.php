@@ -8,8 +8,8 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\FirewallType;
-use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
+use App\Enum\SessionStatus;
 use App\Enum\SettingName;
 use App\Enum\SMSResponse;
 use App\Enum\UserProvider;
@@ -18,10 +18,11 @@ use App\Form\LoginType;
 use App\Form\TwoFACode;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
+use App\Service\EmailGenerator;
 use App\Service\EventActions;
 use App\Service\GetSettings;
+use App\Service\HashArgon2idService;
 use App\Service\MagicLinkService;
-use App\Service\EmailGenerator;
 use App\Service\SendSMS;
 use App\Service\TwoFAService;
 use App\Service\UserCreationService;
@@ -81,6 +82,7 @@ class SecurityController extends AbstractController
         private readonly UserPasswordHasherInterface $userPasswordHasher,
         private readonly RequestStack $requestStack,
         private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly HashArgon2idService $hashArgon2idService,
     ) {
     }
 
@@ -102,8 +104,16 @@ class SecurityController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::ON->value) {
-            return $this->redirectToRoute('app_login_magic');
+        if ($data[SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value]['value'] !== 'true') {
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'authenticationMethodNotEnabled',
+                    [],
+                    'controllers'
+                )
+            );
+            return $this->redirectToRoute('app_landing');
         }
 
         // Last username entered by the user (this will be empty if the user clicked the verification link)
@@ -190,8 +200,16 @@ class SecurityController extends AbstractController
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
-        if ($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::OFF->value) {
-            return $this->redirectToRoute('app_login');
+        if ($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] !== 'true') {
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'authenticationMethodNotEnabled',
+                    [],
+                    'controllers'
+                )
+            );
+            return $this->redirectToRoute('app_landing');
         }
 
         $loginChoiceDTO = new LoginChoiceDTO();
@@ -217,7 +235,8 @@ class SecurityController extends AbstractController
                 $loginUser = $this->userRepository->findOneBy(['uuid' => $loginChoiceDTO->email]);
 
                 if ($loginUser instanceof User) {
-                    if ($loginUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value) {
+                    $firstAuth = $loginUser->getUserExternalAuths()->first();
+                    if (!$firstAuth || $firstAuth->getProvider() !== UserProvider::PORTAL_ACCOUNT->value) {
                         $this->addFlash(
                             'error',
                             $this->translator->trans('emailInUse', [], 'controllers')
@@ -306,7 +325,8 @@ class SecurityController extends AbstractController
                 $phoneNumber = sprintf('+%s%s', $countryCode, $nationalNumber);
                 $loginUser = $this->userRepository->findOneBy(['uuid' => $phoneNumber]);
                 if ($loginUser instanceof User) {
-                    if ($loginUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value) {
+                    $firstAuth = $loginUser->getUserExternalAuths()->first();
+                    if (!$firstAuth || $firstAuth->getProvider() !== UserProvider::PORTAL_ACCOUNT->value) {
                         $this->addFlash(
                             'error',
                             $this->translator->trans('phoneInUse', [], 'controllers')
@@ -572,14 +592,13 @@ class SecurityController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
-
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
 
         // Check if the user is already verified
         $session = $this->requestStack->getSession();
         if (
             $userExternalAuths[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value ||
-            $session->has('session_verified')
+            $session->has(SessionStatus::VERIFIED->value)
         ) {
             return $this->redirectToRoute('app_landing');
         }
@@ -598,7 +617,7 @@ class SecurityController extends AbstractController
                 $user->setForgotPasswordRequest(false);
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
-                $session->set('session_verified', true);
+                $session->set(SessionStatus::VERIFIED->value, true);
 
                 return $this->redirectToRoute('app_landing');
             }
@@ -622,28 +641,45 @@ class SecurityController extends AbstractController
         Request $request,
     ): Response {
         // Get the uuid and verification code from the URL query parameters
-        $token = $request->query->get('token');
+        $token = (string)$request->query->get('token');
+        $uuid = (string)$request->query->get('uuid');
+
+        if ($uuid === '' || $token === '') {
+            $this->addFlash('error', $this->translator->trans('invalidLogin', [], 'controllers'));
+            return $this->redirectToRoute('app_login_magic_link');
+        }
 
         // Get the user with the matching email, excluding admin users
-        $user = $this->userRepository->findOneBy(['twoFAcode' => $token]);
+        $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
 
-        if ($user && $user->getTwoFAcodeIsActive() && $this->magicLinkService->linkValidity($user)) {
+        $isTokenValid = $user instanceof User
+            && $user->getTwoFAcode() !== null
+            && $this->hashArgon2idService->verifyHash($token, $user->getTwoFAcode());
+
+        if (
+            $user &&
+            $isTokenValid &&
+            $user->getTwoFAcodeIsActive() &&
+            $this->magicLinkService->linkValidity($user)
+        ) {
             try {
                 // Create a token manually for the user
-                $token = new UsernamePasswordToken($user, FirewallType::LANDING->value, $user->getRoles());
+                $tokenObj = new UsernamePasswordToken($user, FirewallType::LANDING->value, $user->getRoles());
 
                 // Set the token in the token storage
-                $this->tokenStorage->setToken($token);
+                $this->tokenStorage->setToken($tokenObj);
 
                 // Dispatch the login event
-                $event = new InteractiveLoginEvent($request, $token);
+                $event = new InteractiveLoginEvent($request, $tokenObj);
                 $this->eventDispatcher->dispatch($event);
                 $session = $this->requestStack->getSession();
 
                 if (!$user->isVerified()) {
                     $user->setIsVerified(true);
-                    $session->set('session_verified', true);
                 }
+
+                $session->set(SessionStatus::VERIFIED->value, true);
+                $session->set(SessionStatus::AUTHENTICATED_VIA_UUID_ONLY->value, true);
 
                 $user->setTwoFAcodeIsActive(false);
                 $this->userRepository->save($user, true);

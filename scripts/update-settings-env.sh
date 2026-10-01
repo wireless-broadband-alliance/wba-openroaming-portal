@@ -1,6 +1,8 @@
 #!/bin/bash
 
-ENV_FILE="/var/www/openroaming/.env"
+# Dynamically resolves the .env path based on the script's directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ENV_FILE="${SCRIPT_DIR}/../.env"
 
 if [ "$#" -eq 3 ]; then
     JWT_PASSPHRASE=""
@@ -26,9 +28,12 @@ fi
 set_env() {
     local KEY="$1"
     local VALUE="$2"
+    local TMP_FILE="${ENV_FILE}.tmp"
 
     if grep -q "^$KEY=" "$ENV_FILE"; then
-        sed -i "s|^$KEY=.*|$KEY=\"$VALUE\"|" "$ENV_FILE"
+        sed "s|^$KEY=.*|$KEY=\"$VALUE\"|" "$ENV_FILE" > "$TMP_FILE"
+        cat "$TMP_FILE" > "$ENV_FILE"
+        rm -f "$TMP_FILE"
     else
         echo "$KEY=\"$VALUE\"" >> "$ENV_FILE"
     fi

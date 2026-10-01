@@ -2,53 +2,26 @@
 
 namespace App\Controller;
 
-use App\DTO\CustomTypeDTO;
-use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\AdminRoleType;
-use App\Enum\AnalyticalEventType;
-use App\Enum\EventMetadataKeysType;
-use App\Enum\LanguageType;
-use App\Enum\SettingName;
-use App\Enum\SettingType;
-use App\Form\CustomType;
 use App\Form\RevokeProfilesType;
-use App\Repository\EventRepository;
-use App\Repository\SettingTranslationRepository;
 use App\Repository\UserRepository;
 use App\Security\Voter\UserAuthenticationVoter;
-use App\Service\EventActions;
 use App\Service\GetSettings;
-use App\Service\HtmlSanitizerService;
-use App\Service\VerificationCodeEmailGenerator;
-use DateTime;
-use Doctrine\ORM\EntityManagerInterface;
-use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 class AdminController extends AbstractController
 {
     public function __construct(
-        private readonly MailerInterface $mailer,
         private readonly UserRepository $userRepository,
         private readonly ParameterBagInterface $parameterBag,
         private readonly GetSettings $getSettings,
-        private readonly EventActions $eventActions,
-        private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
-        private readonly EventRepository $eventRepository,
-        private readonly TranslatorInterface $translator,
-        private readonly SettingTranslationRepository $settingTranslationRepository,
-        private readonly HtmlSanitizerService $htmlSanitizerService,
     ) {
     }
 
@@ -143,257 +116,6 @@ class AdminController extends AbstractController
             'delete_users' => $deleteUsers,
             'ApUsage' => null,
             'formRevokeProfiles' => $formRevokeProfiles
-        ]);
-    }
-
-    /**
-     * Regenerate the verification code for the user and send a new email.
-     *
-     * @param string $type Type of action
-     * @return RedirectResponse A redirect response.
-     * @throws Exception
-     * @throws TransportExceptionInterface
-     */
-    #[Route('/dashboard/regenerate/{type}', name: 'app_dashboard_regenerate_code_admin')]
-    #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
-    public function regenerateCode(string $type, Request $request): RedirectResponse
-    {
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-
-        // Regenerate the verification code for the admin to reset settings
-        if (
-            in_array($type, [
-                SettingType::SettingCustom->value,
-                SettingType::SettingTerms->value,
-                SettingType::SettingRadius->value,
-                SettingType::SettingStatus->value,
-                SettingType::SettingLDAP->value,
-                SettingType::SettingCAPPORT->value,
-                SettingType::SettingAUTH->value,
-                SettingType::SettingTwoFA->value,
-                SettingType::SettingSMS->value,
-                SettingType::SettingSchedule->value,
-                SettingType::SettingsReturnApps->value,
-            ], true)
-        ) {
-            $lastResend = $this->eventRepository->findLatest2FACodeAttemptEvent(
-                $currentUser,
-                AnalyticalEventType::SETTING_RESET_CODE_REQUEST->value
-            );
-
-            $timeIntervalInSeconds = 120;
-
-            if ($this->verificationCodeGenerator->canResendCode($currentUser, $timeIntervalInSeconds)) {
-                $email = $this->verificationCodeGenerator->createEmailAdminPage(
-                    $currentUser,
-                    $request->getClientIp(),
-                    $request->headers->get('User-Agent'),
-                    $type
-                );
-
-                $this->mailer->send($email);
-                $this->addFlash(
-                    'success',
-                    $this->translator->trans(
-                        'successResendAdmin',
-                        ['%email%' => $currentUser->getEmail()],
-                        'controllers'
-                    )
-                );
-
-                return $this->redirectToRoute('admin_dashboard_confirm_reset', ['type' => $type]);
-            }
-
-            $timeLeft = $this->verificationCodeGenerator->timeLeftToResendCode($timeIntervalInSeconds, $lastResend);
-
-            $this->addFlash(
-                'error',
-                $this->translator->trans(
-                    'errorAdminWait',
-                    ['%time%' => $timeLeft],
-                    'controllers'
-                )
-            );
-
-            return $this->redirectToRoute('admin_dashboard_confirm_reset', ['type' => $type]);
-        }
-
-        return $this->redirectToRoute('admin_page');
-    }
-
-    /**
-     * Handles the Page Style on the dashboard
-     */
-    #[Route(
-        '/dashboard/customize/{language}',
-        name: 'admin_dashboard_customize',
-        defaults: ['language' => LanguageType::EN->value]
-    )]
-    #[IsGranted(UserAuthenticationVoter::LANDING_PAGE_CONFIG_READ)]
-    public function customize(Request $request, EntityManagerInterface $em, string $language): Response
-    {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        /** @var array<string, array{value: string, description: string}> $data */
-        $data = $this->getSettings->getSettings($language);
-
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-        $canWrite = $this->isGranted(UserAuthenticationVoter::LANDING_PAGE_CONFIG_WRITE);
-
-        $settingsRepository = $em->getRepository(Setting::class);
-        $settings = $settingsRepository->findAll();
-
-        // Get the settings value according to the language
-        $settingsTranslated = $this->getSettings->getSettingsByLocale($settings, $data);
-
-        $customTypeDTO = new CustomTypeDTO();
-
-        // Create the form with the CustomType and pass the relevant settings
-        $form = $this->createForm(CustomType::class, $customTypeDTO, [
-            'settings' => $settingsTranslated,
-            'disabled' => !$canWrite,
-        ]);
-
-        $form->handleRequest($request);
-        if ($canWrite && $form->isSubmitted() && $form->isValid()) {
-            // Update the settings based on the form submission
-            $changeset = [];
-            foreach ($settings as $setting) {
-                $settingName = $setting->getName();
-
-                // Check if the setting is in the allowed settings for customization
-                if (
-                    in_array($settingName, [
-                        SettingName::WELCOME_TEXT->value,
-                        SettingName::PAGE_TITLE->value,
-                        SettingName::WELCOME_DESCRIPTION->value,
-                        SettingName::ADDITIONAL_LABEL->value,
-                        SettingName::CONTACT_EMAIL->value,
-                        SettingName::CUSTOMER_LOGO_ENABLED->value
-                    ], true)
-                ) {
-                    if (in_array($settingName, $this->getSettings->arraySettingsToTranslate(), true)) {
-                        $locale = $language;
-                        $submittedValue = $customTypeDTO->{$settingName} ?? null;
-                        $sanitizedValue = $this->htmlSanitizerService->sanitize($submittedValue);
-                        if ($locale === LanguageType::EN->value) {
-                            // Update the setting value
-                            if ($data[$settingName]['value'] !== $sanitizedValue) {
-                                $changeset[$settingName] = [
-                                    'oldValue' => $data[$settingName]['value'],
-                                    'newValue' => $sanitizedValue,
-                                ];
-                            }
-                            $setting->setValue($sanitizedValue);
-                        }
-                        // Get the translated setting
-                        $settingTranslation = $this->settingTranslationRepository->findOneBy(
-                            ['setting' => $setting, 'locale' => $locale]
-                        );
-                        if ($settingName === SettingName::ADDITIONAL_LABEL->value && $submittedValue === null) {
-                            $changeset[$settingName] = [
-                                'oldValue' => $data[$settingName]['value'],
-                                'newValue' => '',
-                            ];
-                            $settingTranslation?->setTranslation('');
-                        } else {
-                            if ($data[$settingName]['value'] !== $sanitizedValue) {
-                                $changeset[$settingName] = [
-                                    'oldValue' => $data[$settingName]['value'],
-                                    'newValue' => $sanitizedValue,
-                                ];
-                            }
-                            $settingTranslation?->setTranslation($sanitizedValue);
-                        }
-                    } else {
-                        // Get the value from the submitted form data
-                        $submittedValue = $customTypeDTO->{$settingName} ?? null;
-                        if ($data[$settingName]['value'] !== $submittedValue) {
-                            $changeset[$settingName] = [
-                                'oldValue' => $data[$settingName]['value'],
-                                'newValue' => $submittedValue,
-                            ];
-                        }
-                        // Update the setting value
-                        $setting->setValue($submittedValue);
-                    }
-                } elseif (
-                    in_array(
-                        $settingName,
-                        [
-                            SettingName::CUSTOMER_LOGO->value,
-                            SettingName::OPENROAMING_LOGO->value,
-                            SettingName::WALLPAPER_IMAGE->value
-                        ],
-                        true
-                    )
-                ) {
-                    // Handle file uploads for logos and wallpaper image
-                    $file = $form->get($settingName)->getData();
-
-                    if ($file) { // submits the new file to the respective path
-                        $originalFilename = pathinfo((string)$file->getClientOriginalName(), PATHINFO_FILENAME);
-                        // Use a unique id for the uploaded file to avoid overwriting
-                        $newFilename = $originalFilename .
-                            '-' .
-                            uniqid('', true) .
-                            '.' .
-                            $file->guessExtension();
-
-                        // Set the destination directory based on the setting name
-                        $destinationDirectory = $this->getParameter('kernel.project_dir')
-                            . '/public/resources/uploaded/';
-
-                        $file->move($destinationDirectory, $newFilename);
-
-                        if ($data[$settingName]['value'] !== '/resources/uploaded/' . $newFilename) {
-                            $changeset[$settingName] = [
-                                'oldValue' => $data[$settingName]['value'],
-                                'newValue' => '/resources/uploaded/' . $newFilename,
-                            ];
-                        }
-                        $setting->setValue('/resources/uploaded/' . $newFilename);
-                    }
-                    // PLS MAKE SURE TO USE THIS COMMAND ON THE WEB CONTAINER
-                    // chown -R www-data:www-data /var/www/openroaming/public/resources/uploaded/
-                }
-            }
-
-
-            $this->addFlash(
-                'success',
-                $this->translator->trans(
-                    'settingsUpdatedSuccessfully',
-                    [],
-                    'controllers'
-                )
-            );
-
-            $eventMetadata = [
-                EventMetadataKeysType::IP->value => $request->getClientIp(),
-                EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-                EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
-                EventMetadataKeysType::CHANGESET->value => $changeset,
-            ];
-            $this->eventActions->saveEvent(
-                $currentUser,
-                AnalyticalEventType::SETTING_PAGE_STYLE_REQUEST->value,
-                new DateTime(),
-                $eventMetadata
-            );
-
-            return $this->redirectToRoute('admin_dashboard_customize', ['language' => $language]);
-        }
-
-        return $this->render('dashboard/shared/settings_actions.html.twig', [
-            'user' => $currentUser,
-            'settings' => $settingsTranslated,
-            'form' => $form->createView(),
-            'data' => $data,
-            'language' => $language,
-            'customTypeDTO' => $customTypeDTO,
         ]);
     }
 }

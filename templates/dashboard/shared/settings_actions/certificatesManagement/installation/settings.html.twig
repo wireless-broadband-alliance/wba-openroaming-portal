@@ -27,7 +27,7 @@
     <div data-controller="toggle-visibility-card trusted-proxies" class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
 
         {# --- Trusted Proxies Card --- #}
-        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
+        <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5"
              data-controller="trusted-proxies">
 
             <div class="flex flex-row justify-between">
@@ -86,7 +86,7 @@
         </div>
 
         {# --- Turnstile Key Card --- #}
-        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}>
+        <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5" {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}>
             <div class="flex flex-row justify-between">
                 <div class="text-base font-medium text-center break-normal md:break-all">
                     <h1 class="text-base md:text-lg whitespace-nowrap">
@@ -119,7 +119,7 @@
         </div>
 
         {# --- Turnstile Secret Card --- #}
-        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}>
+        <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5" {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}>
             <div class="flex flex-row justify-between">
                 <div class="text-base font-medium text-center break-normal md:break-all">
                     <h1 class="text-base md:text-lg whitespace-nowrap">
@@ -152,7 +152,7 @@
         </div>
 
         {# --- JWT Passphrase Enable Card (Toggle Switch) --- #}
-        <div class="transition hover:-translate-y-1 translate-y-1 hover:shadow bg-white rounded-md p-6 w-full">
+        <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5">
             <div class="flex flex-row justify-between">
                 <div class="text-base font-medium text-center break-normal md:break-all">
                     <h1 class="text-base md:text-lg whitespace-nowrap">
@@ -182,7 +182,7 @@
 
         {# --- JWT Passphrase --- #}
         <div data-toggle-visibility-card-target="card"
-             class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full hidden">
+             class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5 hidden">
             <div class="flex flex-row justify-between">
                 <div class="text-base font-medium text-center break-normal md:break-all">
                     <h1 class="text-base md:text-lg whitespace-nowrap">

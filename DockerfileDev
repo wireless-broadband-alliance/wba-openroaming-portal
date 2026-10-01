@@ -1,93 +1,131 @@
 # =========================
-# PHP / Composer build stage
+# Stage 1: Build / Composer stage
 # =========================
-FROM php:8.4-fpm-bullseye AS vendor
+FROM php:8.4-fpm-alpine3.21 AS vendor
 ENV COMPOSER_ALLOW_SUPERUSER=1
 WORKDIR /app
 
-# Install minimal build deps for Composer
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    nginx supervisor git zip unzip curl gnupg tzdata wget \
- && rm -rf /var/lib/apt/lists/*
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 
-RUN wget -O PaloAlto_SSLInspection_ForwardTrust.crt https://tetrapi.pt/gp/PaloAlto_SSLInspection_ForwardTrust.crt
-RUN cp PaloAlto_SSLInspection_ForwardTrust.crt /usr/local/share/ca-certificates/
-RUN update-ca-certificates
+# Install build dependencies and required PHP extensions
+RUN apk add --no-cache \
+    git \
+    zip \
+    unzip \
+    curl \
+    wget \
+    bash \
+    ca-certificates \
+    gpgme \
+    libgpg-error \
+ && (wget --no-check-certificate -O /usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt https://tetrapi.pt/gp/PaloAlto_SSLInspection_ForwardTrust.crt 2>/dev/null && update-ca-certificates || true) \
+ && install-php-extensions \
+    intl \
+    zip \
+    bcmath \
+    mbstring \
+    pdo \
+    pdo_mysql \
+    pdo_sqlite \
+    soap \
+    gd \
+    dom \
+    exif \
+    opcache \
+    ldap \
+    memcached-3.2.0 \
+ && apk add --no-cache --virtual .gnupg-build-deps $PHPIZE_DEPS gpgme-dev libgpg-error-dev \
+ && pecl install gnupg-1.5.0 \
+ && docker-php-ext-enable gnupg \
+ && apk del .gnupg-build-deps \
+ && rm -f /usr/local/bin/install-php-extensions
 
-# Install Composer
-RUN curl -sS https://getcomposer.org/installer | php -- \
-    --install-dir=/usr/local/bin --filename=composer \
- && composer self-update --2
-
-# Copy Symfony app
+# Copy application files
 COPY . .
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    xmlsec1 libxmlsec1-openssl \
-    libpng-dev libjpeg-dev libfreetype6-dev libsqlite3-dev libicu-dev libzip-dev \
-    libonig-dev libxml2-dev libgpgme-dev libgpg-error-dev libmemcached-dev \
-    libldap2-dev build-essential pkg-config autoconf bash \
- && docker-php-ext-configure gd --with-jpeg --with-freetype \
- && docker-php-ext-install intl zip bcmath mbstring pdo pdo_mysql pdo_sqlite soap gd dom exif opcache ldap \
- && pecl channel-update pecl.php.net \
- && pecl install gnupg-1.5.0 memcached-3.2.0 \
- && docker-php-ext-enable gnupg memcached \
- && rm -rf /var/lib/apt/lists/*
-
-# Install PHP dependencies
 COPY ./.env.sample /app/.env
+
+# Install Composer dependencies and warm cache
 RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/memory.ini \
- && composer install --optimize-autoloader --no-interaction
-
-# Warm Symfony cache
-RUN php bin/console cache:warmup
+ && echo "error_reporting=E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED" > /usr/local/etc/php/conf.d/error_reporting.ini \
+ && composer install --optimize-autoloader --no-interaction --no-progress \
+ && php bin/console cache:warmup
 
 # =========================
-# Final runtime image
+# Stage 2: Final runtime image
 # =========================
-FROM php:8.4-fpm-bullseye AS runtime
+FROM php:8.4-fpm-alpine3.21 AS runtime
 ENV TZ=UTC
 WORKDIR /var/www/openroaming
-
-# Set CA bundle for Python / requests (Certbot)
 ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 
-# Install runtime deps + PHP extensions
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    nginx supervisor tzdata xmlsec1 libxmlsec1-openssl ca-certificates \
-    libpng-dev libjpeg-dev libfreetype6-dev libsqlite3-dev libicu-dev libzip-dev \
-    libonig-dev libxml2-dev libgpgme-dev libgpg-error-dev libmemcached-dev \
-    libldap2-dev build-essential pkg-config autoconf curl gnupg bash wget \
-    certbot python3-certbot-nginx python3-certbot-dns-cloudflare python3-certbot-dns-google \
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
+
+# Install runtime tools, CLI packages, and PHP extensions
+RUN apk add --no-cache \
+    nginx \
+    supervisor \
+    tzdata \
+    bash \
+    curl \
+    wget \
+    ca-certificates \
+    xmlsec \
+    gnupg \
+    gpgme \
+    libgpg-error \
+    python3 \
+    py3-pip \
+ && (wget --no-check-certificate -O /usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt https://tetrapi.pt/gp/PaloAlto_SSLInspection_ForwardTrust.crt 2>/dev/null && update-ca-certificates || true) \
+ && python3 -m venv /opt/certbot \
+ && /opt/certbot/bin/pip install --no-cache-dir certbot certbot-nginx certbot-dns-cloudflare certbot-dns-google \
+ && ln -s /opt/certbot/bin/certbot /usr/local/bin/certbot \
+ && install-php-extensions \
+    intl \
+    zip \
+    bcmath \
+    mbstring \
+    pdo \
+    pdo_mysql \
+    pdo_sqlite \
+    soap \
+    gd \
+    dom \
+    exif \
+    opcache \
+    ldap \
+    memcached-3.2.0 \
+ && apk add --no-cache --virtual .gnupg-build-deps $PHPIZE_DEPS gpgme-dev libgpg-error-dev \
+ && pecl install gnupg-1.5.0 \
+ && docker-php-ext-enable gnupg \
+ && apk del .gnupg-build-deps \
  && update-ca-certificates \
- && docker-php-ext-configure gd --with-jpeg --with-freetype \
- && docker-php-ext-install intl zip bcmath mbstring pdo pdo_mysql pdo_sqlite soap gd dom exif opcache ldap \
- && pecl channel-update pecl.php.net \
- && pecl install gnupg-1.5.0 memcached-3.2.0 \
- && docker-php-ext-enable gnupg memcached \
- && rm -rf /var/lib/apt/lists/*
+ && rm -f /usr/local/bin/install-php-extensions
 
-# Set PHP memory limit
-RUN echo "memory_limit=1024M" > /usr/local/etc/php/conf.d/memory.ini
+# Set PHP memory limit and error reporting
+RUN echo "memory_limit=1024M" > /usr/local/etc/php/conf.d/memory.ini \
+ && echo "error_reporting=E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED" > /usr/local/etc/php/conf.d/error_reporting.ini
 
-# Restore Palo Alto root CA so Certbot can work behind your VPN
-RUN wget -O /usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt \
-      https://tetrapi.pt/gp/PaloAlto_SSLInspection_ForwardTrust.crt \
-    && update-ca-certificates
-
-# Copy Symfony app from vendor stage
+# Copy application from vendor stage
 COPY --from=vendor /app /var/www/openroaming
 
-# Copy configs
+# Copy service configs
 COPY service-config/supervisor/supervisord.conf /etc/supervisor/conf.d/
 COPY service-config/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY service-config/nginx/mime.types /etc/nginx/mime.types
 COPY service-config/nginx/fastcgi_params /etc/nginx/fastcgi_params
 COPY service-config/nginx/sites /etc/nginx/conf.d/
 
-# Prepare runtime environment
-RUN mkdir -p /run/nginx /run/php /var/log/supervisor /var/www/openroaming/var \
- && chown -R www-data:www-data /var/www/openroaming
+# Setup directories and least-privilege permissions (CRA-compliant: www-data
+# only gets write access to its own runtime state, never to app code or
+# system services it doesn't own)
+RUN mkdir -p /run/nginx /run/php /usr/share/nginx/modules /var/log/supervisor /var/log/nginx \
+    /var/lib/nginx/tmp/client_body /var/lib/nginx/tmp/proxy /var/lib/nginx/tmp/fastcgi \
+    /var/lib/nginx/tmp/uwsgi /var/lib/nginx/tmp/scgi \
+    /var/www/openroaming/var /var/www/openroaming/var/certs /var/www/openroaming/config/jwt \
+ && chown -R www-data:www-data /run/nginx /run/php /var/log/nginx /var/log/supervisor /var/lib/nginx \
+ && chown -R www-data:www-data /var/www/openroaming/var /var/www/openroaming/config/jwt \
+ && chmod 755 /var/lib/nginx /var/lib/nginx/tmp
 
 EXPOSE 80
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

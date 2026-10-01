@@ -17,8 +17,8 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\LanguageType;
 use App\Enum\SettingName;
-use App\Enum\SettingType;
 use App\Enum\TextEditorName;
+use App\Exception\EncryptionException;
 use App\Form\AuthSettingsType;
 use App\Form\CapportSettingsType;
 use App\Form\LDAPSettingsType;
@@ -30,6 +30,7 @@ use App\Form\TwoFASettingsType;
 use App\Repository\TextEditorRepository;
 use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\CertificateCheckerService;
+use App\Service\EncryptionService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\HtmlSanitizerService;
@@ -41,8 +42,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -58,417 +57,8 @@ class SettingsController extends AbstractController
         private readonly TextEditorRepository $textEditorRepository,
         private readonly SettingsService $settingsService,
         private readonly HtmlSanitizerService $htmlSanitizerService,
+        private readonly EncryptionService $encryptionService,
     ) {
-    }
-
-    /*
-     * Check if the code and then return the correct action
-     */
-    /**
-     * @param string $type Type of action
-     */
-    #[Route('/dashboard/confirm-checker/{type}', name: 'admin_dashboard_confirm_checker')]
-    #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
-    public function checkSettings(Request $request, string $type): Response
-    {
-        // Get the entered code from the form
-        $enteredCode = $request->get('code');
-
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-
-        if ($enteredCode === $currentUser->getTwoFAcode()) {
-            if (
-                $type === SettingType::SettingCustom->value
-                && $this->isGranted(UserAuthenticationVoter::LANDING_PAGE_CONFIG_WRITE)
-            ) {
-                $command = 'php bin/console reset:customSettings --yes';
-                $projectRootDir = $this->getParameter('kernel.project_dir');
-
-                $process = new Process(explode(' ', $command), $projectRootDir);
-                $process->run();
-                if (!$process->isSuccessful()) {
-                    throw new ProcessFailedException($process);
-                }
-
-                // if you want to dd("$output, $errorOutput"), please use the following variables
-                $output = $process->getOutput();
-                $errorOutput = $process->getErrorOutput();
-                $this->addFlash(
-                    'success',
-                    $this->translator->trans(
-                        'settingResetSuccessfully',
-                        [],
-                        'controllers'
-                    )
-                );
-
-                $eventMetadata = [
-                    EventMetadataKeysType::IP->value => $request->getClientIp(),
-                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
-                ];
-
-                $this->eventActions->saveEvent(
-                    $currentUser,
-                    AnalyticalEventType::SETTING_PAGE_STYLE_RESET_REQUEST->value,
-                    new DateTime(),
-                    $eventMetadata
-                );
-
-                return $this->redirectToRoute('admin_dashboard_customize');
-            }
-
-            if (
-                $type === SettingType::SettingTerms->value
-                && $this->isGranted(UserAuthenticationVoter::TERMS_POLICIES_WRITE)
-            ) {
-                $command = 'php bin/console reset:termsSettings --yes';
-                $projectRootDir = $this->getParameter('kernel.project_dir');
-                $process = new Process(explode(' ', $command), $projectRootDir);
-                $process->run();
-                if (!$process->isSuccessful()) {
-                    throw new ProcessFailedException($process);
-                }
-                // if you want to dd("$output, $errorOutput"), please use the following variables
-                $output = $process->getOutput();
-                $errorOutput = $process->getErrorOutput();
-                $this->addFlash(
-                    'success',
-                    $this->translator->trans('termsPoliciesSettingsResetSuccessfully', [], 'controllers')
-                );
-
-                $eventMetadata = [
-                    EventMetadataKeysType::IP->value => $request->getClientIp(),
-                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
-                ];
-                $this->eventActions->saveEvent(
-                    $currentUser,
-                    AnalyticalEventType::SETTING_TERMS_RESET_REQUEST->value,
-                    new DateTime(),
-                    $eventMetadata
-                );
-
-                return $this->redirectToRoute('admin_dashboard_settings_terms');
-            }
-
-            if (
-                $type === SettingType::SettingRadius->value
-                && $this->isGranted(UserAuthenticationVoter::RADIUS_PROFILE_CONFIG_WRITE)
-            ) {
-                $command = 'php bin/console reset:radiusSettings --yes';
-                $projectRootDir = $this->getParameter('kernel.project_dir');
-                $process = new Process(explode(' ', $command), $projectRootDir);
-                $process->run();
-                if (!$process->isSuccessful()) {
-                    throw new ProcessFailedException($process);
-                }
-                // if you want to dd("$output, $errorOutput"), please use the following variables
-                $output = $process->getOutput();
-                $errorOutput = $process->getErrorOutput();
-                $this->addFlash(
-                    'success',
-                    $this->translator->trans('radiusConfigurationsResetSuccessfully', [], 'controllers')
-                );
-
-                $eventMetadata = [
-                    EventMetadataKeysType::IP->value => $request->getClientIp(),
-                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
-                ];
-                $this->eventActions->saveEvent(
-                    $currentUser,
-                    AnalyticalEventType::SETTING_RADIUS_CONF_RESET_REQUEST->value,
-                    new DateTime(),
-                    $eventMetadata
-                );
-
-                return $this->redirectToRoute('admin_dashboard_settings_radius');
-            }
-
-            if (
-                $type === SettingType::SettingLDAP->value
-                && $this->isGranted(UserAuthenticationVoter::LDAP_SYNCHRONIZATION_WRITE)
-            ) {
-                $command = 'php bin/console reset:ldapSettings --yes';
-                $projectRootDir = $this->getParameter('kernel.project_dir');
-                $process = new Process(explode(' ', $command), $projectRootDir);
-                $process->run();
-                if (!$process->isSuccessful()) {
-                    throw new ProcessFailedException($process);
-                }
-                // if you want to dd("$output, $errorOutput"), please use the following variables
-                $output = $process->getOutput();
-                $errorOutput = $process->getErrorOutput();
-                $this->addFlash(
-                    'success',
-                    $this->translator->trans('LDAPSettingsResetSuccessfully', [], 'controllers')
-                );
-
-                $eventMetadata = [
-                    EventMetadataKeysType::IP->value => $request->getClientIp(),
-                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
-                ];
-                $this->eventActions->saveEvent(
-                    $currentUser,
-                    AnalyticalEventType::SETTING_LDAP_CONF_RESET_REQUEST->value,
-                    new DateTime(),
-                    $eventMetadata
-                );
-
-                return $this->redirectToRoute('admin_dashboard_settings_LDAP');
-            }
-
-            if (
-                $type === SettingType::SettingStatus->value
-                && $this->isGranted(UserAuthenticationVoter::PLATFORM_STATUS_WRITE)
-            ) {
-                $command = 'php bin/console reset:statusSettings --yes';
-                $projectRootDir = $this->getParameter('kernel.project_dir');
-                $process = new Process(explode(' ', $command), $projectRootDir);
-                $process->run();
-                if (!$process->isSuccessful()) {
-                    throw new ProcessFailedException($process);
-                }
-                // if you want to dd("$output, $errorOutput"), please use the following variables
-                $output = $process->getOutput();
-                $errorOutput = $process->getErrorOutput();
-                $this->addFlash(
-                    'success',
-                    $this->translator->trans('platformModeStatusResetSuccessfully', [], 'controllers')
-                );
-
-                $eventMetadata = [
-                    EventMetadataKeysType::IP->value => $request->getClientIp(),
-                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
-                ];
-                $this->eventActions->saveEvent(
-                    $currentUser,
-                    AnalyticalEventType::SETTING_PLATFORM_STATUS_RESET_REQUEST->value,
-                    new DateTime(),
-                    $eventMetadata
-                );
-
-                return $this->redirectToRoute('admin_dashboard_settings_status');
-            }
-
-            if (
-                $type === SettingType::SettingCAPPORT->value
-                && $this->isGranted(UserAuthenticationVoter::USER_ENGAGEMENT_WRITE)
-            ) {
-                $command = 'php bin/console reset:capportSettings --yes';
-                $projectRootDir = $this->getParameter('kernel.project_dir');
-                $process = new Process(explode(' ', $command), $projectRootDir);
-                $process->run();
-                if (!$process->isSuccessful()) {
-                    throw new ProcessFailedException($process);
-                }
-                // if you want to dd("$output, $errorOutput"), please use the following variables
-                $output = $process->getOutput();
-                $errorOutput = $process->getErrorOutput();
-                $this->addFlash(
-                    'success',
-                    $this->translator->trans('platformModeStatusResetSuccessfully', [], 'controllers')
-                );
-
-                $eventMetadata = [
-                    EventMetadataKeysType::IP->value => $request->getClientIp(),
-                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
-                ];
-                $this->eventActions->saveEvent(
-                    $currentUser,
-                    AnalyticalEventType::SETTING_CAPPORT_CONF_RESET_REQUEST->value,
-                    new DateTime(),
-                    $eventMetadata
-                );
-
-                return $this->redirectToRoute('admin_dashboard_settings_capport');
-            }
-
-            if (
-                $type === SettingType::SettingAUTH->value
-                && $this->isGranted(UserAuthenticationVoter::AUTHENTICATION_METHODS_WRITE)
-            ) {
-                $command = 'php bin/console reset:authSettings --yes';
-                $projectRootDir = $this->getParameter('kernel.project_dir');
-                $process = new Process(explode(' ', $command), $projectRootDir);
-                $process->run();
-                if (!$process->isSuccessful()) {
-                    throw new ProcessFailedException($process);
-                }
-                // if you want to dd("$output, $errorOutput"), please use the following variables
-                $output = $process->getOutput();
-                $errorOutput = $process->getErrorOutput();
-                $this->addFlash(
-                    'success',
-                    $this->translator->trans('authenticationSettingsResetSuccessfully', [], 'controllers')
-                );
-
-                $eventMetadata = [
-                    EventMetadataKeysType::IP->value => $request->getClientIp(),
-                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
-                ];
-                $this->eventActions->saveEvent(
-                    $currentUser,
-                    AnalyticalEventType::SETTING_AUTHS_CONF_RESET_REQUEST->value,
-                    new DateTime(),
-                    $eventMetadata
-                );
-
-                return $this->redirectToRoute('admin_dashboard_settings_auth');
-            }
-
-            if (
-                $type === SettingType::SettingTwoFA->value
-                && $this->isGranted(UserAuthenticationVoter::TWO_FACTOR_AUTH_WRITE)
-            ) {
-                $command = 'php bin/console reset:twoFASettings --yes';
-                $projectRootDir = $this->getParameter('kernel.project_dir');
-                $process = new Process(explode(' ', $command), $projectRootDir);
-                $process->run();
-                if (!$process->isSuccessful()) {
-                    throw new ProcessFailedException($process);
-                }
-                // if you want to dd("$output, $errorOutput"), please use the following variables
-                $output = $process->getOutput();
-                $errorOutput = $process->getErrorOutput();
-                $this->addFlash(
-                    'success',
-                    $this->translator->trans('authenticationSettingsResetSuccessfully', [], 'controllers')
-                );
-
-                $eventMetadata = [
-                    EventMetadataKeysType::IP->value => $request->getClientIp(),
-                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
-                ];
-                $this->eventActions->saveEvent(
-                    $currentUser,
-                    AnalyticalEventType::SETTING_PLATFORM_2FA_RESET_REQUEST->value,
-                    new DateTime(),
-                    $eventMetadata
-                );
-
-                return $this->redirectToRoute('admin_dashboard_settings_two_fa');
-            }
-
-            if (
-                $type === SettingType::SettingSMS->value
-                && $this->isGranted(UserAuthenticationVoter::SMS_CONFIG_WRITE)
-            ) {
-                $command = 'php bin/console reset:smsSettings --yes';
-                $projectRootDir = $this->getParameter('kernel.project_dir');
-                $process = new Process(explode(' ', $command), $projectRootDir);
-                $process->run();
-                if (!$process->isSuccessful()) {
-                    throw new ProcessFailedException($process);
-                }
-                // if you want to dd("$output, $errorOutput"), please use the following variables
-                $output = $process->getOutput();
-                $errorOutput = $process->getErrorOutput();
-                $this->addFlash(
-                    'success',
-                    $this->translator->trans('SMSSettingsClearSuccessfully', [], 'controllers')
-                );
-
-                $eventMetadata = [
-                    EventMetadataKeysType::IP->value => $request->getClientIp(),
-                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
-                ];
-                $this->eventActions->saveEvent(
-                    $currentUser,
-                    AnalyticalEventType::SETTING_SMS_CONF_CLEAR_REQUEST->value,
-                    new DateTime(),
-                    $eventMetadata
-                );
-
-                return $this->redirectToRoute('admin_dashboard_settings_sms');
-            }
-
-            if (
-                $type === SettingType::SettingSchedule->value
-                && $this->isGranted(UserAuthenticationVoter::CRON_SCHEDULE_WRITE)
-            ) {
-                $command = 'php bin/console reset:ScheduleSettings --yes';
-                $projectRootDir = $this->getParameter('kernel.project_dir');
-                $process = new Process(explode(' ', $command), $projectRootDir);
-                $process->run();
-                if (!$process->isSuccessful()) {
-                    throw new ProcessFailedException($process);
-                }
-                // if you want to dd("$output, $errorOutput"), please use the following variables
-                $output = $process->getOutput();
-                $errorOutput = $process->getErrorOutput();
-                $this->addFlash(
-                    'success',
-                    $this->translator->trans('configurationScheduleClearSuccessfully', [], 'controllers'),
-                );
-
-                $eventMetadata = [
-                    EventMetadataKeysType::IP->value => $request->getClientIp(),
-                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
-                ];
-                $this->eventActions->saveEvent(
-                    $currentUser,
-                    AnalyticalEventType::SETTING_SMS_CONF_CLEAR_REQUEST->value,
-                    new DateTime(),
-                    $eventMetadata
-                );
-
-                return $this->redirectToRoute('admin_dashboard_settings_schedule');
-            }
-            if (
-                $type === SettingType::SettingsReturnApps->value
-                && $this->isGranted(UserAuthenticationVoter::RETURN_APPS_MANAGEMENT_WRITE)
-            ) {
-                $command = 'php bin/console reset:returnApps --yes';
-                $projectRootDir = $this->getParameter('kernel.project_dir');
-                $process = new Process(explode(' ', $command), $projectRootDir);
-                $process->run();
-                if (!$process->isSuccessful()) {
-                    throw new ProcessFailedException($process);
-                }
-                // if you want to dd("$output, $errorOutput"), please use the following variables
-                $output = $process->getOutput();
-                $errorOutput = $process->getErrorOutput();
-                $this->addFlash(
-                    'success',
-                    $this->translator->trans('returnAppsResetSuccessfully', [], 'controllers')
-                );
-
-                $eventMetadata = [
-                    EventMetadataKeysType::IP->value => $request->getClientIp(),
-                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-                    EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
-                ];
-                $this->eventActions->saveEvent(
-                    $currentUser,
-                    AnalyticalEventType::RETURN_APPS_RESET_REQUEST->value,
-                    new DateTime(),
-                    $eventMetadata
-                );
-
-                return $this->redirectToRoute('admin_dashboard_return_apps');
-            }
-        } else {
-            $this->addFlash(
-                'error',
-                $this->translator->trans('incorrectVerificationCode', [], 'controllers')
-            );
-        }
-
-        $this->addFlash(
-            'error',
-            $this->translator->trans('incorrectVerificationCode', [], 'controllers')
-        );
-        return $this->redirectToRoute('admin_dashboard_confirm_reset', ['type' => $type]);
     }
 
     #[Route(
@@ -645,30 +235,57 @@ class SettingsController extends AbstractController
         ]);
     }
 
+    /**
+     * @throws EncryptionException
+     */
     #[Route('/dashboard/settings/LDAP', name: 'admin_dashboard_settings_LDAP')]
     #[IsGranted(UserAuthenticationVoter::LDAP_SYNCHRONIZATION_READ)]
     public function settingsLDAP(Request $request): Response
     {
-        /** @var array<string, array{value: string, description: string}> $data */
+        $encryptedSettings = [
+            SettingName::SYNC_LDAP_SERVER->value,
+            SettingName::SYNC_LDAP_BIND_USER_DN->value,
+            SettingName::SYNC_LDAP_BIND_USER_PASSWORD->value,
+            SettingName::SYNC_LDAP_SEARCH_BASE_DN->value,
+        ];
+
+        /** @var array<string, array{value: string|null, description?: string}> $data */
         $data = $this->getSettings->getSettings();
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         $canWrite = $this->isGranted(UserAuthenticationVoter::LDAP_SYNCHRONIZATION_WRITE);
 
-        // Initialize DTO from settings
+        // Decrypt sensitive settings before passing them to the DTO / Form
+        foreach ($encryptedSettings as $settingKey) {
+            if (isset($data[$settingKey]['value'])) {
+                $data[$settingKey]['value'] = $this->safeDecrypt($data[$settingKey]['value']);
+            }
+        }
+
+        // Initialize DTO with decrypted settings
         $dto = new LDAPSettingsDTO($data);
 
         // Create form bound to DTO
         $form = $this->createForm(LDAPSettingsType::class, $dto, ['disabled' => !$canWrite]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
+        if ($canWrite && $form->isSubmitted() && $form->isValid()) {
             /** @var LDAPSettingsDTO $dto */
             $dto = $form->getData();
+            $settingsData = $dto->toArray();
 
-            // Save updated settings
-            $changeset = $this->settingsService->updateSettingsFromArray($dto->toArray());
+            // Encrypt sensitive settings before saving to Database
+            foreach ($encryptedSettings as $settingKey) {
+                $plainValue = $settingsData[$settingKey]['value'] ?? null;
+
+                if ($plainValue !== null && $plainValue !== '') {
+                    $settingsData[$settingKey]['value'] = $this->encryptionService->encrypt($plainValue);
+                }
+            }
+
+            // Save updated encrypted settings
+            $changeset = $this->settingsService->updateSettingsFromArray($settingsData);
             $this->settingsService->flush();
 
             // Log the event
@@ -680,7 +297,7 @@ class SettingsController extends AbstractController
                     EventMetadataKeysType::IP->value => $request->getClientIp(),
                     EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
                     EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
-                    EventMetadataKeysType::CHANGESET->value  => $changeset,
+                    EventMetadataKeysType::CHANGESET->value => $changeset,
                 ]
             );
 
@@ -924,21 +541,19 @@ class SettingsController extends AbstractController
         $form = $this->createForm(AuthSettingsType::class, $authSettingsTypeDTO, ['disabled' => !$canWrite]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
-            $changeset =
-                $this->settingsService->updateAuthSettingsToTranslateFromArray(
-                    $authSettingsTypeDTO->toArray(),
-                    $language
-                );
+        if ($canWrite && $form->isSubmitted() && $form->isValid()) {
+            $changeset = $this->settingsService->updateAuthSettingsToTranslateFromArray(
+                $authSettingsTypeDTO->toArray(),
+                $language
+            );
 
             $this->settingsService->flush();
-
 
             $eventMetadata = [
                 EventMetadataKeysType::IP->value => $request->getClientIp(),
                 EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
                 EventMetadataKeysType::UUID->value => $currentUser->getUuid(),
-                EventMetadataKeysType::CHANGESET->value  => $changeset,
+                EventMetadataKeysType::CHANGESET->value => $changeset,
             ];
 
             $this->eventActions->saveEvent(
@@ -1067,5 +682,23 @@ class SettingsController extends AbstractController
             'data' => $data,
             'user' => $currentUser,
         ]);
+    }
+
+    /**
+     * Safely decrypts a value. If decryption fails (e.g. existing legacy plaintext),
+     * returns the original raw value.
+     */
+    private function safeDecrypt(?string $value): ?string
+    {
+        if ($value === null || $value === '') {
+            return $value;
+        }
+
+        try {
+            return $this->encryptionService->decrypt($value);
+        } catch (EncryptionException) {
+            // Value is not encrypted yet (e.g., existing legacy plain text)
+            return $value;
+        }
     }
 }

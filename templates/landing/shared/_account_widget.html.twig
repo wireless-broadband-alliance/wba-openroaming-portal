@@ -1,3 +1,12 @@
+{% set has_first_name_errors = form.firstName.vars.errors|length > 0 %}
+{% set has_last_name_errors = form.lastName.vars.errors|length > 0 %}
+{% set has_personal_errors = form.vars.errors|length > 0 or has_first_name_errors or has_last_name_errors %}
+
+{% set has_current_pass_errors = formPassword.password.vars.errors|length > 0 %}
+{% set has_new_pass_errors = formPassword.newPassword.vars.errors|length > 0 %}
+{% set has_confirm_pass_errors = formPassword.confirmPassword.vars.errors|length > 0 %}
+{% set has_password_errors = formPassword.vars.errors|length > 0 or has_current_pass_errors or has_new_pass_errors or has_confirm_pass_errors %}
+
 <div class="bg-white rounded-lg transition-all duration-300 px-10 py-[35px] h-[calc(90%)] lg:h-[calc(80%)] w-[810px] overflow-auto">
 
     <div class="flex flex-row justify-start items-center">
@@ -9,24 +18,61 @@
         </button>
     </div>
 
+    {# Personal Data Section #}
     <div {{ stimulus_controller('fields') }}>
         <h1 class="text-lg mb-8 mt-10">{{ 'personalData.title'|trans({}, '_account_widget') }}</h1>
 
         {{ form_start(form, {action: path('app_landing_account_user')}) }}
-        {{ form_errors(form) }}
 
-        <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
-            <div class="relative w-full">
-                {{ form_label(form.firstName, 'personalData.firstName'|trans({}, '_account_widget'), {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(form.firstName, {attr: {class: 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
-                {{ form_errors(form.firstName) }}
+        <div class="flex flex-col gap-y-4">
+            <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
+                {# First Name #}
+                <div class="relative w-full">
+                    {{ form_label(form.firstName, 'personalData.firstName'|trans({}, '_account_widget'), {label_attr: {class: 'form-label'}}) }}
+                    {{ form_widget(form.firstName, {attr: {
+                        class: 'form-widget ' ~ (has_first_name_errors ? '!border-red-500 focus:!ring-red-500 focus:!border-red-500' : ''),
+                        'data-fields-target': 'input',
+                        'data-action': 'fields#input_changed',
+                    }}) }}
+                </div>
+
+                {# Last Name #}
+                <div class="relative w-full">
+                    {{ form_label(form.lastName, 'personalData.lastName'|trans({}, '_account_widget'), {label_attr: {class: 'form-label'}}) }}
+                    {{ form_widget(form.lastName, {attr: {
+                        class: 'form-widget ' ~ (has_last_name_errors ? '!border-red-500 focus:!ring-red-500 focus:!border-red-500' : ''),
+                        'data-fields-target': 'input',
+                        'data-action': 'fields#input_changed',
+                    }}) }}
+                </div>
             </div>
 
-            <div class="relative w-full">
-                {{ form_label(form.lastName, 'personalData.lastName'|trans({}, '_account_widget'), {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(form.lastName, {attr: {class: 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
-                {{ form_errors(form.lastName) }}
-            </div>
+            {# Personal Data Errors #}
+            {% if has_personal_errors %}
+                <div class="w-full text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded-lg p-3.5 flex flex-col gap-3 shadow-sm">
+                    {% if form.vars.errors|length > 0 %}
+                        <div class="flex items-start gap-2.5">
+                            <div class="flex-1 [&>ul]:list-disc [&>ul]:pl-4 [&>ul]:space-y-1 text-red-600">
+                                {{ form_errors(form) }}
+                            </div>
+                        </div>
+                    {% endif %}
+                    {% if has_first_name_errors %}
+                        <div class="flex items-start gap-2.5">
+                            <div class="flex-1 [&>ul]:list-disc [&>ul]:pl-4 [&>ul]:space-y-1 text-red-600">
+                                {{ form_errors(form.firstName) }}
+                            </div>
+                        </div>
+                    {% endif %}
+                    {% if has_last_name_errors %}
+                        <div class="flex items-start gap-2.5">
+                            <div class="flex-1 [&>ul]:list-disc [&>ul]:pl-4 [&>ul]:space-y-1 text-red-600">
+                                {{ form_errors(form.lastName) }}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
 
         <button {{ stimulus_target('fields', 'button') }} class="mt-6 w-[180px] btn-primary cursor-not-allowed"
@@ -39,41 +85,89 @@
     </div>
 
     {% if data.PLATFORM_MODE.value == constant('App\\Enum\\PlatformMode::LIVE').value %}
-        {# Divider between sections #}
-        <div class="divider my-8"></div>
+        {# Change Password Section (Only when NOT using Magic Link / UUID only) #}
+        {% if data.LOGIN_WITH_UUID_ONLY.value == 'false' %}
+            <div class="divider my-8"></div>
 
-        {% if data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::OFF').value %}
-            {# Form Password Section #}
             <div {{ stimulus_controller('fields') }}>
                 <h1 class="text-lg mb-8 mt-10">{{ 'changePassword.title'|trans({}, '_account_widget') }}</h1>
 
                 {{ form_start(formPassword, {action: path('app_landing_account_user')}) }}
-                {{ form_errors(formPassword) }}
 
-                <div class="flex flex-col gap-x-6 gap-y-8">
-                    <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
-                        <div class="relative w-full">
-                            {{ form_label(formPassword.password, 'changePassword.current'|trans({}, '_account_widget'), {label_attr: {class: 'form-label'}}) }}
-                            {{ form_widget(formPassword.password, {attr: {class: 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
-                            {{ form_errors(formPassword.password) }}
+                <div class="flex flex-col gap-y-6">
+                    <div class="flex flex-col gap-x-6 gap-y-8">
+                        <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
+                            {# Current Password #}
+                            <div class="relative w-full">
+                                {{ form_label(formPassword.password, 'changePassword.current'|trans({}, '_account_widget'), {label_attr: {class: 'form-label'}}) }}
+                                {{ form_widget(formPassword.password, {attr: {
+                                    class: 'form-widget ' ~ (has_current_pass_errors ? '!border-red-500 focus:!ring-red-500 focus:!border-red-500' : ''),
+                                    'data-fields-target': 'input',
+                                    'data-action': 'fields#input_changed',
+                                }}) }}
+                            </div>
+
+                            <div class="hidden lg:flex w-full"></div>
                         </div>
 
-                        <div class="hidden lg:flex w-full"></div>
+                        <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
+                            {# New Password #}
+                            <div class="relative w-full">
+                                {{ form_label(formPassword.newPassword, 'changePassword.new'|trans({}, '_account_widget'), {label_attr: {class: 'form-label'}}) }}
+                                {{ form_widget(formPassword.newPassword, {attr: {
+                                    class: 'form-widget ' ~ (has_new_pass_errors ? '!border-red-500 focus:!ring-red-500 focus:!border-red-500' : ''),
+                                    minlength: 7,
+                                    'data-fields-target': 'input',
+                                    'data-action': 'fields#input_changed',
+                                }}) }}
+                            </div>
+
+                            {# Confirm Password #}
+                            <div class="relative w-full">
+                                {{ form_label(formPassword.confirmPassword, 'changePassword.confirm'|trans({}, '_account_widget'), {label_attr: {class: 'form-label'}}) }}
+                                {{ form_widget(formPassword.confirmPassword, {attr: {
+                                    class: 'form-widget ' ~ (has_confirm_pass_errors ? '!border-red-500 focus:!ring-red-500 focus:!border-red-500' : ''),
+                                    minlength: 7,
+                                    'data-fields-target': 'input',
+                                    'data-action': 'fields#input_changed',
+                                }}) }}
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
-                        <div class="relative w-full">
-                            {{ form_label(formPassword.newPassword, 'changePassword.new'|trans({}, '_account_widget'), {label_attr: {class: 'form-label'}}) }}
-                            {{ form_widget(formPassword.newPassword, {attr: {class: 'form-widget', minlength: 7, 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
-                            {{ form_errors(formPassword.newPassword) }}
+                    {# Password Form Errors #}
+                    {% if has_password_errors %}
+                        <div class="w-full text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded-lg p-3.5 flex flex-col gap-3 shadow-sm">
+                            {% if formPassword.vars.errors|length > 0 %}
+                                <div class="flex items-start gap-2.5">
+                                    <div class="flex-1 [&>ul]:list-disc [&>ul]:pl-4 [&>ul]:space-y-1 text-red-600">
+                                        {{ form_errors(formPassword) }}
+                                    </div>
+                                </div>
+                            {% endif %}
+                            {% if has_current_pass_errors %}
+                                <div class="flex items-start gap-2.5">
+                                    <div class="flex-1 [&>ul]:list-disc [&>ul]:pl-4 [&>ul]:space-y-1 text-red-600">
+                                        {{ form_errors(formPassword.password) }}
+                                    </div>
+                                </div>
+                            {% endif %}
+                            {% if has_new_pass_errors %}
+                                <div class="flex items-start gap-2.5">
+                                    <div class="flex-1 [&>ul]:list-disc [&>ul]:pl-4 [&>ul]:space-y-1 text-red-600">
+                                        {{ form_errors(formPassword.newPassword) }}
+                                    </div>
+                                </div>
+                            {% endif %}
+                            {% if has_confirm_pass_errors %}
+                                <div class="flex items-start gap-2.5">
+                                    <div class="flex-1 [&>ul]:list-disc [&>ul]:pl-4 [&>ul]:space-y-1 text-red-600">
+                                        {{ form_errors(formPassword.confirmPassword) }}
+                                    </div>
+                                </div>
+                            {% endif %}
                         </div>
-
-                        <div class="relative w-full">
-                            {{ form_label(formPassword.confirmPassword, 'changePassword.confirm'|trans({}, '_account_widget'), {label_attr: {class: 'form-label'}}) }}
-                            {{ form_widget(formPassword.confirmPassword, {attr: {class: 'form-widget', minlength: 7, 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
-                            {{ form_errors(formPassword.confirmPassword) }}
-                        </div>
-                    </div>
+                    {% endif %}
                 </div>
 
                 {# Turnstile Checker #}
@@ -93,35 +187,29 @@
                 {{ form_end(formPassword) }}
             </div>
         {% endif %}
-    {% endif %}
 
-    {% if data.PLATFORM_MODE.value == constant('App\\Enum\\PlatformMode::LIVE').value %}
-        {# Divider between sections #}
+        {# 2FA Section (Always shown on LIVE mode) #}
         <div class="divider my-8"></div>
-        {% if data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::OFF').value or
-            user.userExternalAuths[0].provider != constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value %}
 
-            <h1 class="text-lg mb-8 mt-10">
-                {{ 'twoFactorAuth.title'|trans({}, '_account_widget') }}
-            </h1>
+        <h1 class="text-lg mb-8 mt-10">
+            {{ 'twoFactorAuth.title'|trans({}, '_account_widget') }}
+        </h1>
 
-            <div class="grid {% if user.twoFAtype != constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}grid-cols-2{% else %}grid-cols-1{% endif %} space-x-2">
-                <a href="{{ path('app_configure2FA') }}" class="btn-secondary md:text-base text-sm">
-                    {{ 'twoFactorAuth.configure'|trans({}, '_account_widget') }}
+        <div class="grid {% if user.twoFAtype != constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}grid-cols-2{% else %}grid-cols-1{% endif %} space-x-2">
+            <a href="{{ path('app_configure2FA') }}" class="btn-secondary md:text-base text-sm">
+                {{ 'twoFactorAuth.configure'|trans({}, '_account_widget') }}
+            </a>
+            {% if user.twoFAtype != constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}
+                <a href="{{ path('app_disable2FA', {context: context}) }}" class="btn-logout">
+                    {{ 'twoFactorAuth.disable'|trans({}, '_account_widget') }}
                 </a>
-                {% if user.twoFAtype != constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}
-                    <a href="{{ path('app_disable2FA', {context: context}) }}" class="btn-logout">
-                        {{ 'twoFactorAuth.disable'|trans({}, '_account_widget') }}
-                    </a>
-                {% endif %}
-            </div>
-
-        {% endif %}
+            {% endif %}
+        </div>
     {% endif %}
 
     {# Revoke Account Profile Section #}
+    {% set has_revoke_errors = formRevokeProfiles.vars.errors|length > 0 %}
     <div {{ stimulus_controller('alert') }}>
-        {# Divider between sections #}
         <div class="divider my-8"></div>
 
         <h1 class="text-lg mb-8 mt-10">
@@ -136,7 +224,17 @@
                     'data-alert-target': 'form',
                 },
             }) }}
-            {{ form_errors(formRevokeProfiles) }}
+
+            {% if has_revoke_errors %}
+                <div class="mb-4 w-full text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded-lg p-3.5 flex flex-col gap-3 shadow-sm">
+                    <div class="flex items-start gap-2.5">
+                        <div class="flex-1 [&>ul]:list-disc [&>ul]:pl-4 [&>ul]:space-y-1 text-red-600">
+                            {{ form_errors(formRevokeProfiles) }}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
             {% set userUUID = app.user.uuid %}
 
             {% if user.userExternalAuths|length > 0 %}
@@ -162,12 +260,11 @@
     </div>
 
     {% if data.PLATFORM_MODE.value == constant('App\\Enum\\PlatformMode::LIVE').value %}
-        {# Divider between sections #}
-        <div class="divider my-8"></div>
-
-        {# Additional Option: Danger Zone for Account Deletion #}
+        {# Danger Zone Section #}
         {% if user.email is not null or user.phoneNumber is not null %}
             {% if not is_granted(constant('App\\Enum\\AdminRoleType::ROLE_ADMIN').value) %}
+                <div class="divider my-8"></div>
+
                 <h1 class="text-lg mb-8 mt-10 !text-red-600 font-bold uppercase">
                     {{ 'dangerZone.title'|trans({}, '_account_widget') }}
                 </h1>

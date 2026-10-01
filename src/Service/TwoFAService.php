@@ -7,11 +7,12 @@ use App\Entity\OTPcode;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
-use App\Enum\PlatformMode;
+use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Enum\TwoFAType;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
+use App\Exception\EncryptionException;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -31,6 +32,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class TwoFAService
 {
+    private const int OTP_CODES_AMOUNT = 12;
+
     public function __construct(
         private EntityManagerInterface $entityManager,
         private UserRepository $userRepository,
@@ -40,7 +43,9 @@ readonly class TwoFAService
         private SettingRepository $settingRepository,
         private EventActions $eventActions,
         private EventRepository $eventRepository,
-        private TranslatorInterface $translator
+        private TranslatorInterface $translator,
+        private EncryptionService $encryptionService,
+        private HashArgon2idService $hashArgon2idService,
     ) {
     }
 
@@ -59,7 +64,9 @@ readonly class TwoFAService
         if ($diff >= $timeToExpireCode) {
             return false;
         }
-        if ($user->getTwoFACode() === $formCode) {
+
+        $savedCode = $user->getTwoFACode();
+        if ($savedCode !== null && $this->hashArgon2idService->verifyHash($formCode, $savedCode)) {
             $user->setTwoFAcodeIsActive(false);
             return true;
         }
@@ -73,12 +80,15 @@ readonly class TwoFAService
     {
         // Generate a random verification code with 6 digits
         $verificationCode = (string)random_int(100000, 999999);
-        $user->setTwoFACode($verificationCode);
+
+        $hashedCode = $this->hashArgon2idService->hash($verificationCode);
+
+        $user->setTwoFACode($hashedCode);
         $user->setTwoFACodeGeneratedAt(new DateTime());
         $user->setTwoFAcodeIsActive(true);
         $this->userRepository->save($user, true);
 
-        return $user->getTwoFAcode();
+        return $verificationCode;
     }
 
     public function generate2FACode(
@@ -105,39 +115,84 @@ readonly class TwoFAService
     }
 
     /**
+     * Generates a fresh set of OTP recovery codes.
+     *
+     * Codes are stored encrypted (reversible) rather than hashed, so that they can be
+     * displayed back to the user after the initial setup.
+     *
+     * @return string[] Returns an array of plaintext codes for display
      * @throws RandomException
+     * @throws EncryptionException
      */
-    public function generateOTPCodes(User $user): void
+    public function generateOTPCodes(User $user): array
     {
-        // Remove existing codes
-        foreach ($user->getOTPcodes() as $code) {
-            $this->entityManager->remove($code);
-        }
+        // Remove existing codes, both from the DB and from the in-memory collection
+        $this->removeOTPCodes($user);
 
-        $nCodes = 12; // Number of codes generated.
+        $plainTextCodes = [];
 
-        for ($i = 0; $i < $nCodes; $i++) {
-            $code = $this->generateMixedCode();
+        for ($i = 0; $i < self::OTP_CODES_AMOUNT; $i++) {
+            $plainCode = $this->generateMixedCode();
+            $plainTextCodes[] = $plainCode;
+
             $otpCode = new OTPcode();
-            $otpCode->setCode($code);
+            $otpCode->setCode($this->hashArgon2idService->hash($plainCode));
             $otpCode->setUser($user);
-            $otpCode->setActive(false);
+            $otpCode->setActive(true);
             $otpCode->setCreatedAt(new DateTime());
+
             $user->addOTPcode($otpCode);
             $this->entityManager->persist($otpCode);
         }
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();
+
+        return $plainTextCodes;
+    }
+
+    /**
+     * Returns the plaintext of the user's current OTP codes.
+     *
+     * @return string[]
+     */
+    public function getPlainTextOTPCodes(User $user): array
+    {
+        $plainTextCodes = [];
+
+        foreach ($user->getOTPcodes() as $code) {
+            $storedCode = $code->getCode();
+            if (!is_string($storedCode)) {
+                continue;
+            }
+
+            try {
+                $plainTextCodes[] = $this->encryptionService->decrypt($storedCode);
+            } catch (EncryptionException) {
+                // Skip values that cannot be decrypted (e.g. legacy or corrupted rows)
+                continue;
+            }
+        }
+
+        return $plainTextCodes;
     }
 
     public function validateOTPCodes(User $user, string $formCode): bool
     {
         $twoFACodes = $user->getOTPcodes();
         foreach ($twoFACodes as $code) {
-            // Verify if the code exists and if this code is valid
-            if ($code->getCode() === $formCode && $code->isActive()) {
-                // As we can only use the code once, we have to deactivate it after it is used.
+            if (!$code->isActive()) {
+                continue;
+            }
+
+            $storedHash = $code->getCode();
+            if (!is_string($storedHash)) {
+                continue;
+            }
+
+            // Verify the submitted code against the stored Argon2id hash
+            if ($this->hashArgon2idService->verifyHash($formCode, $storedHash)) {
+                // Deactivate the single-use OTP code after successful verification
                 $code->setActive(false);
                 $this->entityManager->persist($code);
                 $this->entityManager->flush();
@@ -179,21 +234,38 @@ readonly class TwoFAService
         $secondsLeft = $this->settingRepository->findOneBy(
             ['name' => SettingName::TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME->value]
         )->getValue();
-        if ($messageType === UserTwoFactorAuthenticationStatus::EMAIL->value || $user->getEmail()) {
-            $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
-            $contactEmail = $this->settingRepository->findOneBy([
-                'name' => SettingName::CONTACT_EMAIL->value
-            ])->getValue();
-            $supportTeam = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
-            $customerLogo = $this->settingRepository->findOneBy([
-                'name' => SettingName::CUSTOMER_LOGO->value
-            ])->getValue();
-            $projectDir = $this->parameterBag->get('kernel.project_dir');
-            $logoPath = $projectDir . '/public' . $customerLogo;
 
-            if (
-                $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
-            ) {
+        if ($messageType === UserTwoFactorAuthenticationStatus::EMAIL->value || $user->getEmail()) {
+            $emailTitle = $this->settingRepository->findOneBy(
+                ['name' => SettingName::PAGE_TITLE->value]
+            )?->getValue();
+            $contactEmail = $this->settingRepository->findOneBy(
+                ['name' => SettingName::CONTACT_EMAIL->value]
+            )?->getValue();
+            $supportTeam = $emailTitle;
+
+            $customerLogo = $this->settingRepository->findOneBy(
+                ['name' => SettingName::CUSTOMER_LOGO->value]
+            )?->getValue();
+            $footerImageEnabledSetting = $this->settingRepository->findOneBy(
+                ['name' => SettingName::FOOTER_IMAGE_ENABLED->value]
+            )?->getValue();
+            $footerImageSetting = $this->settingRepository->findOneBy(
+                ['name' => SettingName::FOOTER_IMAGE->value]
+            )?->getValue();
+
+            $projectDir = $this->parameterBag->get('kernel.project_dir');
+
+            // Logo file check
+            $logoPath = !empty($customerLogo) ? $projectDir . '/public' . $customerLogo : null;
+            $hasLogo = $logoPath && file_exists($logoPath);
+
+            // Footer Banner file check
+            $isFooterEnabled = ($footerImageEnabledSetting === OperationMode::ON->value) && !empty($footerImageSetting);
+            $footerPath = $isFooterEnabled ? $projectDir . '/public' . $footerImageSetting : null;
+            $hasFooter = $isFooterEnabled && $footerPath && file_exists($footerPath);
+
+            if ($eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value) {
                 // LOGIN_WITH_UUID_ONLY_CODE
                 $email = new TemplatedEmail()
                     ->from(
@@ -210,8 +282,8 @@ readonly class TwoFAService
                         'emailTitle' => $emailTitle,
                         'contactEmail' => $contactEmail,
                         'twoFaCode' => $code,
-                    ])
-                    ->embedFromPath($logoPath, 'logo_cid');
+                        'footerImageEnabled' => $hasFooter,
+                    ]);
             } elseif (
                 $eventType === AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value ||
                 $eventType === AnalyticalEventType::VERIFICATION_CODE_LOGIN_RESEND->value
@@ -229,15 +301,13 @@ readonly class TwoFAService
                     ->htmlTemplate('email/user_verification.html.twig')
                     ->context([
                         'uuid' => $user->getEmail(),
-                        'supportTeam' => $emailTitle,
+                        'supportTeam' => $supportTeam,
                         'contactEmail' => $contactEmail,
                         'twoFaCode' => $code,
-                        'is2FATemplate' => false
-                    ])
-                    ->embedFromPath($logoPath, 'logo_cid');
-            } elseif (
-                $eventType === AnalyticalEventType::USER_AUTO_DELETE_CODE->value
-            ) {
+                        'is2FATemplate' => false,
+                        'footerImageEnabled' => $hasFooter,
+                    ]);
+            } elseif ($eventType === AnalyticalEventType::USER_AUTO_DELETE_CODE->value) {
                 // AUTO DELETE CONFIRMATION CODE
                 $email = new TemplatedEmail()
                     ->from(
@@ -262,8 +332,8 @@ readonly class TwoFAService
                         'supportTeam' => $supportTeam,
                         'code' => $code,
                         'secondsLeft' => $secondsLeft,
-                    ])
-                    ->embedFromPath($logoPath, 'logo_cid');
+                        'footerImageEnabled' => $hasFooter,
+                    ]);
             } else {
                 // 2FA VERIFICATION REQUESTS
                 $email = new TemplatedEmail()
@@ -290,9 +360,18 @@ readonly class TwoFAService
                         'twoFaCode' => $code,
                         'is2FATemplate' => true,
                         'secondsLeft' => $secondsLeft,
-                    ])
-                    ->embedFromPath($logoPath, 'logo_cid');
+                        'footerImageEnabled' => $hasFooter,
+                    ]);
             }
+
+            if ($hasLogo) {
+                $email->embedFromPath($logoPath, 'logo_cid');
+            }
+
+            if ($hasFooter) {
+                $email->embedFromPath($footerPath, 'footer_cid');
+            }
+
             $this->mailer->send($email);
         } elseif ($messageType === UserTwoFactorAuthenticationStatus::SMS->value || $user->getPhoneNumber()) {
             if (
@@ -407,11 +486,11 @@ readonly class TwoFAService
 
     private function removeOTPCodes(User $user): void
     {
-        $codes = $user->getOTPcodes();
-        foreach ($codes as $code) {
+        foreach ($user->getOTPcodes() as $code) {
             $user->removeOTPcode($code);
-            $this->entityManager->persist($user);
+            $this->entityManager->remove($code);
         }
+        $this->entityManager->persist($user);
         $this->entityManager->flush();
     }
 

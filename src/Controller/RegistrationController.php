@@ -8,14 +8,17 @@ use App\Enum\EventMetadataKeysType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
+use App\Enum\SessionStatus;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Form\RegistrationFormSMSType;
 use App\Form\RegistrationFormType;
+use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
+use App\Service\EmailGenerator;
 use App\Service\EventActions;
 use App\Service\GetSettings;
-use App\Service\EmailGenerator;
+use App\Service\HashArgon2idService;
 use App\Service\MagicLinkService;
 use App\Service\SendSMS;
 use App\Service\UserCreationService;
@@ -72,6 +75,8 @@ class RegistrationController extends AbstractController
         private readonly EventDispatcherInterface $eventDispatcher,
         private readonly PhoneNumberUtil $phoneNumberUtil,
         private readonly RateLimiterFactoryInterface $verifyAccountLimiter,
+        private readonly SettingRepository $settingRepository,
+        private readonly HashArgon2idService $hashArgon2idService
     ) {
     }
 
@@ -116,7 +121,7 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::ON->value) {
+        if ($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === 'true') {
             $this->addFlash(
                 'error',
                 $this->translator->trans(
@@ -234,7 +239,7 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::ON->value) {
+        if ($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === 'true') {
             $this->addFlash(
                 'error',
                 $this->translator->trans(
@@ -293,7 +298,6 @@ class RegistrationController extends AbstractController
                 $request
             );
 
-
             // Send SMS
             $message = $this->translator->trans('yourAccountPasswordIs', [], 'controllers')
                 . $randomPassword
@@ -334,7 +338,7 @@ class RegistrationController extends AbstractController
     public function confirmAccount(
         Request $request,
     ): Response {
-        $uuid = $request->query->get('uuid');
+        $uuid = (string)$request->query->get('uuid');
         $key = $request->getClientIp() . '_' . $uuid;
 
         $limiter = $this->verifyAccountLimiter->create($key);
@@ -354,15 +358,21 @@ class RegistrationController extends AbstractController
             );
         }
         // Get the email and verification code from the URL query parameters
-        $verificationCode = $request->query->get('twoFaCode');
+        $verificationCode = (string)$request->query->get('twoFaCode');
         $source = $request->query->get('source', 'portal');
         $isApiSource = $source === 'api';
 
         // Get the user with the matching email, excluding admin users
         $user = $this->userRepository->findOneByUUIDExcludingAdmin($uuid);
 
-        // Check if the user has been previously verified
-        if ($user && $user->isVerified() && !$user->isForgotPasswordRequest()) {
+        $loginUuidOnlySetting = $this->settingRepository->findOneBy(
+            ['name' => SettingName::LOGIN_WITH_UUID_ONLY->value]
+        );
+
+        $isUuidOnly = filter_var($loginUuidOnlySetting?->getValue(), FILTER_VALIDATE_BOOLEAN);
+
+        // Check if the user has been previously verified only with UUID login OFF
+        if (!$isUuidOnly && $user && $user->isVerified() && !$user->isForgotPasswordRequest()) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('accountAlreadyVerified', [], 'controllers')
@@ -370,40 +380,45 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_login', ['uuid' => $uuid]);
         }
 
-        if (
-            $user && $user->getUuid() === $uuid && $user->getTwoFAcode() === $verificationCode &&
-            $this->magicLinkService->linkCanBeUsed($user, AnalyticalEventType::USER_CREATION->value)
-        ) {
-            $this->addFlash(
-                'error',
-                $this->translator->trans(
-                    'invalidVerificationCodeLink',
-                    [],
-                    'controllers'
-                )
-            );
+        $isCodeValid = $user instanceof User
+            && $user->getTwoFAcode() !== null
+            && $verificationCode !== ''
+            && $this->hashArgon2idService->verifyHash($verificationCode, $user->getTwoFAcode());
 
-            return $this->redirectToRoute('app_landing');
+        if ($user && $user->getUuid() === $uuid && $isCodeValid) {
+            // UUID-only logins (authLocal) don't create a USER_CREATION event, so validate
+            // against the moment the code was generated. Registration keeps the event check.
+            $isLinkExpired = $isUuidOnly
+                ? !$this->magicLinkService->linkValidity($user)
+                : $this->magicLinkService->linkCanBeUsed($user, AnalyticalEventType::USER_CREATION->value);
+
+            if ($isLinkExpired) {
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans(
+                        'invalidVerificationCodeLink',
+                        [],
+                        'controllers'
+                    )
+                );
+
+                return $this->redirectToRoute('app_landing');
+            }
         }
-        if ($user && $user->getTwoFAcode() === $verificationCode) {
-            try {
-                // Create a token manually for the user
-                $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
 
-                // Set the token in the token storage
+        if ($isCodeValid) {
+            try {
+                $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
                 $this->tokenStorage->setToken($token);
 
-                // Dispatch the login event
                 $event = new InteractiveLoginEvent($request, $token);
                 $this->eventDispatcher->dispatch($event);
 
-                // Update the verified status and save the user
                 $user->setIsVerified(true);
                 $this->userRepository->save($user, true);
                 $session = $this->requestStack->getSession();
-                $session->set('session_verified', true);
+                $session->set(SessionStatus::VERIFIED->value, true);
 
-                // Defines the Event to the table
                 $eventMetaData = [
                     EventMetadataKeysType::IP->value => $request->getClientIp(),
                     EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
@@ -446,7 +461,7 @@ class RegistrationController extends AbstractController
             // Example at the end of registration success
             if ($request->query->get('source') === 'api') {
                 $session = $request->getSession();
-                $session->set('app_return', [
+                $session->set(SessionStatus::APP_RETURN->value, [
                     'timestamp' => time(),
                     'ttl' => 300, // 5 minutes
                 ]);

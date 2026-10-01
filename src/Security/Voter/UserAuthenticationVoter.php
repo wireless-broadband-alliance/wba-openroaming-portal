@@ -279,8 +279,7 @@ final class UserAuthenticationVoter extends Voter
             self::USER_MANAGEMENT => $this->hasUserManagement($user),
 
             self::ACTIVITY_LOGS_READ =>
-                $this->hasPermission($user, AdminPermissionsType::ACTIVITY_LOGS_READ)
-                || $this->hasPermission($user, AdminPermissionsType::ACTIVITY_LOGS_WRITE),
+                $this->hasPermission($user, AdminPermissionsType::ACTIVITY_LOGS_READ),
 
             default => false,
         };

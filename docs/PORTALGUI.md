@@ -90,10 +90,7 @@ primary features:
 
 The admin dashboard is only accessible after a secure login, accessible via **https://<portal_url>/dashboard/login**.
 
-To access the dashboard, administrators must provide their
-credentials **(default is: admin@example.com/gnimaornepo)**. The login page provides authorized users with a secure and
-private
-entry point to control the platform.
+To access the dashboard, administrators must provide their credentials configured during environment setup (via `SUPERADMIN_EMAIL` and `SUPERADMIN_PASSWORD` or generated via `php bin/console reset:super-admin`). The login page provides authorized users with a secure and private entry point to control the platform.
 
 ### 2. Admin Page
 

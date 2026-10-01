@@ -12,6 +12,7 @@ use App\Enum\FirewallType;
 use App\Enum\SessionStatus;
 use App\Enum\SettingName;
 use App\Enum\UserTwoFactorAuthenticationStatus;
+use App\Exception\EncryptionException;
 use App\Form\TwoFACode;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
@@ -31,7 +32,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class TwoFAController extends AbstractController
@@ -599,6 +599,10 @@ class TwoFAController extends AbstractController
         ]);
     }
 
+    /**
+     * @throws EncryptionException
+     * @throws RandomException
+     */
     #[Route(
         '/{context}/2FAFirstSetup/codes',
         name: 'app_otpCodes',
@@ -629,11 +633,26 @@ class TwoFAController extends AbstractController
             );
             return $this->redirectToRoute('app_dashboard_login');
         }
-        $data = $this->getSettings->getSettings();
         $session = $request->getSession();
+        if (!($user->getOTPcodes()->isEmpty())) {
+            $session_admin = $session->get('session_admin');
+            $this->addFlash(
+                'error',
+                $this->translator->trans('otpCodesAlreadyViewed', [], 'controllers')
+            );
+            if ($session_admin) {
+                return $this->redirectToRoute('admin_page');
+            }
+            return $this->redirectToRoute('app_landing');
+        }
+
+        $data = $this->getSettings->getSettings();
+
+
         if ($this->twoFAService->hasValidOTPCodes($user)) {
             return $this->redirectToRoute('app_landing');
         }
+
         if ($this->twoFAService->twoFAisActive($user)) {
             $session_admin = $session->get('session_admin');
             if ($session_admin) {
@@ -641,12 +660,12 @@ class TwoFAController extends AbstractController
             }
             return $this->redirectToRoute('app_landing');
         }
-        if ($user->getOTPcodes()->isEmpty()) {
-            $this->twoFAService->generateOTPCodes($user);
-        }
+
+        $plainTextCodes = $this->twoFAService->generateOTPCodes($user);
+
         return $this->render('landing/twoFAAuthentication/otpCodes.html.twig', [
             'data' => $data,
-            'codes' => $user->getOTPcodes(),
+            'codes' => $plainTextCodes,
             'user' => $user,
             'context' => $context
         ]);
@@ -686,7 +705,6 @@ class TwoFAController extends AbstractController
             return $this->redirectToRoute('app_dashboard_login');
         }
 
-        $this->twoFAService->saveCodes($user);
         $this->twoFAService->event2FA(
             $request->getClientIp(),
             $user,
@@ -755,6 +773,8 @@ class TwoFAController extends AbstractController
                 AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND->value,
             CodeVerificationType::VERIFICATION_CODE_LOGIN_RESEND->value =>
                 AnalyticalEventType::VERIFICATION_CODE_LOGIN_RESEND->value,
+            CodeVerificationType::AUTO_DELETE_RESEND->value =>
+                AnalyticalEventType::USER_AUTO_DELETE_CODE->value,
         ];
         $eventType = $eventTypeMapping[$type] ?? null;
 
@@ -861,10 +881,7 @@ class TwoFAController extends AbstractController
         $session = $request->getSession();
         $route = $session->get(SessionStatus::SYSTEM_RESET_REQUEST->value) ?? '';
 
-        if ($route && $session->get(SessionStatus::INSTALLATION_STARTED->value) === true) {
-            return $this->redirectToRoute($route);
-        }
-        if ($route && $session->get(SessionStatus::CERTIFICATE_STARTED->value) === true) {
+        if ($route === 'admin_dashboard_settings_certs_installation') {
             return $this->redirectToRoute($route);
         }
 
@@ -924,9 +941,10 @@ class TwoFAController extends AbstractController
         ],
         defaults: [
             'context' => FirewallType::LANDING->value
-        ]
+        ],
+        methods: ['POST']
     )]
-    public function downloadCodes(string $context): Response
+    public function downloadCodes(Request $request, string $context): Response
     {
         $user = $this->getUser();
         // Ensure the user is logged in
@@ -947,10 +965,8 @@ class TwoFAController extends AbstractController
             return $this->redirectToRoute('app_dashboard_login');
         }
 
-        $codes = [];
-        foreach ($user->getOTPcodes() as $code) {
-            $codes[] = $code->getCode();
-        }
+        /** @var array<string> $codes */
+        $codes = $request->request->all('codes');
 
         // Create the content of the file
         $fileContent = implode("\n", $codes);

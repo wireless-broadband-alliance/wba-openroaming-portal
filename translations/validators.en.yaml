@@ -110,3 +110,12 @@ coordinateDegreeBetween180: 'The longitude must be a numerical value between -18
 invalidGeometryFormat: 'Invalid geometry format.'
 valueMustBeBetween: 'O valor deve estar entre {{ min }} e {{ max }}.'
 invalidSerialNumberFormat: "The serial number format is invalid."
+passwordCannotBeLongerThan: 'The password cannot be longer than {{ limit }} characters'
+passwordCannotBeShorterThan: 'The password cannot be shorter than {{ limit }} characters'
+passwordIsCompromised: 'This password has appeared in a data breach and cannot be used.'
+passwordIsTooWeak: 'This password is too weak. Please use a stronger combination of characters.'
+currentPasswordIncorrect: "Your current password is incorrect."
+invalidEmailFormat: 'The entered email address is invalid.'
+invalidDateFormat: 'The entered date is invalid.'
+securityFingerprintInvalid: 'The PGP fingerprint must consist of exactly 40 hexadecimal characters.'
+invalidSecurityContactFormat: 'The security contact must be a valid URI starting with mailto:, https://, or tel: (e.g., mailto:security@example.com, https://example.com/security, or tel:+123456789).'

@@ -6,7 +6,6 @@ use App\Entity\User;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\SettingName;
-use App\Repository\SettingRepository;
 use Random\RandomException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -20,9 +19,9 @@ readonly class EmailGenerator
     public function __construct(
         private ParameterBagInterface $parameterBag,
         private MailerInterface $mailer,
-        private SettingRepository $settingRepository,
         private MagicLinkService $magicLinkService,
-        private TranslatorInterface $translator
+        private TranslatorInterface $translator,
+        private GetSettings $getSettings,
     ) {
     }
 
@@ -33,32 +32,25 @@ readonly class EmailGenerator
     public function sendRegistrationEmail(
         User $user,
         ?string $password = null,
-        bool $returnAppsRegistration = false
+        bool $returnAppsRegistration = false,
+        ?string $rawTwoFaCode = null
     ): void {
-        $supportTeam = $this->settingRepository
-            ->findOneBy(['name' => SettingName::PAGE_TITLE->value])
-            ->getValue();
+        $settings = $this->fetchSettings([
+            SettingName::PAGE_TITLE,
+            SettingName::CONTACT_EMAIL,
+            SettingName::LOGIN_WITH_UUID_ONLY,
+            SettingName::RETURN_APPS_ENABLED,
+            SettingName::CUSTOMER_LOGO,
+            SettingName::FOOTER_IMAGE_ENABLED,
+            SettingName::FOOTER_IMAGE,
+        ]);
 
-        $contactEmail = $this->settingRepository
-            ->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])
-            ->getValue();
+        $supportTeam = $this->getVal($settings, SettingName::PAGE_TITLE);
+        $contactEmail = $this->getVal($settings, SettingName::CONTACT_EMAIL);
+        $loginWithUUID = $this->getVal($settings, SettingName::LOGIN_WITH_UUID_ONLY);
+        $returnAppsEnabled = $this->getVal($settings, SettingName::RETURN_APPS_ENABLED);
 
-        $loginWithUUID = $this->settingRepository
-            ->findOneBy(['name' => SettingName::LOGIN_WITH_UUID_ONLY->value])
-            ->getValue();
-
-        $returnAppsEnabled = $this->settingRepository
-            ->findOneBy(['name' => SettingName::RETURN_APPS_ENABLED->value])
-            ->getValue();
-
-        $customerLogo = $this->settingRepository
-            ->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])
-            ->getValue();
-
-        $projectDir = $this->parameterBag->get('kernel.project_dir');
-        $logoPath = $projectDir . '/public' . $customerLogo;
-
-        // Default template
+        // Default template and translation domain
         $template = 'email/user_registration.html.twig';
         $translationDomain = 'user_registration';
 
@@ -66,12 +58,12 @@ readonly class EmailGenerator
             'uuid' => $user->getEmail(),
             'supportTeam' => $supportTeam,
             'contactEmail' => $contactEmail,
-            'twoFaCode' => $user->getTwoFAcode(),
-            'password' => $password ?? null
+            'twoFaCode' => $rawTwoFaCode ?? $user->getTwoFAcode(),
+            'password' => $password ?? null,
         ];
 
         // Switch template depending on login mode or return apps setting
-        if ($loginWithUUID === OperationMode::ON->value) {
+        if ($loginWithUUID === 'true' && !$returnAppsRegistration) {
             $template = 'email/user_registration_login_uuid.html.twig';
             $translationDomain = 'user_registration_login_uuid';
 
@@ -81,14 +73,7 @@ readonly class EmailGenerator
             $translationDomain = 'user_registration_api';
         }
 
-        $email = new TemplatedEmail()
-            ->from(
-                new Address(
-                    $this->parameterBag->get('app.email_address'),
-                    $this->parameterBag->get('app.sender_name')
-                )
-            )
-            ->to($user->getEmail())
+        $email = $this->createBaseEmail($user->getEmail())
             ->subject(
                 $this->translator->trans(
                     'subject_registration_details',
@@ -96,10 +81,9 @@ readonly class EmailGenerator
                     $translationDomain
                 )
             )
-            ->htmlTemplate($template)
-            ->context($context)
-            ->embedFromPath($logoPath, 'logo_cid');
+            ->htmlTemplate($template);
 
+        $this->configureEmailMedia($email, $settings, $context);
         $this->mailer->send($email);
     }
 
@@ -108,30 +92,23 @@ readonly class EmailGenerator
      */
     public function sendNotifyExpiresProfileEmail(User $user, int $timeLeft): void
     {
-        $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
-        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
-        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
-        $projectDir = $this->parameterBag->get('kernel.project_dir');
-        $logoPath = $projectDir . '/public' . $customerLogo;
+        $settings = $this->fetchStandardSettings();
 
-        // Send email to the user with the verification code
-        $email = new TemplatedEmail()
-            ->from(
-                new Address(
-                    $this->parameterBag->get('app.email_address'),
-                    $this->parameterBag->get('app.sender_name')
-                )
-            )
-            ->to($user->getEmail())
+        $emailTitle = $this->getVal($settings, SettingName::PAGE_TITLE);
+        $contactEmail = $this->getVal($settings, SettingName::CONTACT_EMAIL);
+
+        $context = [
+            'uuid' => $user->getEmail(),
+            'emailTitle' => $emailTitle,
+            'contactEmail' => $contactEmail,
+            'timeLeft' => $timeLeft,
+        ];
+
+        $email = $this->createBaseEmail($user->getEmail())
             ->subject($this->translator->trans('subject_is_expiring', [], 'expirationProfiles'))
-            ->htmlTemplate('email/expiresProfile.html.twig')
-            ->context([
-                'uuid' => $user->getEmail(),
-                'emailTitle' => $emailTitle,
-                'contactEmail' => $contactEmail,
-                'timeLeft' => $timeLeft,
-            ])
-            ->embedFromPath($logoPath, 'logo_cid');
+            ->htmlTemplate('email/expiresProfile.html.twig');
+
+        $this->configureEmailMedia($email, $settings, $context);
         $this->mailer->send($email);
     }
 
@@ -140,53 +117,46 @@ readonly class EmailGenerator
      */
     public function sendNotifyExpiredProfile(User $user): void
     {
-        $supportTeam = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
-        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
-        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
-        $projectDir = $this->parameterBag->get('kernel.project_dir');
-        $logoPath = $projectDir . '/public' . $customerLogo;
+        $settings = $this->fetchStandardSettings();
 
-        // Send email to the user with the verification code
-        $email = new TemplatedEmail()
-            ->from(
-                new Address(
-                    $this->parameterBag->get('app.email_address'),
-                    $this->parameterBag->get('app.sender_name')
-                )
-            )
-            ->to($user->getEmail())
+        $supportTeam = $this->getVal($settings, SettingName::PAGE_TITLE);
+        $contactEmail = $this->getVal($settings, SettingName::CONTACT_EMAIL);
+
+        $context = [
+            'uuid' => $user->getEmail(),
+            'contactEmail' => $contactEmail,
+            'emailTitle' => $supportTeam,
+            'supportTeam' => $supportTeam,
+        ];
+
+        $email = $this->createBaseEmail($user->getEmail())
             ->subject($this->translator->trans('subject_is_expired', [], 'expirationProfiles'))
-            ->htmlTemplate('email/expiredProfile.html.twig')
-            ->context([
-                'uuid' => $user->getEmail(),
-                'contactEmail' => $contactEmail,
-                'emailTitle' => $supportTeam,
-                'supportTeam' => $supportTeam,
-            ])
-            ->embedFromPath($logoPath, 'logo_cid');
+            ->htmlTemplate('email/expiredProfile.html.twig');
 
+        $this->configureEmailMedia($email, $settings, $context);
         $this->mailer->send($email);
     }
 
     /**
      * @throws TransportExceptionInterface
      */
-    public function sendForgotPasswordEmail(User $user): void
+    public function sendForgotPasswordEmail(User $user, ?string $rawTwoFaCode = null): void
     {
-        $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
-        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
-        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
-        $projectDir = $this->parameterBag->get('kernel.project_dir');
-        $logoPath = $projectDir . '/public' . $customerLogo;
+        $settings = $this->fetchStandardSettings();
 
-        $email = new TemplatedEmail()
-            ->from(
-                new Address(
-                    $this->parameterBag->get('app.email_address'),
-                    $this->parameterBag->get('app.sender_name')
-                )
-            )
-            ->to($user->getEmail())
+        $emailTitle = $this->getVal($settings, SettingName::PAGE_TITLE);
+        $contactEmail = $this->getVal($settings, SettingName::CONTACT_EMAIL);
+
+        $context = [
+            'forgotPasswordUser' => true,
+            'uuid' => $user->getUuid(),
+            'emailTitle' => $emailTitle,
+            'contactEmail' => $contactEmail,
+            'verificationCode' => $rawTwoFaCode ?? $user->getTwoFAcode(),
+            'context' => FirewallType::LANDING->value,
+        ];
+
+        $email = $this->createBaseEmail($user->getEmail())
             ->subject(
                 $this->translator->trans(
                     'subject_forgot_password',
@@ -194,17 +164,9 @@ readonly class EmailGenerator
                     'user_forgot_password_request'
                 )
             )
-            ->htmlTemplate('email/user_forgot_password_request.html.twig')
-            ->context([
-                'forgotPasswordUser' => true,
-                'uuid' => $user->getUuid(),
-                'emailTitle' => $emailTitle,
-                'contactEmail' => $contactEmail,
-                'verificationCode' => $user->getTwoFAcode(),
-                'context' => FirewallType::LANDING->value,
-            ])
-            ->embedFromPath($logoPath, 'logo_cid');
+            ->htmlTemplate('email/user_forgot_password_request.html.twig');
 
+        $this->configureEmailMedia($email, $settings, $context);
         $this->mailer->send($email);
     }
 
@@ -213,29 +175,22 @@ readonly class EmailGenerator
      */
     public function sendResetPasswordEmailByAdmin(User $user, string $newPassword): void
     {
-        $supportTeam = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
-        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
-        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
-        $projectDir = $this->parameterBag->get('kernel.project_dir');
-        $logoPath = $projectDir . '/public' . $customerLogo;
+        $settings = $this->fetchStandardSettings();
 
-        $email = new TemplatedEmail()
-            ->from(
-                new Address(
-                    $this->parameterBag->get('app.email_address'),
-                    $this->parameterBag->get('app.sender_name')
-                )
-            )
-            ->to($user->getEmail())
+        $supportTeam = $this->getVal($settings, SettingName::PAGE_TITLE);
+        $contactEmail = $this->getVal($settings, SettingName::CONTACT_EMAIL);
+
+        $context = [
+            'password' => $newPassword,
+            'supportTeam' => $supportTeam,
+            'contactEmail' => $contactEmail,
+        ];
+
+        $email = $this->createBaseEmail($user->getEmail())
             ->subject($this->translator->trans('subject_password_reset_details', [], 'user_password_reset'))
-            ->htmlTemplate('email/user_password_reset.html.twig')
-            ->context([
-                'password' => $newPassword,
-                'supportTeam' => $supportTeam,
-                'contactEmail' => $contactEmail,
-            ])
-            ->embedFromPath($logoPath, 'logo_cid');
+            ->htmlTemplate('email/user_password_reset.html.twig');
 
+        $this->configureEmailMedia($email, $settings, $context);
         $this->mailer->send($email);
     }
 
@@ -244,58 +199,47 @@ readonly class EmailGenerator
      */
     public function sendNotifyExpiresCertEmail(User $user, int $timeLeft): void
     {
-        $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
-        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
-        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
-        $projectDir = $this->parameterBag->get('kernel.project_dir');
-        $logoPath = $projectDir . '/public' . $customerLogo;
+        $settings = $this->fetchStandardSettings();
 
-        // Send email to the user with the verification code
-        $email = new TemplatedEmail()
-            ->from(
-                new Address(
-                    $this->parameterBag->get('app.email_address'),
-                    $this->parameterBag->get('app.sender_name')
-                )
-            )
-            ->to($user->getEmail())
+        $emailTitle = $this->getVal($settings, SettingName::PAGE_TITLE);
+        $contactEmail = $this->getVal($settings, SettingName::CONTACT_EMAIL);
+
+        $context = [
+            'uuid' => $user->getEmail(),
+            'emailTitle' => $emailTitle,
+            'contactEmail' => $contactEmail,
+            'timeLeft' => $timeLeft,
+        ];
+
+        $email = $this->createBaseEmail($user->getEmail())
             ->subject($this->translator->trans('subjectExpiring', [], 'notify_admin_expiring'))
-            ->htmlTemplate('email/notify_admin_expiring.html.twig')
-            ->context([
-                'uuid' => $user->getEmail(),
-                'emailTitle' => $emailTitle,
-                'contactEmail' => $contactEmail,
-                'timeLeft' => $timeLeft,
-            ])
-            ->embedFromPath($logoPath, 'logo_cid');
+            ->htmlTemplate('email/notify_admin_expiring.html.twig');
+
+        $this->configureEmailMedia($email, $settings, $context);
         $this->mailer->send($email);
     }
 
+    /**
+     * @throws TransportExceptionInterface
+     */
     public function sendNotifyExpiredCertEmail(User $user): void
     {
-        $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
-        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
-        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
-        $projectDir = $this->parameterBag->get('kernel.project_dir');
-        $logoPath = $projectDir . '/public' . $customerLogo;
+        $settings = $this->fetchStandardSettings();
 
-        // Send email to the user with the verification code
-        $email = new TemplatedEmail()
-            ->from(
-                new Address(
-                    $this->parameterBag->get('app.email_address'),
-                    $this->parameterBag->get('app.sender_name')
-                )
-            )
-            ->to($user->getEmail())
+        $emailTitle = $this->getVal($settings, SettingName::PAGE_TITLE);
+        $contactEmail = $this->getVal($settings, SettingName::CONTACT_EMAIL);
+
+        $context = [
+            'uuid' => $user->getEmail(),
+            'emailTitle' => $emailTitle,
+            'contactEmail' => $contactEmail,
+        ];
+
+        $email = $this->createBaseEmail($user->getEmail())
             ->subject($this->translator->trans('subjectExpired', [], 'notify_admin_expiring'))
-            ->htmlTemplate('email/notify_admin_expired.html.twig')
-            ->context([
-                'uuid' => $user->getEmail(),
-                'emailTitle' => $emailTitle,
-                'contactEmail' => $contactEmail,
-            ])
-            ->embedFromPath($logoPath, 'logo_cid');
+            ->htmlTemplate('email/notify_admin_expired.html.twig');
+
+        $this->configureEmailMedia($email, $settings, $context);
         $this->mailer->send($email);
     }
 
@@ -304,20 +248,18 @@ readonly class EmailGenerator
      */
     public function sendUserAccountDeletionConfirmationEmail(User $user): void
     {
-        $supportTeam = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
-        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
-        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
-        $projectDir = $this->parameterBag->get('kernel.project_dir');
-        $logoPath = $projectDir . '/public' . $customerLogo;
+        $settings = $this->fetchStandardSettings();
 
-        $email = new TemplatedEmail()
-            ->from(
-                new Address(
-                    $this->parameterBag->get('app.email_address'),
-                    $this->parameterBag->get('app.sender_name')
-                )
-            )
-            ->to($user->getEmail())
+        $supportTeam = $this->getVal($settings, SettingName::PAGE_TITLE);
+        $contactEmail = $this->getVal($settings, SettingName::CONTACT_EMAIL);
+
+        $context = [
+            'uuid' => $user->getEmail(),
+            'supportTeam' => $supportTeam,
+            'contactEmail' => $contactEmail,
+        ];
+
+        $email = $this->createBaseEmail($user->getEmail())
             ->subject(
                 $this->translator->trans(
                     'subject_account_deletion_confirmation',
@@ -325,14 +267,9 @@ readonly class EmailGenerator
                     'account_deletion_confirmation_by_user'
                 )
             )
-            ->htmlTemplate('email/account_deletion_confirmation_by_user.html.twig')
-            ->context([
-                'uuid' => $user->getEmail(),
-                'supportTeam' => $supportTeam,
-                'contactEmail' => $contactEmail,
-            ])
-            ->embedFromPath($logoPath, 'logo_cid');
+            ->htmlTemplate('email/account_deletion_confirmation_by_user.html.twig');
 
+        $this->configureEmailMedia($email, $settings, $context);
         $this->mailer->send($email);
     }
 
@@ -344,20 +281,20 @@ readonly class EmailGenerator
         User $adminRecipient,
         User $performedBy
     ): void {
-        $supportTeam = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
-        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
-        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
-        $projectDir = $this->parameterBag->get('kernel.project_dir');
-        $logoPath = $projectDir . '/public' . $customerLogo;
+        $settings = $this->fetchStandardSettings();
 
-        $email = new TemplatedEmail()
-            ->from(
-                new Address(
-                    $this->parameterBag->get('app.email_address'),
-                    $this->parameterBag->get('app.sender_name')
-                )
-            )
-            ->to($adminRecipient->getEmail())
+        $supportTeam = $this->getVal($settings, SettingName::PAGE_TITLE);
+        $contactEmail = $this->getVal($settings, SettingName::CONTACT_EMAIL);
+
+        $context = [
+            'uuid' => $deletedUser->getUuid(),
+            'adminName' => trim($performedBy->getFirstName() . ' ' . $performedBy->getLastName()),
+            'adminEmail' => $performedBy->getEmail(),
+            'supportTeam' => $supportTeam,
+            'contactEmail' => $contactEmail,
+        ];
+
+        $email = $this->createBaseEmail($adminRecipient->getEmail())
             ->subject(
                 $this->translator->trans(
                     'subject_admin_account_deletion_confirmation',
@@ -365,16 +302,103 @@ readonly class EmailGenerator
                     'account_deletion_confirmation_by_admins'
                 )
             )
-            ->htmlTemplate('email/account_deletion_confirmation_by_admins.html.twig')
-            ->context([
-                'uuid' => $deletedUser->getUuid(),
-                'adminName' => trim($performedBy->getFirstName() . ' ' . $performedBy->getLastName()),
-                'adminEmail' => $performedBy->getEmail(),
-                'supportTeam' => $supportTeam,
-                'contactEmail' => $contactEmail,
-            ])
-            ->embedFromPath($logoPath, 'logo_cid');
+            ->htmlTemplate('email/account_deletion_confirmation_by_admins.html.twig');
 
+        $this->configureEmailMedia($email, $settings, $context);
         $this->mailer->send($email);
+    }
+
+    /**
+     * Helper to instantiate a TemplatedEmail with pre-configured 'from' and 'to' addresses.
+     */
+    private function createBaseEmail(string $recipientEmail): TemplatedEmail
+    {
+        return new TemplatedEmail()
+            ->from(
+                new Address(
+                    $this->parameterBag->get('app.email_address'),
+                    $this->parameterBag->get('app.sender_name')
+                )
+            )
+            ->to($recipientEmail);
+    }
+
+    /**
+     * Helper to fetch common standard settings used by most emails.
+     *
+     * @return array<string, array{value: string}>
+     */
+    private function fetchStandardSettings(): array
+    {
+        return $this->fetchSettings([
+            SettingName::PAGE_TITLE,
+            SettingName::CONTACT_EMAIL,
+            SettingName::CUSTOMER_LOGO,
+            SettingName::FOOTER_IMAGE_ENABLED,
+            SettingName::FOOTER_IMAGE,
+        ]);
+    }
+
+    /**
+     * Helper to invoke GetSettings::getSpecificSettings with an array of SettingName enums.
+     *
+     * @param SettingName[] $settingNames
+     * @return array<string, array{value: string}>
+     */
+    private function fetchSettings(array $settingNames): array
+    {
+        $keys = array_map(static fn(SettingName $name) => $name->value, $settingNames);
+
+        return $this->getSettings->getSpecificSettings($keys);
+    }
+
+    /**
+     * Helper to safely get a setting's value from the array returned by GetSettings.
+     *
+     * @param array<string, array{value: string}> $settings
+     */
+    private function getVal(array $settings, SettingName $name): ?string
+    {
+        return $settings[$name->value]['value'] ?? null;
+    }
+
+    /**
+     * Helper to embed customer logo and footer banner images into the email,
+     * updating the context array with 'footerImageEnabled' flag before applying it to the email.
+     *
+     * @param array<string, array{value: string}> $settings
+     * @param array<string, mixed> $context
+     */
+    private function configureEmailMedia(
+        TemplatedEmail $email,
+        array $settings,
+        array $context
+    ): void {
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
+
+        $customerLogo = $this->getVal($settings, SettingName::CUSTOMER_LOGO);
+        $footerImageEnabled = $this->getVal($settings, SettingName::FOOTER_IMAGE_ENABLED);
+        $footerImage = $this->getVal($settings, SettingName::FOOTER_IMAGE);
+
+        // Embed Customer Logo
+        if (!empty($customerLogo)) {
+            $logoPath = $projectDir . '/public' . $customerLogo;
+            if (file_exists($logoPath)) {
+                $email->embedFromPath($logoPath, 'logo_cid');
+            }
+        }
+
+        // Embed Footer Banner
+        $isFooterEnabled = ($footerImageEnabled === OperationMode::ON->value) && !empty($footerImage);
+        $footerPath = $isFooterEnabled ? $projectDir . '/public' . $footerImage : null;
+        $hasFooter = $isFooterEnabled && $footerPath && file_exists($footerPath);
+
+        $context['footerImageEnabled'] = $hasFooter;
+
+        if ($hasFooter) {
+            $email->embedFromPath($footerPath, 'footer_cid');
+        }
+
+        $email->context($context);
     }
 }

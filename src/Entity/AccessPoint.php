@@ -6,6 +6,7 @@ use App\Repository\AccessPointRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: AccessPointRepository::class)]
+#[ORM\Index(name: 'idx_ap_location', columns: ['location'], flags: ['spatial'])]
 class AccessPoint
 {
     #[ORM\Id]

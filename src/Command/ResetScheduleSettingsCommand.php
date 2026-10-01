@@ -58,6 +58,10 @@ class ResetScheduleSettingsCommand extends Command
             ['name' => SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON_ENABLED->value, 'value' => 'ON'],
             ['name' => SettingName::LDAP_SYNC_CRON_ENABLED->value, 'value' => 'ON'],
             ['name' => SettingName::DOMAIN_BLACKLIST_IMPORT_CRON_ENABLED->value, 'value' => 'ON'],
+            ['name' => SettingName::CLEANUP_EXPIRED_DATA_CRON->value, 'value' => '* 5 * * *'],
+            ['name' => SettingName::CLEANUP_EXPIRED_DATA_CRON_ENABLED->value, 'value' => 'OFF'],
+            ['name' => SettingName::USER_RETENTION_DAYS->value, 'value' => '30'],
+            ['name' => SettingName::OTP_EXPIRATION_HOURS->value, 'value' => '12'],
         ];
 
         // Begin a database transaction to ensure data consistency

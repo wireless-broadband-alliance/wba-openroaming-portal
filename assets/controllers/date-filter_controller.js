@@ -475,7 +475,7 @@ export default class extends Controller {
         };
 
         if (!this.#rangeStart) {
-            this.rangeLabelTarget.innerHTML = `<span class="text-gray-400">${this.t('pickRange')}</span>`;
+            this.rangeLabelTarget.innerHTML = `<span class="text-gray-400">${this.t('pickDate')}</span>`;
             return;
         }
 

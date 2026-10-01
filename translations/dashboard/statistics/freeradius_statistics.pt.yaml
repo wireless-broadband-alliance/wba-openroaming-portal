@@ -26,3 +26,12 @@ totalAttempts: 'Total de Tentativas'
 data: 'Dados'
 durationHour: 'h'
 durationMinute: 'm'
+confirmExportFreeradiusStatistics: "Pretende exportar as estatísticas atuais do Freeradius?"
+groupedBy: "Agrupado por %bucket%"
+bucket:
+  hour: 'hora'
+  day: 'dia'
+  week: 'semana'
+  month: 'mês'
+  year: 'ano'
+viewUsers: 'Ver Utilizadores'

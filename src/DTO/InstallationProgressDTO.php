@@ -34,6 +34,11 @@ class InstallationProgressDTO
 
     public ?string $emailAdmin = null;
 
+    public ?string $securityContact = null;
+
+    public ?\DateTimeInterface $securityExpires = null;
+
+    public ?string $securityPgpFingerprint = null;
 
     public ?\DateTimeInterface $updatedAt = null;
 

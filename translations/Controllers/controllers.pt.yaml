@@ -100,6 +100,7 @@ PasswordPasswordConfirmationMustMatch: 'Os campos palavra-passe e confirmação 
 passwordUpdated: '"%uuid%" palavra-passe foi atualizada.'
 accountAlreadyVerified: 'Esta conta já foi verificada.'
 verificationCodeSent: 'Foi enviado um código de verificação de login para o seu e-mail.'
+verificationCodeSentSms: 'Foi enviado um código de verificação de login para o seu número de telefone.'
 configurationScheduleClearSuccessfully: 'A configuração do agendamento das crons foi restaurado com sucesso!'
 password_reset_code: "Se pediu a redefinição da palavra-passe da sua conta OpenRoaming, utilize este código para prosseguir: %code%"
 passwordRequestAccepted: 'O pedido de alteração da palavra-passe da sua conta foi aceite!'
@@ -198,6 +199,7 @@ invalidPhoneNumber: 'Número de telefone inválido. Por favor, insira um número
 phoneNumberRequired: 'O número de telefone é obrigatório.'
 replyCodeTotp: 'Por favor, aguarde %remainingTime% segundos antes de tentar novamente.'
 tooManyAttempts: "Demasiadas tentativas. Tente novamente em %seconds% segundos."
+tooManyAttemptsMinutes: "Demasiadas tentativas. Tente novamente em %minutes% minutos."
 redirectingToApp: 'Redirecionado para a aplicação.'
 certificateProcessBlocked: "Ocorreu um erro de configuração. Por favor contacte a nossa equipa de suporte."
 emailAliasesNotAllowed: 'Não é permitido o uso de aliases de email para o registo.'
@@ -234,3 +236,12 @@ importErrorValidation: 'Importação cancelada. Reveja os erros abaixo e reenvie
 mapSettingsAppliedSuccessfully: 'Configuração do mapa aplicada com sucesso!'
 importErrorInvalidMimeType: 'O conteúdo do ficheiro não é um CSV válido (MIME type incorreto).'
 coverageMapDisabled: 'O mapa de cobertura está desativado no momento.'
+cannotResetExternalAuthProviderPassword: "A redefinição de palavra-passe só é permitida para Contas Portal."
+encryptionError: 'Ocorreu um erro ao encriptar os dados. Por favor, tente novamente.'
+otpCodesAlreadyViewed: 'Já visualizou os seus códigos de recuperação. Esta página só pode ser acedida uma vez.'
+securityConfigurationAppliedSuccessfully: 'As configurações de segurança foram atualizadas com sucesso.'
+securityTxt:
+  saveSuccess: "Configuração do Security.txt guardada com sucesso."
+  saveError: "Ocorreu um erro ao guardar a configuração do Security.txt."
+  formError: "Por favor, corrija os erros no formulário antes de continuar."
+securityTxtSettingsResetSuccessfully: "As definições foram repostas com sucesso."

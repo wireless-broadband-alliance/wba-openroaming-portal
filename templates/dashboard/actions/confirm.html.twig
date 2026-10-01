@@ -8,7 +8,20 @@
     <div class="flex justify-center items-center min-h-[70vh]">
         <div class="w-full max-w-xl bg-white rounded-lg p-6">
 
-            {% if type in ['settingMain', 'settingCustom', 'settingTerms', 'settingRadius', 'settingStatus', 'settingLDAP', 'settingCAPPORT', 'settingAUTH', 'settingTwoFA', 'settingSMS', 'settingSchedule', 'settingReturnApps'] %}
+            {% if type in [
+                constant('App\\Enum\\SettingType::CUSTOM').value,
+                constant('App\\Enum\\SettingType::TERMS').value,
+                constant('App\\Enum\\SettingType::RADIUS').value,
+                constant('App\\Enum\\SettingType::STATUS').value,
+                constant('App\\Enum\\SettingType::LDAP').value,
+                constant('App\\Enum\\SettingType::CAPPORT').value,
+                constant('App\\Enum\\SettingType::AUTH').value,
+                constant('App\\Enum\\SettingType::TWO_FA').value,
+                constant('App\\Enum\\SettingType::SMS').value,
+                constant('App\\Enum\\SettingType::SCHEDULE').value,
+                constant('App\\Enum\\SettingType::RETURN_APPS').value,
+                constant('App\\Enum\\SettingType::SECURITY_TXT').value,
+            ] %}
 
                 <div class="text-center">
                     <h1 class="text-3xl font-semibold">

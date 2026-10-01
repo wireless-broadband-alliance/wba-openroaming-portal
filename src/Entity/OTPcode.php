@@ -20,7 +20,7 @@ class OTPcode
     #[ORM\JoinColumn(nullable: false)]
     private User $user;
 
-    #[ORM\Column(length: 10)]
+    #[ORM\Column(length: 255)]
     #[ORM\JoinColumn(nullable: false)]
     private string $code;
 

@@ -12,12 +12,14 @@
         <td align="center">
             <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" bgcolor="#ffffff" style="margin:0 auto;">
 
+                <!-- Header -->
                 <tr>
                     <td bgcolor="#0B1A58" align="center" style="padding:40px;">
                         <img src="cid:logo_cid" alt="Customer Logo" style="max-width:300px; height:auto; display:block;" />
                     </td>
                 </tr>
 
+                <!-- Content -->
                 <tr>
                     <td align="center" style="padding:40px; font-size:16px; line-height:1.5; color:#0B1A58;">
                         <h1 style="font-size:24px; font-weight:bold; margin:0 0 20px 0;">{{ 'subject_is_expiring'|trans({}, 'expirationProfiles') }}</h1>
@@ -33,6 +35,17 @@
                     </td>
                 </tr>
 
+                <!-- Footer Image Banner -->
+                {% if footerImageEnabled|default(false) %}
+                    <tr>
+                        <td align="center" style="padding:0 20px 30px 20px;">
+                            <img src="cid:footer_cid" alt="Footer Banner"
+                                 style="max-width:100%; height:auto; border:0; display:block; margin:0 auto;" />
+                        </td>
+                    </tr>
+                {% endif %}
+
+                <!-- Footer -->
                 <tr>
                     <td bgcolor="#E6E6E6" align="center" style="padding:20px; font-size:14px; color:#1A202C;">
                         <p style="margin:0 0 10px 0;">

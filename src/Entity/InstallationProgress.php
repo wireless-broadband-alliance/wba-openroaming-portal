@@ -11,10 +11,8 @@ use Doctrine\ORM\Mapping as ORM;
 class InstallationProgress
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
     #[ORM\Column]
-    /** @phpstan-ignore-next-line */
-    private ?int $id = null;
+    private int $id = 1;
 
     #[ORM\Column(nullable: true, enumType: ProcessStatusType::class)]
     private ?ProcessStatusType $installationState = ProcessStatusType::IN_PROGRESS;
@@ -40,18 +38,26 @@ class InstallationProgress
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $jwtPassphrase = null;
 
+    #[ORM\Column(type: Types::BOOLEAN)]
+    private bool $isSettingsCompleted = false;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $securityContact = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $securityExpires = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $securityPgpFingerprint = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $emailAdmin = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $passwordAdmin = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
     private ?string $confirmCodeAdmin = null;
 
-    #[ORM\Column]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?bool $adminConfirmation = false;
+    #[ORM\Column(type: Types::BOOLEAN)]
+    private bool $adminConfirmed = false;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $updatedAt = null;
@@ -59,7 +65,7 @@ class InstallationProgress
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
 
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }
@@ -151,6 +157,70 @@ class InstallationProgress
         return $this;
     }
 
+    public function isSettingsCompleted(): bool
+    {
+        return $this->isSettingsCompleted;
+    }
+
+    public function setIsSettingsCompleted(bool $isSettingsCompleted): static
+    {
+        $this->isSettingsCompleted = $isSettingsCompleted;
+
+        return $this;
+    }
+
+    public function getSecurityContact(): ?string
+    {
+        return $this->securityContact;
+    }
+
+    public function setSecurityContact(?string $securityContact): static
+    {
+        $this->securityContact = $securityContact;
+
+        return $this;
+    }
+
+    public function getSecurityExpires(): ?\DateTimeInterface
+    {
+        return $this->securityExpires;
+    }
+
+    public function setSecurityExpires(?\DateTimeInterface $securityExpires): static
+    {
+        $this->securityExpires = $securityExpires;
+
+        return $this;
+    }
+
+    public function getSecurityPgpFingerprint(): ?string
+    {
+        return $this->securityPgpFingerprint;
+    }
+
+    public function setSecurityPgpFingerprint(?string $securityPgpFingerprint): static
+    {
+        $this->securityPgpFingerprint = $securityPgpFingerprint;
+
+        return $this;
+    }
+
+    /**
+     * Checks if contact is present and expiration date is in the future.
+     */
+    public function isSecurityTxtValid(): bool
+    {
+        if ($this->securityContact === null || trim($this->securityContact) === '') {
+            return false;
+        }
+
+        if (!$this->securityExpires instanceof \DateTimeInterface) {
+            return false;
+        }
+
+        return $this->securityExpires > new \DateTime();
+    }
+
     public function getEmailAdmin(): ?string
     {
         return $this->emailAdmin;
@@ -159,18 +229,6 @@ class InstallationProgress
     public function setEmailAdmin(?string $emailAdmin): static
     {
         $this->emailAdmin = $emailAdmin;
-
-        return $this;
-    }
-
-    public function getPasswordAdmin(): ?string
-    {
-        return $this->passwordAdmin;
-    }
-
-    public function setPasswordAdmin(?string $passwordAdmin): static
-    {
-        $this->passwordAdmin = $passwordAdmin;
 
         return $this;
     }
@@ -185,14 +243,16 @@ class InstallationProgress
         $this->confirmCodeAdmin = $confirmCodeAdmin;
     }
 
-    public function getAdminConfirmation(): ?bool
+    public function isAdminConfirmed(): bool
     {
-        return $this->adminConfirmation;
+        return $this->adminConfirmed;
     }
 
-    public function setAdminConfirmation(?bool $adminConfirmation): void
+    public function setAdminConfirmed(bool $adminConfirmed): static
     {
-        $this->adminConfirmation = $adminConfirmation;
+        $this->adminConfirmed = $adminConfirmed;
+
+        return $this;
     }
 
     public function getUpdatedAt(): ?\DateTimeInterface

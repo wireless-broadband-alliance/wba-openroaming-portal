@@ -27,20 +27,27 @@ class RsaEncryptionService
                     'success' => false,
                     'error' => [
                         'code' => 1001,
-                        'message' => 'Invalid RSA public key provided.',
+                        'message' => 'Invalid RSA public key provided: ' . (openssl_error_string() ?: 'Unknown error'),
                     ],
                 ];
             }
 
             $encryptedData = '';
-            $success = openssl_public_encrypt($data, $encryptedData, $publicKey);
+
+            // SECURITY FIX: Explicitly use OAEP padding.
+            $success = openssl_public_encrypt(
+                $data,
+                $encryptedData,
+                $publicKey,
+                OPENSSL_PKCS1_OAEP_PADDING
+            );
 
             if (!$success) {
                 return [
                     'success' => false,
                     'error' => [
                         'code' => 1002,
-                        'message' => 'Failed to encrypt data using RSA public key.',
+                        'message' => 'Failed to encrypt data: ' . (openssl_error_string() ?: 'Unknown error'),
                     ],
                 ];
             }

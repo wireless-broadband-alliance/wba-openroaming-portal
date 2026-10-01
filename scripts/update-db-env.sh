@@ -1,4 +1,8 @@
-ENV_FILE="/var/www/openroaming/.env"
+#!/bin/bash
+
+# Dynamically resolves the .env path based on the script's directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ENV_FILE="${SCRIPT_DIR}/../.env"
 
 DATABASE_URL="$1"
 DATABASE_FREERADIUS_URL="$2"
@@ -15,20 +19,21 @@ if [ ! -f "$ENV_FILE" ]; then
     exit 1
 fi
 
-# backup (only if necessary!)
-#BACKUP_FILE="${ENV_FILE}.backup_$(date +%F_%H-%M-%S)"
-#cp "$ENV_FILE" "$BACKUP_FILE"
-#echo "Backup created on: $BACKUP_FILE"
-
 set_env() {
     KEY="$1"
     VALUE="$2"
 
-    # Remove all old occurrences of the variable
-    sed -i "/^$KEY=/d" "$ENV_FILE"
+    TMP_FILE="${ENV_FILE}.tmp"
 
-    # Add the new value
-    echo "$KEY=\"$VALUE\"" >> "$ENV_FILE"
+    # Remove old key into temp file
+    sed "/^$KEY=/d" "$ENV_FILE" > "$TMP_FILE"
+
+    # Append new key
+    echo "$KEY=\"$VALUE\"" >> "$TMP_FILE"
+
+    # Overwrite original .env content without breaking mount
+    cat "$TMP_FILE" > "$ENV_FILE"
+    rm -f "$TMP_FILE"
 
     echo "Updated: $KEY"
 }

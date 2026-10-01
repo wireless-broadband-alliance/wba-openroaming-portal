@@ -41,67 +41,89 @@ class ResetAdminCommand extends Command
     protected function configure(): void
     {
         $this
-        ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
+            ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset')
+            ->addOption('email', null, InputOption::VALUE_OPTIONAL, 'Super admin email address')
+            ->addOption('password', null, InputOption::VALUE_OPTIONAL, 'Super admin password');
     }
 
-  /**
-   * @throws RandomException
-   */
+    /**
+     * @throws RandomException
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-      // Check if the --yes option is provided (comes from a controller), then skip the confirmation prompt
+        // Check if the --yes option is provided (comes from a controller), then skip the confirmation prompt
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
             $question = new ConfirmationQuestion(
                 'This action will reset the super admin credentials' .
-                'to its default state without deleting any data. [y/N]',
+                'to its configured state without deleting any data. [y/N]',
                 false
             );
-          /** @var QuestionHelper $helper */
+            /** @var QuestionHelper $helper */
             if (!$helper->ask($input, $output, $question)) {
-                  $output->writeln('Command aborted.');
-                  return Command::SUCCESS;
+                $output->writeln('Command aborted.');
+                return Command::SUCCESS;
             }
         }
 
-      // Reset admin user credentials
-        $this->resetAdminUser();
+        $email = $input->getOption('email')
+            ?? $_ENV['SUPERADMIN_EMAIL']
+            ?? $_SERVER['SUPERADMIN_EMAIL']
+            ?? DefaultUser::ADMIN->value;
 
-        $output->writeln('<info>Success:</info> The admin credentials have been reset to its default state.');
+        $password = $input->getOption('password')
+            ?? $_ENV['SUPERADMIN_PASSWORD']
+            ?? $_SERVER['SUPERADMIN_PASSWORD']
+            ?? null;
+
+        if (empty($password)) {
+            $output->writeln(
+                '<error>Error:</error> Super Admin password is required. ' .
+                'Specify --password option or set SUPERADMIN_PASSWORD in .env file.'
+            );
+            return Command::FAILURE;
+        }
+
+        // Reset admin user credentials
+        $this->resetAdminUser($email, $password);
+
+        $output->writeln('<info>Success:</info> The super admin credentials have been reset.');
+        $output->writeln(sprintf('Email: <comment>%s</comment>', $email));
+        $output->writeln(sprintf('Password: <comment>%s</comment>', $password));
 
         return Command::SUCCESS;
     }
 
-  /**
-   * @throws RandomException
-   */
-    protected function resetAdminUser(): void
+    /**
+     * @throws RandomException
+     */
+    protected function resetAdminUser(string $email, string $password): void
     {
         $admin = $this->userRepository->findSuperAdmin();
 
         if (!$admin instanceof User) {
             $admin = new User();
-            $admin->setUuid(DefaultUser::ADMIN->value);
-            $admin->setEmail(DefaultUser::ADMIN->value);
-            $admin->setPassword($this->userPasswordHashed->hashPassword($admin, 'gnimaornepo'));
+            $admin->setUuid($email);
+            $admin->setEmail($email);
+            $admin->setPassword($this->userPasswordHashed->hashPassword($admin, $password));
             $admin->setRoles([AdminRoleType::ROLE_SUPER_ADMIN->value]);
             $admin->setPermissions([]);
             $admin->setIsVerified(true);
             $admin->setForgotPasswordRequest(true);
-            $admin->setTwoFAcode((string)random_int(100000, 999999));
+            $admin->setTwoFAcode((string) random_int(100000, 999999));
             $admin->setTwoFAcodeGeneratedAt(new DateTime());
             $admin->setTwoFAcodeIsActive(true);
             $admin->setCreatedAt(new DateTime());
             $this->entityManager->persist($admin);
 
-          // Create and set up the UserExternalAuth entity
+            // Create and set up the UserExternalAuth entity
             $userExternalAuth = new UserExternalAuth();
             $userExternalAuth->setUser($admin);
             $userExternalAuth->setProvider(UserProvider::PORTAL_ACCOUNT->value);
             $userExternalAuth->setProviderId(UserProvider::EMAIL->value);
             $this->entityManager->persist($userExternalAuth);
 
-          // Save the event Action using the service
+            // Save the event Action using the service
             $this->eventActions->saveEvent(
                 $admin,
                 AnalyticalEventType::SUPER_ADMIN_CREATION->value,
@@ -117,13 +139,13 @@ class ResetAdminCommand extends Command
         }
 
         // Set password
-        $admin->setUuid(DefaultUser::ADMIN->value);
-        $admin->setEmail(DefaultUser::ADMIN->value);
+        $admin->setUuid($email);
+        $admin->setEmail($email);
         $admin->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
         $admin->setForgotPasswordRequest(true);
         $admin->setRoles([AdminRoleType::ROLE_SUPER_ADMIN->value]);
         $admin->setPermissions([]);
-        $admin->setPassword($this->userPasswordHashed->hashPassword($admin, 'gnimaornepo'));
+        $admin->setPassword($this->userPasswordHashed->hashPassword($admin, $password));
 
         $this->entityManager->flush();
     }

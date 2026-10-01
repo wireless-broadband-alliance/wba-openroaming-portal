@@ -50,10 +50,21 @@ class ScheduleDTO
     )]
     public ?ScheduleSettingDTO $domain_blacklist_import_cron = null;
 
+    #[Assert\Valid]
+    #[Assert\When(
+        expression: "this.use_advanced_mode != null and this.use_advanced_mode",
+        constraints: [
+            new AcmeAssert\CronNotEmpty()
+        ],
+    )]
+    public ?ScheduleSettingDTO $cleanup_expired_data_cron = null;
+
     public ?bool $delete_unconfirmed_users_enabled = true;
     public ?bool $users_when_profile_expires_enabled = true;
     public ?bool $ldap_sync_enabled = true;
     public ?bool $domain_blacklist_import_enabled = true;
+    public ?bool $cleanup_expired_data_enabled = true;
+
     public function __construct(
         ?SettingRepository $settingRepository = null,
         ?CronExpressionHelperService $cronExpressionHelperService = null
@@ -89,6 +100,12 @@ class ScheduleDTO
             $cronExpressionHelperService
         );
 
+        $this->cleanup_expired_data_cron = new ScheduleSettingDTO(
+            SettingName::CLEANUP_EXPIRED_DATA_CRON->value,
+            $settingRepository,
+            $cronExpressionHelperService
+        );
+
         if (!is_null($settingRepository)) {
             $cronAdvanceStatus = $settingRepository->findOneBy(["name" => SettingName::CRON_ADVANCED_STATUS->value]);
             if (!is_null($cronAdvanceStatus)) {
@@ -109,6 +126,10 @@ class ScheduleDTO
 
             $this->domain_blacklist_import_enabled = $settingRepository
                     ->findOneBy(['name' => SettingName::DOMAIN_BLACKLIST_IMPORT_CRON_ENABLED->value])
+                    ?->getValue() !== OperationMode::OFF->value;
+
+            $this->cleanup_expired_data_enabled = $settingRepository
+                    ->findOneBy(['name' => SettingName::CLEANUP_EXPIRED_DATA_CRON_ENABLED->value])
                     ?->getValue() !== OperationMode::OFF->value;
         }
     }
@@ -136,6 +157,11 @@ class ScheduleDTO
                 ),
             SettingName::DOMAIN_BLACKLIST_IMPORT_CRON->value =>
                 $this->domain_blacklist_import_cron->toCronExpression(
+                    $this->use_advanced_mode,
+                    $cronExpressionHelperService
+                ),
+            SettingName::CLEANUP_EXPIRED_DATA_CRON->value =>
+                $this->cleanup_expired_data_cron->toCronExpression(
                     $this->use_advanced_mode,
                     $cronExpressionHelperService
                 ),

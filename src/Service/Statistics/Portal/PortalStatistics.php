@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\Statistics\Portal;
 
+use App\Entity\Event;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\OSType;
 use App\Enum\PlatformMode;
@@ -129,10 +130,20 @@ readonly class PortalStatistics
         ];
 
         foreach ($events as $event) {
-            $metadata = $event->getEventMetadata();
-            if (!isset($metadata[EventMetadataKeysType::DOWNLOADED_PROFILE_TYPE->value])) {
+            /** @var Event|array<string, mixed> $event */
+            $metadata = $event instanceof Event
+                ? $event->getEventMetadata()
+                : $event['event_metadata'];
+
+            /** @var array<string, mixed>|string|null $metadata */
+            if (is_string($metadata)) {
+                $metadata = json_decode($metadata, true, 512, JSON_THROW_ON_ERROR);
+            }
+
+            if (!is_array($metadata) || !isset($metadata[EventMetadataKeysType::DOWNLOADED_PROFILE_TYPE->value])) {
                 continue;
             }
+
             $type = $metadata[EventMetadataKeysType::DOWNLOADED_PROFILE_TYPE->value];
             if (isset($result[$type])) {
                 $result[$type]++;

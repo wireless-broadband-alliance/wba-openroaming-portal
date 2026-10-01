@@ -17,8 +17,7 @@ final class APIStatusListener
 
     /** @var string[] */
     private array $ignoredPaths = [
-        '/api/v1/capport/json',
-        '/api/v2/capport/json'
+        '/api/v3/capport/json'
     ];
 
     /** @var string[] */

@@ -6,23 +6,21 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
+use App\Enum\SessionStatus;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\TwoFAService;
-use DateTimeInterface;
 use libphonenumber\NumberParseException;
 use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
 use PixelOpen\CloudflareTurnstileBundle\Http\CloudflareTurnstileHttpClient;
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
@@ -30,7 +28,6 @@ use Symfony\Component\Security\Http\Authenticator\AbstractLoginFormAuthenticator
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\CsrfTokenBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
-use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\CustomCredentials;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
@@ -48,7 +45,6 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         private readonly UserRepository $userRepository,
         private readonly TwoFAService $twoFAService,
         private readonly TranslatorInterface $translator,
-        private readonly RequestStack $requestStack,
     ) {
     }
 
@@ -67,8 +63,9 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         $password = (string) ($loginData['password'] ?? '');
 
         $request->getSession()->set('last_login_method', $loginMethod);
+        $request->getSession()->remove(SessionStatus::AUTHENTICATED_VIA_UUID_ONLY->value);
         if ($loginMethod === UserProvider::EMAIL->value) {
-            $identifier = $formData['login']['email'];
+            $identifier = $formData['login']['email'] ?? null;
 
             $userLoader = fn(string $id) => $this->userRepository->findOneBy([
                 'email' => $id,
@@ -81,7 +78,6 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
             if (!empty($phoneData['country']) && !empty($phoneData['number'])) {
                 try {
                     $phoneNumberObj = $phoneUtil->parse($phoneData['number'], $phoneData['country']);
-                    // Use E164 format string as identifier for UserBadge
                     $identifier = $phoneUtil->format($phoneNumberObj, PhoneNumberFormat::E164);
                 } catch (NumberParseException) {
                     throw new CustomUserMessageAuthenticationException('Invalid phone number.');
@@ -90,10 +86,9 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
                 $identifier = null;
             }
 
-            // The callback will convert the string back to PhoneNumber object for repository
             $userLoader = function (string $id) use ($phoneUtil) {
                 try {
-                    $phoneNumberObj = $phoneUtil->parse($id); // parse E164 string back to object
+                    $phoneNumberObj = $phoneUtil->parse($id);
                 } catch (NumberParseException) {
                     return null;
                 }
@@ -130,7 +125,6 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
 
         $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $identifier);
 
-        // Remember-me badge
         $csrfToken = $request->request->get('_csrf_token');
         $csrfToken = is_string($csrfToken) ? $csrfToken : null;
 
@@ -145,7 +139,6 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
             }
         }
 
-        // Standard login with password
         return new Passport(
             new UserBadge($identifier, $userLoader),
             new PasswordCredentials($password),
@@ -158,7 +151,6 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         $user = $token->getUser();
 
         if (!$user instanceof User) {
-            // Default redirection for non-admin or anonymous users
             if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
                 return new RedirectResponse($targetPath);
             }
@@ -166,60 +158,103 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
             return new RedirectResponse($this->urlGenerator->generate('app_landing'));
         }
 
-        if ($user->isVerified()) {
-            return new RedirectResponse($this->urlGenerator->generate('app_landing'));
+        $session = $request->getSession();
+        $context = FirewallType::LANDING->value;
+
+        // Check for TOTP 2FA
+        if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
+            $session->remove('2fa_verified_' . $context);
+
+            return new RedirectResponse($this->urlGenerator->generate('app_verify2FA_TOTP', [
+                'context' => $context,
+            ]));
         }
 
-        $loginModeSetting = $this->settingRepository->findOneBy(['name' => SettingName::LOGIN_WITH_UUID_ONLY->value]);
-        $mode = OperationMode::from($loginModeSetting?->getValue() ?? OperationMode::OFF->value);
-
-        $eventType = match ($mode) {
-            OperationMode::ON => AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE,
-            OperationMode::OFF => AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST,
-        };
-
+        // Check for SMS or EMAIL 2FA
         if (
-            $this->settingRepository->findOneBy(['name' => SettingName::USER_VERIFICATION->value])->getValue() ===
-            OperationMode::ON->value
+            $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value ||
+            $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value
         ) {
-            if ($this->twoFAService->canValidationCode($user, $eventType->value)) {
+            $session->remove('2fa_verified_' . $context);
+
+            if ($this->twoFAService->canValidationCode($user, AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value)) {
                 $this->twoFAService->generate2FACode(
                     $user,
                     $request->getClientIp(),
                     $request->headers->get('User-Agent'),
-                    $eventType->value
+                    AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value
                 );
-
-                $session = $this->requestStack->getSession();
-                if ($session instanceof Session) {
-                    $session->getFlashBag()->add(
-                        'success',
-                        $this->translator->trans(
-                            'verificationCodeSent',
-                            [],
-                            'controllers'
-                        )
-                    );
-                }
-
-
-                return new RedirectResponse($this->urlGenerator->generate('app_login_confirmation'));
             }
 
-            $intervalMinutes = $this->twoFAService->timeLeftToResendCode($user, $eventType->value);
+            return new RedirectResponse($this->urlGenerator->generate('app_verify2FA_portal', [
+                'context' => $context,
+            ]));
+        }
 
-            throw new CustomUserMessageAuthenticationException(
-                $this->translator->trans(
-                    'codeAlreadySent',
-                    ['%minutes%' => $intervalMinutes],
-                    'controllers'
-                )
+        // Handle unverified users requiring email confirmation code
+        if (!$user->isVerified()) {
+            $userVerificationSetting = $this->settingRepository->findOneBy(
+                ['name' => SettingName::USER_VERIFICATION->value]
             );
+            if ($userVerificationSetting?->getValue() === OperationMode::ON->value) {
+                $loginModeSetting = $this->settingRepository->findOneBy(
+                    ['name' => SettingName::LOGIN_WITH_UUID_ONLY->value]
+                );
+                $value = $loginModeSetting?->getValue();
+
+                $eventType = match ($value) {
+                    'true' => AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE,
+                    default => AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST,
+                };
+
+                if ($this->twoFAService->canValidationCode($user, $eventType->value)) {
+                    $this->twoFAService->generate2FACode(
+                        $user,
+                        $request->getClientIp(),
+                        $request->headers->get('User-Agent'),
+                        $eventType->value
+                    );
+
+                    if ($session instanceof Session) {
+                        // Determine if user is SMS based on UserExternalAuth provider_id or missing email
+                        $firstAuth = $user->getUserExternalAuths()->first();
+                        $isSmsUser = ($firstAuth && $firstAuth->getProviderId() === UserProvider::PHONE_NUMBER->value)
+                            || ($user->getPhoneNumber() && !$user->getEmail());
+
+                        $messageKey = $isSmsUser ? 'verificationCodeSentSms' : 'verificationCodeSent';
+
+                        $session->getFlashBag()->add(
+                            'success',
+                            $this->translator->trans(
+                                $messageKey,
+                                [],
+                                'controllers'
+                            )
+                        );
+                    }
+
+                    return new RedirectResponse($this->urlGenerator->generate('app_login_confirmation'));
+                }
+
+                $intervalMinutes = $this->twoFAService->timeLeftToResendCode($user, $eventType->value);
+
+                throw new CustomUserMessageAuthenticationException(
+                    $this->translator->trans(
+                        'codeAlreadySent',
+                        ['%minutes%' => $intervalMinutes],
+                        'controllers'
+                    )
+                );
+            }
+        }
+
+        // 4. Default landing redirect for verified users without 2FA
+        if ($targetPath = $this->getTargetPath($session, $firewallName)) {
+            return new RedirectResponse($targetPath);
         }
 
         return new RedirectResponse($this->urlGenerator->generate('app_landing'));
     }
-
 
     protected function getLoginUrl(Request $request): string
     {

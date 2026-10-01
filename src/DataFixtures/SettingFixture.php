@@ -51,6 +51,8 @@ class SettingFixture extends Fixture
             ['name' => SettingName::CUSTOMER_LOGO->value, 'value' => '/resources/logos/WBA_Logo.png'],
             ['name' => SettingName::OPENROAMING_LOGO->value, 'value' => '/resources/logos/openroaming.svg'],
             ['name' => SettingName::WALLPAPER_IMAGE->value, 'value' => '/resources/images/background.png'],
+            ['name' => SettingName::FOOTER_IMAGE_ENABLED->value, 'value' => 'OFF'],
+            ['name' => SettingName::FOOTER_IMAGE->value, 'value' => '/resources/images/footer.png'],
             ['name' => SettingName::WELCOME_TEXT->value, 'value' => 'Welcome to OpenRoaming Provisioning Service'],
             [
                 'name' => SettingName::WELCOME_DESCRIPTION->value,
@@ -88,12 +90,17 @@ class SettingFixture extends Fixture
                 'value' => 'Don\'t have an account? Create one'
             ],
             ['name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value, 'value' => 'true'],
-            ['name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value, 'value' => 'Login Here'],
+            ['name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value, 'value' => 'Login with Password Here'],
             [
                 'name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value,
                 'value' => 'Already have an account? Login then'
             ],
-            ['name' => SettingName::LOGIN_WITH_UUID_ONLY->value, 'value' => 'OFF'],
+            ['name' => SettingName::LOGIN_WITH_UUID_ONLY->value, 'value' => 'false'],
+            ['name' => SettingName::LOGIN_WITH_UUID_ONLY_LABEL->value, 'value' => 'Login with Magic Link'],
+            [
+                'name' => SettingName::LOGIN_WITH_UUID_ONLY_DESCRIPTION->value,
+                'value' => 'No password required. Enter your email or phone number to receive an instant login link.'
+            ],
             ['name' => SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value, 'value' => 'false'],
             [
                 'name' => SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value,
@@ -169,6 +176,15 @@ class SettingFixture extends Fixture
             ['name' => SettingName::MAP_CENTER_LONGITUDE->value, 'value' => '0.0000'],
             ['name' => SettingName::MAP_CENTER_LATITUDE->value, 'value' => '51.4779'],
             ['name' => SettingName::MAP_CENTER_ZOOM->value, 'value' => '12'],
+
+            ['name' => SettingName::CLEANUP_EXPIRED_DATA_CRON->value, 'value' => '* 5 * * *'],
+            ['name' => SettingName::CLEANUP_EXPIRED_DATA_CRON_ENABLED->value, 'value' => 'OFF'],
+            ['name' => SettingName::USER_RETENTION_DAYS->value, 'value' => '30'],
+            ['name' => SettingName::OTP_EXPIRATION_HOURS->value, 'value' => '12'],
+
+            ['name' => SettingName::SECURITY_CONTACT->value, 'value' => 'mailto:security@example.com'],
+            ['name' => SettingName::SECURITY_EXPIRES->value, 'value' => ''],
+            ['name' => SettingName::SECURITY_PGP_FINGERPRINT->value, 'value' => ''],
         ];
 
         foreach ($settings as $settingData) {

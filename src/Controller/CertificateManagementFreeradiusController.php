@@ -19,6 +19,7 @@ use App\Enum\FirewallType;
 use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
 use App\Enum\SettingName;
+use App\Exception\EncryptionException;
 use App\Exception\FreeradiusTestException;
 use App\Form\CertificateFreeradiusUploadManualType;
 use App\Form\CertificatesFreeradiusPasteType;
@@ -36,6 +37,7 @@ use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateStorageService;
 use App\Service\CertificateWriterUpdateService;
 use App\Service\CloudflareService;
+use App\Service\EncryptionService;
 use App\Service\EventActions;
 use App\Service\FreeradiusCertificateValidatorService;
 use App\Service\FreeradiusTestOrchestrator;
@@ -80,6 +82,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         private readonly FreeradiusCertificateValidatorService $freeradiusCertificateValidatorService,
         private readonly CertificateFreeradiusHTTPChallengeCommandsService $httpChallengeCommands,
         private readonly CertificateCAGeneratorService $certificateCAGeneratorService,
+        private readonly EncryptionService $encryptionService
     ) {
     }
 
@@ -160,7 +163,7 @@ class CertificateManagementFreeradiusController extends AbstractController
             }
 
             // Save CA.pem in the application
-            $tmpPath = sys_get_temp_dir() . '/ca.pem';
+            $tmpPath = tempnam(sys_get_temp_dir(), 'ca_pem_');
             $caContent = rtrim($caContent) . "\n"; // Ensure is ends with a breaking line
             file_put_contents($tmpPath, $caContent);
 
@@ -558,32 +561,19 @@ class CertificateManagementFreeradiusController extends AbstractController
                     );
                 }
 
-                // Map raw extracted certificates to identifiers
-                $map = [
-                    CertificateFileName::CA_PEM->value,
-                    CertificateFileName::CERT_PEM->value,
-                    CertificateFileName::CHAIN_PEM->value,
-                    CertificateFileName::FULL_CHAIN_PEM->value,
-                    CertificateFileName::PRIVATE_KEY_PEM->value,
-                ];
-
+                // Build the certificate set explicitly from the values already extracted above.
                 $extractCertificates = [];
-
-                // Fill the array with extracted PEMs
-                foreach ($map as $index => $key) {
-                    // Use the raw extracted PEMs from paste form
-                    if (isset($rawExtracted[$index])) {
-                        $extractCertificates[$key] = rtrim($rawExtracted[$index]) . "\n";
-                    }
-                }
+                $extractCertificates[CertificateFileName::CERT_PEM->value] = rtrim($certPem) . "\n";
+                $extractCertificates[CertificateFileName::CHAIN_PEM->value] = rtrim($chainPem) . "\n";
+                $extractCertificates[CertificateFileName::FULL_CHAIN_PEM->value] =
+                    rtrim($certPem) . "\n" . rtrim($chainPem) . "\n";
 
                 // Override or add the CA with the generated root
                 $extractCertificates[CertificateFileName::CA_PEM->value] = trim($caPem);
 
                 // Validate required certificates
                 if (
-                    empty($extractCertificates[CertificateFileName::CA_PEM->value]) ||
-                    empty($extractCertificates[CertificateFileName::CERT_PEM->value])
+                    empty($extractCertificates[CertificateFileName::CA_PEM->value])
                 ) {
                     throw new RuntimeException('Missing required certificates');
                 }
@@ -939,17 +929,27 @@ class CertificateManagementFreeradiusController extends AbstractController
                 $certificateSetupProcess->setFreeradiusFormCompletedAt(new DateTimeImmutable());
                 $certificateSetupProcess->setFreeradiusConfigAppliedAt(null);
                 $certificateSetupProcess->setIsFreeradiusCloudflare(true);
+
+                try {
+                    $encryptedToken = $this->encryptionService->encrypt($dto->token);
+                } catch (EncryptionException) {
+                    $this->addFlash('error', $this->translator->trans('encryptionError', [], 'controllers'));
+
+                    return $this->redirectToRoute(
+                        'admin_dashboard_settings_certs_freeradius_cloudflare_dnsChallenge'
+                    );
+                }
+
                 $setting = $this->settingRepository->findOneBy(['name' => SettingName::CLOUDFLARE_TOKEN->value]);
-                if ($setting) {
-                    $setting->setValue($dto->token);
-                } else {
+                if (!$setting) {
                     $setting = new Setting();
                     $setting->setName(SettingName::CLOUDFLARE_TOKEN->value);
-                    $setting->setValue($dto->token);
                     $this->entityManager->persist($setting);
                 }
+
+                $setting->setValue($encryptedToken);
+
                 $this->entityManager->persist($certificateSetupProcess);
-                $this->entityManager->persist($setting);
                 $this->entityManager->flush();
             }
 

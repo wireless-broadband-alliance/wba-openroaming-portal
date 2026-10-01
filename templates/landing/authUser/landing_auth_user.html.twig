@@ -22,6 +22,13 @@
     </form>
 
     <div class="my-[25px] divider"></div>
+
+    {% set has_account_form_errors = app.user.isVerified and (
+        (form.vars.submitted and not form.vars.valid) or
+        (formPassword.vars.submitted and not formPassword.vars.valid) or
+        (formRevokeProfiles.vars.submitted and not formRevokeProfiles.vars.valid)
+        ) %}
+
     <div {{ stimulus_controller('widget') }}>
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4">
             <div>
@@ -46,7 +53,7 @@
                     </div>
 
                     <div {{ stimulus_target('widget', 'modal') }}
-                            class="hidden fixed top-0 left-0 w-full h-full bg-[#090B2F] bg-opacity-70 z-40">
+                            class="{{ has_account_form_errors ? '' : 'hidden' }} fixed top-0 left-0 w-full h-full bg-[#090B2F] bg-opacity-70 z-40">
                         <div class="flex flex-row justify-center items-center h-full w-full">
                             {{ include('landing/shared/_account_widget.html.twig') }}
                         </div>

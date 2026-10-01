@@ -12,7 +12,7 @@ sms_provider_notice: 'This is for the
 timeIntervalBetweenRequests: 'Time Interval Between Request'
 timeIntervalToResetAttempts: 'Time Interval To Reset Attempts'
 attemptsNumber: 'Number of Attempts'
-newProvider: 'New Provider'
+newConfiguration: 'New Configuration'
 sms_providers_notice: 'Only one SMS provider can be active at a time. The active provider is used for every outgoing SMS, including two-factor authentication codes.'
 noProvidersConfigured: 'No SMS providers configured yet.'
 noProvidersFoundWith: 'No providers found for'

@@ -23,15 +23,13 @@ security:
                 default_roles: ['ROLE_USER']
         users_in_memory: { memory: null }
     firewalls:
-        auth_v1:
-            pattern: ^/api/v1/auth
+        auth_v3:
+            pattern: ^/api/v3/auth
             stateless: true
-            security: false
-
-        auth_v2:
-            pattern: ^/api/v2/auth
-            stateless: true
-            security: false
+            security: true
+            provider: user_provider
+            login_throttling:
+                limiter: limiter.login_api
 
         api:
             pattern: ^/api/
@@ -112,9 +110,9 @@ security:
     # Note: Only the *first* access control that matches will be used
     # Note: Only the *first* matching rule is applied
     access_control:
+        - { path: ^/api/v3/auth, roles: PUBLIC_ACCESS }
         - { path: ^/saml/(metadata|login|acs), roles: PUBLIC_ACCESS }
-        - { path: ^/api/v1/user, roles: IS_AUTHENTICATED_FULLY }
-        - { path: ^/api/v2/user, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/v3/user, roles: IS_AUTHENTICATED_FULLY }
 when@test:
     security:
         password_hashers:

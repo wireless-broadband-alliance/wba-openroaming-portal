@@ -2,9 +2,17 @@ import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
     static targets = ['modal'];
+    static values = {
+        hasErrors: Boolean,
+    };
 
     connect() {
-        super.connect();
+        // Force open modal if validation errors are passed from Symfony
+        if (this.hasHasErrorsValue && this.hasErrorsValue) {
+            this.open();
+            return;
+        }
+
         this.toggleInitialVisibility();
     }
 
@@ -25,7 +33,6 @@ export default class extends Controller {
             return;
         }
 
-        console.log('Toggle Initial Visibility - Checkbox checked state:', checkbox.checked);
         if (checkbox.checked) {
             this.open();
         } else {
@@ -34,10 +41,14 @@ export default class extends Controller {
     }
 
     open() {
-        this.modalTarget.classList.remove('hidden');
+        if (this.hasModalTarget) {
+            this.modalTarget.classList.remove('hidden');
+        }
     }
 
     close() {
-        this.modalTarget.classList.add('hidden');
+        if (this.hasModalTarget) {
+            this.modalTarget.classList.add('hidden');
+        }
     }
 }

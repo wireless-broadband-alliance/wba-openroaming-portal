@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block body %}
-    <div class="min-h-screen bg-center bg-cover flex items-center justify-center px-4 sm:px-6 lg:px-8"
+    <div class="min-h-screen bg-center bg-cover flex items-start justify-center px-4 sm:px-6 lg:px-8 py-8 sm:py-12"
          style="background-image: url('{{ bgUrl }}');" {{ stimulus_controller('visibility') }}>
 
         <div class="landing-container">
@@ -52,6 +52,9 @@
 
                 {% block content %}
                 {% endblock %}
+
+                {# Footer Banner Bar - Displays only when FOOTER_IMAGE_ENABLED is ON / true #}
+                {{ include('shared/_footer_landing.html.twig') }}
             </div>
         </div>
     </div>

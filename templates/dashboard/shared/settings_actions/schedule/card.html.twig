@@ -124,4 +124,44 @@
         </div>
     {% endif %}
 
+    {% if field_name === 'cleanup_expired_data_enabled' %}
+        {# USER_RETENTION_DAYS #}
+        <div class="py-4">
+            <div class="form-group" {{ stimulus_controller('card') }} id="USER_RETENTION_DAYS">
+                <div class="text-sm font-semibold text-gray-700 py-1">
+                    {{ 'userRetentionDays'|trans({}, 'schedule') }}
+                </div>
+
+                <div class="text-xs text-gray-500 mb-1 py-2">
+                    {{ 'USER_RETENTION_DAYS'|trans({}, 'setting_descriptions') }}
+                </div>
+                <div class="form-group">
+                    {{ form_widget(field.userRetentionDays, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
+                </div>
+                <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+                    {{ form_errors(field.userRetentionDays) }}
+                </div>
+            </div>
+        </div>
+
+        {# OTP_EXPIRATION_HOURS #}
+        <div class="py-2">
+            <div class="form-group" {{ stimulus_controller('card') }} id="OTP_EXPIRATION_HOURS">
+                <div class="text-sm font-semibold text-gray-700 py-1">
+                    {{ 'otpExpirationHours'|trans({}, 'schedule') }}
+                </div>
+
+                <div class="text-xs text-gray-500 mb-1 py-2">
+                    {{ 'OTP_EXPIRATION_HOURS'|trans({}, 'setting_descriptions') }}
+                </div>
+                <div class="form-group">
+                    {{ form_widget(field.otpExpirationHours, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
+                </div>
+                <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+                    {{ form_errors(field.otpExpirationHours) }}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
 </div>

@@ -1,0 +1,88 @@
+{% set controller = controller|default('date-picker-security-txt') %}
+
+{# Parse initial value from form field for server-side rendering #}
+{% set formattedValue = '' %}
+{% if field.vars.value is not empty %}
+    {% if field.vars.value.timestamp is defined %}
+        {% set formattedValue = field.vars.value|date('Y-m-d') %}
+    {% else %}
+        {% set formattedValue = field.vars.value %}
+    {% endif %}
+{% endif %}
+
+{% set translations = {
+    pickDate: 'pickDate'|trans({}, '_date_filter'),
+    selected: 'selected'|trans({}, '_date_filter'),
+    clear: 'clear'|trans({}, '_date_filter'),
+    apply: 'applyRange'|trans({}, '_date_filter'),
+    daySu: 'daySu'|trans({}, '_date_filter'), dayMo: 'dayMo'|trans({}, '_date_filter'),
+    dayTu: 'dayTu'|trans({}, '_date_filter'), dayWe: 'dayWe'|trans({}, '_date_filter'),
+    dayTh: 'dayTh'|trans({}, '_date_filter'), dayFr: 'dayFr'|trans({}, '_date_filter'),
+    daySa: 'daySa'|trans({}, '_date_filter'),
+    monthJan: 'monthJan'|trans({}, '_date_filter'), monthFeb: 'monthFeb'|trans({}, '_date_filter'),
+    monthMar: 'monthMar'|trans({}, '_date_filter'), monthApr: 'monthApr'|trans({}, '_date_filter'),
+    monthMay: 'monthMay'|trans({}, '_date_filter'), monthJun: 'monthJun'|trans({}, '_date_filter'),
+    monthJul: 'monthJul'|trans({}, '_date_filter'), monthAug: 'monthAug'|trans({}, '_date_filter'),
+    monthSep: 'monthSep'|trans({}, '_date_filter'), monthOct: 'monthOct'|trans({}, '_date_filter'),
+    monthNov: 'monthNov'|trans({}, '_date_filter'), monthDec: 'monthDec'|trans({}, '_date_filter'),
+} %}
+
+<div class="space-y-2 flex-1 flex flex-col justify-start relative z-20"
+     data-controller="{{ controller }}"
+     data-{{ controller }}-translations-value="{{ translations|json_encode }}">
+
+    {{ form_widget(field, {
+        attr: {class: 'hidden', ('data-' ~ controller ~ '-target'): 'input'},
+    }) }}
+
+    <div class="relative" data-{{ controller }}-target="pickerWrap">
+        <button type="button"
+                data-action="click->{{ controller }}#togglePicker"
+                data-{{ controller }}-target="pickerTrigger"
+                class="flex items-center gap-2 border border-gray-300 rounded-md px-3 py-[5px] text-sm bg-white hover:border-[#7DB928] transition-colors w-full">
+            <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                 stroke-width="1.5">
+                <rect x="1.5" y="3" width="13" height="11" rx="2" />
+                <path d="M5 1v4M11 1v4M1.5 7h13" />
+            </svg>
+
+            {# Render value directly from Twig so Live Component re-renders preserve the label #}
+            <span data-{{ controller }}-target="dateLabel"
+                  class="text-xs {{ formattedValue ? 'text-gray-800 font-medium' : 'text-gray-500' }}">
+                {{ formattedValue ?: ('pickDate'|trans({}, '_date_filter')) }}
+            </span>
+
+            <span data-{{ controller }}-target="pickerArrow" class="ml-auto text-[10px] text-gray-400">▼</span>
+        </button>
+
+        {# --- DROPDOWN CONTAINER --- #}
+        <div data-{{ controller }}-target="pickerDropdown"
+             class="hidden absolute left-0 top-full mt-2 z-[9999] bg-white border border-gray-200 rounded-xl p-4 pb-5 shadow-2xl w-[300px]">
+
+            <div data-{{ controller }}-target="calendarGrid"></div>
+
+            <div class="flex items-center justify-between border-t border-gray-100 pt-3 mt-3">
+                <span data-{{ controller }}-target="footerSummary" class="text-xs text-gray-500"></span>
+                <div class="flex gap-2">
+                    <button type="button"
+                            data-action="click->{{ controller }}#clearDate"
+                            data-action-target="clear"
+                            class="text-xs border border-gray-200 rounded-md px-3 py-1.5 text-gray-500 hover:border-gray-400 hover:text-gray-700 transition-colors cursor-pointer">
+                        {{ 'clear'|trans({}, '_date_filter') }}
+                    </button>
+                    <button type="button"
+                            data-action="click->{{ controller }}#applyDate"
+                            class="text-xs bg-[#7DB928] text-white rounded-md px-4 py-1.5 font-medium hover:opacity-90 transition-opacity cursor-pointer">
+                        {{ 'applyRange'|trans({}, '_date_filter') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if form_errors(field) %}
+        <div class="text-xs text-red-500 font-medium mt-1">
+            {{ form_errors(field) }}
+        </div>
+    {% endif %}
+</div>

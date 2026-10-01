@@ -63,6 +63,14 @@
                 enabled_field: form.domain_blacklist_import_enabled,
                 field_name: 'domain_blacklist_import_enabled',
             }) }}
+
+            {{ include('dashboard/shared/settings_actions/schedule/card.html.twig', {
+                label: 'cleanupExpiredDataCronLabel'|trans({}, 'schedule'),
+                description: 'cleanupExpiredDataCronDescription'|trans({}, 'schedule'),
+                field: form.cleanup_expired_data_cron,
+                enabled_field: form.cleanup_expired_data_enabled,
+                field_name: 'cleanup_expired_data_enabled',
+            }) }}
         </div>
 
         <div class="alert-block my-4 p-2 {{ form.use_advanced_mode.vars.data != default_use_advanced_mode ? '' : 'hidden' }}">
@@ -79,7 +87,7 @@
 
         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::CRON_SCHEDULE_WRITE')) %}
             <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
-                <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingSchedule'}) }}"
+                <a href="{{ path('app_dashboard_regenerate_code_admin', {type: constant('App\\Enum\\SettingType::SCHEDULE').value}) }}"
                    data-confirm="{{ 'resetDefaultSettings'|trans({}, 'schedule')|e('html_attr') }}"
                    class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
                     {{ 'reset'|trans({}, 'schedule') }}
