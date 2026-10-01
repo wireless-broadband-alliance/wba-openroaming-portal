@@ -154,7 +154,9 @@ export default class extends Controller {
             const lng = parseFloat(geometry.coordinates[0]);
             const lat = parseFloat(geometry.coordinates[1]);
             if (this._isValidCoord(lat) && this._isValidCoord(lng)) {
-                const marker = L.marker([lat, lng], { icon: this._getIcon() }).bindPopup(`<b>${network.name || 'Network'}</b>`);
+                const marker = L.marker([lat, lng], { icon: this._getIcon() }).bindPopup(
+                    `<b>${network.name || 'Network'}</b>`
+                );
                 this.pendingMarkers.push(marker);
             }
             return;
