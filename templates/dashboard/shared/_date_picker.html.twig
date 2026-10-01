@@ -14,7 +14,7 @@
     pickDate: 'pickDate'|trans({}, '_date_filter'),
     selected: 'selected'|trans({}, '_date_filter'),
     clear: 'clear'|trans({}, '_date_filter'),
-    apply: 'applyRange'|trans({}, '_date_filter'),
+    apply: 'applyDate'|trans({}, '_date_filter'),
     daySu: 'daySu'|trans({}, '_date_filter'), dayMo: 'dayMo'|trans({}, '_date_filter'),
     dayTu: 'dayTu'|trans({}, '_date_filter'), dayWe: 'dayWe'|trans({}, '_date_filter'),
     dayTh: 'dayTh'|trans({}, '_date_filter'), dayFr: 'dayFr'|trans({}, '_date_filter'),
@@ -73,7 +73,7 @@
                     <button type="button"
                             data-action="click->{{ controller }}#applyDate"
                             class="text-xs bg-[#7DB928] text-white rounded-md px-4 py-1.5 font-medium hover:opacity-90 transition-opacity cursor-pointer">
-                        {{ 'applyRange'|trans({}, '_date_filter') }}
+                        {{ 'applyDate'|trans({}, '_date_filter') }}
                     </button>
                 </div>
             </div>
