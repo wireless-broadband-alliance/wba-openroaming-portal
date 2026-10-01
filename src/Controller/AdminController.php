@@ -4,37 +4,24 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Enum\AdminRoleType;
-use App\Enum\AnalyticalEventType;
-use App\Enum\SettingType;
 use App\Form\RevokeProfilesType;
-use App\Repository\EventRepository;
 use App\Repository\UserRepository;
 use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\GetSettings;
-use App\Service\VerificationCodeEmailGenerator;
-use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 class AdminController extends AbstractController
 {
     public function __construct(
-        private readonly MailerInterface $mailer,
         private readonly UserRepository $userRepository,
         private readonly ParameterBagInterface $parameterBag,
         private readonly GetSettings $getSettings,
-        private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
-        private readonly EventRepository $eventRepository,
-        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -130,81 +117,5 @@ class AdminController extends AbstractController
             'ApUsage' => null,
             'formRevokeProfiles' => $formRevokeProfiles
         ]);
-    }
-
-    /**
-     * Regenerate the verification code for the user and send a new email.
-     *
-     * @param string $type Type of action
-     * @return RedirectResponse A redirect response.
-     * @throws Exception
-     * @throws TransportExceptionInterface
-     */
-    #[Route('/dashboard/regenerate/{type}', name: 'app_dashboard_regenerate_code_admin')]
-    #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
-    public function regenerateCode(string $type, Request $request): RedirectResponse
-    {
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-
-        // Regenerate the verification code for the admin to reset settings
-        if (
-            in_array($type, [
-                SettingType::SettingCustom->value,
-                SettingType::SettingTerms->value,
-                SettingType::SettingRadius->value,
-                SettingType::SettingStatus->value,
-                SettingType::SettingLDAP->value,
-                SettingType::SettingCAPPORT->value,
-                SettingType::SettingAUTH->value,
-                SettingType::SettingTwoFA->value,
-                SettingType::SettingSMS->value,
-                SettingType::SettingSchedule->value,
-                SettingType::SettingsReturnApps->value,
-            ], true)
-        ) {
-            $lastResend = $this->eventRepository->findLatest2FACodeAttemptEvent(
-                $currentUser,
-                AnalyticalEventType::SETTING_RESET_CODE_REQUEST->value
-            );
-
-            $timeIntervalInSeconds = 120;
-
-            if ($this->verificationCodeGenerator->canResendCode($currentUser, $timeIntervalInSeconds)) {
-                $email = $this->verificationCodeGenerator->createEmailAdminPage(
-                    $currentUser,
-                    $request->getClientIp(),
-                    $request->headers->get('User-Agent'),
-                    $type
-                );
-
-                $this->mailer->send($email);
-                $this->addFlash(
-                    'success',
-                    $this->translator->trans(
-                        'successResendAdmin',
-                        ['%email%' => $currentUser->getEmail()],
-                        'controllers'
-                    )
-                );
-
-                return $this->redirectToRoute('admin_dashboard_confirm_reset', ['type' => $type]);
-            }
-
-            $timeLeft = $this->verificationCodeGenerator->timeLeftToResendCode($timeIntervalInSeconds, $lastResend);
-
-            $this->addFlash(
-                'error',
-                $this->translator->trans(
-                    'errorAdminWait',
-                    ['%time%' => $timeLeft],
-                    'controllers'
-                )
-            );
-
-            return $this->redirectToRoute('admin_dashboard_confirm_reset', ['type' => $type]);
-        }
-
-        return $this->redirectToRoute('admin_page');
     }
 }

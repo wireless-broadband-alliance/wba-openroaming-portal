@@ -320,7 +320,7 @@ enum AnalyticalEventType: string
             self::BREAKING_GLASS_ACCOUNT_RESET => 'Breaking Glass Account Reset',
             self::EXPORT_ACTIVITY_LOGS_REQUEST => 'Export Activity Logs Request',
             self::SETTING_MAP_REQUEST => 'Settings Map Request',
-            self::SETTING_SECURITY_TXT_CONF_REQUEST => 'Security Tx Conflict Request',
+            self::SETTING_SECURITY_TXT_CONF_REQUEST => 'Security TxT Configuration Request',
         };
     }
 }

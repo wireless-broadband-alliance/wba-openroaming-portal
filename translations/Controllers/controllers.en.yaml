@@ -246,3 +246,4 @@ securityTxt:
   saveSuccess: "Security.txt configuration saved successfully."
   saveError: "An error occurred while saving the Security.txt configuration."
   formError: "Please correct the errors in the form before proceeding."
+securityTxtSettingsResetSuccessfully: "Settings have been reset successfully."

@@ -143,7 +143,7 @@
 
     {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::LANDING_PAGE_CONFIG_WRITE')) %}
         <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
-            <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingCustom'}) }}"
+            <a href="{{ path('app_dashboard_regenerate_code_admin', {type: constant('App\\Enum\\SettingType::CUSTOM').value}) }}"
                data-confirm="{{ 'resetMessage'|trans({}, 'settings_actions_general')|e('html_attr') }}"
                class="text-base font-semibold hover:text-red-600 transition ease-in duration-300 p-2 rounded-lg">
                 {{ 'reset'|trans({}, 'settings_actions_general') }}

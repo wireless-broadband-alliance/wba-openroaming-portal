@@ -1,5 +1,3 @@
-# Changelog
-
 ## Release V1.14.0
 
 ### Breaking Changes & Security Requirements
@@ -81,6 +79,10 @@
   while removing stale files.
 - **Portal Statistics Parsing Fix**: Resolved a 500 server error in `PortalStatistics` caused by device download events
   returning metadata as raw array data or unparsed JSON.
+- **Admin Password Reset Fix for Promoted Users**: Resolved an issue where resetting a password from the admin dashboard
+  failed/crashed for users created via Magic Link and later promoted to the Admin role.
+- **Admin Permissions Enum Cleanup**: Fixed a 500 Internal Server Error caused by referencing a non-existent permission
+  value (`ACTIVITY_LOGS_WRITE`) by removing the invalid backing value from `AdminPermissionsType`.
 
 ### Other CRA Compliance Fixes
 

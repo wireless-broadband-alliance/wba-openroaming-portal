@@ -35,5 +35,7 @@
             {{ include('dashboard/shared/settings_actions/_networks.html.twig') }}
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_security_txt' %}
         {{ include('dashboard/shared/settings_actions/_securityTxt.html.twig') }}
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_ip_restriction' %}
+        {{ include('dashboard/shared/settings_actions/_ip_restriction.html.twig') }}
     {% endif %}
 {% endblock %}
