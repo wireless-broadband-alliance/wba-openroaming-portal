@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\DTO\CustomTypeDTO;
+use App\DTO\NewPasswordAccountDTO;
 use App\Entity\Setting;
 use App\Entity\SettingTranslation;
 use App\Entity\User;
@@ -362,7 +363,7 @@ class LandingPageConfigController extends AbstractController
         $dummyUser = new User();
 
         $landingForm = $this->createForm(AccountUserUpdateLandingType::class, $dummyUser);
-        $formPassword = $this->createForm(NewPasswordAccountType::class, $dummyUser);
+        $formPassword = $this->createForm(NewPasswordAccountType::class, new NewPasswordAccountDTO());
         $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $dummyUser);
         $formRegistrationDemo = $this->createForm(RegistrationFormType::class, $dummyUser);
         $formTOS = $this->createForm(TOSType::class);
