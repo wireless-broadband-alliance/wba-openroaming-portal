@@ -26,6 +26,8 @@ export default class extends Controller {
         this.map = event.detail.map;
         window.L = L;
 
+        this.map.setMinZoom(4);
+
         if (!L.markerClusterGroup) {
             await import('leaflet.markercluster');
         }
@@ -80,11 +82,22 @@ export default class extends Controller {
 
         const fetchId = ++this.currentFetchId;
         const bounds = this.map.getBounds();
+
+        let minLat = Math.max(-90, bounds.getSouth());
+        let maxLat = Math.min(90, bounds.getNorth());
+        let minLng = bounds.getWest();
+        let maxLng = bounds.getEast();
+
+        if (minLng > maxLng || Math.abs(maxLng - minLng) >= 360 || minLng < -180 || maxLng > 180) {
+            minLng = -180;
+            maxLng = 180;
+        }
+
         const params = new URLSearchParams({
-            minLat: bounds.getSouth(),
-            minLng: bounds.getWest(),
-            maxLat: bounds.getNorth(),
-            maxLng: bounds.getEast(),
+            minLat,
+            minLng,
+            maxLat,
+            maxLng,
         });
 
         let data;
@@ -136,6 +149,16 @@ export default class extends Controller {
     drawNetwork(network, showPolygons) {
         const geometry = network.geometry;
         if (!geometry || !geometry.type || !geometry.coordinates) return;
+
+        if (geometry.type === 'Point') {
+            const lng = parseFloat(geometry.coordinates[0]);
+            const lat = parseFloat(geometry.coordinates[1]);
+            if (this._isValidCoord(lat) && this._isValidCoord(lng)) {
+                const marker = L.marker([lat, lng], { icon: this._getIcon() }).bindPopup(`<b>${network.name || 'Network'}</b>`);
+                this.pendingMarkers.push(marker);
+            }
+            return;
+        }
 
         const toLatLngRing = (ring) => {
             if (!Array.isArray(ring)) return [];
