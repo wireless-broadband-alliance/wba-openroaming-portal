@@ -35,7 +35,7 @@ export default class extends Controller {
         this.clusterGroup = L.markerClusterGroup({
             showCoverageOnHover: false,
             maxClusterRadius: 80,
-            chunkedLoading: false,
+            chunkedLoading: true,
             animate: false,
             iconCreateFunction: (cluster) => {
                 const childCount = cluster.getChildCount();
