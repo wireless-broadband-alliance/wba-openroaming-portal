@@ -295,9 +295,9 @@ final class UserAuthenticationVoter extends Voter
             self::INSTALLATION_READ => $this->hasPermission($user, AdminPermissionsType::INSTALLATION_READ) ||
                 $this->hasPermission($user, AdminPermissionsType::INSTALLATION_WRITE),
 
-            self::SECURITY_TXT_WRITE => $this->hasPermission($user, AdminPermissionsType::SECURITY_WRITE),
-            self::SECURITY_TXT_READ => $this->hasPermission($user, AdminPermissionsType::SECURITY_READ) ||
-                $this->hasPermission($user, AdminPermissionsType::SECURITY_WRITE),
+            self::SECURITY_TXT_WRITE => $this->hasPermission($user, AdminPermissionsType::SECURITY_TXT_WRITE),
+            self::SECURITY_TXT_READ => $this->hasPermission($user, AdminPermissionsType::SECURITY_TXT_READ) ||
+                $this->hasPermission($user, AdminPermissionsType::SECURITY_TXT_WRITE),
 
             default => false,
         };
