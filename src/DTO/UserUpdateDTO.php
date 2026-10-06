@@ -71,7 +71,7 @@ class UserUpdateDTO
     public PermissionLevel $activityLogs = PermissionLevel::NONE;
     public PermissionLevel $map = PermissionLevel::NONE;
     public PermissionLevel $installation = PermissionLevel::NONE;
-    public PermissionLevel $security = PermissionLevel::NONE;
+    public PermissionLevel $securityTxt = PermissionLevel::NONE;
 
     public function __construct(?User $user = null)
     {
@@ -182,6 +182,6 @@ class UserUpdateDTO
         'activityLogs' => 'ACTIVITY_LOGS',
         'map' => 'MAP',
         'installation' => 'INSTALLATION',
-        'security' => 'SECURITY',
+        'securityTxt' => 'SECURITY_TXT',
     ];
 }

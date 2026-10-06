@@ -81,7 +81,7 @@ class UserAddDTO
     public PermissionLevel $activityLogs = PermissionLevel::NONE;
     public PermissionLevel $map = PermissionLevel::NONE;
     public PermissionLevel $installation = PermissionLevel::NONE;
-    public PermissionLevel $security = PermissionLevel::NONE;
+    public PermissionLevel $securityTxt = PermissionLevel::NONE;
 
     /**
      * Returns AdminPermissionsType strings based on selected levels
@@ -110,7 +110,7 @@ class UserAddDTO
             'activityLogs' => 'ACTIVITY_LOGS',
             'map' => 'MAP',
             'installation' => 'INSTALLATION',
-            'security' => 'SECURITY',
+            'securityTxt' => 'SECURITY_TXT',
         ];
 
         $permissions = [];

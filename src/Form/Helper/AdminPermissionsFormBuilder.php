@@ -42,7 +42,7 @@ readonly class AdminPermissionsFormBuilder
             'activityLogs' => 'activityLogs',
             'map' => 'map',
             'installation' => 'installation',
-            'security' => 'security',
+            'securityTxt' => 'securityTxt',
         ];
 
         foreach ($permissions as $field => $translationKey) {
