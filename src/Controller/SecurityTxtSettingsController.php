@@ -20,7 +20,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-#[IsGranted(UserAuthenticationVoter::SECURITY_TXT_WRITE)]
+#[IsGranted(UserAuthenticationVoter::SECURITY_TXT_READ)]
 class SecurityTxtSettingsController extends AbstractController
 {
     public function __construct(

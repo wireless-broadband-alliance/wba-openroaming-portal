@@ -60,6 +60,7 @@ enum AdminPermissionsType: string
     case MAP_READ = 'MAP_READ';
     case MAP_WRITE = 'MAP_WRITE';
     case INSTALLATION_WRITE = 'INSTALLATION_WRITE';
+    case SECURITY_TXT_READ = 'SECURITY_TXT_READ';
     case SECURITY_TXT_WRITE = 'SECURITY_TXT_WRITE';
 
 
@@ -86,7 +87,7 @@ enum AdminPermissionsType: string
             self::CONNECTIVITY_STATISTICS_READ => 'connectivityStatistics',
             self::ACTIVITY_LOGS_READ => 'activityLogs',
             self::INSTALLATION_WRITE => 'installation',
-            self::SECURITY_TXT_WRITE => 'securityTxt',
+            self::SECURITY_TXT_READ, self::SECURITY_TXT_WRITE => 'securityTxt',
         };
     }
 

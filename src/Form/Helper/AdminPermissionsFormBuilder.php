@@ -71,7 +71,7 @@ readonly class AdminPermissionsFormBuilder
      */
     private function getPermissionChoices(string $field): array
     {
-        if (in_array($field, ['installation', 'securityTxt'], true)) {
+        if ($field === 'installation') {
             return [
                 $this->translator->trans('none', [], 'UserAddType') => PermissionLevel::NONE,
                 $this->translator->trans('write', [], 'UserAddType') => PermissionLevel::WRITE,
