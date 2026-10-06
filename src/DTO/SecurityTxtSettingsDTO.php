@@ -24,14 +24,14 @@ class SecurityTxtSettingsDTO
         message: 'invalidSecurityContactFormat'
     )]
     public ?string $securityContact = null;
-
+    
     /**
      * RFC 9116 §2.5.5: Expires is required, must be in the future, and < 1 year away.
      */
-    #[Assert\NotBlank(message: 'securityExpiresRequired')]
-    #[Assert\Type(type: \DateTimeInterface::class, message: 'securityExpiresInvalidFormat')]
-    #[Assert\GreaterThan('now', message: 'securityExpiresMustBeInFuture')]
-    #[Assert\LessThan('+1 year', message: 'securityExpiresMaxOneYear')]
+    #[Assert\NotBlank(message: 'securityTxtExpiresRequired')]
+    #[Assert\Type(type: \DateTimeInterface::class, message: 'securityTxtExpiresInvalidFormat')]
+    #[Assert\GreaterThan('now', message: 'securityTxtExpiresMustBeInFuture')]
+    #[Assert\LessThan('+1 year', message: 'securityTxtExpiresMaxOneYear')]
     public ?DateTimeImmutable $securityExpires = null;
 
     /**
