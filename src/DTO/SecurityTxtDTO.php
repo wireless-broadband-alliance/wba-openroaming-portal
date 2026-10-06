@@ -27,10 +27,10 @@ class SecurityTxtDTO
     /**
      * RFC 9116 §2.5.5: Expires is required, must be in the future, and < 1 year away.
      */
-    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
-    #[Assert\Type(type: DateTimeInterface::class, message: 'invalidDateFormat')]
-    #[Assert\GreaterThan('now', message: 'invalidDateFormat')]
-    #[Assert\LessThan('+1 year', message: 'invalidDateFormat')]
+    #[Assert\NotBlank(message: 'securityTxtExpiresRequired')]
+    #[Assert\Type(type: \DateTimeInterface::class, message: 'securityTxtExpiresInvalidFormat')]
+    #[Assert\GreaterThan('now', message: 'securityTxtExpiresMustBeInFuture')]
+    #[Assert\LessThan('+1 year', message: 'securityTxtExpiresMaxOneYear')]
     public ?DateTimeImmutable $expires = null;
 
     /**

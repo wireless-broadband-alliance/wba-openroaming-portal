@@ -8,6 +8,7 @@ use App\Enum\AdminRoleType;
 use App\Enum\InstallationStep;
 use App\Exception\EncryptionException;
 use App\Form\SecurityTxtType;
+use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\GetSettings;
 use App\Service\InstallationFlow;
 use App\Service\InstallationService;
@@ -22,7 +23,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Throwable;
 
-#[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+#[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
+#[IsGranted(UserAuthenticationVoter::INSTALLATION_WRITE)]
 #[Route('/dashboard/settings/certificatesManagement/installation')]
 class SecurityTxtStepController extends AbstractController
 {
