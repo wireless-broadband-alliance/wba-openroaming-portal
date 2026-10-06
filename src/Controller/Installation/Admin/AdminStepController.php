@@ -26,7 +26,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
-#[IsGranted(UserAuthenticationVoter::INSTALLATION_WRITE->value)]
+#[IsGranted(UserAuthenticationVoter::INSTALLATION_WRITE)]
 #[Route('/dashboard/settings/certificatesManagement/installation')]
 class AdminStepController extends AbstractController
 {

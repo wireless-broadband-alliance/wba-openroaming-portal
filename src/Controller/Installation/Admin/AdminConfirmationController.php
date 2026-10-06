@@ -28,7 +28,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
-#[IsGranted(UserAuthenticationVoter::INSTALLATION_WRITE->value)]
+#[IsGranted(UserAuthenticationVoter::INSTALLATION_WRITE)]
 #[Route('/dashboard/settings/certificatesManagement/installation')]
 class AdminConfirmationController extends AbstractController
 {

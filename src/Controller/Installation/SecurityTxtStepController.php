@@ -24,7 +24,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Throwable;
 
 #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
-#[IsGranted(UserAuthenticationVoter::INSTALLATION_WRITE->value)]
+#[IsGranted(UserAuthenticationVoter::INSTALLATION_WRITE)]
 #[Route('/dashboard/settings/certificatesManagement/installation')]
 class SecurityTxtStepController extends AbstractController
 {
