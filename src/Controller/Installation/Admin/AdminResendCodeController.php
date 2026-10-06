@@ -11,6 +11,7 @@ use App\Enum\EventMetadataKeysType;
 use App\Enum\SettingName;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
+use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\EventActions;
 use App\Service\InstallationService;
 use App\Service\TwoFAService;
@@ -24,7 +25,8 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-#[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+#[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
+#[IsGranted(UserAuthenticationVoter::INSTALLATION_WRITE->value)]
 #[Route('/dashboard/settings/certificatesManagement/installation')]
 class AdminResendCodeController extends AbstractController
 {

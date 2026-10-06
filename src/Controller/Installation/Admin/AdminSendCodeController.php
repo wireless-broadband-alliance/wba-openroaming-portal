@@ -10,6 +10,7 @@ use App\Enum\EventMetadataKeysType;
 use App\Enum\InstallationStep;
 use App\Exception\EncryptionException;
 use App\Repository\UserRepository;
+use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\EventActions;
 use App\Service\InstallationFlow;
 use App\Service\InstallationService;
@@ -24,7 +25,8 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-#[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+#[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
+#[IsGranted(UserAuthenticationVoter::INSTALLATION_WRITE->value)]
 #[Route('/dashboard/settings/certificatesManagement/installation')]
 class AdminSendCodeController extends AbstractController
 {

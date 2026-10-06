@@ -12,6 +12,7 @@ use App\Enum\SessionStatus;
 use App\Exception\EncryptionException;
 use App\Form\TwoFACode;
 use App\Repository\UserRepository;
+use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\InstallationFlow;
@@ -26,7 +27,8 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-#[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+#[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
+#[IsGranted(UserAuthenticationVoter::INSTALLATION_WRITE->value)]
 #[Route('/dashboard/settings/certificatesManagement/installation')]
 class AdminConfirmationController extends AbstractController
 {

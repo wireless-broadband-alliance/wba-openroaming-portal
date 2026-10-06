@@ -14,6 +14,7 @@ use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
 use App\Exception\EncryptionException;
 use App\Form\DbSetupType;
+use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\DatabaseConnectionService;
 use App\Service\EncryptionService;
 use App\Service\EventActions;
@@ -30,7 +31,8 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-#[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+#[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
+#[IsGranted(UserAuthenticationVoter::INSTALLATION_WRITE->value)]
 #[Route('/dashboard/settings/certificatesManagement/installation')]
 class DatabaseStepController extends AbstractController
 {
