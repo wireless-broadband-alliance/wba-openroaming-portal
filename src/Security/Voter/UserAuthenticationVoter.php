@@ -74,6 +74,10 @@ final class UserAuthenticationVoter extends Voter
     public const string ACTIVITY_LOGS_READ = 'ACTIVITY_LOGS_READ';
     public const string MAP_READ = 'MAP_READ';
     public const string MAP_WRITE = 'MAP_WRITE';
+    public const string INSTALLATION_READ = 'INSTALLATION_READ';
+    public const string INSTALLATION_WRITE = 'INSTALLATION_WRITE';
+    public const string SECURITY_READ = 'SECURITY_READ';
+    public const string SECURITY_WRITE = 'SECURITY_WRITE';
 
     #[Override]
     protected function supports(string $attribute, mixed $subject): bool
@@ -140,6 +144,12 @@ final class UserAuthenticationVoter extends Voter
 
                 self::MAP_READ,
                 self::MAP_WRITE,
+
+                self::INSTALLATION_READ,
+                self::INSTALLATION_WRITE,
+
+                self::SECURITY_READ,
+                self::SECURITY_WRITE,
                 ]
         );
     }
@@ -280,6 +290,14 @@ final class UserAuthenticationVoter extends Voter
 
             self::ACTIVITY_LOGS_READ =>
                 $this->hasPermission($user, AdminPermissionsType::ACTIVITY_LOGS_READ),
+
+            self::INSTALLATION_WRITE => $this->hasPermission($user, AdminPermissionsType::INSTALLATION_WRITE),
+            self::INSTALLATION_READ => $this->hasPermission($user, AdminPermissionsType::INSTALLATION_READ) ||
+                $this->hasPermission($user, AdminPermissionsType::INSTALLATION_WRITE),
+
+            self::SECURITY_WRITE => $this->hasPermission($user, AdminPermissionsType::SECURITY_WRITE),
+            self::SECURITY_READ => $this->hasPermission($user, AdminPermissionsType::SECURITY_READ) ||
+                $this->hasPermission($user, AdminPermissionsType::SECURITY_WRITE),
 
             default => false,
         };

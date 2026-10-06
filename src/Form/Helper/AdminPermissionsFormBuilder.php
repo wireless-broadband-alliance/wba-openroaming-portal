@@ -40,7 +40,9 @@ readonly class AdminPermissionsFormBuilder
             'connectivityStatistics' => 'connectivityStatistics',
             'domainsBlacklist' => 'domainsBlacklist',
             'activityLogs' => 'activityLogs',
-            'map' => 'map'
+            'map' => 'map',
+            'installation' => 'installation',
+            'security' => 'security',
         ];
 
         foreach ($permissions as $field => $translationKey) {
