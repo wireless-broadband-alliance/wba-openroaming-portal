@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\Setting;
 use App\Enum\CertificateFileName;
+use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use RuntimeException;
@@ -78,11 +79,20 @@ readonly class CertificateWriterUpdateService
     {
         $serverCN = $certParsed['subject']['CN'] ?? null;
 
+        // Clean and format SHA-1 fingerprint to space-separated hex pairs (e.g. "ca bd 2a...")
+        // for Windows EAPHost compatibility
+        $rawSha1 = $caParsed['fingerprintSHA1'] ?? null;
+        $formattedSha1 = null;
+        if ($rawSha1 !== null) {
+            $cleanSha1 = preg_replace('/[^a-fA-F0-9]/', '', $rawSha1);
+            $formattedSha1 = implode(' ', str_split(strtolower($cleanSha1), 2));
+        }
+
         $settingsMap = [
-            'RADIUS_REALM_NAME' => $serverCN,
-            'NAI_REALM' => $serverCN,
-            'DOMAIN_NAME' => $serverCN,
-            'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH' => $caParsed['fingerprintSHA1'] ?? null,
+            SettingName::RADIUS_REALM_NAME->value => $serverCN,
+            SettingName::NAI_REALM->value => $serverCN,
+            SettingName::DOMAIN_NAME->value => $serverCN,
+            SettingName::RADIUS_TRUSTED_ROOT_CA_SHA1_HASH->value => $formattedSha1,
         ];
 
         foreach ($settingsMap as $name => $value) {
