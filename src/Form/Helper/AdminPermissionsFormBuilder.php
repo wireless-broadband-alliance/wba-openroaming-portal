@@ -40,7 +40,9 @@ readonly class AdminPermissionsFormBuilder
             'connectivityStatistics' => 'connectivityStatistics',
             'domainsBlacklist' => 'domainsBlacklist',
             'activityLogs' => 'activityLogs',
-            'map' => 'map'
+            'map' => 'map',
+            'installation' => 'installation',
+            'securityTxt' => 'securityTxt',
         ];
 
         foreach ($permissions as $field => $translationKey) {
@@ -69,6 +71,13 @@ readonly class AdminPermissionsFormBuilder
      */
     private function getPermissionChoices(string $field): array
     {
+        if ($field === 'installation') {
+            return [
+                $this->translator->trans('none', [], 'UserAddType') => PermissionLevel::NONE,
+                $this->translator->trans('write', [], 'UserAddType') => PermissionLevel::WRITE,
+            ];
+        }
+
         $choices = [
             $this->translator->trans('none', [], 'UserAddType') => PermissionLevel::NONE,
             $this->translator->trans('read', [], 'UserAddType') => PermissionLevel::READ,

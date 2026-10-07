@@ -70,6 +70,8 @@ class UserUpdateDTO
     public PermissionLevel $connectivityStatistics = PermissionLevel::NONE;
     public PermissionLevel $activityLogs = PermissionLevel::NONE;
     public PermissionLevel $map = PermissionLevel::NONE;
+    public PermissionLevel $installation = PermissionLevel::NONE;
+    public PermissionLevel $securityTxt = PermissionLevel::NONE;
 
     public function __construct(?User $user = null)
     {
@@ -178,6 +180,8 @@ class UserUpdateDTO
         'connectivityStatistics' => 'CONNECTIVITY_STATISTICS',
         'domainsBlacklist' => 'DOMAINS_BLACKLIST',
         'activityLogs' => 'ACTIVITY_LOGS',
-        'map' => 'MAP'
+        'map' => 'MAP',
+        'installation' => 'INSTALLATION',
+        'securityTxt' => 'SECURITY_TXT',
     ];
 }

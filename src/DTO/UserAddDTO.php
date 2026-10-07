@@ -80,6 +80,8 @@ class UserAddDTO
     public PermissionLevel $connectivityStatistics = PermissionLevel::NONE;
     public PermissionLevel $activityLogs = PermissionLevel::NONE;
     public PermissionLevel $map = PermissionLevel::NONE;
+    public PermissionLevel $installation = PermissionLevel::NONE;
+    public PermissionLevel $securityTxt = PermissionLevel::NONE;
 
     /**
      * Returns AdminPermissionsType strings based on selected levels
@@ -106,7 +108,9 @@ class UserAddDTO
             'domainsBlacklist' => 'DOMAINS_BLACKLIST',
             'connectivityStatistics' => 'CONNECTIVITY_STATISTICS',
             'activityLogs' => 'ACTIVITY_LOGS',
-            'map' => 'MAP'
+            'map' => 'MAP',
+            'installation' => 'INSTALLATION',
+            'securityTxt' => 'SECURITY_TXT',
         ];
 
         $permissions = [];
