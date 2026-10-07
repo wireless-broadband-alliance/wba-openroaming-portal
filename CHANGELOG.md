@@ -1,3 +1,15 @@
+## Release V1.14.1
+
+- **Windows Profile XML Signing (`KEY-NOT-FOUND`):** Fixed an issue where `xmlsec1` failed with `KEY-NOT-FOUND` when
+  attempting to sign Windows profiles (`template_win11.xml` / `template.xml`).
+- **Signature Algorithm Mismatch:** Added runtime private key inspection via OpenSSL to dynamically override XML
+  `<SignatureMethod>` and `<DigestMethod>` URIs in memory (`ecdsa-sha256` / `rsa-sha1` $\rightarrow$ `rsa-sha256`) when
+  using RSA signing keys.
+- **Process Command Parameters:** Resolved undefined file path variables (`$privkeyPath`, `$certPath`) and added missing
+  `--output` / file arguments in the Symfony `Process` execution pipeline.
+- **Key Resolution:** Added the `--lax-key-search` flag to `xmlsec1` invocation to prevent strict key lookup failures
+  against provided PEM certificate chains.
+
 ## Release V1.14.0
 
 ### Breaking Changes & Security Requirements
