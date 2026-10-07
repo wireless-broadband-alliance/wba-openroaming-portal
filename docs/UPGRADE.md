@@ -7,12 +7,15 @@
 3. [Upgrade Path Matrix](#upgrade-path-matrix)
 4. [Upgrade Checklist](#upgrade-checklist)
 5. [Step-by-Step Procedure](#step-by-step-procedure)
-6. [Release-Specific Notes: Version 1.14.0](#release-specific-notes-version-1140)
-7. [Release-Specific Notes: Version 1.13.0](#release-specific-notes-version-1130)
-8. [Release-Specific Notes: Version 1.8.1](#release-specific-notes-version-181)
-9. [Release-Specific Notes: Version 1.7.x](#release-specific-notes-version-17x)
-10. [Troubleshooting & Rollback](#troubleshooting--rollback)
-11. [Additional Resources](#additional-resources)
+6. [Release-Specific Notes: Version 1.14.1](#release-specific-notes-version-1141)
+7. [Release-Specific Notes: Version 1.14.0](#release-specific-notes-version-1140)
+8. [Release-Specific Notes: Version 1.13.0](#release-specific-notes-version-1130)
+9. [Release-Specific Notes: Version 1.8.1](#release-specific-notes-version-181)
+10. [Release-Specific Notes: Version 1.7.x](#release-specific-notes-version-17x)
+11. [Troubleshooting & Rollback](#troubleshooting--rollback)
+12. [Additional Resources](#additional-resources)
+13. [Troubleshooting & Rollback](#troubleshooting--rollback)
+14. [Additional Resources](#additional-resources)
 
 ---
 
@@ -111,6 +114,7 @@ Use this table to determine the exact upgrade steps based on your current versio
 | 1.12.1          | 1.13.0         | Run `php bin/console doctrine:migrations:migrate` to set up the new `AccessPoint`, `Network`, and `SMSProvider`/`SMSProviderParam` tables. Then run `php bin/console prepare:multiSMSMigration` **once** to migrate existing BudgetSMS API credentials from the `Settings` table to the new dedicated `SMSProvider` management system. Perform both actions while the portal is **offline or restricted**.                                                                                                                                                                                      |
 | 1.13.0          | 1.13.1         | No migration or actions required.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | 1.13.1          | 1.14.0         | Run `php bin/console doctrine:migrations:migrate`. Next, run `php bin/console app:cra:migrate-all --yes` to execute all CRA data encryption steps at once (including Installation Progress data). Then complete the mandatory **Security.txt Configuration** step in the Installation Wizard. **Breaking:** API v1 and v2 are removed (use `/api/v3`) and the JWT TTL is now 15 minutes. Review your `.env` and Docker Compose setup (see [Release-Specific Notes: Version 1.14.0](#release-specific-notes-version-1140)). Perform these actions while the portal is **offline or restricted**. |
+| 1.14.0          | 1.14.1         | Patch release — no database migrations or configuration changes required. Fixes Windows Wi-Fi profile XML signing failures (`xmlsec1`).                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
 ---
 
@@ -184,6 +188,40 @@ docker compose exec web php bin/console cache:clear
 ```bash
 docker compose logs -f web
 ```
+
+---
+
+## Release-Specific Notes: Version 1.14.1
+
+**Scenario**: Your current version is **1.14.0**, and you want to upgrade to **1.14.1**.
+
+* **Patch Release (No Schema/Database Migrations):**
+  This maintenance release resolves an issue where `xmlsec1` failed with `KEY-NOT-FOUND` or process errors when
+  attempting to sign Windows profiles (`template.xml` / `template_win11.xml`).
+
+* **What Was Fixed:**
+    * Fixed missing input/output parameters and undefined file path variables passed to the Symfony `Process` execution
+      pipeline.
+    * Added dynamic OpenSSL private key inspection to automatically match XML `<SignatureMethod>` and `<DigestMethod>`
+      URIs (`rsa-sha256`) when using RSA certificates.
+    * Introduced `--lax-key-search` during `xmlsec1` execution to ensure smooth verification against provided PEM
+      certificate chains.
+
+* **Upgrade Steps:**
+    1. Pull the latest code:
+       ```bash
+       git pull
+       ```
+    2. Restart the containers:
+       ```bash
+       docker compose up -d
+       ```
+    3. Clear Symfony cache:
+       ```bash
+       docker compose exec web php bin/console cache:clear
+       ```
+
+* **No manual data migrations, database updates, or configuration changes are required.**
 
 ---
 
