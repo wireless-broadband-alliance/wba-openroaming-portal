@@ -417,12 +417,16 @@ class ProfileController extends AbstractController
 
         $rawHash = $this->settingRepository->findOneBy([
             'name' => SettingName::RADIUS_TRUSTED_ROOT_CA_SHA1_HASH->value
-        ])->getValue();
+        ])?->getValue() ?? '';
 
-        //$formattedHash = trim(chunk_split($rawHash, 2, ' '));
+        $pattern = '/^([0-9A-F]{2}\s){19}[0-9A-F]{2}$/';
 
-        $formattedHash = strtoupper(trim(chunk_split($rawHash, 2, ' ')));
-
+        if (preg_match($pattern, $rawHash)) {
+            $formattedHash = $rawHash;
+        } else {
+            $cleanHash = str_replace([' ', ':'], '', $rawHash);
+            $formattedHash = strtoupper(trim(chunk_split($cleanHash, 2, ' ')));
+        }
         $profile = str_replace([
             '@USERNAME@',
             '@PASSWORD@',
