@@ -24,7 +24,7 @@ class SecurityTxtSettingsDTO
         message: 'invalidSecurityContactFormat'
     )]
     public ?string $securityContact = null;
-    
+
     /**
      * RFC 9116 §2.5.5: Expires is required, must be in the future, and < 1 year away.
      */
