@@ -65,11 +65,11 @@ readonly class CertificateWriterUpdateService
     /**
      * Updates the settings table based on parsed certificate content
      *
-     *
      * @param array{
      *     subject?: array{
      *         CN?: string
-     *     }
+     *     },
+     *     fingerprintSHA1?: string|false|null
      * } $certParsed
      */
     public function updateFromParsedCertificates(array $certParsed): void
@@ -80,7 +80,7 @@ readonly class CertificateWriterUpdateService
         // for Windows EAPHost compatibility
         $rawSha1 = $certParsed['fingerprintSHA1'] ?? null;
         $formattedSha1 = null;
-        if ($rawSha1 !== null) {
+        if (is_string($rawSha1)) {
             $cleanSha1 = preg_replace('/[^a-fA-F0-9]/', '', $rawSha1);
             $formattedSha1 = implode(' ', str_split(strtolower($cleanSha1), 2));
         }
