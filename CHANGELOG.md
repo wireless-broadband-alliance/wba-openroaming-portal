@@ -1,3 +1,12 @@
+## Release v1.14.2
+
+- **Windows EAPHost Root CA Hash Formatting**: Fixed an issue where raw SHA-1 certificate thumbprints extracted by the
+  certificate wizard caused Windows Wi-Fi provisioning (ms-settings:wifi-provisioning) to fail during profile import.
+  Root
+  CA SHA-1 hashes are now automatically sanitized into 20 space-separated hex pairs (e.g., ca bd 2a 79...) to comply
+  with
+  Windows XML schema validation.
+
 ## Release V1.14.1
 
 - **Windows Profile XML Signing (`KEY-NOT-FOUND`):** Fixed an issue where `xmlsec1` failed with `KEY-NOT-FOUND` when

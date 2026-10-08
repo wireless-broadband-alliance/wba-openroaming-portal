@@ -30,6 +30,10 @@ class RadiusSettingsDTO
     public ?string $naiRealm = null;
 
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    #[Assert\Regex(
+        pattern: '/^([a-fA-F0-9]{2}\s){19}[a-fA-F0-9]{2}$/',
+        message: 'invalidSha1HashFormat'
+    )]
     public ?string $radiusTrustedRootCaSha1Hash = null;
 
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
