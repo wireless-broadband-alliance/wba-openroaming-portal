@@ -401,7 +401,6 @@ class CertificateManagementFreeradiusController extends AbstractController
                 }
 
                 $this->certificateWriterUpdateService->updateFromParsedCertificates(
-                    $caParsed,
                     $certParsed
                 );
 
@@ -791,7 +790,7 @@ class CertificateManagementFreeradiusController extends AbstractController
 
                 if ($normalizedCaParsed && $normalizedCertParsed) {
                     $this->certificateWriterUpdateService
-                        ->updateFromParsedCertificates($normalizedCaParsed, $certParsed);
+                        ->updateFromParsedCertificates($certParsed);
                 }
             } else {
                 // Update process entity
