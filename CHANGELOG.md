@@ -6,6 +6,8 @@
   CA SHA-1 hashes are now automatically sanitized into 20 space-separated hex pairs (e.g., ca bd 2a 79...) to comply
   with
   Windows XML schema validation.
+- **API User Registration & External Providers**: Fixed issues in the registration API endpoints involving external OAuth providers (Google and Microsoft) and updated payload validation logic to improve onboarding stability.
+- **Password Reset & Token Verification**: Fixed a bug where password reset emails contained the hashed token instead of the plain-text verification code, rendering reset links invalid. Corrected the API validation logic to properly compare incoming raw tokens against the Argon2id hashes stored in the database.
 
 ## Release V1.14.1
 
