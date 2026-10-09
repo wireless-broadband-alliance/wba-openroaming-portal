@@ -1,15 +1,3 @@
-## Release v1.14.4
-
-- Fix invalid dependency injection service wiring for `GoogleController` and `MicrosoftController` in `services.yaml`
-  that caused `TypeError` 500.
-- Fix API forgot password reset flow where raw Argon2id hashes and unencoded characters in verification links caused
-  validation failures on `/forgot-password/link`.
-
-## Release v1.14.3
-
-- Fix bug where .env settings were not updated in the database following post-login listener verification
-  during an active installation flow.
-
 ## Release v1.14.2
 
 - **Windows EAPHost Root CA Hash Formatting**: Fixed an issue where raw SHA-1 certificate thumbprints extracted by the
@@ -20,6 +8,12 @@
   Windows XML schema validation.
 - **API User Registration & External Providers**: Fixed issues in the registration API endpoints involving external OAuth providers (Google and Microsoft) and updated payload validation logic to improve onboarding stability.
 - **Password Reset & Token Verification**: Fixed a bug where password reset emails contained the hashed token instead of the plain-text verification code, rendering reset links invalid. Corrected the API validation logic to properly compare incoming raw tokens against the Argon2id hashes stored in the database.
+- Fix invalid dependency injection service wiring for `GoogleController` and `MicrosoftController` in `services.yaml`
+  that caused `TypeError` 500.
+- Fix API forgot password reset flow where raw Argon2id hashes and unencoded characters in verification links caused
+  validation failures on `/forgot-password/link`.
+- Fix bug where .env settings were not updated in the database following post-login listener verification
+  during an active installation flow.
 
 ## Release V1.14.1
 
