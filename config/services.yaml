@@ -76,15 +76,6 @@ services:
         tags:
             - { name: kernel.event_subscriber }
     App\Service\UserStatusChecker: ~
-    # Things to make the login with Google work
-    App\Controller\GoogleController:
-        arguments:
-            $clientRegistry: '@KnpU\OAuth2ClientBundle\Client\Provider\GoogleClient'
-    App\Controller\MicrosoftController:
-        arguments:
-            $clientRegistry: '@KnpU\OAuth2ClientBundle\Client\Provider\MicrosoftClient'
-            # default configuration for services in *this* file
-
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
     saml_user_factory:
