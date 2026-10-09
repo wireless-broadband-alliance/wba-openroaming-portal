@@ -529,11 +529,14 @@ readonly class InstallationService
      */
     public function commandToDataBase(InstallationProgress $installationProgress): string
     {
-        return 'scripts/update-db-env.sh "' .
-            $this->decryptOrEmpty($installationProgress->getDbOpenRoaming()) .
-            '" "' .
-            $this->decryptOrEmpty($installationProgress->getDbFreeradius()) .
-            '"';
+        $dbOpenRoaming = $this->decryptOrEmpty($installationProgress->getDbOpenRoaming());
+        $dbFreeradius = $this->decryptOrEmpty($installationProgress->getDbFreeradius());
+
+        return sprintf(
+            "scripts/update-db-env.sh '%s' '%s'",
+            str_replace("'", "'\\''", $dbOpenRoaming),
+            str_replace("'", "'\\''", $dbFreeradius)
+        );
     }
 
     /**
@@ -544,26 +547,17 @@ readonly class InstallationService
         $trustedProxies = implode(',', $installationProgress->getTrustedProxies() ?? []);
         $turnstileKey = $this->decryptOrEmpty($installationProgress->getTurnstileKey());
         $turnstileSecret = $this->decryptOrEmpty($installationProgress->getTurnstileSecret());
+        $jwtPassphrase = $installationProgress->getJwtPassphrase() !== null
+            ? $this->encryptionService->decrypt($installationProgress->getJwtPassphrase())
+            : '';
 
-        if ($installationProgress->getJwtPassphrase() !== null) {
-            return 'scripts/update-settings-env.sh "' .
-                $this->encryptionService->decrypt($installationProgress->getJwtPassphrase()) .
-                '" "' .
-                $trustedProxies .
-                '" "' .
-                $turnstileKey .
-                '" "' .
-                $turnstileSecret .
-                '"';
-        }
-
-        return 'scripts/update-settings-env.sh "" "' .
-            $trustedProxies .
-            '" "' .
-            $turnstileKey .
-            '" "' .
-            $turnstileSecret .
-            '"';
+        return sprintf(
+            "scripts/update-settings-env.sh '%s' '%s' '%s' '%s'",
+            str_replace("'", "'\\''", $jwtPassphrase),
+            str_replace("'", "'\\''", $trustedProxies),
+            str_replace("'", "'\\''", $turnstileKey),
+            str_replace("'", "'\\''", $turnstileSecret)
+        );
     }
 
     public function saveSecurityTxtSettings(SecurityTxtDTO $dto, InstallationProgress $installationProgress): void
