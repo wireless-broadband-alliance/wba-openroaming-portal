@@ -2,6 +2,10 @@
 
 - Fix bug where .env settings were not updated in the database following post-login listener verification
   during an active installation flow.
+- Fix invalid dependency injection service wiring for `GoogleController` and `MicrosoftController` in `services.yaml`
+  that caused `TypeError` 500.
+- Fix API forgot password reset flow where raw Argon2id hashes and unencoded characters in verification links caused
+  validation failures on `/forgot-password/link`.
 
 ## Release v1.14.2
 
