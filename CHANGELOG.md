@@ -1,3 +1,8 @@
+## Release v1.14.3
+
+- Fix bug where .env settings were not updated in the database following post-login listener verification
+  during an active installation flow.
+
 ## Release v1.14.2
 
 - **Windows EAPHost Root CA Hash Formatting**: Fixed an issue where raw SHA-1 certificate thumbprints extracted by the
