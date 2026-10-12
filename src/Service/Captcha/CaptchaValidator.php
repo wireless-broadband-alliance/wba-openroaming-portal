@@ -8,27 +8,55 @@ use App\Api\V3\BaseResponse;
 use App\Enum\CaptchaProviderEnum;
 use App\Enum\SettingName;
 use App\Repository\SettingRepository;
+use App\Service\EncryptionService;
 
 readonly class CaptchaValidator
 {
     public function __construct(
         private SettingRepository $settingRepository,
+        private EncryptionService $encryptionService,
         private TurnstileValidator $turnstileValidator,
         private Recaptcha3Validator $recaptcha3Validator
     ) {
     }
 
-    /**
-     * Helper method for API Controllers.
-     * Returns a BaseResponse if validation fails, or null if validation passes/is disabled.
-     */
-    public function validateApiPayload(array $payload, ?string $clientIp): ?BaseResponse
+    public function getActiveProvider(): string
     {
-        $provider = $this->settingRepository->findOneBy(
+        return $this->settingRepository->findOneBy(
             ['name' => SettingName::CAPTCHA_PROVIDER->value]
         )?->getValue() ?? CaptchaProviderEnum::OFF->value;
+    }
 
-        // Skip validation if CAPTCHA is disabled
+    public function getSiteKey(): string
+    {
+        $provider = $this->getActiveProvider();
+
+        $settingName = match ($provider) {
+            CaptchaProviderEnum::TURNSTILE->value => SettingName::TURNSTILE_KEY->value,
+            CaptchaProviderEnum::RECAPTCHA3->value => SettingName::RECAPTCHA3_KEY->value,
+            default => null,
+        };
+
+        if (!$settingName) {
+            return '';
+        }
+
+        $setting = $this->settingRepository->findOneBy(['name' => $settingName]);
+        if (!$setting || empty($setting->getValue())) {
+            return '';
+        }
+
+        try {
+            return $this->encryptionService->decrypt($setting->getValue());
+        } catch (\Throwable) {
+            return $setting->getValue();
+        }
+    }
+
+    public function validateApiPayload(array $payload, ?string $clientIp): ?BaseResponse
+    {
+        $provider = $this->getActiveProvider();
+
         if ($provider === CaptchaProviderEnum::OFF->value) {
             return null;
         }
@@ -62,9 +90,7 @@ readonly class CaptchaValidator
      */
     public function validate(string $token, ?string $clientIp = null): array
     {
-        $provider = $this->settingRepository->findOneBy(
-            ['name' => SettingName::CAPTCHA_PROVIDER->value]
-        )?->getValue();
+        $provider = $this->getActiveProvider();
 
         return match ($provider) {
             CaptchaProviderEnum::TURNSTILE->value => $this->turnstileValidator->validate($token, $clientIp),

@@ -3,19 +3,19 @@
 namespace App\Security;
 
 use App\Entity\User;
+use App\Enum\CaptchaProviderEnum;
 use App\Enum\FirewallType;
-use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Enum\TwoFAType;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
+use App\Service\Captcha\CaptchaValidator;
 use App\Service\EncryptionService;
 use libphonenumber\NumberParseException;
 use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
-use PixelOpen\CloudflareTurnstileBundle\Http\CloudflareTurnstileHttpClient;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -41,7 +41,7 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
     public function __construct(
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly SettingRepository $settingRepository,
-        private readonly CloudflareTurnstileHttpClient $turnstileHttpClient,
+        private readonly CaptchaValidator $captchaValidator,
         private readonly UserRepository $userRepository,
         private readonly RequestStack $requestStack,
         private readonly TranslatorInterface $translator,
@@ -108,19 +108,25 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
             throw new CustomUserMessageAuthenticationException('Missing user identifier.');
         }
 
-        // CAPTCHA (Turnstile) check
-        $turnstileResponse = $request->request->get('cf-turnstile-response');
-        $turnstileResponse = is_string($turnstileResponse) ? $turnstileResponse : '';
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => SettingName::TURNSTILE_CHECKER->value]);
-        $isTurnstileEnabled = $turnstileSetting && $turnstileSetting->getValue() === OperationMode::ON->value;
+        // CAPTCHA Validation using unified CaptchaValidator service
+        if ($this->captchaValidator->getActiveProvider() !== CaptchaProviderEnum::OFF->value) {
+            $captchaToken = trim((string) ($loginData['captcha'] ?? ''));
 
-        if (
-            $isTurnstileEnabled && ($turnstileResponse === '' || $turnstileResponse === '0' ||
-                !$this->turnstileHttpClient->verifyResponse($turnstileResponse))
-        ) {
-            throw new CustomUserMessageAuthenticationException(
-                $this->translator->trans('invalidCAPTCHAValidation', [], 'Security')
-            );
+            if ($captchaToken === '') {
+                $captchaToken = (string) (
+                    $request->request->get('cf-turnstile-response')
+                    ?? $request->request->get('g-recaptcha-response')
+                    ?? ''
+                );
+            }
+
+            $validation = $this->captchaValidator->validate($captchaToken, $request->getClientIp());
+
+            if (!$validation['success']) {
+                throw new CustomUserMessageAuthenticationException(
+                    $this->translator->trans('invalidCAPTCHAValidation', [], 'Security')
+                );
+            }
         }
 
         // Store last username/identifier in session

@@ -7,16 +7,13 @@ use App\Enum\CaptchaProviderEnum;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
-use App\Service\EncryptionService;
-use Exception;
-use Karser\Recaptcha3Bundle\Form\Recaptcha3Type;
-use Karser\Recaptcha3Bundle\Validator\Constraints\Recaptcha3;
+use App\Service\Captcha\CaptchaValidator;
 use libphonenumber\PhoneNumberFormat;
 use Misd\PhoneNumberBundle\Form\Type\PhoneNumberType;
-use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -30,7 +27,7 @@ class LoginType extends AbstractType
 {
     public function __construct(
         private readonly SettingRepository $settingRepository,
-        private readonly EncryptionService $encryptionService,
+        private readonly CaptchaValidator $captchaValidator,
         private readonly TranslatorInterface $translator
     ) {
     }
@@ -46,10 +43,6 @@ class LoginType extends AbstractType
         $regionInputs = $regionsSetting && $regionsSetting->getValue()
             ? array_map(trim(...), explode(',', $regionsSetting->getValue()))
             : ['PT', 'US', 'GB']; // fallback default
-
-        $captchaProvider = $this->settingRepository->findOneBy(
-            ['name' => SettingName::CAPTCHA_PROVIDER->value]
-        )?->getValue();
 
         $emailMethod = $this->settingRepository->findOneBy(
             ['name' => SettingName::AUTH_METHOD_REGISTER_ENABLED->value]
@@ -113,37 +106,11 @@ class LoginType extends AbstractType
             'mapped' => false,
         ]);
 
-        // Dynamically append selected CAPTCHA provider
-        if ($captchaProvider === CaptchaProviderEnum::TURNSTILE->value) {
-            $builder->add('captcha', TurnstileType::class, [
-                'attr' => [
-                    'data-action' => 'login',
-                    'data-theme' => 'light',
-                    'data-language' => $this->translator->getLocale(),
-                ],
-                'label' => false,
-            ]);
-        } elseif ($captchaProvider === CaptchaProviderEnum::RECAPTCHA3->value) {
-            // Fetch and decrypt reCAPTCHA key from Setting table
-            $recaptchaKeyRaw = $this->settingRepository->findOneBy(
-                ['name' => SettingName::RECAPTCHA3_KEY->value]
-            )?->getValue();
-
-            $siteKey = '';
-            if ($recaptchaKeyRaw) {
-                try {
-                    $siteKey = $this->encryptionService->decrypt($recaptchaKeyRaw);
-                } catch (Exception) {
-                    $siteKey = $recaptchaKeyRaw;
-                }
-            }
-
-            $builder->add('captcha', Recaptcha3Type::class, [
-                'site_key' => $siteKey,
-                'constraints' => new Recaptcha3([
-                    'message' => $this->translator->trans('suspiciousTraffic', [], 'LoginFormType'),
-                ]),
-                'action_name' => 'login',
+        // Add hidden CAPTCHA input if provider is active
+        if ($this->captchaValidator->getActiveProvider() !== CaptchaProviderEnum::OFF->value) {
+            $builder->add('captcha', HiddenType::class, [
+                'required' => false,
+                'mapped' => false,
             ]);
         }
     }

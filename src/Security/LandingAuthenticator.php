@@ -4,6 +4,7 @@ namespace App\Security;
 
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\CaptchaProviderEnum;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\SessionStatus;
@@ -12,11 +13,11 @@ use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
+use App\Service\Captcha\CaptchaValidator;
 use App\Service\TwoFAService;
 use libphonenumber\NumberParseException;
 use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
-use PixelOpen\CloudflareTurnstileBundle\Http\CloudflareTurnstileHttpClient;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -41,7 +42,7 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
     public function __construct(
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly SettingRepository $settingRepository,
-        private readonly CloudflareTurnstileHttpClient $turnstileHttpClient,
+        private readonly CaptchaValidator $captchaValidator,
         private readonly UserRepository $userRepository,
         private readonly TwoFAService $twoFAService,
         private readonly TranslatorInterface $translator,
@@ -64,6 +65,7 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
 
         $request->getSession()->set('last_login_method', $loginMethod);
         $request->getSession()->remove(SessionStatus::AUTHENTICATED_VIA_UUID_ONLY->value);
+
         if ($loginMethod === UserProvider::EMAIL->value) {
             $identifier = $formData['login']['email'] ?? null;
 
@@ -106,21 +108,25 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
             throw new CustomUserMessageAuthenticationException('Missing user identifier.');
         }
 
-        // Turnstile CAPTCHA check
-        $turnstileResponse = $request->request->get('cf-turnstile-response');
-        $turnstileResponse = is_string($turnstileResponse) ? $turnstileResponse : '';
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => SettingName::TURNSTILE_CHECKER->value]);
-        $isTurnstileEnabled = $turnstileSetting && $turnstileSetting->getValue() === OperationMode::ON->value;
-        if (
-            $isTurnstileEnabled &&
-            ($turnstileResponse === '' ||
-                $turnstileResponse === '0' || !$this->turnstileHttpClient->verifyResponse(
-                    $turnstileResponse
-                ))
-        ) {
-            throw new CustomUserMessageAuthenticationException(
-                $this->translator->trans('invalidCAPTCHAValidation', [], 'Security')
-            );
+        // CAPTCHA Validation using unified CaptchaValidator service
+        if ($this->captchaValidator->getActiveProvider() !== CaptchaProviderEnum::OFF->value) {
+            $captchaToken = trim((string)($loginData['captcha'] ?? ''));
+
+            if ($captchaToken === '') {
+                $captchaToken = (string)(
+                    $request->request->get('cf-turnstile-response')
+                    ?? $request->request->get('g-recaptcha-response')
+                    ?? ''
+                );
+            }
+
+            $validation = $this->captchaValidator->validate($captchaToken, $request->getClientIp());
+
+            if (!$validation['success']) {
+                throw new CustomUserMessageAuthenticationException(
+                    $this->translator->trans('invalidCAPTCHAValidation', [], 'Security')
+                );
+            }
         }
 
         $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $identifier);
@@ -216,7 +222,6 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
                     );
 
                     if ($session instanceof Session) {
-                        // Determine if user is SMS based on UserExternalAuth provider_id or missing email
                         $firstAuth = $user->getUserExternalAuths()->first();
                         $isSmsUser = ($firstAuth && $firstAuth->getProviderId() === UserProvider::PHONE_NUMBER->value)
                             || ($user->getPhoneNumber() && !$user->getEmail());
@@ -248,7 +253,7 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
             }
         }
 
-        // 4. Default landing redirect for verified users without 2FA
+        // Default landing redirect for verified users without 2FA
         if ($targetPath = $this->getTargetPath($session, $firewallName)) {
             return new RedirectResponse($targetPath);
         }

@@ -73,9 +73,6 @@
             "config/routes/easyadmin.yaml"
         ]
     },
-    "karser/karser-recaptcha3-bundle": {
-        "version": "v0.3.0"
-    },
     "knpuniversity/oauth2-client-bundle": {
         "version": "2.15",
         "recipe": {
@@ -149,18 +146,6 @@
             "bin/phpunit",
             "phpunit.xml.dist",
             "tests/bootstrap.php"
-        ]
-    },
-    "pixelopen/cloudflare-turnstile-bundle": {
-        "version": "0.3",
-        "recipe": {
-            "repo": "github.com/symfony/recipes-contrib",
-            "branch": "main",
-            "version": "0.1",
-            "ref": "6173b9aff0056dd99ca70a2caa940cc7bcac0b4b"
-        },
-        "files": [
-            "config/packages/pixel_open_cloudflare_turnstile.yaml"
         ]
     },
     "sentry/sentry-symfony": {
