@@ -10,8 +10,8 @@ use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
+use App\Enum\CaptchaProviderEnum;
 use App\Enum\EventMetadataKeysType;
-use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Enum\SMSResponse;
 use App\Enum\UserProvider;
@@ -19,7 +19,7 @@ use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\AuthAPIResponseService;
-use App\Service\CaptchaValidator;
+use App\Service\Captcha\CaptchaValidator;
 use App\Service\EmailGenerator;
 use App\Service\EventActions;
 use App\Service\HashArgon2idService;
@@ -37,7 +37,6 @@ use Exception;
 use JsonException;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use OneLogin\Saml2\Auth;
-use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -90,32 +89,9 @@ class AuthController extends AbstractController
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse();
         }
 
-        $turnstileSetting = $this->settingRepository->findOneBy([
-            'name' => SettingName::TURNSTILE_CHECKER->value
-        ]);
-        if (!$turnstileSetting) {
-            throw new RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
-        }
-
-        if ($turnstileSetting->getValue() === OperationMode::ON->value) {
-            if (!isset($data['turnstile_token'])) {
-                return new BaseResponse(
-                    400,
-                    null,
-                    'CAPTCHA validation failed'
-                )->toResponse();
-            }
-
-            $turnstileValidation = $this->captchaValidator->validate(
-                $data['turnstile_token'],
-                $request->getClientIp()
-            );
-
-            if (!$turnstileValidation['success']) {
-                $errorMessage = $turnstileValidation['error'] ?? 'CAPTCHA validation failed';
-
-                return new BaseResponse(400, null, $errorMessage)->toResponse();
-            }
+        // Single call handles checking provider status, token extraction, and response formatting
+        if ($captchaError = $this->captchaValidator->validateApiPayload($data, $request->getClientIp())) {
+            return $captchaError->toResponse();
         }
 
         $errors = [];

@@ -6,20 +6,16 @@ use App\Api\V3\BaseResponse;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
-use App\Enum\OperationMode;
-use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
-use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
-use App\Service\CaptchaValidator;
+use App\Service\Captcha\CaptchaValidator;
 use App\Service\EventActions;
 use App\Service\TOTPService;
 use App\Service\TwoFAService;
 use App\Service\UserStatusChecker;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Exception\JsonException;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -38,7 +34,6 @@ class TwoFAController extends AbstractController
         private readonly TOTPService $TOTPService,
         private readonly EntityManagerInterface $entityManager,
         private readonly EventActions $eventActions,
-        private readonly SettingRepository $settingRepository,
         private readonly CaptchaValidator $captchaValidator,
         private readonly UserRepository $userRepository,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
@@ -67,35 +62,12 @@ class TwoFAController extends AbstractController
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException) {
-            return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); # Bad Request Response
+            return new BaseResponse(400, null, 'Invalid JSON format')->toResponse();
         }
 
-        $turnstileSetting = $this->settingRepository->findOneBy([
-            'name' => SettingName::TURNSTILE_CHECKER->value
-        ])->getValue();
-        if (!$turnstileSetting) {
-            throw new RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
-        }
-
-        if ($turnstileSetting === OperationMode::ON->value) {
-            if (!isset($data['turnstile_token'])) {
-                return new BaseResponse(
-                    400,
-                    null,
-                    'CAPTCHA validation failed'
-                )->toResponse(); # Bad Request Response
-            }
-
-            $turnstileValidation = $this->captchaValidator->validate(
-                $data['turnstile_token'],
-                $request->getClientIp()
-            );
-
-            if (!$turnstileValidation['success']) {
-                $errorMessage = $turnstileValidation['error'] ?? 'CAPTCHA validation failed';
-
-                return new BaseResponse(400, null, $errorMessage)->toResponse();
-            }
+        // Single call handles checking provider status, token extraction, and response formatting
+        if ($captchaError = $this->captchaValidator->validateApiPayload($data, $request->getClientIp())) {
+            return $captchaError->toResponse();
         }
 
         $errors = [];
@@ -115,16 +87,15 @@ class TwoFAController extends AbstractController
             )->toResponse();
         }
 
-        // Check if user exists are valid
+        // Check if user exists and is valid
         $user = $this->userRepository->findOneBy(['uuid' => $data['uuid']]);
 
         if (!$user instanceof User) {
             return new BaseResponse(401, null, 'Invalid credentials')->toResponse();
-            // Bad Request Response
         }
 
         if (!$this->userPasswordHasher->isPasswordValid($user, $data['password'])) {
-            return new BaseResponse(401, null, 'Invalid credentials')->toResponse(); # Unauthorized Request Response
+            return new BaseResponse(401, null, 'Invalid credentials')->toResponse();
         }
 
         $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
@@ -132,7 +103,7 @@ class TwoFAController extends AbstractController
             return $statusCheckerResponse->toResponse();
         }
 
-        // Only manually update the 2fa totp if the user checks it
+        // Generate TOTP secret
         if ($type === 'totp') {
             $secret = $this->TOTPService->generateSecret();
             $user->setTwoFAsecret($secret);
@@ -156,12 +127,12 @@ class TwoFAController extends AbstractController
                 200,
                 [
                     'message' => 'Two Factor TOTP Secret generated successfully',
-                    'totpId' => $user->getTwoFAsecret()
+                    'totpId' => $user->getTwoFAsecret(),
                 ]
             )->toResponse();
         }
 
-        // Auto-detects if the user did select email||sms
+        // Generate Email/SMS 2FA code
         $this->twoFAService->generate2FACode(
             $user,
             $request->getClientIp(),
@@ -169,7 +140,7 @@ class TwoFAController extends AbstractController
             AnalyticalEventType::TWO_FA_CODE_ENABLE->value
         );
 
-        $provider = $user->getUserExternalAuths()[0]->getProvider();
+        $provider = $user->getUserExternalAuths()[0]?->getProvider();
 
         if ($provider === UserProvider::SAML->value) {
             $message = 'Two Factor Code sent to: ' . $user->getUserExternalAuths()[0]->getProviderId();
