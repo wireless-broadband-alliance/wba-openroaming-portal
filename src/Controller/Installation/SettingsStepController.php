@@ -14,7 +14,7 @@ use App\Enum\SettingsConfigType;
 use App\Exception\EncryptionException;
 use App\Form\SettingsType;
 use App\Security\Voter\UserAuthenticationVoter;
-use App\Service\CaptchaValidator;
+use App\Service\Captcha\CaptchaValidator;
 use App\Service\DatabaseConnectionService;
 use App\Service\EncryptionService;
 use App\Service\EventActions;
