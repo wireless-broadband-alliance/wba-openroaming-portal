@@ -50,7 +50,6 @@ class ResetPlatformStatusSettingsCommand extends Command
         $settings = [
             ['name' => SettingName::PLATFORM_MODE->value, 'value' => 'Demo'],
             ['name' => SettingName::USER_VERIFICATION->value, 'value' => 'OFF'],
-            ['name' => SettingName::TURNSTILE_CHECKER->value, 'value' => 'OFF'],
             ['name' => SettingName::API_STATUS->value, 'value' => 'OFF'],
             ['name' => SettingName::EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS->value, 'value' => '60'],
             ['name' => SettingName::EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS->value, 'value' => '30'],

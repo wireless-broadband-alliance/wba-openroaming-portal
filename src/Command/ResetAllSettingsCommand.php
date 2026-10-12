@@ -67,8 +67,12 @@ class ResetAllSettingsCommand extends Command
 
             ['name' => SettingName::PLATFORM_MODE->value, 'value' => 'Demo'],
             ['name' => SettingName::USER_VERIFICATION->value, 'value' => 'OFF'],
-            ['name' => SettingName::TURNSTILE_CHECKER->value, 'value' => 'OFF'],
             ['name' => SettingName::API_STATUS->value, 'value' => 'OFF'],
+            ['name' => SettingName::CAPTCHA_PROVIDER->value, 'value' => 'OFF'],
+            ['name' => SettingName::TURNSTILE_KEY->value, 'value' => ''],
+            ['name' => SettingName::TURNSTILE_SECRET->value, 'value' => ''],
+            ['name' => SettingName::RECAPTCHA3_KEY->value, 'value' => ''],
+            ['name' => SettingName::RECAPTCHA3_SECRET->value, 'value' => ''],
 
             ['name' => SettingName::TWO_FACTOR_AUTH_STATUS->value, 'value' => 'NOT_ENFORCED'],
             ['name' => SettingName::TWO_FACTOR_AUTH_APP_LABEL->value, 'value' => 'OpenRoaming'],
