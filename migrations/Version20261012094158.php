@@ -12,70 +12,90 @@ final class Version20261012094158 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return 'Renames TURNSTILE_CHECKER to CAPTCHA_PROVIDER and inserts RECAPTCHA3 Settings.';
+        return 'Renames TURNSTILE_CHECKER to CAPTCHA_PROVIDER and inserts RECAPTCHA3 settings.';
     }
 
     public function up(Schema $schema): void
     {
         // Rename TURNSTILE_CHECKER to CAPTCHA_PROVIDER if it exists
         $this->addSql(
-            sprintf(
-                "UPDATE Setting SET name = '%s' WHERE name = 'TURNSTILE_CHECKER'",
-                SettingName::CAPTCHA_PROVIDER->value
-            )
+            'UPDATE Setting SET name = :new_name WHERE name = :old_name',
+            [
+                'new_name' => SettingName::CAPTCHA_PROVIDER->value,
+                'old_name' => 'TURNSTILE_CHECKER',
+            ]
         );
 
         // Migrate legacy 'ON' value to 'TURNSTILE'
         $this->addSql(
-            sprintf(
-                "UPDATE Setting SET value = 'TURNSTILE' WHERE name = '%s' AND value = 'ON'",
-                SettingName::CAPTCHA_PROVIDER->value
-            )
+            'UPDATE Setting SET value = :new_val WHERE name = :name AND value = :old_val',
+            [
+                'new_val' => 'TURNSTILE',
+                'name' => SettingName::CAPTCHA_PROVIDER->value,
+                'old_val' => 'ON',
+            ]
         );
 
         // Ensure CAPTCHA_PROVIDER row exists (for fresh installations)
         $this->addSql(
-            sprintf(
-                "INSERT IGNORE INTO Setting (name, value) VALUES ('%s', 'OFF')",
-                SettingName::CAPTCHA_PROVIDER->value
-            )
+            'INSERT INTO Setting (name, value)
+             SELECT :name, :val
+             WHERE NOT EXISTS (SELECT 1 FROM Setting WHERE name = :name)',
+            [
+                'name' => SettingName::CAPTCHA_PROVIDER->value,
+                'val' => 'OFF',
+            ]
         );
 
-        // Insert reCAPTCHA v3 keys
+        // Insert RECAPTCHA3_KEY individually
         $this->addSql(
-            sprintf(
-                "INSERT IGNORE INTO Setting (name, value) VALUES ('%s', NULL), ('%s', NULL)",
-                SettingName::RECAPTCHA3_KEY->value,
-                SettingName::RECAPTCHA3_SECRET->value
-            )
+            'INSERT INTO Setting (name, value)
+             SELECT :name, NULL
+             WHERE NOT EXISTS (SELECT 1 FROM Setting WHERE name = :name)',
+            [
+                'name' => SettingName::RECAPTCHA3_KEY->value,
+            ]
+        );
+
+        // Insert RECAPTCHA3_SECRET individually
+        $this->addSql(
+            'INSERT INTO Setting (name, value)
+             SELECT :name, NULL
+             WHERE NOT EXISTS (SELECT 1 FROM Setting WHERE name = :name)',
+            [
+                'name' => SettingName::RECAPTCHA3_SECRET->value,
+            ]
         );
     }
 
     public function down(Schema $schema): void
     {
-        // Convert 'TURNSTILE' value back to 'ON'
+        // Revert 'TURNSTILE' value back to 'ON'
         $this->addSql(
-            sprintf(
-                "UPDATE Setting SET value = 'ON' WHERE name = '%s' AND value = 'TURNSTILE'",
-                SettingName::CAPTCHA_PROVIDER->value
-            )
+            'UPDATE Setting SET value = :old_val WHERE name = :name AND value = :new_val',
+            [
+                'old_val' => 'ON',
+                'name' => SettingName::CAPTCHA_PROVIDER->value,
+                'new_val' => 'TURNSTILE',
+            ]
         );
 
         // Revert CAPTCHA_PROVIDER back to TURNSTILE_CHECKER
         $this->addSql(
-            sprintf(
-                "UPDATE Setting SET name = 'TURNSTILE_CHECKER' WHERE name = '%s'",
-                SettingName::CAPTCHA_PROVIDER->value
-            )
+            'UPDATE Setting SET name = :old_name WHERE name = :new_name',
+            [
+                'old_name' => 'TURNSTILE_CHECKER',
+                'new_name' => SettingName::CAPTCHA_PROVIDER->value,
+            ]
         );
 
-        // Delete reCAPTCHA v3 key Settings
+        // Delete reCAPTCHA v3 settings
         $this->addSql(
-            sprintf(
-                "DELETE FROM Setting WHERE name IN ('%s', '%s')",
-                SettingName::RECAPTCHA3_KEY->value,
-                SettingName::RECAPTCHA3_SECRET->value
-            )
+            'DELETE FROM Setting WHERE name = :key_name OR name = :secret_name',
+            [
+                'key_name' => SettingName::RECAPTCHA3_KEY->value,
+                'secret_name' => SettingName::RECAPTCHA3_SECRET->value,
+            ]
         );
     }
 }
