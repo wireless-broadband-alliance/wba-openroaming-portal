@@ -15,8 +15,6 @@
 11. [Release-Specific Notes: Version 1.7.x](#release-specific-notes-version-17x)
 12. [Troubleshooting & Rollback](#troubleshooting--rollback)
 13. [Additional Resources](#additional-resources)
-14. [Troubleshooting & Rollback](#troubleshooting--rollback)
-15. [Additional Resources](#additional-resources)
 
 ---
 
@@ -116,7 +114,7 @@ Use this table to determine the exact upgrade steps based on your current versio
 | 1.13.0          | 1.13.1         | No migration or actions required.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | 1.13.1          | 1.14.0         | Run `php bin/console doctrine:migrations:migrate`. Next, run `php bin/console app:cra:migrate-all --yes` to execute all CRA data encryption steps at once (including Installation Progress data). Then complete the mandatory **Security.txt Configuration** step in the Installation Wizard. **Breaking:** API v1 and v2 are removed (use `/api/v3`) and the JWT TTL is now 15 minutes. Review your `.env` and Docker Compose setup (see [Release-Specific Notes: Version 1.14.0](#release-specific-notes-version-1140)). Perform these actions while the portal is **offline or restricted**. |
 | 1.14.0          | 1.14.1         | Patch release — no database migrations or configuration changes required. Fixes Windows Wi-Fi profile XML signing failures (`xmlsec1`).                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| 1.14.1          | 1.14.2         | Patch release — no database migrations or configuration changes required. Fixes Windows Wi-Fi profile XML signing failures (`xmlsec1`) and formats Root CA SHA-1 hashes into space-separated byte pairs to satisfy Windows EAPHost schema validation during profile provisioning.                                                                                                                                                                                                                                                                                                               |
+| 1.14.1          | 1.14.2         | Patch release — no database migrations or configuration changes required. Fixes Root CA SHA-1 hash formatting for Windows EAPHost schema validation, installation wizard `.env` sync, OAuth controller wiring, API user registration flows, and password reset token verification logic.                                                                                                                                                                                                                                                                                                        |
 
 ---
 
@@ -197,38 +195,56 @@ docker compose logs -f web
 
 **Scenario**: Your current version is **1.14.1** (or earlier 1.14.x), and you want to upgrade to **1.14.2**.
 
-* **Patch Release (No Schema/Database Migrations):**  
-  This maintenance release resolves issues with Windows profile XML signing (`xmlsec1`) and Windows Wi-Fi provisioning
-  schema validation failures caused by raw Root CA SHA-1 thumbprints (`template.xml` / `template_win11.xml`).
+### 1. Patch Release (No Schema/Database Migrations)
 
-* **What Was Fixed:**
-    * **Windows EAPHost Root CA Hash Formatting:** Resolved an issue where continuous 40-character SHA-1 thumbprints
-      extracted by the certificate wizard caused Windows Wi-Fi provisioning (`ms-settings:wifi-provisioning`) to fail
-      with an "Unexpected error" ("Erro inesperado"). SHA-1 hashes are now automatically sanitized into 20
-      space-separated 2-character hex pairs (e.g., `ca bd 2a 79...`) to comply with Windows EAPHost XML schema
-      requirements.
-    * **XML Profile Signing (`xmlsec1`):** Fixed missing input/output parameters and undefined file path variables
-      passed to the Symfony `Process` execution pipeline.
-    * **Signature Algorithm Matching:** Added dynamic OpenSSL private key inspection to automatically match XML
-      `<SignatureMethod>` and `<DigestMethod>` URIs (`rsa-sha256`) when using RSA certificates.
-    * **Key Resolution:** Introduced `--lax-key-search` during `xmlsec1` execution to ensure smooth verification against
-      provided PEM certificate chains.
+This maintenance release consolidates fixes for Windows Wi-Fi provisioning and XML profile signing (`xmlsec1`), OAuth
+controller service wiring, API user registration flows, password reset token verification, installation wizard `.env`
+synchronization, and administrative settings forms. No manual data migrations, database updates, or configuration
+changes are required.
 
-* **Upgrade Steps:**
-    1. Pull the latest code:
-       ```bash
-       git pull
-       ```
-    2. Restart the containers:
-       ```bash
-       docker compose up -d
-       ```
-    3. Clear Symfony cache:
-       ```bash
-       docker compose exec web php bin/console cache:clear
-       ```
+### 2. What Was Fixed
 
-* **No manual data migrations, database updates, or configuration changes are required.**
+* **Windows EAPHost Root CA Hash Formatting:** Resolved an issue where continuous 40-character SHA-1 thumbprints
+  extracted by the certificate wizard caused Windows Wi-Fi provisioning (`ms-settings:wifi-provisioning`) to fail with
+  an "Unexpected error" ("Erro inesperado"). SHA-1 hashes are now automatically sanitized into 20 space-separated
+  2-character hex pairs (e.g., `ca bd 2a 79...`) to comply with Windows EAPHost XML schema requirements.
+
+* **XML Profile Signing (`xmlsec1`):** Fixed missing input/output parameters, undefined path variables, and added
+  dynamic version checking so `--lax-key-search` is only passed on supported `xmlsec1` builds (1.3.0+), preventing
+  command failures on older server environments.
+
+* **Signature Algorithm Matching:** Added dynamic OpenSSL private key inspection to automatically match XML
+  `<SignatureMethod>` and `<DigestMethod>` URIs (`rsa-sha256`) when using RSA certificates.
+
+* **OAuth & Controller Wiring:** Fixed invalid dependency injection service wiring for `GoogleController` and
+  `MicrosoftController` in `services.yaml` that caused `TypeError` 500 errors. Fixed external provider onboarding and
+  payload validation in API registration endpoints.
+
+* **Password Reset & Token Verification:** Fixed password reset emails containing hashed tokens instead of plain-text
+  verification codes. Corrected API validation logic and `/forgot-password/link` verification to properly compare raw
+  incoming tokens against Argon2id hashes stored in the database.
+
+* **Installation Wizard & `.env` Sync:** Fixed a bug where `.env` settings were not updating database values following
+  post-login listener verification during active installation flows. Updated settings scripts to safely quote and escape
+  special shell characters (such as `!` and `$`) in secrets/passphrases.
+
+* **PRR Settings Input Handling:** Fixed a `TypeError` when submitting PRR settings in Link mode or with empty text
+  fields by ensuring empty submissions are converted safely before passing to the HTML sanitizer.
+
+### 3. Upgrade Steps
+
+1. Pull the latest code:
+   ```bash
+   git pull
+   ```
+2. Restart the containers:
+   ```bash
+   docker compose up -d
+   ```
+3. Clear Symfony cache:
+   ```bash
+   docker compose exec web php bin/console cache:clear
+   ```
 
 ---
 
@@ -236,33 +252,35 @@ docker compose logs -f web
 
 **Scenario**: Your current version is **1.14.0**, and you want to upgrade to **1.14.1**.
 
-* **Patch Release (No Schema/Database Migrations):**
-  This maintenance release resolves an issue where `xmlsec1` failed with `KEY-NOT-FOUND` or process errors when
-  attempting to sign Windows profiles (`template.xml` / `template_win11.xml`).
+### 1. Patch Release (No Schema/Database Migrations)
 
-* **What Was Fixed:**
-    * Fixed missing input/output parameters and undefined file path variables passed to the Symfony `Process` execution
-      pipeline.
-    * Added dynamic OpenSSL private key inspection to automatically match XML `<SignatureMethod>` and `<DigestMethod>`
-      URIs (`rsa-sha256`) when using RSA certificates.
-    * Introduced `--lax-key-search` during `xmlsec1` execution to ensure smooth verification against provided PEM
-      certificate chains.
+This maintenance release resolves an issue where `xmlsec1` failed with `KEY-NOT-FOUND` or process errors when
+attempting to sign Windows profiles (`template.xml` / `template_win11.xml`). No manual data migrations, database
+updates, or configuration changes are required.
 
-* **Upgrade Steps:**
-    1. Pull the latest code:
-       ```bash
-       git pull
-       ```
-    2. Restart the containers:
-       ```bash
-       docker compose up -d
-       ```
-    3. Clear Symfony cache:
-       ```bash
-       docker compose exec web php bin/console cache:clear
-       ```
+### 2. What Was Fixed
 
-* **No manual data migrations, database updates, or configuration changes are required.**
+* Fixed missing input/output parameters and undefined file path variables passed to the Symfony `Process` execution
+  pipeline.
+* Added dynamic OpenSSL private key inspection to automatically match XML `<SignatureMethod>` and `<DigestMethod>`
+  URIs (`rsa-sha256`) when using RSA certificates.
+* Introduced `--lax-key-search` during `xmlsec1` execution to ensure smooth verification against provided PEM
+  certificate chains.
+
+### 3. Upgrade Steps
+
+1. Pull the latest code:
+   ```bash
+   git pull
+   ```
+2. Restart the containers:
+   ```bash
+   docker compose up -d
+   ```
+3. Clear Symfony cache:
+   ```bash
+   docker compose exec web php bin/console cache:clear
+   ```
 
 ---
 
@@ -423,17 +441,19 @@ php bin/console clear:expired-user-data --yes
 
 **Scenario**: Your current version is **1.12.1**, and you want to upgrade to **1.13.0**.
 
-* **New Entities & Required Migrations:**
-  This release introduces the Coverage Map feature (`AccessPoint`, `Network` entities) and the new multi-provider
-  `SMSProvider`/`SMSProviderParam` management system. You must run:
+### 1. New Entities & Required Migrations
+
+This release introduces the Coverage Map feature (`AccessPoint`, `Network` entities) and the new multi-provider
+`SMSProvider`/`SMSProviderParam` management system. You must run:
 
 ```bash
 php bin/console doctrine:migrations:migrate
 ```
 
-* **Required One-Time Action — SMS Credentials Migration:**
-  After the schema migration above, run the following command **once** to migrate your existing BudgetSMS API
-  credentials from the `Settings` table into the new `SMSProvider` system:
+### 2. Required One-Time Action — SMS Credentials Migration
+
+After the schema migration above, run the following command **once** to migrate your existing BudgetSMS API
+credentials from the `Settings` table into the new `SMSProvider` system:
 
 ```bash
 php bin/console prepare:multiSMSMigration
@@ -443,57 +463,60 @@ php bin/console prepare:multiSMSMigration
 > migration is complete, SMS provider credentials are managed exclusively through the new SMS Provider management page
 > in the dashboard.
 
-* **No further manual steps** are required for the Coverage Map, FreeRADIUS Statistics optimization, user data export,
+### 3. Post-Upgrade Notes
+
+* No further manual steps are required for the Coverage Map, FreeRADIUS Statistics optimization, user data export,
   or TOTP/2FA changes in this release — these are available immediately after the migration completes.
-* **Breaking Changes:**
-  Please always review the [CHANGELOG.md](../CHANGELOG.md) for detailed information.
+* Please always review the [CHANGELOG.md](../CHANGELOG.md) for detailed information on breaking changes.
 
 ---
 
 ## Release-Specific Notes: Version 1.8.1
 
-**Scenario**: Your current version is **1.8.0,** and you want to upgrade to **1.8.1**.
+**Scenario**: Your current version is **1.8.0**, and you want to upgrade to **1.8.1**.
 
-* **Removed Fields & Database Optimizations:**
-  In version **1.8.1**, the field `verificationCode` was removed as part of optimizations to improve account
-  verification and 2FA configuration.
+### 1. Removed Fields & Database Optimizations
+
+In version **1.8.1**, the field `verificationCode` was removed as part of optimizations to improve account
+verification and 2FA configuration.
 
 > **Important:** If upgrading from **1.8.0** or lower and your database still contains the `verificationCode` field,
 > ensure any necessary data migrations are handled before or during the upgrade.
 
-* **Required Migrations:**
-  To apply the database optimizations and update the `User` entity schema, you must run:
+### 2. Required Migrations
+
+To apply the database optimizations and update the `User` entity schema, you must run:
 
 ```bash
 php bin/console doctrine:migrations:migrate
 ```
 
-* **Breaking Changes:**
-  Please always review the [CHANGELOG.md](../CHANGELOG.md) for detailed information.
+> **Breaking Changes:**
+> Please always review the [CHANGELOG.md](../CHANGELOG.md) for detailed information.
 
 ---
 
 ## Release-Specific Notes: Version 1.7.x
 
-**Scenario**: Your current version is **1.5,** and you want to upgrade to **1.7.x**.
+**Scenario**: Your current version is **1.5**, and you want to upgrade to **1.7.x**.
 
-1. **Create a Full Backup**
-   Backup all critical data:
+### 1. Create a Full Backup
+
+Backup all critical data before proceeding:
 
 * Database
 * Configuration files
 * User data
 
-This allows for rollback if issues arise.
+### 2. Upgrade to Version 1.6
 
-2. **Upgrade to Version 1.6**
-
-* If your current version is **1.5** or lower, first upgrade to **1.6**.
+If your current version is **1.5** or lower, first upgrade to **1.6**.
 
 > **Important:** Skipping this step can break the upgrade path.
 
-3. **Run Pre-Upgrade Commands in Version 1.6**
-   Execute the following command in your terminal after upgrading to **1.6**:
+### 3. Run Pre-Upgrade Commands in Version 1.6
+
+Execute the following command after upgrading to **1.6**:
 
 ```bash
 php bin/console reset:allocate-providers
@@ -503,27 +526,28 @@ php bin/console reset:allocate-providers
 
 > **Note:** This command is removed in version **1.7.x**, so it must be run in **1.6**.
 
-4. **Proceed to Version 1.7.x**
-   After completing the steps above, **upgrade to version 1.7.x** following the usual procedure.
+### 4. Proceed to Version 1.7.x
+
+After completing the steps above, upgrade to version **1.7.x** following the usual procedure.
 
 ---
 
 ## Troubleshooting & Rollback
 
-| Issue                                                                          | Cause                                                                                          | Solution                                                                                                                                                    |
-|--------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Errors running migrations                                                      | Invalid or old `Event` records                                                                 | Run `php bin/console clear:eventEntity` to clean up.                                                                                                        |
-| Missing JWT keypair                                                            | Skipped step during 1.4.0                                                                      | Run `php bin/console lexik:jwt:generate-keypair`.                                                                                                           |
-| `reset:allocate-providers` missing                                             | Skipped upgrade to 1.6                                                                         | Upgrade to 1.6 and then run the command.                                                                                                                    |
-| Schema mismatch                                                                | Schema updates not applied                                                                     | Run `php bin/console doctrine:schema:update --force`.                                                                                                       |
-| Cache issues                                                                   | Stale or old cache files                                                                       | Run `php bin/console cache:clear`.                                                                                                                          |
-| Installation Wizard shows up again after 1.14.0                                | The migration resets `InstallProgress` to `IN_PROGRESS`                                        | Expected behaviour. Complete the mandatory Security.txt Configuration step in the wizard.                                                                   |
-| API clients get 404 on `/api/v1` or `/api/v2`                                  | API v1 and v2 were removed in 1.14.0                                                           | Update the integration to `/api/v3`.                                                                                                                        |
-| API tokens stop working after about 15 minutes                                 | JWT TTL reduced to 900s in 1.14.0                                                              | Use the token refresh endpoints described in the API documentation.                                                                                         |
-| Users or admins cannot log in after the encryption                             | An encryption step failed or ran partially                                                     | Check the command output, then re-run `php bin/console app:cra:migrate-all --yes` (commands are safe to re-run).                                            |
-| Installation Wizard steps fail to decrypt after 1.14.0                         | `InstallationProgress` still holds plaintext values                                            | Run `php bin/console app:cra:encrypt-installation-progress` (or the full `app:cra:migrate-all --yes` suite).                                                |
-| `/metrics` returns 403 after 1.14.0                                            | `METRICS_ALLOWED_IPS` no longer defaults to `0.0.0.0/0`                                        | Add your monitoring hosts to `METRICS_ALLOWED_IPS` in `.env`.                                                                                               |
-| Windows Wi-Fi profile import fails with "Unexpected error" ("Erro inesperado") | Unformatted Root CA SHA-1 thumbprint without space delimiters violating Windows EAPHost schema | Upgrade to 1.14.2+ and re-save certificate settings to ensure the thumbprint is stored/formatted as 20 space-separated byte pairs (e.g., `ca bd 2a 79...`). |
+| Issue                                                                          | Cause                                                                 | Solution                                                                                                                                          |
+|--------------------------------------------------------------------------------|-----------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
+| Errors running migrations                                                      | Invalid or old `Event` records                                        | Run `php bin/console clear:eventEntity` to clean up.                                                                                              |
+| Missing JWT keypair                                                            | Skipped step during 1.4.0                                             | Run `php bin/console lexik:jwt:generate-keypair`.                                                                                                 |
+| `reset:allocate-providers` missing                                             | Skipped upgrade to 1.6                                                | Upgrade to 1.6 and then run the command.                                                                                                          |
+| Schema mismatch                                                                | Schema updates not applied                                            | Run `php bin/console doctrine:schema:update --force`.                                                                                             |
+| Cache issues                                                                   | Stale or old cache files                                              | Run `php bin/console cache:clear`.                                                                                                                |
+| Installation Wizard shows up again after 1.14.0                                | The migration resets `InstallProgress` to `IN_PROGRESS`               | Expected behaviour. Complete the mandatory Security.txt Configuration step in the wizard.                                                         |
+| API clients get 404 on `/api/v1` or `/api/v2`                                  | API v1 and v2 were removed in 1.14.0                                  | Update the integration to `/api/v3`.                                                                                                              |
+| API tokens stop working after about 15 minutes                                 | JWT TTL reduced to 900s in 1.14.0                                     | Use the token refresh endpoints described in the API documentation.                                                                               |
+| Users or admins cannot log in after the encryption                             | An encryption step failed or ran partially                            | Check the command output, then re-run `php bin/console app:cra:migrate-all --yes` (commands are safe to re-run).                                  |
+| Installation Wizard steps fail to decrypt after 1.14.0                         | `InstallationProgress` still holds plaintext values                   | Run `php bin/console app:cra:encrypt-installation-progress` (or the full `app:cra:migrate-all --yes` suite).                                      |
+| `/metrics` returns 403 after 1.14.0                                            | `METRICS_ALLOWED_IPS` no longer defaults to `0.0.0.0/0`               | Add your monitoring hosts to `METRICS_ALLOWED_IPS` in `.env`.                                                                                     |
+| Windows Wi-Fi profile import fails with "Unexpected error" ("Erro inesperado") | Unformatted Root CA SHA-1 thumbprint violating Windows EAPHost schema | Upgrade to 1.14.2+ and re-save certificate settings to ensure the thumbprint is formatted as space-separated byte pairs (e.g., `ca bd 2a 79...`). |
 
 ### Rollback Procedure
 

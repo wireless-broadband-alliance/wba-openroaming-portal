@@ -59,12 +59,7 @@ readonly class InstallationService
     {
         $progress = $this->installationProgressRepository->getLast();
 
-        if ($progress instanceof InstallationProgress) {
-            // Mid-wizard/aborted rows hold pending values on purpose (getStep() compares them against .env)
-            if ($progress->getInstallationState() !== ProcessStatusType::COMPLETED) {
-                return $progress;
-            }
-        } else {
+        if (!$progress instanceof InstallationProgress) {
             $progress = new InstallationProgress();
             $progress->setInstallationState(ProcessStatusType::IN_PROGRESS);
             $progress->setCreatedAt(new DateTime());
@@ -72,54 +67,52 @@ readonly class InstallationService
 
         $progress->setUpdatedAt(new DateTime());
 
-        // Each block checks "is it missing?" first, so no connection tests run for fields already filled
+        // Check OpenRoaming Database Connection
         $databaseUrl = $this->parameterBag->get('app.database_url');
         if (
             $databaseUrl &&
-            $progress->getDbOpenRoaming() === null &&
             $this->databaseConnectionService->testDatabaseConnection($databaseUrl)
         ) {
             $progress->setDbOpenRoaming($this->encryptionService->encrypt($databaseUrl));
         }
 
+        // Check FreeRADIUS Database Connection
         $databaseFreeRadiusUrl = $this->parameterBag->get('app.database_freeradius_url');
         if (
             $databaseFreeRadiusUrl &&
-            $progress->getDbFreeradius() === null &&
             $this->databaseConnectionService->testDatabaseConnection($databaseFreeRadiusUrl)
         ) {
             $progress->setDbFreeradius($this->encryptionService->encrypt($databaseFreeRadiusUrl));
         }
 
+        // Trusted Proxies
         $trustedProxies = $this->parameterBag->get('app.trusted_proxies');
-        if ($trustedProxies && $progress->getTrustedProxies() === null) {
+        if ($trustedProxies) {
             $progress->setTrustedProxies(array_map(trim(...), explode(',', $trustedProxies)));
         }
 
+        // Turnstile Key
         $turnstileKey = $this->parameterBag->get('app.turnstile_key');
-        if ($turnstileKey && $progress->getTurnstileKey() === null) {
+        if ($turnstileKey) {
             $progress->setTurnstileKey($this->encryptionService->encrypt($turnstileKey));
         }
 
+        // Turnstile Secret
         $turnstileSecret = $this->parameterBag->get('app.turnstile_secret');
         if (
             $turnstileSecret &&
-            $progress->getTurnstileSecret() === null &&
             $this->captchaValidator->validateCredentials($turnstileSecret)['success']
         ) {
             $progress->setTurnstileSecret($this->encryptionService->encrypt($turnstileSecret));
         }
 
+        // JWT Passphrase
         $jwtPassphrase = $this->parameterBag->get('app.jwt_passphrase');
-        if (
-            $jwtPassphrase &&
-            $progress->getJwtPassphrase() === null
-        ) {
+        if ($jwtPassphrase) {
             $progress->setJwtPassphrase($this->encryptionService->encrypt($jwtPassphrase));
         }
 
-        // Mark settings as completed if the installation is already COMPLETED
-        // or if settings were auto-discovered/populated from existing env parameters
+        // Mark settings as completed if already COMPLETED or if settings were auto-discovered
         if (
             $progress->getInstallationState() === ProcessStatusType::COMPLETED ||
             $progress->getTrustedProxies() !== null ||
@@ -130,6 +123,7 @@ readonly class InstallationService
             $progress->setIsSettingsCompleted(true);
         }
 
+        // Admin Email Confirmation
         if ($progress->getEmailAdmin() === null) {
             $superAdmin = $this->userRepository->findSuperAdmin();
             if ($superAdmin && $superAdmin->getEmail() !== DefaultUser::ADMIN->value) {
@@ -535,11 +529,14 @@ readonly class InstallationService
      */
     public function commandToDataBase(InstallationProgress $installationProgress): string
     {
-        return 'scripts/update-db-env.sh "' .
-            $this->decryptOrEmpty($installationProgress->getDbOpenRoaming()) .
-            '" "' .
-            $this->decryptOrEmpty($installationProgress->getDbFreeradius()) .
-            '"';
+        $dbOpenRoaming = $this->decryptOrEmpty($installationProgress->getDbOpenRoaming());
+        $dbFreeradius = $this->decryptOrEmpty($installationProgress->getDbFreeradius());
+
+        return sprintf(
+            "scripts/update-db-env.sh '%s' '%s'",
+            str_replace("'", "'\\''", $dbOpenRoaming),
+            str_replace("'", "'\\''", $dbFreeradius)
+        );
     }
 
     /**
@@ -550,26 +547,17 @@ readonly class InstallationService
         $trustedProxies = implode(',', $installationProgress->getTrustedProxies() ?? []);
         $turnstileKey = $this->decryptOrEmpty($installationProgress->getTurnstileKey());
         $turnstileSecret = $this->decryptOrEmpty($installationProgress->getTurnstileSecret());
+        $jwtPassphrase = $installationProgress->getJwtPassphrase() !== null
+            ? $this->encryptionService->decrypt($installationProgress->getJwtPassphrase())
+            : '';
 
-        if ($installationProgress->getJwtPassphrase() !== null) {
-            return 'scripts/update-settings-env.sh "' .
-                $this->encryptionService->decrypt($installationProgress->getJwtPassphrase()) .
-                '" "' .
-                $trustedProxies .
-                '" "' .
-                $turnstileKey .
-                '" "' .
-                $turnstileSecret .
-                '"';
-        }
-
-        return 'scripts/update-settings-env.sh "" "' .
-            $trustedProxies .
-            '" "' .
-            $turnstileKey .
-            '" "' .
-            $turnstileSecret .
-            '"';
+        return sprintf(
+            "scripts/update-settings-env.sh '%s' '%s' '%s' '%s'",
+            str_replace("'", "'\\''", $jwtPassphrase),
+            str_replace("'", "'\\''", $trustedProxies),
+            str_replace("'", "'\\''", $turnstileKey),
+            str_replace("'", "'\\''", $turnstileSecret)
+        );
     }
 
     public function saveSecurityTxtSettings(SecurityTxtDTO $dto, InstallationProgress $installationProgress): void

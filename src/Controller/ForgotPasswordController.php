@@ -425,7 +425,6 @@ class ForgotPasswordController extends AbstractController
         // Get the uuid and verification code from the URL query parameters
         $uuid = (string)$request->query->get('uuid');
         $twoFaCode = (string)$request->query->get('twoFaCode');
-
         $key = $request->getClientIp() . '_' . $uuid;
 
         $limiter = $this->verifyAccountLimiter->create($key);
@@ -470,7 +469,7 @@ class ForgotPasswordController extends AbstractController
             && $twoFaCode !== ''
             && $this->hashArgon2idService->verifyHash($twoFaCode, $user->getTwoFAcode());
 
-        if ($user->getUuid() === $uuid && $isCodeValid) {
+        if ($isCodeValid && $user->getUuid() === $uuid) {
             if (
                 $this->magicLinkService->linkCanBeUsed(
                     $user,
@@ -570,7 +569,7 @@ class ForgotPasswordController extends AbstractController
                 && $code !== ''
                 && $this->hashArgon2idService->verifyHash($code, $user->getTwoFAcode());
 
-            if ($user->getUuid() === $uuid && $isCodeValid) {
+            if ($isCodeValid && $user->getUuid() === $uuid) {
                 // Create a token manually for the user
                 $this->passwordResetRequestHandler->handle($user);
 
