@@ -112,13 +112,12 @@
             </div>
         {% endif %}
 
-        {# Turnstile Checker #}
-        {% if form.security is defined %}
+        {# CAPTCHA Protection (Turnstile / Google reCAPTCHA v3) #}
+        {% if form.captcha is defined %}
             <div class="ml-3 mt-5">
-                {{ form_label(form.security) }}
-                {{ form_widget(form.security) }}
+                {{ form_widget(form.captcha) }}
                 <div class="text-red-500">
-                    {{ form_errors(form.security) }}
+                    {{ form_errors(form.captcha) }}
                 </div>
             </div>
         {% endif %}

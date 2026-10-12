@@ -3,11 +3,14 @@
 namespace App\Form;
 
 use App\DTO\LoginChoiceDTO;
-use App\Entity\Setting;
-use App\Enum\OperationMode;
+use App\Enum\CaptchaProviderEnum;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
+use App\Service\EncryptionService;
+use Exception;
+use Karser\Recaptcha3Bundle\Form\Recaptcha3Type;
+use Karser\Recaptcha3Bundle\Validator\Constraints\Recaptcha3;
 use libphonenumber\PhoneNumberFormat;
 use Misd\PhoneNumberBundle\Form\Type\PhoneNumberType;
 use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
@@ -27,6 +30,7 @@ class LoginType extends AbstractType
 {
     public function __construct(
         private readonly SettingRepository $settingRepository,
+        private readonly EncryptionService $encryptionService,
         private readonly TranslatorInterface $translator
     ) {
     }
@@ -43,12 +47,14 @@ class LoginType extends AbstractType
             ? array_map(trim(...), explode(',', $regionsSetting->getValue()))
             : ['PT', 'US', 'GB']; // fallback default
 
-        $turnstileCheckerValue = $this->settingRepository->findOneBy(
-            ['name' => SettingName::TURNSTILE_CHECKER->value]
+        $captchaProvider = $this->settingRepository->findOneBy(
+            ['name' => SettingName::CAPTCHA_PROVIDER->value]
         )?->getValue();
+
         $emailMethod = $this->settingRepository->findOneBy(
             ['name' => SettingName::AUTH_METHOD_REGISTER_ENABLED->value]
         )?->getValue();
+
         $phoneNumberMethod = $this->settingRepository->findOneBy(
             ['name' => SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value]
         )?->getValue();
@@ -71,7 +77,7 @@ class LoginType extends AbstractType
             'required' => false,
             'label' => 'Email',
             'attr' => [
-                'placeholder' => $this->translator->trans('EnterEmail', [], 'LoginFormType'),
+                'placeholder' => $this->translator->trans('enterEmail', [], 'LoginFormType'),
             ],
         ]);
 
@@ -95,7 +101,7 @@ class LoginType extends AbstractType
                 'visible_label' => null,
                 'required' => true,
                 'attr' => [
-                    'placeholder' => $this->translator->trans('EnterPassword', [], 'LoginFormType'),
+                    'placeholder' => $this->translator->trans('enterPassword', [], 'LoginFormType'),
                     'data-live-ignore' => 'true',
                 ],
             ]);
@@ -107,14 +113,37 @@ class LoginType extends AbstractType
             'mapped' => false,
         ]);
 
-        if ($turnstileCheckerValue === OperationMode::ON->value) {
-            $builder->add('security', TurnstileType::class, [
+        // Dynamically append selected CAPTCHA provider
+        if ($captchaProvider === CaptchaProviderEnum::TURNSTILE->value) {
+            $builder->add('captcha', TurnstileType::class, [
                 'attr' => [
-                    'data-action' => 'contact',
+                    'data-action' => 'login',
                     'data-theme' => 'light',
                     'data-language' => $this->translator->getLocale(),
                 ],
-                'label' => false
+                'label' => false,
+            ]);
+        } elseif ($captchaProvider === CaptchaProviderEnum::RECAPTCHA3->value) {
+            // Fetch and decrypt reCAPTCHA key from Setting table
+            $recaptchaKeyRaw = $this->settingRepository->findOneBy(
+                ['name' => SettingName::RECAPTCHA3_KEY->value]
+            )?->getValue();
+
+            $siteKey = '';
+            if ($recaptchaKeyRaw) {
+                try {
+                    $siteKey = $this->encryptionService->decrypt($recaptchaKeyRaw);
+                } catch (Exception) {
+                    $siteKey = $recaptchaKeyRaw;
+                }
+            }
+
+            $builder->add('captcha', Recaptcha3Type::class, [
+                'site_key' => $siteKey,
+                'constraints' => new Recaptcha3([
+                    'message' => $this->translator->trans('suspiciousTraffic', [], 'LoginFormType'),
+                ]),
+                'action_name' => 'login',
             ]);
         }
     }

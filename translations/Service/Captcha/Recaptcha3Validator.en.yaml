@@ -1,0 +1,5 @@
+tokenEmpty: 'reCAPTCHA token is empty. Please complete the security verification.'
+secretNotConfigured: 'reCAPTCHA v3 secret key is not configured in the settings.'
+validationFailed: 'reCAPTCHA v3 validation failed. Please try again.'
+invalidSecretKey: 'Invalid reCAPTCHA v3 secret key.'
+credentialCheckFailed: 'Unable to verify reCAPTCHA v3 credentials due to a connection error.'

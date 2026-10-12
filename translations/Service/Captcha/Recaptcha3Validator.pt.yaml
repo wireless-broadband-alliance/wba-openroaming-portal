@@ -1,0 +1,5 @@
+tokenEmpty: 'O token do reCAPTCHA está vazio. Por favor, conclua a verificação de segurança.'
+secretNotConfigured: 'A chave secreta do reCAPTCHA v3 não está configurada nas definições.'
+validationFailed: 'A validação do reCAPTCHA v3 falhou. Por favor, tente novamente.'
+invalidSecretKey: 'Chave secreta do reCAPTCHA v3 inválida.'
+credentialCheckFailed: 'Não foi possível verificar as credenciais do reCAPTCHA v3 devido a um erro de ligação.'

@@ -1,0 +1,5 @@
+tokenEmpty: 'Turnstile CAPTCHA token is empty. Please complete the security verification.'
+secretNotConfigured: 'Turnstile secret key is not configured in the settings.'
+validationFailed: 'Turnstile CAPTCHA validation failed. Please try again.'
+invalidSecretKey: 'Invalid Turnstile secret key.'
+credentialCheckFailed: 'Unable to verify Turnstile credentials due to a connection error.'
