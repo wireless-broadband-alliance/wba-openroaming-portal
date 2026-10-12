@@ -73,6 +73,9 @@
             "config/routes/easyadmin.yaml"
         ]
     },
+    "karser/karser-recaptcha3-bundle": {
+        "version": "v0.3.0"
+    },
     "knpuniversity/oauth2-client-bundle": {
         "version": "2.15",
         "recipe": {
