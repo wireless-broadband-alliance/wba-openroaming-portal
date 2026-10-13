@@ -93,17 +93,10 @@ class RegistrationSMSController extends AbstractController
         $violations = $this->validator->validate($registrationDTO);
 
         if (count($violations) > 0) {
-            $errors = [];
-
-            foreach ($violations as $violation) {
-                $propertyPath = $violation->getPropertyPath();
-                $errors[$propertyPath][] = $violation->getMessage();
-            }
-
             return new BaseResponse(
                 400,
-                $errors,
-                'Invalid data.'
+                null,
+                $violations[0]->getMessage()
             )->toResponse();
         }
 
