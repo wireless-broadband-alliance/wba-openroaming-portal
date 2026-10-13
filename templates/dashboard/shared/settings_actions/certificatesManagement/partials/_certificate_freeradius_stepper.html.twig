@@ -1,5 +1,3 @@
-{% set setupProcessType = app.session.get('freeradiusSetupProcessType') %}
-
 {% set steps = [
     {
         id: 'freeradius_upload',
@@ -29,77 +27,79 @@
     {% endif %}
 {% endfor %}
 
+{% set totalSteps = steps|length %}
+{% set progressPercent = totalSteps > 1 ? (currentIndex / (totalSteps - 1)) * 100 : 0 %}
+
 {{ include('dashboard/shared/settings_actions/certificatesManagement/partials/_abort_certs.html.twig') }}
 {{ include('dashboard/shared/settings_actions/certificatesManagement/partials/_freeradius_info_title.html.twig') }}
 
-<div class="w-full max-w-5xl mx-auto mt-8 mb-10 px-4">
-    <div class="p-2">
+<div class="w-full mb-8">
+    <div class="mb-6">
         {{ include('dashboard/shared/_info_details.html.twig', {
             info_text: 'info_text_stepper_details'|trans({}, '_certificate_stepper'),
         }) }}
     </div>
 
-    <div class="relative flex flex-col md:flex-row items-start md:items-center">
+    {# Stepper Container #}
+    <div class="relative">
 
-        {# Progress bar #}
-        <div class="hidden md:block absolute top-1/2 left-0 h-1 rounded-full transform -translate-y-1/2 transition-all duration-500 ease-in-out"
-             style="width: calc({{ ((currentIndex + 1) / steps|length) * 100 }}%)"
-        ></div>
+        {# Connecting Line Track (Desktop Only - spans center of Col 1 [16.66%] to Col 3 [83.33%]) #}
+        <div class="hidden md:block absolute top-5 left-[16.66%] right-[16.66%] h-0.5 bg-slate-200 -z-0">
+            <div class="h-full bg-primary transition-all duration-500 ease-in-out"
+                 style="width: {{ progressPercent }}%;"></div>
+        </div>
 
+        {# 3-Column Equal Grid #}
         {% set stages = processState.stages ?? {} %}
 
-        {% for step in steps %}
-            {% set title = ('step.' ~ step.id ~ '.title')|trans(domain: '_certificate_stepper') %}
-            {% set description = ('step.' ~ step.id ~ '.description')|trans(domain: '_certificate_stepper') %}
-            {% set index = loop.index0 %}
-            {% set active = currentRoute in step.routes %}
-            {% set completed = stages[step.id] ?? false %}
-            {% set previousCompleted = index == 0 or (steps[index - 1].id in stages and stages[steps[index - 1].id]) %}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-y-6 gap-x-2 relative z-10">
+            {% for step in steps %}
+                {% set title = ('step.' ~ step.id ~ '.title')|trans({}, '_certificate_stepper') %}
+                {% set description = ('step.' ~ step.id ~ '.description')|trans({}, '_certificate_stepper') %}
+                {% set active = currentRoute in step.routes %}
+                {% set completed = stages[step.id] ?? false %}
 
-            {# Compute stepRoute dynamically #}
-            {% set stepRoute = step.routes[0] %}
-            {% if step.id == 'freeradius_upload' %}
-                {% if setupProcessType == constant('App\\Enum\\AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERADIUS_UPLOAD_AUTO_DOMAIN').value %}
-                    {% set stepRoute = 'admin_dashboard_settings_certs_freeradius_auto_renew_domain' %}
-                {% elseif setupProcessType == constant('App\\Enum\\AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERADIUS_UPLOAD_CLOUDFLARE_DNS_CHALLENGE').value %}
-                    {% set stepRoute = 'admin_dashboard_settings_certs_freeradius_cloudflare_dnsChallenge' %}
-                {% else %}
-                    {% set stepRoute = 'admin_dashboard_settings_certs_freeradius_upload' %}
-                {% endif %}
-            {% endif %}
+                <div class="flex flex-col items-center text-center group">
 
-            <div class="w-full md:flex-1 flex flex-col md:items-center text-center mb-8 p-2">
-                <div class="
-                    flex items-center justify-center w-10 h-10 rounded-full border-2 z-10 font-semibold
-                    transition-all duration-300 text-center
-                    {% if active %} bg-white border-primary text-primary step-active
-                    {% elseif completed %} bg-primary border-primary text-white
-                    {% else %} bg-white border-gray-300 text-gray-400 {% endif %}
-                ">
-                    {% if previousCompleted %}
-                        <a href="{{ path(stepRoute) }}"
-                           class="flex items-center justify-center w-full h-full text-inherit no-underline leading-none">
-                            {{ loop.index }}
-                        </a>
-                    {% else %}
-                        <span class="flex items-center justify-center w-full h-full cursor-not-allowed opacity-50 leading-none">
-                            {{ loop.index }}
-                        </span>
-                    {% endif %}
+                    {# Circle Badge (Static / Non-clickable) #}
+                    <div class="relative bg-white rounded-full p-1">
+                        <div class="flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm transition-all duration-200 shadow-sm
+              {% if completed and not active %}
+                bg-primary border-2 border-primary text-white
+              {% elseif active %}
+                bg-white border-2 border-primary text-primary ring-4 ring-primary/10 scale-105
+              {% else %}
+                bg-slate-50 border-2 border-slate-200 text-slate-400
+              {% endif %}">
+                            {% if completed and not active %}
+                                <twig:ux:icon name="wba:check-rounded" class="w-5 fill-current stroke-none" />
+                            {% else %}
+                                {{ loop.index }}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {# Step Title & Description #}
+                    <div class="mt-2.5 flex flex-col items-center w-full px-2">
+            <span class="text-xs font-bold leading-tight transition-colors duration-200
+              {% if active %}
+                text-primary
+              {% elseif completed %}
+                text-slate-900
+              {% else %}
+                text-slate-400
+              {% endif %}">
+              {{ title }}
+            </span>
+
+                        <p class="text-[10px] leading-tight text-slate-400 mt-1 hidden md:block line-clamp-2">
+                            {{ description }}
+                        </p>
+                    </div>
+
                 </div>
+            {% endfor %}
+        </div>
 
-                <div class="mt-4 sm:mt-1 md:mt-2">
-                    <h4 class="text-sm sm:text-xs font-semibold
-                        {% if completed or active %} text-primary {% else %} text-gray-500 {% endif %}
-                    ">
-                        {{ title }}
-                    </h4>
-                    <p class="text-xs sm:text-[9px] text-gray-400 mt-1 break-words">
-                        {{ description }}
-                    </p>
-                </div>
-            </div>
-
-        {% endfor %}
     </div>
 </div>

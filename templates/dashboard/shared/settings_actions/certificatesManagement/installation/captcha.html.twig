@@ -1,0 +1,181 @@
+{% extends 'dashboard/shared/settings_actions/certificatesManagement/installation/base.html.twig' %}
+
+{% block title %}
+    {{ 'adminPageWBA'|trans({}, '_header_admin') }}
+{% endblock %}
+
+{% block installation_content %}
+
+    <div class="mt-8 leading-7">
+        <p class="font-bold text-base sm:text-lg md:text-xl lg:text-2xl">
+            {{ 'captchaTitle'|trans({}, 'captcha') }}
+        </p>
+        <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
+            {{ 'captchaDescription'|trans({}, 'captcha') }}
+        </p>
+    </div>
+
+    <div class="my-[25px] divider"></div>
+
+    {{ include('shared/_toast.html.twig', {
+        toast_type: 'toast-warning-dashboard',
+        message: message|default(null),
+    }) }}
+
+    {{ form_start(form, {attr: {autocomplete: 'off'}}) }}
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" data-controller="captcha-provider">
+
+        {# ================= PROVIDER SELECTION CARD ================= #}
+        <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5">
+            <div class="border-b border-slate-100 pb-4">
+                <h2 class="text-lg font-bold text-slate-900">
+                    {{ 'captchaProviderLabel'|trans({}, 'captcha') }}
+                </h2>
+                <p class="text-xs text-slate-500 mt-1">
+                    {{ 'captchaProviderDescription'|trans({}, 'captcha') }}
+                </p>
+            </div>
+
+            <div class="space-y-1">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-2">
+                    {{ 'selectProvider'|trans({}, 'captcha') }}
+                </label>
+
+                {{ form_widget(form.provider, {
+                    attr: {
+                        class: 'form-widget',
+                        'data-action': 'change->captcha-provider#toggle',
+                        'data-captcha-provider-target': 'select',
+                    },
+                }) }}
+                <div class="text-red-500 text-xs mt-1">{{ form_errors(form.provider) }}</div>
+            </div>
+        </div>
+
+        {# ================= CLOUDFLARE TURNSTILE CARD ================= #}
+        <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5"
+             data-controller="card"
+             data-captcha-provider-target="turnstileCard">
+
+            <div class="border-b border-slate-100 pb-4 flex flex-row justify-between items-start">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <span class="text-orange-600">⚡</span> {{ 'turnstileLabel'|trans({}, 'captcha') }}
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">
+                        {{ 'turnstileDescription'|trans({}, 'captcha') }}
+                    </p>
+                </div>
+
+                <label class="flex items-center cursor-pointer pt-1">
+                    <img class="w-5 h-5 opacity-70 hover:opacity-100 transition"
+                            {{ stimulus_target('card', 'button') }}
+                            {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon" />
+                </label>
+            </div>
+
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                description: 'turnstileHelpInfo'|trans({}, 'captcha'),
+            }) }}
+
+            {# Turnstile Site Key #}
+            <div class="space-y-1">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600">
+                    {{ 'turnstileSiteKeyLabel'|trans({}, 'captcha') }}
+                </label>
+                {{ form_widget(form.turnstileKey, {
+                    attr: {
+                        class: 'form-widget',
+                        placeholder: '0x4AAAAAAA...',
+                    },
+                }) }}
+                <div class="text-red-500 text-xs mt-1">{{ form_errors(form.turnstileKey) }}</div>
+            </div>
+
+            {# Turnstile Secret Key #}
+            <div class="space-y-1 pt-2 border-t border-slate-100">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600">
+                    {{ 'turnstileSecretKeyLabel'|trans({}, 'captcha') }}
+                </label>
+                {{ form_widget(form.turnstileSecret, {
+                    attr: {
+                        class: 'form-widget',
+                        placeholder: '0x4AAAAAAA...',
+                    },
+                }) }}
+                <div class="text-red-500 text-xs mt-1">{{ form_errors(form.turnstileSecret) }}</div>
+            </div>
+        </div>
+
+        {# ================= GOOGLE RECAPTCHA V3 CARD ================= #}
+        <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5"
+             data-controller="card"
+             data-captcha-provider-target="recaptcha3Card">
+
+            <div class="border-b border-slate-100 pb-4 flex flex-row justify-between items-start">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <span class="text-blue-600">🛡️</span> {{ 'recaptcha3Label'|trans({}, 'captcha') }}
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">
+                        {{ 'recaptcha3Description'|trans({}, 'captcha') }}
+                    </p>
+                </div>
+
+                <label class="flex items-center cursor-pointer pt-1">
+                    <img class="w-5 h-5 opacity-70 hover:opacity-100 transition"
+                            {{ stimulus_target('card', 'button') }}
+                            {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon" />
+                </label>
+            </div>
+
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                description: 'recaptcha3HelpInfo'|trans({}, 'captcha'),
+            }) }}
+
+            {# reCAPTCHA v3 Site Key #}
+            <div class="space-y-1">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600">
+                    {{ 'recaptcha3SiteKeyLabel'|trans({}, 'captcha') }}
+                </label>
+                {{ form_widget(form.recaptcha3Key, {
+                    attr: {
+                        class: 'form-widget',
+                        placeholder: '6Ld...',
+                    },
+                }) }}
+                <div class="text-red-500 text-xs mt-1">{{ form_errors(form.recaptcha3Key) }}</div>
+            </div>
+
+            {# reCAPTCHA v3 Secret Key #}
+            <div class="space-y-1 pt-2 border-t border-slate-100">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600">
+                    {{ 'recaptcha3SecretKeyLabel'|trans({}, 'captcha') }}
+                </label>
+                {{ form_widget(form.recaptcha3Secret, {
+                    attr: {
+                        class: 'form-widget',
+                        placeholder: '6Ld...',
+                    },
+                }) }}
+                <div class="text-red-500 text-xs mt-1">{{ form_errors(form.recaptcha3Secret) }}</div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="mt-8 divider-solid"></div>
+
+    <div class="mt-6 flex w-full justify-end items-center gap-2">
+        <button type="submit" class="w-[160px] btn-primary"
+                onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'data_base') }}')">
+            {{ 'captchaApplyBtn'|trans({}, 'captcha') }}
+        </button>
+    </div>
+
+    {{ form_row(form._token) }}
+    {{ form_end(form, {render_rest: false}) }}
+{% endblock %}

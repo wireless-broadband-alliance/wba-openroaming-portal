@@ -113,7 +113,7 @@
         {% endif %}
 
         {# CAPTCHA Verification Partial #}
-        {{ render_captcha(form.captcha) }}
+        {{ render_captcha(form) }}
 
         <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 

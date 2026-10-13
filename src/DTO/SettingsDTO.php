@@ -17,15 +17,20 @@ class SettingsDTO
     ])]
     public array $trustedProxies = [];
 
-    #[Assert\Length(min:5, max:100, minMessage: 'minCharacters', maxMessage: 'maxCharacters')]
-    #[Assert\Regex('/^[a-zA-Z0-9\-_]+$/', message: 'invalidFormat')]
-    public ?string $turnstileKey = null;
-
-    #[Assert\Length(min:5, max:100, minMessage: 'minCharacters', maxMessage: 'maxCharacters')]
-    #[Assert\Regex('/^[a-zA-Z0-9\-_]+$/', message: 'invalidFormat')]
-    public ?string $turnstileSecret = null;
-
     public ?bool $jwtPassphraseEnable = false;
 
+    #[Assert\Length(
+        min: 16,
+        max: 255,
+        minMessage: 'passwordCannotBeShorterThan',
+        maxMessage: 'passwordCannotBeLongerThan'
+    )]
+    #[Assert\PasswordStrength(
+        minScore: Assert\PasswordStrength::STRENGTH_MEDIUM,
+        message: 'passwordIsTooWeak'
+    )]
+    #[Assert\NotCompromisedPassword(
+        message: 'passwordIsCompromised'
+    )]
     public ?string $jwtPassphrase = null;
 }

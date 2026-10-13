@@ -2,10 +2,12 @@
 
 namespace App\Service;
 
+use App\DTO\CaptchaDTO;
 use App\DTO\InstallationProgressDTO;
 use App\DTO\SecurityTxtDTO;
 use App\Entity\InstallationProgress;
 use App\Entity\User;
+use App\Enum\CaptchaProviderEnum;
 use App\Enum\DataBaseSetupType;
 use App\Enum\DefaultUser;
 use App\Enum\InstallationStep;
@@ -19,7 +21,6 @@ use App\Repository\EventRepository;
 use App\Repository\InstallationProgressRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
-use App\Service\Captcha\CaptchaValidator;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use InvalidArgumentException;
@@ -43,16 +44,14 @@ readonly class InstallationService
         private DatabaseConnectionService $databaseConnectionService,
         private TranslatorInterface $translator,
         private UserRepository $userRepository,
-        private CaptchaValidator $captchaValidator,
         private EncryptionService $encryptionService,
         private HashArgon2idService $hashArgon2idService,
     ) {
     }
 
     /**
-     * TRUSTED_PROXIES, TURNSTILE_KEY, TURNSTILE_SECRET and JWT_PASSPHRASE are each
-     * checked and persisted independently onto InstallationProgress. A missing or
-     * invalid value for one of them no longer blocks the others from being saved.
+     * TRUSTED_PROXIES, DB URLs, and JWT_PASSPHRASE are checked and persisted
+     * independently onto InstallationProgress.
      *
      * @throws EncryptionException
      */
@@ -92,34 +91,16 @@ readonly class InstallationService
             $progress->setTrustedProxies(array_map(trim(...), explode(',', $trustedProxies)));
         }
 
-        // Turnstile Key
-        $turnstileKey = $this->parameterBag->get('app.turnstile_key');
-        if ($turnstileKey) {
-            $progress->setTurnstileKey($this->encryptionService->encrypt($turnstileKey));
-        }
-
-        // Turnstile Secret
-        $turnstileSecret = $this->parameterBag->get('app.turnstile_secret');
-        if (
-            $turnstileSecret &&
-            $this->captchaValidator->validateCredentials($turnstileSecret)['success']
-        ) {
-            $progress->setTurnstileSecret($this->encryptionService->encrypt($turnstileSecret));
-        }
-
         // JWT Passphrase
         $jwtPassphrase = $this->parameterBag->get('app.jwt_passphrase');
         if ($jwtPassphrase) {
             $progress->setJwtPassphrase($this->encryptionService->encrypt($jwtPassphrase));
         }
 
-        // Mark settings as completed if already COMPLETED or if settings were auto-discovered
+        // Mark settings as completed if already COMPLETED or if core envs were auto-discovered
         if (
             $progress->getInstallationState() === ProcessStatusType::COMPLETED ||
-            $progress->getTrustedProxies() !== null ||
-            $progress->getTurnstileKey() !== null ||
-            $progress->getTurnstileSecret() !== null ||
-            $progress->getJwtPassphrase() !== null
+            ($progress->getTrustedProxies() !== null && $progress->getJwtPassphrase() !== null)
         ) {
             $progress->setIsSettingsCompleted(true);
         }
@@ -168,16 +149,12 @@ readonly class InstallationService
             return InstallationStep::DATABASE;
         }
 
-        // Check if the settings step has been submitted/completed (instead of requiring all keys to be non-null)
         if (!$installationProgress->isSettingsCompleted()) {
             return InstallationStep::SETTINGS;
         }
 
-        if (
-            !$this->checkDatabaseSettings($installationProgress) ||
-            !$this->checkSettingsValues($installationProgress)
-        ) {
-            return InstallationStep::COMMAND;
+        if (!$installationProgress->getCaptchaProvider()) {
+            return InstallationStep::CAPTCHA;
         }
 
         if (!$installationProgress->isSecurityTxtValid()) {
@@ -191,6 +168,13 @@ readonly class InstallationService
             return InstallationStep::ADMIN;
         }
 
+        if (
+            !$this->checkDatabaseSettings($installationProgress) ||
+            !$this->checkSettingsValues($installationProgress)
+        ) {
+            return InstallationStep::COMMAND;
+        }
+
         return InstallationStep::COMPLETED;
     }
 
@@ -202,49 +186,71 @@ readonly class InstallationService
         if ($progress instanceof InstallationProgress) {
             return [
                 InstallationWidgetStepsEnum::DATABASE->value => $progress->getDbOpenRoaming(
-                ) !== null || $progress->getDbFreeradius() !== null,
+                    ) !== null || $progress->getDbFreeradius() !== null,
                 InstallationWidgetStepsEnum::SETTINGS->value => $progress->getTrustedProxies(
-                ) !== null || $progress->getTurnstileKey() !== null,
+                    ) !== null || $progress->getJwtPassphrase() !== null,
+                InstallationWidgetStepsEnum::CAPTCHA->value => $progress->getCaptchaProvider(
+                    ) !== null,
                 InstallationWidgetStepsEnum::SECURITY_TXT->value => $progress->getSecurityContact(
-                ) !== null && $progress->getSecurityExpires() instanceof \DateTimeInterface,
+                    ) !== null && $progress->getSecurityExpires() instanceof \DateTimeInterface,
                 InstallationWidgetStepsEnum::ADMIN_CREDENTIALS->value => $progress->getEmailAdmin(
-                ) !== null && $progress->isAdminConfirmed(),
+                    ) !== null && $progress->isAdminConfirmed(),
                 InstallationWidgetStepsEnum::SUMMARY->value => $progress->getInstallationState(
-                ) === ProcessStatusType::COMPLETED,
+                    ) === ProcessStatusType::COMPLETED,
             ];
         }
 
-        // Fallback sequential logic if $progress is not passed
-        $stepValue = $step instanceof InstallationStep ? $step->value : $step;
+        // Fallback sequential logic — each step implies all previous steps are done.
+        // Steps are ordered: DATABASE → SETTINGS → CAPTCHA → SECURITY_TXT → ADMIN → COMMAND → COMPLETED
+        $stepValue = $step instanceof InstallationStep ? $step : InstallationStep::from($step);
 
-        $status = [
-            InstallationWidgetStepsEnum::DATABASE->value => false,
-            InstallationWidgetStepsEnum::SETTINGS->value => false,
-            InstallationWidgetStepsEnum::SECURITY_TXT->value => false,
-            InstallationWidgetStepsEnum::ADMIN_CREDENTIALS->value => false,
-            InstallationWidgetStepsEnum::SUMMARY->value => false,
+        $databaseDone = false;
+        $settingsDone = false;
+        $captchaDone = false;
+        $securityTxtDone = false;
+        $adminDone = false;
+        $summaryDone = false;
+
+        match ($stepValue) {
+            InstallationStep::SETTINGS => $databaseDone = true,
+            InstallationStep::CAPTCHA => [
+                $databaseDone = true,
+                $settingsDone = true,
+            ],
+            InstallationStep::SECURITY_TXT => [
+                $databaseDone = true,
+                $settingsDone = true,
+                $captchaDone = true,
+            ],
+            InstallationStep::ADMIN => [
+                $databaseDone = true,
+                $settingsDone = true,
+                $captchaDone = true,
+                $securityTxtDone = true,
+            ],
+            InstallationStep::COMMAND,
+            InstallationStep::COMPLETED => [
+                $databaseDone = true,
+                $settingsDone = true,
+                $captchaDone = true,
+                $securityTxtDone = true,
+                $adminDone = true,
+            ],
+            default => null,
+        };
+
+        if ($stepValue === InstallationStep::COMPLETED) {
+            $summaryDone = true;
+        }
+
+        return [
+            InstallationWidgetStepsEnum::DATABASE->value => $databaseDone,
+            InstallationWidgetStepsEnum::SETTINGS->value => $settingsDone,
+            InstallationWidgetStepsEnum::CAPTCHA->value => $captchaDone,
+            InstallationWidgetStepsEnum::SECURITY_TXT->value => $securityTxtDone,
+            InstallationWidgetStepsEnum::ADMIN_CREDENTIALS->value => $adminDone,
+            InstallationWidgetStepsEnum::SUMMARY->value => $summaryDone,
         ];
-
-        if ($stepValue === InstallationStep::SETTINGS->value) {
-            $status[InstallationWidgetStepsEnum::DATABASE->value] = true;
-        }
-        if ($stepValue === InstallationStep::SECURITY_TXT->value) {
-            $status[InstallationWidgetStepsEnum::DATABASE->value] = true;
-            $status[InstallationWidgetStepsEnum::SETTINGS->value] = true;
-        }
-        if ($stepValue === InstallationStep::ADMIN->value) {
-            $status[InstallationWidgetStepsEnum::DATABASE->value] = true;
-            $status[InstallationWidgetStepsEnum::SETTINGS->value] = true;
-            $status[InstallationWidgetStepsEnum::SECURITY_TXT->value] = true;
-        }
-        if ($stepValue === InstallationStep::COMPLETED->value || $stepValue === InstallationStep::COMMAND->value) {
-            $status[InstallationWidgetStepsEnum::DATABASE->value] = true;
-            $status[InstallationWidgetStepsEnum::SETTINGS->value] = true;
-            $status[InstallationWidgetStepsEnum::SECURITY_TXT->value] = true;
-            $status[InstallationWidgetStepsEnum::ADMIN_CREDENTIALS->value] = true;
-        }
-
-        return $status;
     }
 
     /**
@@ -347,9 +353,8 @@ readonly class InstallationService
     /**
      * @throws EncryptionException
      */
-    public function fillDto(
-        InstallationProgress $installationProgress
-    ): InstallationProgressDTO {
+    public function fillDto(InstallationProgress $installationProgress): InstallationProgressDTO
+    {
         $dto = new InstallationProgressDTO();
         $dto->installationState = $installationProgress->getInstallationState();
 
@@ -370,12 +375,16 @@ readonly class InstallationService
         $dto->dbFreeradiusPort = (string)$dbFreeradiusPartials['port'];
 
         $dto->trustedProxies = implode(',', $installationProgress->getTrustedProxies() ?? []);
-        $dto->turnstileKey = $installationProgress->getTurnstileKey();
+
+        // CAPTCHA DTO mappings
+        $dto->captchaProvider = ($installationProgress->getCaptchaProvider())?->value;
+        $dto->turnstileKey = $this->decryptOrNull($installationProgress->getTurnstileKey());
         $dto->turnstileSecret = $this->decryptOrNull($installationProgress->getTurnstileSecret());
+        $dto->recaptcha3Key = $this->decryptOrNull($installationProgress->getRecaptcha3Key());
+        $dto->recaptcha3Secret = $this->decryptOrNull($installationProgress->getRecaptcha3Secret());
 
         $dto->emailAdmin = $installationProgress->getEmailAdmin();
 
-        // Map security.txt properties onto the DTO
         $dto->securityContact = $installationProgress->getSecurityContact();
         $dto->securityExpires = $installationProgress->getSecurityExpires();
         $dto->securityPgpFingerprint = $installationProgress->getSecurityPgpFingerprint();
@@ -386,9 +395,6 @@ readonly class InstallationService
         return $dto;
     }
 
-    /**
-     * @throws EncryptionException
-     */
     public function checkDatabaseSettings(InstallationProgress $installationProgress): bool
     {
         if (
@@ -405,12 +411,8 @@ readonly class InstallationService
         );
     }
 
-    /**
-     * @throws EncryptionException
-     */
     public function checkSettingsValues(InstallationProgress $installationProgress): bool
     {
-        // Only check trusted proxies if set
         $trustedProxies = $installationProgress->getTrustedProxies();
         if (
             !empty($trustedProxies) &&
@@ -422,31 +424,6 @@ readonly class InstallationService
             return false;
         }
 
-        // Only check turnstile key if set
-        $turnstileKey = $this->decryptOrNull($installationProgress->getTurnstileKey());
-        if (
-            $turnstileKey !== null &&
-            !$this->envValueMatches(
-                SettingsConfigType::TURNSTILE_KEY->value,
-                $turnstileKey
-            )
-        ) {
-            return false;
-        }
-
-        // Only check turnstile secret if set
-        $turnstileSecret = $this->decryptOrNull($installationProgress->getTurnstileSecret());
-        if (
-            $turnstileSecret !== null &&
-            !$this->envValueMatches(
-                SettingsConfigType::TURNSTILE_SECRET->value,
-                $turnstileSecret
-            )
-        ) {
-            return false;
-        }
-
-        // Use decryptOrNull instead of direct decrypt call to avoid EncryptionException crash
         $jwtPassphrase = $this->decryptOrNull($installationProgress->getJwtPassphrase());
         if (
             $jwtPassphrase !== null &&
@@ -470,9 +447,7 @@ readonly class InstallationService
         }
 
         $envContent = file_get_contents($envPath);
-
         $expectedValue ??= '';
-
         $pattern = sprintf('/^%s=("?)(.*?)\1$/m', preg_quote($key, '/'));
 
         if (preg_match($pattern, (string)$envContent, $matches)) {
@@ -500,14 +475,6 @@ readonly class InstallationService
             $this->databaseConnectionService->writeDatabaseUrlToEnv(
                 implode(',', $lastCompleted->getTrustedProxies() ?? []),
                 SettingsConfigType::TRUSTED_PROXIES->value
-            );
-            $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                $lastCompleted->getTurnstileKey() ?? '',
-                SettingsConfigType::TURNSTILE_KEY->value
-            );
-            $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                $this->decryptOrEmpty($lastCompleted->getTurnstileSecret()),
-                SettingsConfigType::TURNSTILE_SECRET->value
             );
             if ($lastCompleted->getJwtPassphrase() !== null) {
                 $this->databaseConnectionService->writeDatabaseUrlToEnv(
@@ -546,41 +513,100 @@ readonly class InstallationService
     public function commandToSettings(InstallationProgress $installationProgress): string
     {
         $trustedProxies = implode(',', $installationProgress->getTrustedProxies() ?? []);
-        $turnstileKey = $this->decryptOrEmpty($installationProgress->getTurnstileKey());
-        $turnstileSecret = $this->decryptOrEmpty($installationProgress->getTurnstileSecret());
         $jwtPassphrase = $installationProgress->getJwtPassphrase() !== null
             ? $this->encryptionService->decrypt($installationProgress->getJwtPassphrase())
             : '';
 
         return sprintf(
-            "scripts/update-settings-env.sh '%s' '%s' '%s' '%s'",
+            "scripts/update-settings-env.sh '%s' '%s'",
             str_replace("'", "'\\''", $jwtPassphrase),
-            str_replace("'", "'\\''", $trustedProxies),
-            str_replace("'", "'\\''", $turnstileKey),
-            str_replace("'", "'\\''", $turnstileSecret)
+            str_replace("'", "'\\''", $trustedProxies)
         );
+    }
+
+    public function saveCaptchaSettings(CaptchaDTO $dto, InstallationProgress $installationProgress): void
+    {
+        $installationProgress->setCaptchaProvider($dto->provider);
+
+        if (!empty($dto->turnstileKey)) {
+            $encryptedKey = $this->encryptionService->encrypt($dto->turnstileKey);
+            $installationProgress->setTurnstileKey($encryptedKey);
+
+            $settingKey = $this->settingRepository->findOneBy(['name' => SettingName::TURNSTILE_KEY->value]);
+            if ($settingKey) {
+                $settingKey->setValue($encryptedKey);
+                $this->entityManager->persist($settingKey);
+            }
+        }
+
+        if (!empty($dto->turnstileSecret)) {
+            $encryptedSecret = $this->encryptionService->encrypt($dto->turnstileSecret);
+            $installationProgress->setTurnstileSecret($encryptedSecret);
+
+            $settingSecret = $this->settingRepository->findOneBy(['name' => SettingName::TURNSTILE_SECRET->value]);
+            if ($settingSecret) {
+                $settingSecret->setValue($encryptedSecret);
+                $this->entityManager->persist($settingSecret);
+            }
+        }
+
+        if (!empty($dto->recaptcha3Key)) {
+            $encryptedKey = $this->encryptionService->encrypt($dto->recaptcha3Key);
+            $installationProgress->setRecaptcha3Key($encryptedKey);
+
+            $settingKey = $this->settingRepository->findOneBy(['name' => SettingName::RECAPTCHA3_KEY->value]);
+            if ($settingKey) {
+                $settingKey->setValue($encryptedKey);
+                $this->entityManager->persist($settingKey);
+            }
+        }
+
+        if (!empty($dto->recaptcha3Secret)) {
+            $encryptedSecret = $this->encryptionService->encrypt($dto->recaptcha3Secret);
+            $installationProgress->setRecaptcha3Secret($encryptedSecret);
+
+            $settingSecret = $this->settingRepository->findOneBy(['name' => SettingName::RECAPTCHA3_SECRET->value]);
+            if ($settingSecret) {
+                $settingSecret->setValue($encryptedSecret);
+                $this->entityManager->persist($settingSecret);
+            }
+        }
+
+        // Persist provider choice to settings table
+        $settingProvider = $this->settingRepository->findOneBy(['name' => SettingName::CAPTCHA_PROVIDER->value]);
+        if ($settingProvider) {
+            $settingProvider->setValue($dto->provider);
+            $this->entityManager->persist($settingProvider);
+        }
+
+        $installationProgress->setUpdatedAt(new DateTime());
+        $installationProgress->setInstallationState(ProcessStatusType::IN_PROGRESS);
+
+        $this->entityManager->persist($installationProgress);
+        $this->entityManager->flush();
     }
 
     public function saveSecurityTxtSettings(SecurityTxtDTO $dto, InstallationProgress $installationProgress): void
     {
         $expires = $dto->expires ?? throw new InvalidArgumentException('Expires date is required');
 
-        // Convert DateTimeImmutable to \DateTime (mutable)
         $expiresFormatted = DateTime::createFromInterface($expires)->setTime(23, 59, 59);
 
-        // Update InstallationProgress Entity
         $installationProgress->setSecurityContact($dto->contact);
         $securityContact = $this->settingRepository->findOneBy(['name' => SettingName::SECURITY_CONTACT->value]);
         $securityContact->setValue($dto->contact);
         $this->entityManager->persist($securityContact);
+
         $installationProgress->setSecurityExpires($expiresFormatted);
         $securityExpires = $this->settingRepository->findOneBy(['name' => SettingName::SECURITY_EXPIRES->value]);
         $securityExpires->setValue($expiresFormatted->format('Y-m-d H:i:s'));
         $this->entityManager->persist($securityExpires);
+
         $installationProgress->setSecurityPgpFingerprint($dto->pgpFingerprint);
         $pgpFingerprint = $this->settingRepository->findOneBy(['name' => SettingName::SECURITY_PGP_FINGERPRINT->value]);
         $pgpFingerprint->setValue($dto->pgpFingerprint);
         $this->entityManager->persist($pgpFingerprint);
+
         $installationProgress->setUpdatedAt(new DateTime());
         $installationProgress->setInstallationState(ProcessStatusType::IN_PROGRESS);
 

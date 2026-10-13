@@ -5,6 +5,7 @@ namespace App\EventListener;
 use App\Entity\CertificateSetupProcess;
 use App\Entity\InstallationProgress;
 use App\Entity\User;
+use App\Enum\AdminRoleType;
 use App\Enum\CertificateTestResult;
 use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
@@ -21,7 +22,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[AsEventListener(event: KernelEvents::REQUEST)]
-readonly class AdminCertificateProcessEnforcerListener
+readonly class WizardsProcessEnforcerListener
 {
     public function __construct(
         private Security $security,
@@ -50,7 +51,7 @@ readonly class AdminCertificateProcessEnforcerListener
         // Only admins with valid session flag
         if (
             !$user instanceof User ||
-            !$this->security->isGranted('ROLE_ADMIN') ||
+            !$this->security->isGranted(AdminRoleType::ROLE_ADMIN->value) ||
             !$session->has(SessionStatus::SYSTEM_RESET_REQUEST->value)
         ) {
             return;
@@ -66,18 +67,8 @@ readonly class AdminCertificateProcessEnforcerListener
          * Supports exact matches and regex patterns
          */
         $allowedPatterns = [
-            // Installation pages
-            '#^/dashboard/settings/certificatesManagement/installation$#',
-            '#^/dashboard/settings/certificatesManagement/installation/commands$#',
-            '#^/dashboard/settings/certificatesManagement/installation/security-txt$#',
-            '#^/dashboard/settings/certificatesManagement/installation/settings$#',
-            '#^/dashboard/settings/certificatesManagement/installation/admin$#',
-            '#^/dashboard/settings/certificatesManagement/installation/admin/sendCode$#',
-            '#^/dashboard/settings/certificatesManagement/installation/admin/confirmation$#',
-            '#^/dashboard/settings/certificatesManagement/installation/admin/confirmation/resend$#',
-            '#^/dashboard/settings/certificatesManagement/installation/summary$#',
-            '#^/dashboard/settings/certificatesManagement/installation/summary/complete$#',
-            '#^/dashboard/settings/certificatesManagement/installation/abortProcess$#',
+            // All Installation steps & sub-routes
+            '#^/dashboard/settings/certificatesManagement/installation(/.*)?$#',
 
             // Verify identity (installation | certificates)
             '#^/dashboard/settings/certificatesManagement/verifyIdentity/(installation|certificates)$#',
@@ -87,29 +78,11 @@ readonly class AdminCertificateProcessEnforcerListener
             // Certificates reset abort
             '#^/dashboard/settings/certificatesManagement/certificates/abort$#',
 
-            // Radsecproxy steps
-            '#^/dashboard/settings/certificatesManagement/radsecproxy/upload$#',
-            '#^/dashboard/settings/certificatesManagement/radsecproxy/config$#',
-            '#^/dashboard/settings/certificatesManagement/radsecproxy/test$#',
-            '#^/dashboard/settings/certificatesManagement/radsecproxy/test/run$#',
+            // All Radsecproxy steps & sub-routes
+            '#^/dashboard/settings/certificatesManagement/radsecproxy(/.*)?$#',
 
-            // Freeradius Certificates Management Selection
-            '#^/dashboard/settings/certificatesManagement/freeradius/selection#',
-
-            // Freeradius steps
-
-            // Auto Generation Lets Encrypt
-            '#^/dashboard/settings/certificatesManagement/freeradius/autoRenew$#',
-            '#^/dashboard/settings/certificatesManagement/freeradius/autoRenewDomain#',
-            // Manual Upload
-            '#^/dashboard/settings/certificatesManagement/freeradius/upload$#',
-            '#^/dashboard/settings/certificatesManagement/freeradius/config$#',
-            '#^/dashboard/settings/certificatesManagement/freeradius/test$#',
-            '#^/dashboard/settings/certificatesManagement/freeradius/test/run$#',
-
-            // Cloudflare
-            '#^/dashboard/settings/certificatesManagement/freeradius/cloudflare/dnsChallenge$#',
-            '#^/dashboard/settings/certificatesManagement/freeradius/cloudflare/httpChallenge#',
+            // All FreeRADIUS steps & sub-routes (Selection, Auto-renew, Manual Upload, Cloudflare, etc.)
+            '#^/dashboard/settings/certificatesManagement/freeradius(/.*)?$#',
 
             // 2FA flow — must not be blocked while completing dashboard 2FA
             '#^/dashboard/login$#',

@@ -60,6 +60,7 @@ class CommandStepController extends AbstractController
             $computedStep,
             InstallationStep::DATABASE,
             InstallationStep::SETTINGS,
+            InstallationStep::CAPTCHA,
             InstallationStep::SECURITY_TXT,
             InstallationStep::ADMIN,
             InstallationStep::COMPLETED,

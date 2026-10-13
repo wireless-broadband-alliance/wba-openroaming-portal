@@ -66,12 +66,12 @@ class DatabaseStepController extends AbstractController
             $redirect = $this->installationFlow->redirectIfStep(
                 $computedStep,
                 InstallationStep::SETTINGS,
+                InstallationStep::CAPTCHA,
                 InstallationStep::SECURITY_TXT,
                 InstallationStep::ADMIN,
                 InstallationStep::COMMAND,
                 InstallationStep::COMPLETED,
             );
-
             if ($redirect instanceof RedirectResponse) {
                 return $redirect;
             }

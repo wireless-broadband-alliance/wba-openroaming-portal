@@ -4,19 +4,15 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENV_FILE="${SCRIPT_DIR}/../.env"
 
-if [ "$#" -eq 3 ]; then
+if [ "$#" -eq 1 ]; then
     JWT_PASSPHRASE=""
     TRUSTED_PROXIES="$1"
-    TURNSTILE_KEY="$2"
-    TURNSTILE_SECRET="$3"
-elif [ "$#" -eq 4 ]; then
+elif [ "$#" -eq 2 ]; then
     JWT_PASSPHRASE="$1"
     TRUSTED_PROXIES="$2"
-    TURNSTILE_KEY="$3"
-    TURNSTILE_SECRET="$4"
 else
     echo "Error: Incorrect number of arguments."
-    echo "Usage: $0 [JWT_PASSPHRASE] \"TRUSTED_PROXIES\" \"TURNSTILE_KEY\" \"TURNSTILE_SECRET\""
+    echo "Usage: $0 [JWT_PASSPHRASE] \"TRUSTED_PROXIES\""
     exit 1
 fi
 
@@ -41,14 +37,12 @@ set_env() {
     echo "Updated: $KEY"
 }
 
-if [ "$#" -eq 4 ]; then
+if [ "$#" -eq 2 ]; then
     set_env "JWT_PASSPHRASE" "$JWT_PASSPHRASE"
 else
     echo "JWT_PASSPHRASE omitted (unchanged)"
 fi
 
 set_env "TRUSTED_PROXIES" "$TRUSTED_PROXIES"
-set_env "TURNSTILE_KEY" "$TURNSTILE_KEY"
-set_env "TURNSTILE_SECRET" "$TURNSTILE_SECRET"
 
 echo "Update completed successfully."

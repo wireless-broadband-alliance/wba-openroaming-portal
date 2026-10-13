@@ -1,6 +1,7 @@
 {% set steps = [
   {id: 'database', route: ['admin_dashboard_settings_certs_installation']},
   {id: 'settings', route: ['admin_dashboard_settings_certs_installation_settings']},
+  {id: 'captcha', route: ['admin_dashboard_settings_certs_installation_captcha']},
   {id: 'security_txt', route: ['admin_dashboard_settings_certs_installation_security_txt']},
   {id: 'admin_credentials', route: [
     'admin_dashboard_settings_certs_installation_admin',
@@ -21,92 +22,107 @@
   {% endif %}
 {% endfor %}
 
-{# Abort Button + Leave Configuration #}
-<div class="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-2 sm:gap-3">
-  {% set SYSTEM_RESET_REQUEST = constant('App\\Enum\\SessionStatus::SYSTEM_RESET_REQUEST').value %}
-  {% if not app.session.has(SYSTEM_RESET_REQUEST) %}
-    {% if app.request.attributes.get('_route') != 'admin_dashboard_settings_certs_installation' %}
-      <form action="{{ path('admin_dashboard_settings_certs_installation_abortProcess') }}"
-            method="POST"
-            onsubmit="return confirm('{{ 'confirm_abort'|trans({}, '_installation_stepper') }}');">
-        <button type="submit"
-                class="w-full sm:w-auto flex items-center gap-2
-          px-3 py-1.5 sm:px-4 sm:py-2
-          text-xs sm:text-sm
-          rounded-lg shadow font-medium
-          text-red-700 bg-white border border-red-200
-          hover:bg-red-50 hover:border-red-300 transition">
-          <twig:ux:icon name="wba:cross-circle-rounded"
-                        class="w-4 h-4 opacity-80 fill-current"/>
-          {{ 'abort'|trans({}, '_installation_stepper') }}
-        </button>
-      </form>
-    {% endif %}
-    <a href="{{ path('admin_page') }}"
-       class="w-full sm:w-auto flex items-center gap-2
-          px-3 py-1.5 sm:px-4 sm:py-2
-          text-xs sm:text-sm
-          rounded-lg shadow font-medium
-          text-gray-700 bg-white border border-gray-200
-          hover:bg-gray-50 hover:border-gray-300 transition">
-      <twig:ux:icon name="wba:exit"
-                    class="w-4 h-4 opacity-70 fill-current"/>
-      {{ 'leave'|trans({}, '_installation_stepper') }}
-    </a>
-  {% else %}
-    <a href="{{ path('app_dashboard_logout') }}" class="w-full sm:w-auto flex items-center gap-2
-          px-3 py-1.5 sm:px-4 sm:py-2
-          text-xs sm:text-sm
-          rounded-lg shadow font-medium
-          text-red-700 bg-white border border-red-200
-          hover:bg-red-50 hover:border-red-300 transition">
-      <twig:ux:icon name="wba:logout"
-                    class="w-4 h-4 opacity-80 fill-none stroke-current"/>
-      {{ 'logout'|trans({}, 'landing') }}
-    </a>
-  {% endif %}
-</div>
+{% set totalSteps = steps|length %}
+{% set progressPercent = totalSteps > 1 ? (currentIndex / (totalSteps - 1)) * 100 : 0 %}
 
-<div class="w-full max-w-5xl mx-auto mt-8 mb-10 px-4">
+<div class="w-full mb-8">
 
-  <div class="relative flex flex-col md:flex-row items-start md:items-center">
-    {# Progress bar #}
-    <div class="hidden md:block absolute top-1/2 left-0 h-1 rounded-full transform -translate-y-1/2 transition-all duration-500 ease-in-out"
-         style="width: calc({{ ((currentIndex + 1) / steps|length) * 100 }}%)"
-    ></div>
+  {# Header Bar with Action Buttons #}
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 mb-8 border-b border-slate-200/80">
+    <div>
+      <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+        Step {{ currentIndex + 1 }} of {{ totalSteps }}
+      </span>
+    </div>
 
-    {% for step in steps %}
-      {% set title = ('step.' ~ step.id ~ '.title')|trans(domain: '_installation_stepper') %}
-      {% set description = ('step.' ~ step.id ~ '.description')|trans(domain: '_installation_stepper') %}
-      {% set index = loop.index0 %}
-      {% set active = currentRoute in step.route %}
-      {% set completed = stages[step.id] ?? false %}
+    <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-end">
+      {% set SYSTEM_RESET_REQUEST = constant('App\\Enum\\SessionStatus::SYSTEM_RESET_REQUEST').value %}
+      {% if not app.session.has(SYSTEM_RESET_REQUEST) %}
+        {% if currentRoute != 'admin_dashboard_settings_certs_installation' %}
+          <form action="{{ path('admin_dashboard_settings_certs_installation_abortProcess') }}"
+                method="POST"
+                onsubmit="return confirm('{{ 'confirm_abort'|trans({}, '_installation_stepper') }}');">
+            <button type="submit"
+                    class="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-lg text-red-700 bg-white border border-red-200 shadow-sm hover:bg-red-50 hover:border-red-300 transition-colors">
+              <twig:ux:icon name="wba:cross-circle-rounded" class="w-4 h-4 fill-current text-red-600" />
+              {{ 'abort'|trans({}, '_installation_stepper') }}
+            </button>
+          </form>
+        {% endif %}
 
-      <div class="w-full md:flex-1 flex flex-col md:items-center text-center mb-8 p-2">
-        <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 z-10 font-semibold transition-all duration-300
-              {% if completed %} bg-primary border-primary text-white
-              {% elseif active %} bg-white border-primary text-primary step-active
-              {% else %} bg-white border-gray-300 text-gray-400 {% endif %}">
-          {% if currentRoute in step.route %}
-            <a href="{{ path(step.route[0]) }}"
-               class="flex items-center justify-center w-full h-full no-underline {% if completed %} text-white {% else %} text-inherit {% endif %}">
-              {{ loop.index }}
-            </a>
-          {% else %}
-            <span class="flex items-center justify-center w-full h-full cursor-not-allowed {% if completed %} text-white {% else %} text-gray-400 {% endif %}">
-                  {{ loop.index }}
+        <a href="{{ path('admin_page') }}"
+           class="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-lg text-slate-700 bg-white border border-slate-200 shadow-sm hover:bg-slate-50 hover:border-slate-300 transition-colors">
+          <twig:ux:icon name="wba:exit" class="w-4 h-4 fill-current text-slate-500" />
+          {{ 'leave'|trans({}, '_installation_stepper') }}
+        </a>
+      {% else %}
+        <a href="{{ path('app_dashboard_logout') }}"
+           class="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-lg text-red-700 bg-white border border-red-200 shadow-sm hover:bg-red-50 hover:border-red-300 transition-colors">
+          <twig:ux:icon name="wba:logout" class="w-4 h-4 stroke-current fill-none text-red-600" />
+          {{ 'logout'|trans({}, 'landing') }}
+        </a>
+      {% endif %}
+    </div>
+  </div>
+
+  {# Stepper Container #}
+  <div class="relative">
+
+    {# Connecting Line Track (Spans directly across center of column 1 to column 6) #}
+    <div class="hidden md:block absolute top-5 left-[8.33%] right-[8.33%] h-0.5 bg-slate-200 -z-0">
+      <div class="h-full bg-primary transition-all duration-500 ease-in-out"
+           style="width: {{ progressPercent }}%;"></div>
+    </div>
+
+    {# 6-Column Grid #}
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-y-6 gap-x-2 relative z-10">
+      {% for step in steps %}
+        {% set title = ('step.' ~ step.id ~ '.title')|trans({}, '_installation_stepper') %}
+        {% set description = ('step.' ~ step.id ~ '.description')|trans({}, '_installation_stepper') %}
+        {% set active = currentRoute in step.route %}
+        {% set completed = stages[step.id] ?? false %}
+
+        <div class="flex flex-col items-center text-center group">
+
+          {# Circle Badge (Static) #}
+          <div class="relative bg-white rounded-full p-1">
+            <div class="flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm transition-all duration-200 shadow-sm
+              {% if completed and not active %}
+                bg-primary border-2 border-primary text-white
+              {% elseif active %}
+                bg-white border-2 border-primary text-primary ring-4 ring-primary/10 scale-105
+              {% else %}
+                bg-slate-50 border-2 border-slate-200 text-slate-400
+              {% endif %}">
+              {% if completed and not active %}
+                <twig:ux:icon name="wba:check-rounded" class="w-5 fill-current stroke-none"/>
+              {% else %}
+                {{ loop.index }}
+              {% endif %}
+            </div>
+          </div>
+
+          {# Step Title & Description #}
+          <div class="mt-2.5 flex flex-col items-center w-full px-0.5">
+            <span class="text-xs font-bold leading-tight transition-colors duration-200
+              {% if active %}
+                text-primary
+              {% elseif completed %}
+                text-slate-900
+              {% else %}
+                text-slate-400
+              {% endif %}">
+              {{ title }}
             </span>
-          {% endif %}
-        </div>
 
-        <div class="mt-4 sm:mt-1 md:mt-2">
-          <h4 class="text-sm sm:text-xs font-semibold
-                        {% if completed or active %} text-primary {% else %} text-gray-500 {% endif %}">
-            {{ title }}
-          </h4>
-          <p class="text-xs sm:text-[9px] text-gray-400 mt-1 break-words">{{ description }}</p>
+            <p class="text-[10px] leading-tight text-slate-400 mt-1 hidden xl:block line-clamp-2">
+              {{ description }}
+            </p>
+          </div>
+
         </div>
-      </div>
-    {% endfor %}
+      {% endfor %}
+    </div>
+
   </div>
 </div>
