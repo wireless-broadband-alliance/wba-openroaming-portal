@@ -17,10 +17,12 @@
 
     <div class="my-[25px] divider"></div>
 
-    {{ include('shared/_toast.html.twig', {
-        toast_type: 'toast-warning-dashboard',
-        message: message,
-    }) }}
+    {% if message is defined and message %}
+        {{ include('shared/_toast.html.twig', {
+            toast_type: 'toast-warning-dashboard',
+            message: message,
+        }) }}
+    {% endif %}
 
     {{ form_start(form, {attr: {autocomplete: 'off'}}) }}
 

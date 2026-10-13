@@ -1,0 +1,18 @@
+captcha:
+  provider:
+    turnstile: "Cloudflare Turnstile"
+    recaptcha3: "Google reCAPTCHA v3"
+  turnstile:
+    key:
+      label: "Turnstile Site Key"
+      placeholder: "0x4AAAAAAA..."
+    secret:
+      label: "Turnstile Secret Key"
+      placeholder: "0x4AAAAAAA..."
+  recaptcha3:
+    key:
+      label: "reCAPTCHA v3 Site Key"
+      placeholder: "6Ld..."
+    secret:
+      label: "reCAPTCHA v3 Secret Key"
+      placeholder: "6Ld..."

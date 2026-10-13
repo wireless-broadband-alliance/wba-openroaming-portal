@@ -245,3 +245,6 @@ securityTxt:
   saveError: "Ocorreu um erro ao guardar a configuração do Security.txt."
   formError: "Por favor, corrija os erros no formulário antes de continuar."
 securityTxtSettingsResetSuccessfully: "As definições foram repostas com sucesso."
+captcha:
+  saveSuccess: "Definições de CAPTCHA guardadas com sucesso."
+  saveError: "Ocorreu um erro ao guardar as definições de CAPTCHA."

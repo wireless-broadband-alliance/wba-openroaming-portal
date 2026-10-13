@@ -28,14 +28,17 @@ class CaptchaStepType extends AbstractType
         $builder
             ->add('provider', EnumType::class, [
                 'class' => CaptchaProviderEnum::class,
-                'choice_label' => fn (CaptchaProviderEnum $provider) => match ($provider) {
-                    CaptchaProviderEnum::OFF => $this->translator->trans('captcha.provider.off', [], 'CaptchaStepType'),
-                    CaptchaProviderEnum::TURNSTILE => $this->translator->trans('captcha.provider.turnstile', [], 'CaptchaStepType'),
-                    CaptchaProviderEnum::RECAPTCHA3 => $this->translator->trans('captcha.provider.recaptcha3', [], 'CaptchaStepType'),
-                },
+                'choices' => [
+                    CaptchaProviderEnum::TURNSTILE,
+                    CaptchaProviderEnum::RECAPTCHA3,
+                ],
+                'choice_label' => fn(CaptchaProviderEnum $provider) => $this->translator->trans(
+                    'captcha.provider.' . strtolower($provider->name),
+                    [],
+                    'CaptchaStepType'
+                ),
                 'expanded' => false,
                 'required' => true,
-                'label' => $this->translator->trans('captcha.provider.label', [], 'CaptchaStepType'),
             ])
             ->add('turnstileKey', TextType::class, [
                 'required' => false,

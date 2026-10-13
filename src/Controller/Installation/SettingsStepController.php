@@ -207,11 +207,6 @@ class SettingsStepController extends AbstractController
                 'form' => $form->createView(),
                 'formDTO' => $settingsDTO,
                 'stages' => $this->installationService->getStepperStatus($computedStep, $lastInstallation),
-                'message' => $this->translator->trans(
-                    'canSkipThisPage',
-                    [],
-                    'controllers'
-                ),
             ]
         );
     }

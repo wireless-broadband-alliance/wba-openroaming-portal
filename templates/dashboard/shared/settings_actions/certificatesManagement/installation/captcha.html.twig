@@ -17,10 +17,12 @@
 
     <div class="my-[25px] divider"></div>
 
-    {{ include('shared/_toast.html.twig', {
-        toast_type: 'toast-warning-dashboard',
-        message: message|default(null),
-    }) }}
+    {% if message is defined and message %}
+        {{ include('shared/_toast.html.twig', {
+            toast_type: 'toast-warning-dashboard',
+            message: message,
+        }) }}
+    {% endif %}
 
     {{ form_start(form, {attr: {autocomplete: 'off'}}) }}
 
@@ -61,11 +63,8 @@
             <div class="border-b border-slate-100 pb-4 flex flex-row justify-between items-start">
                 <div>
                     <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                        <span class="text-orange-600">⚡</span> {{ 'turnstileLabel'|trans({}, 'captcha') }}
+                        {{ 'turnstileLabel'|trans({}, 'captcha') }}
                     </h2>
-                    <p class="text-xs text-slate-500 mt-1">
-                        {{ 'turnstileDescription'|trans({}, 'captcha') }}
-                    </p>
                 </div>
 
                 <label class="flex items-center cursor-pointer pt-1">
@@ -117,11 +116,8 @@
             <div class="border-b border-slate-100 pb-4 flex flex-row justify-between items-start">
                 <div>
                     <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                        <span class="text-blue-600">🛡️</span> {{ 'recaptcha3Label'|trans({}, 'captcha') }}
+                        {{ 'recaptcha3Label'|trans({}, 'captcha') }}
                     </h2>
-                    <p class="text-xs text-slate-500 mt-1">
-                        {{ 'recaptcha3Description'|trans({}, 'captcha') }}
-                    </p>
                 </div>
 
                 <label class="flex items-center cursor-pointer pt-1">
