@@ -5,6 +5,7 @@ namespace App\Controller\Installation;
 use App\DTO\CaptchaDTO;
 use App\Entity\InstallationProgress;
 use App\Enum\AdminRoleType;
+use App\Enum\CaptchaProviderEnum;
 use App\Enum\InstallationStep;
 use App\Exception\EncryptionException;
 use App\Form\CaptchaStepType;
@@ -68,6 +69,12 @@ class CaptchaStepController extends AbstractController
         }
 
         $dto = new CaptchaDTO();
+
+        // Pre-fill provider from installation entity if exists, defaulting to TURNSTILE
+        $provider = $lastInstallation->getCaptchaProvider();
+        $dto->provider = ($provider && $provider !== CaptchaProviderEnum::OFF)
+            ? $provider
+            : CaptchaProviderEnum::TURNSTILE;
 
         $form = $this->createForm(CaptchaStepType::class, $dto);
         $form->handleRequest($request);
