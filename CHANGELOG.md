@@ -6,6 +6,14 @@
   CA SHA-1 hashes are now automatically sanitized into 20 space-separated hex pairs (e.g., ca bd 2a 79...) to comply
   with
   Windows XML schema validation.
+- **API User Registration & External Providers**: Fixed issues in the registration API endpoints involving external OAuth providers (Google and Microsoft) and updated payload validation logic to improve onboarding stability.
+- **Password Reset & Token Verification**: Fixed a bug where password reset emails contained the hashed token instead of the plain-text verification code, rendering reset links invalid. Corrected the API validation logic to properly compare incoming raw tokens against the Argon2id hashes stored in the database.
+- Fix invalid dependency injection service wiring for `GoogleController` and `MicrosoftController` in `services.yaml`
+  that caused `TypeError` 500.
+- Fix API forgot password reset flow where raw Argon2id hashes and unencoded characters in verification links caused
+  validation failures on `/forgot-password/link`.
+- Fix bug where .env settings were not updated in the database following post-login listener verification
+  during an active installation flow.
 
 ## Release V1.14.1
 
