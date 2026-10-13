@@ -69,12 +69,7 @@ class CaptchaStepController extends AbstractController
         }
 
         $dto = new CaptchaDTO();
-
-        // Pre-fill provider from installation entity if exists, defaulting to TURNSTILE
-        $provider = $lastInstallation->getCaptchaProvider();
-        $dto->provider = ($provider && $provider !== CaptchaProviderEnum::OFF)
-            ? $provider
-            : CaptchaProviderEnum::TURNSTILE;
+        $dto->provider = $lastInstallation->getCaptchaProvider() ?? CaptchaProviderEnum::TURNSTILE;
 
         $form = $this->createForm(CaptchaStepType::class, $dto);
         $form->handleRequest($request);

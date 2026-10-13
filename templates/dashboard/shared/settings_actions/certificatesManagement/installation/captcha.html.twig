@@ -25,53 +25,55 @@
     {% endif %}
 
     <twig:CaptchaStepForm :form="form" :captchaDTO="formDTO">
-        {{ form_start(form, {attr: {autocomplete: 'off'}}) }}
-
         {% set selectedProvider = form.provider.vars.value %}
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div data-controller="visibility">
+            {{ form_start(form, { attr: { autocomplete: 'off' } }) }}
 
-            {# ================= PROVIDER SELECTION CARD ================= #}
-            <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5">
-                <div class="border-b border-slate-100 pb-4">
-                    <h2 class="text-lg font-bold text-slate-900">
-                        {{ 'captchaProviderLabel'|trans({}, 'captcha') }}
-                    </h2>
-                    <p class="text-xs text-slate-500 mt-1">
-                        {{ 'captchaProviderDescription'|trans({}, 'captcha') }}
-                    </p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                {# ================= PROVIDER SELECTION CARD ================= #}
+                <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5">
+                    <div class="border-b border-slate-100 pb-4">
+                        <h2 class="text-lg font-bold text-slate-900">
+                            {{ 'captchaProviderLabel'|trans({}, 'captcha') }}
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-1">
+                            {{ 'captchaProviderDescription'|trans({}, 'captcha') }}
+                        </p>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-2">
+                            {{ 'selectProvider'|trans({}, 'captcha') }}
+                        </label>
+
+                        {{ form_widget(form.provider, {
+                            attr: {
+                                class: 'form-widget',
+                                'data-visibility-target': 'select',
+                                'data-action': 'change->visibility#update',
+                                'data-model': 'on(change)|*',
+                            },
+                        }) }}
+                        {% if form_errors(form.provider) %}
+                            <div class="text-xs text-red-500 font-medium mt-1">
+                                {{ form_errors(form.provider) }}
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
 
-                <div class="space-y-1">
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-2">
-                        {{ 'selectProvider'|trans({}, 'captcha') }}
-                    </label>
-
-                    {{ form_widget(form.provider, {
-                        attr: {
-                            class: 'form-widget',
-                            'data-model': 'on(change)|*',
-                        },
-                    }) }}
-                    {% if form_errors(form.provider) %}
-                        <div class="text-xs text-red-500 font-medium mt-1">
-                            {{ form_errors(form.provider) }}
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            {# ================= CLOUDFLARE TURNSTILE CARD ================= #}
-            {% if selectedProvider == 'TURNSTILE' or selectedProvider == 'turnstile' %}
-                <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5"
+                {# ================= CLOUDFLARE TURNSTILE CARD ================= #}
+                <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5 {{ selectedProvider != 'TURNSTILE' ? 'hidden' : '' }}"
+                     data-visibility-target="item"
+                     data-visibility-value="TURNSTILE"
                         {{ stimulus_controller('card') }}>
 
                     <div class="border-b border-slate-100 pb-4 flex flex-row justify-between items-start">
-                        <div>
                             <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
                                 {{ 'turnstileLabel'|trans({}, 'captcha') }}
                             </h2>
-                        </div>
 
                         <label class="flex items-center cursor-pointer pt-1">
                             <img class="w-5 h-5 opacity-70 hover:opacity-100 transition"
@@ -85,7 +87,6 @@
                         description: 'turnstileHelpInfo'|trans({}, 'captcha'),
                     }) }}
 
-                    {# Turnstile Site Key #}
                     <div class="space-y-1">
                         <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600">
                             {{ 'turnstileSiteKeyLabel'|trans({}, 'captcha') }}
@@ -94,16 +95,14 @@
                             attr: {
                                 class: 'form-widget',
                                 placeholder: '0x4AAAAAAA...',
-                            },
+                                'data-model': 'on(blur)|*',
+                            }
                         }) }}
                         {% if form_errors(form.turnstileKey) %}
-                            <div class="text-xs text-red-500 font-medium mt-1">
-                                {{ form_errors(form.turnstileKey) }}
-                            </div>
+                            <div class="text-xs text-red-500 font-medium mt-1">{{ form_errors(form.turnstileKey) }}</div>
                         {% endif %}
                     </div>
 
-                    {# Turnstile Secret Key #}
                     <div class="space-y-1 pt-2 border-t border-slate-100">
                         <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600">
                             {{ 'turnstileSecretKeyLabel'|trans({}, 'captcha') }}
@@ -112,28 +111,25 @@
                             attr: {
                                 class: 'form-widget',
                                 placeholder: '0x4AAAAAAA...',
-                            },
+                                'data-model': 'on(blur)|*',
+                            }
                         }) }}
                         {% if form_errors(form.turnstileSecret) %}
-                            <div class="text-xs text-red-500 font-medium mt-1">
-                                {{ form_errors(form.turnstileSecret) }}
-                            </div>
+                            <div class="text-xs text-red-500 font-medium mt-1">{{ form_errors(form.turnstileSecret) }}</div>
                         {% endif %}
                     </div>
                 </div>
-            {% endif %}
 
-            {# ================= GOOGLE RECAPTCHA V3 CARD ================= #}
-            {% if selectedProvider == 'RECAPTCHA3' or selectedProvider == 'recaptcha3' %}
-                <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5"
+                {# ================= GOOGLE RECAPTCHA V3 CARD ================= #}
+                <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5 {{ selectedProvider != 'RECAPTCHA3' ? 'hidden' : '' }}"
+                     data-visibility-target="item"
+                     data-visibility-value="RECAPTCHA3"
                         {{ stimulus_controller('card') }}>
 
                     <div class="border-b border-slate-100 pb-4 flex flex-row justify-between items-start">
-                        <div>
                             <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
                                 {{ 'recaptcha3Label'|trans({}, 'captcha') }}
                             </h2>
-                        </div>
 
                         <label class="flex items-center cursor-pointer pt-1">
                             <img class="w-5 h-5 opacity-70 hover:opacity-100 transition"
@@ -147,7 +143,6 @@
                         description: 'recaptcha3HelpInfo'|trans({}, 'captcha'),
                     }) }}
 
-                    {# reCAPTCHA v3 Site Key #}
                     <div class="space-y-1">
                         <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600">
                             {{ 'recaptcha3SiteKeyLabel'|trans({}, 'captcha') }}
@@ -156,16 +151,14 @@
                             attr: {
                                 class: 'form-widget',
                                 placeholder: '6Ld...',
-                            },
+                                'data-model': 'on(blur)|*',
+                            }
                         }) }}
                         {% if form_errors(form.recaptcha3Key) %}
-                            <div class="text-xs text-red-500 font-medium mt-1">
-                                {{ form_errors(form.recaptcha3Key) }}
-                            </div>
+                            <div class="text-xs text-red-500 font-medium mt-1">{{ form_errors(form.recaptcha3Key) }}</div>
                         {% endif %}
                     </div>
 
-                    {# reCAPTCHA v3 Secret Key #}
                     <div class="space-y-1 pt-2 border-t border-slate-100">
                         <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600">
                             {{ 'recaptcha3SecretKeyLabel'|trans({}, 'captcha') }}
@@ -174,31 +167,30 @@
                             attr: {
                                 class: 'form-widget',
                                 placeholder: '6Ld...',
-                            },
+                                'data-model': 'on(blur)|*',
+                            }
                         }) }}
                         {% if form_errors(form.recaptcha3Secret) %}
-                            <div class="text-xs text-red-500 font-medium mt-1">
-                                {{ form_errors(form.recaptcha3Secret) }}
-                            </div>
+                            <div class="text-xs text-red-500 font-medium mt-1">{{ form_errors(form.recaptcha3Secret) }}</div>
                         {% endif %}
                     </div>
                 </div>
-            {% endif %}
 
+            </div>
+
+            <div class="my-8 border-t border-gray-200"></div>
+
+            <div class="flex justify-end">
+                <button type="submit"
+                        class="px-6 py-2.5 bg-lime-600 hover:bg-lime-700 text-white font-medium text-sm rounded-lg shadow transition-all cursor-pointer"
+                        onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'data_base') }}')">
+                    {{ 'captchaApplyBtn'|trans({}, 'captcha') }}
+                </button>
+            </div>
+
+            {{ form_row(form._token) }}
+            {{ form_end(form, {render_rest: false}) }}
         </div>
-
-        <div class="my-8 border-t border-gray-200"></div>
-
-        <div class="flex justify-end">
-            <button type="submit"
-                    class="px-6 py-2.5 bg-lime-600 hover:bg-lime-700 text-white font-medium text-sm rounded-lg shadow transition-all cursor-pointer"
-                    onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'data_base') }}')">
-                {{ 'captchaApplyBtn'|trans({}, 'captcha') }}
-            </button>
-        </div>
-
-        {{ form_row(form._token) }}
-        {{ form_end(form, {render_rest: false}) }}
     </twig:CaptchaStepForm>
 
 {% endblock %}

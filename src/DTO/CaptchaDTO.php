@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 class CaptchaDTO
 {
     #[Assert\NotNull]
-    public CaptchaProviderEnum $provider = CaptchaProviderEnum::OFF;
+    public ?CaptchaProviderEnum $provider = CaptchaProviderEnum::TURNSTILE;
 
     #[Assert\Length(min: 5, max: 255, minMessage: 'minCharacters', maxMessage: 'maxCharacters')]
     #[Assert\When(
