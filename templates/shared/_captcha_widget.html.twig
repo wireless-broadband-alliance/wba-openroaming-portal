@@ -12,16 +12,6 @@ To use CAPTCHA in the forms, use the dedicated Twig function:
 <div class="ml-3 mt-5">
     {{ form_widget(field) }}
 
-    {# Active CAPTCHA Provider Label #}
-    <div class="text-xs text-gray-500 mb-1 font-medium">
-        Active Provider:
-        {% if provider == constant('App\\Enum\\CaptchaProviderEnum::TURNSTILE').value %}
-            <span class="text-orange-600 font-semibold">Cloudflare Turnstile</span>
-        {% elseif provider == constant('App\\Enum\\CaptchaProviderEnum::RECAPTCHA3').value %}
-            <span class="text-blue-600 font-semibold">Google reCAPTCHA v3</span>
-        {% endif %}
-    </div>
-
     {# Dynamic UI message container for client-side feedback #}
     <div id="captcha-ui-status" class="text-sm hidden mt-1"></div>
 
@@ -33,61 +23,9 @@ To use CAPTCHA in the forms, use the dedicated Twig function:
              data-callback="onTurnstileSuccess"
              data-error-callback="onTurnstileError"></div>
         <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-        <script>
-          function onTurnstileSuccess(token) {
-            console.log('✅ Cloudflare Turnstile Token Generated:', token);
-
-            // Inject token into Symfony hidden form field
-            var input = document.getElementById('{{ fieldId }}');
-            if (input) {
-              input.value = token;
-            }
-
-            var statusDiv = document.getElementById('captcha-ui-status');
-            if (statusDiv) {
-              statusDiv.textContent = '⚡ Cloudflare Turnstile verification successful! 🎉';
-              statusDiv.className = 'text-green-600 font-semibold text-sm mt-1';
-            }
-          }
-
-          function onTurnstileError() {
-            var statusDiv = document.getElementById('captcha-ui-status');
-            if (statusDiv) {
-              statusDiv.textContent = '❌ Cloudflare Turnstile verification failed. Please refresh.';
-              statusDiv.className = 'text-red-500 text-sm mt-1';
-            }
-          }
-        </script>
 
         {% elseif provider == constant('App\\Enum\\CaptchaProviderEnum::RECAPTCHA3').value %}
         <script src="https://www.google.com/recaptcha/api.js?render={{ siteKey }}"></script>
-        <script>
-          grecaptcha.ready(function() {
-            grecaptcha.execute('{{ siteKey }}', { action: 'login' })
-              .then(function(token) {
-                console.log('✅ Google reCAPTCHA v3 Token Generated:', token);
-
-                var input = document.getElementById('{{ fieldId }}');
-                if (input) {
-                  input.value = token;
-                }
-
-                var statusDiv = document.getElementById('captcha-ui-status');
-                if (statusDiv) {
-                  statusDiv.textContent = '⚡ Google reCAPTCHA v3 verification successful! 🎉';
-                  statusDiv.className = 'text-green-600 font-semibold text-sm mt-1';
-                }
-              })
-              .catch(function(err) {
-                console.error('❌ Google reCAPTCHA v3 Error:', err);
-                var statusDiv = document.getElementById('captcha-ui-status');
-                if (statusDiv) {
-                  statusDiv.textContent = '❌ Google reCAPTCHA v3 initialization failed. Please refresh the page.';
-                  statusDiv.className = 'text-red-500 text-sm mt-1';
-                }
-              });
-          });
-        </script>
     {% endif %}
 
     <div class="text-red-500">
