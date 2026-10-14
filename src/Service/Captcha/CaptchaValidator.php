@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\Captcha;
 
-use App\Api\V3\BaseResponse;
+use App\Api\V4\BaseResponse;
 use App\Enum\CaptchaProviderEnum;
 use App\Enum\SettingName;
 use App\Repository\SettingRepository;
@@ -75,14 +75,20 @@ readonly class CaptchaValidator
             return null;
         }
 
-        // Extract token from any of the standard payload keys
-        $token = (string)(
-            $payload['turnstile_token']
-            ?? $payload['recaptcha_token']
-            ?? ''
-        );
+        // Only the parameter matching the active provider is accepted
+        $tokenKey = match ($provider) {
+            CaptchaProviderEnum::TURNSTILE->value => 'turnstile_token',
+            CaptchaProviderEnum::RECAPTCHA3->value => 'recaptcha_token',
+            default => null,
+        };
 
-        if (trim($token) === '') {
+        if ($tokenKey === null) {
+            return new BaseResponse(400, null, 'CAPTCHA validation failed');
+        }
+
+        $token = $payload[$tokenKey] ?? '';
+
+        if (!is_string($token) || trim($token) === '') {
             return new BaseResponse(400, null, 'CAPTCHA validation failed');
         }
 
