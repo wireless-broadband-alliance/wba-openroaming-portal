@@ -15,7 +15,7 @@ class CaptchaDTO
     #[Assert\When(
         expression: 'this.provider !== null and this.provider.isTurnstile()',
         constraints: [
-            new Assert\NotBlank(message: 'notBlank'),
+            new Assert\NotBlank(message: 'fieldCannotBeBlank'),
             new Assert\Length(min: 5, max: 255, minMessage: 'minCharacters', maxMessage: 'maxCharacters'),
         ],
     )]
@@ -24,7 +24,7 @@ class CaptchaDTO
     #[Assert\When(
         expression: 'this.provider !== null and this.provider.isTurnstile()',
         constraints: [
-            new Assert\NotBlank(message: 'notBlank'),
+            new Assert\NotBlank(message: 'fieldCannotBeBlank'),
             new Assert\Length(min: 5, max: 255, minMessage: 'minCharacters', maxMessage: 'maxCharacters'),
         ],
     )]
@@ -33,7 +33,7 @@ class CaptchaDTO
     #[Assert\When(
         expression: 'this.provider !== null and this.provider.isRecaptcha3()',
         constraints: [
-            new Assert\NotBlank(message: 'notBlank'),
+            new Assert\NotBlank(message: 'fieldCannotBeBlank'),
             new Assert\Length(min: 5, max: 255, minMessage: 'minCharacters', maxMessage: 'maxCharacters'),
         ],
     )]
@@ -42,7 +42,7 @@ class CaptchaDTO
     #[Assert\When(
         expression: 'this.provider !== null and this.provider.isRecaptcha3()',
         constraints: [
-            new Assert\NotBlank(message: 'notBlank'),
+            new Assert\NotBlank(message: 'fieldCannotBeBlank'),
             new Assert\Length(min: 5, max: 255, minMessage: 'minCharacters', maxMessage: 'maxCharacters'),
         ],
     )]
