@@ -1,3 +1,74 @@
+## Release V1.15.0 (Work in Progress)
+
+### Breaking Changes & API v3 Deprecation Notice
+
+- **API v3 Deprecation & API v4 Transition**: API v3 is now officially deprecated due to structural breaking changes in
+  the base configuration response required for multi-provider CAPTCHA support (`TURNSTILE`, `RECAPTCHA3`, and `OFF`).
+  All client integrations and mobile applications are encouraged to migrate to **API v4** (`/api/v4`).
+  - **Base Configuration Payload Overhaul (`/config`)**:
+    - Removed legacy boolean flag `platform.TURNSTILE_CHECKER` in favor of dynamic enum `platform.CAPTCHA_PROVIDER` (
+      `TURNSTILE`, `RECAPTCHA3`, or `OFF`).
+    - Replaced fixed `turnstile` object block with dynamic provider keys that strictly reflect the active CAPTCHA
+      provider (e.g., returning a `recaptcha3` object with `RECAPTCHA3_KEY` when `CAPTCHA_PROVIDER` is set to
+      `RECAPTCHA3`).
+  - **Payload Structure Comparison**:
+    - *Legacy API v3 Config Response*:
+      ```json
+      {
+        "success": true,
+        "data": {
+          "platform": {
+            "TURNSTILE_CHECKER": true
+          },
+          "turnstile": {
+            "TURNSTILE_KEY": "0x4AAAAAAAbU9Fvdl8WH6GRk"
+          }
+        }
+      }
+      ```
+    - *New API v4 Config Response*:
+      ```json
+      {
+        "success": true,
+        "data": {
+          "platform": {
+            "CAPTCHA_PROVIDER": "RECAPTCHA3"
+          },
+          "recaptcha3": {
+            "RECAPTCHA3_KEY": "6LfJmOstAAAAAD274T05Q_1HRdEd8KuX3ETgmPJm"
+          }
+        }
+      }
+      ```
+
+### Action Required & Deployment Steps
+
+- **Database Migrations & Turnstile Settings Import**: Executing the database migration sets up the required settings
+  structures. You must run the new Turnstile settings import command afterward to encrypt and sync existing `.env` keys
+  into the database.
+  - Run the migrations and import command with:
+    ```bash
+    php bin/console doctrine:migrations:migrate
+    php bin/console import:turnstileSettings
+    ```
+
+### Improvements & Features
+
+- **Installation Wizard CAPTCHA Integration**: Fully integrated CAPTCHA provider configuration into the initial project
+  setup and installation wizard flow.
+- **Dynamic CAPTCHA Provider API**: Reworked system configuration endpoints and base API routes to dynamically report
+  and query the currently active CAPTCHA provider (`TURNSTILE`, `RECAPTCHA3`, or `OFF`).
+- **API v4 Documentation**: Introduced support for API v4 (`/api/v4`) and updated the primary `/api` documentation
+  endpoint to redirect to the new v4 version by default.
+- **Environment Turnstile Settings Importer (`import:turnstileSettings`)**: Added a CLI command (
+  `php bin/console import:turnstileSettings`) to read `TURNSTILE_KEY` and `TURNSTILE_SECRET` from environment variables,
+  encrypt them at rest via `EncryptionService`, and persist or update them in the `Setting` table.
+
+### Pending & Work in Progress
+
+- **ReCAPTCHA v3 Outcomes & Documentation**: Finalizing end-to-end testing for ReCAPTCHA v3 verification outcomes and
+  updating the corresponding API documentation specs.
+
 ## Release v1.14.2
 
 - **Windows EAPHost Root CA Hash Formatting**: Fixed an issue where raw SHA-1 certificate thumbprints extracted by the

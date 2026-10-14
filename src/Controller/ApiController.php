@@ -24,7 +24,7 @@ class ApiController extends AbstractController
     #[Route('/api', name: 'api_docs')]
     public function redirectToLatestAPIVersion(): Response
     {
-        return $this->redirectToRoute('api_v3_docs');
+        return $this->redirectToRoute('api_v4_docs');
     }
 
     /**
@@ -33,7 +33,16 @@ class ApiController extends AbstractController
     #[Route('/api/v3', name: 'api_v3_docs')]
     public function versionThree(): Response
     {
-        return $this->renderApiDocs(ApiVersion::API_V3, 'api/version_tree.html.twig');
+        return $this->renderApiDocs(ApiVersion::API_V3, 'api/version_three.html.twig');
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Route('/api/v4', name: 'api_v4_docs')]
+    public function versionFour(): Response
+    {
+        return $this->renderApiDocs(ApiVersion::API_V4, 'api/version_four.html.twig');
     }
 
     /**
