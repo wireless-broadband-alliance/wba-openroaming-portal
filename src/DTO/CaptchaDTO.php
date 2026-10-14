@@ -12,31 +12,39 @@ class CaptchaDTO
     #[Assert\NotNull]
     public ?CaptchaProviderEnum $provider = CaptchaProviderEnum::TURNSTILE;
 
-    #[Assert\Length(min: 5, max: 255, minMessage: 'minCharacters', maxMessage: 'maxCharacters')]
     #[Assert\When(
-        expression: 'this.provider.isTurnstile()',
-        constraints: [new Assert\NotBlank(message: 'notBlank')],
+        expression: 'this.provider !== null and this.provider.isTurnstile()',
+        constraints: [
+            new Assert\NotBlank(message: 'notBlank'),
+            new Assert\Length(min: 5, max: 255, minMessage: 'minCharacters', maxMessage: 'maxCharacters'),
+        ],
     )]
     public ?string $turnstileKey = null;
 
-    #[Assert\Length(min: 5, max: 255, minMessage: 'minCharacters', maxMessage: 'maxCharacters')]
     #[Assert\When(
-        expression: 'this.provider.isTurnstile()',
-        constraints: [new Assert\NotBlank(message: 'notBlank')],
+        expression: 'this.provider !== null and this.provider.isTurnstile()',
+        constraints: [
+            new Assert\NotBlank(message: 'notBlank'),
+            new Assert\Length(min: 5, max: 255, minMessage: 'minCharacters', maxMessage: 'maxCharacters'),
+        ],
     )]
     public ?string $turnstileSecret = null;
 
-    #[Assert\Length(min: 5, max: 255, minMessage: 'minCharacters', maxMessage: 'maxCharacters')]
     #[Assert\When(
-        expression: 'this.provider.isRecaptcha3()',
-        constraints: [new Assert\NotBlank(message: 'notBlank')],
+        expression: 'this.provider !== null and this.provider.isRecaptcha3()',
+        constraints: [
+            new Assert\NotBlank(message: 'notBlank'),
+            new Assert\Length(min: 5, max: 255, minMessage: 'minCharacters', maxMessage: 'maxCharacters'),
+        ],
     )]
     public ?string $recaptcha3Key = null;
 
-    #[Assert\Length(min: 5, max: 255, minMessage: 'minCharacters', maxMessage: 'maxCharacters')]
     #[Assert\When(
-        expression: 'this.provider.isRecaptcha3()',
-        constraints: [new Assert\NotBlank(message: 'notBlank')],
+        expression: 'this.provider !== null and this.provider.isRecaptcha3()',
+        constraints: [
+            new Assert\NotBlank(message: 'notBlank'),
+            new Assert\Length(min: 5, max: 255, minMessage: 'minCharacters', maxMessage: 'maxCharacters'),
+        ],
     )]
     public ?string $recaptcha3Secret = null;
 }
