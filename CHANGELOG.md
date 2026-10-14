@@ -54,20 +54,18 @@
 
 ### Improvements & Features
 
+- **API v4 Implementation & Documentation**: Released API v4 (`/api/v4`) as the new primary API version, updating the
+  main `/api` documentation endpoint to redirect to v4 by default. All CAPTCHA-protected endpoints (login, registration,
+  password reset, SMS registration/reset, and 2FA enablement) now dynamically accept tokens matching the active
+  provider (`turnstile_token` or `recaptcha_token`), requiring no token when the provider is set to `OFF`. Complete
+  request bodies, provider behaviors, and response schemas are fully documented.
 - **Installation Wizard CAPTCHA Integration**: Fully integrated CAPTCHA provider configuration into the initial project
   setup and installation wizard flow.
 - **Dynamic CAPTCHA Provider API**: Reworked system configuration endpoints and base API routes to dynamically report
   and query the currently active CAPTCHA provider (`TURNSTILE`, `RECAPTCHA3`, or `OFF`).
-- **API v4 Documentation**: Introduced support for API v4 (`/api/v4`) and updated the primary `/api` documentation
-  endpoint to redirect to the new v4 version by default.
 - **Environment Turnstile Settings Importer (`import:turnstileSettings`)**: Added a CLI command (
   `php bin/console import:turnstileSettings`) to read `TURNSTILE_KEY` and `TURNSTILE_SECRET` from environment variables,
   encrypt them at rest via `EncryptionService`, and persist or update them in the `Setting` table.
-
-### Pending & Work in Progress
-
-- **ReCAPTCHA v3 Outcomes & Documentation**: Finalizing end-to-end testing for ReCAPTCHA v3 verification outcomes and
-  updating the corresponding API documentation specs.
 
 ## Release v1.14.2
 
