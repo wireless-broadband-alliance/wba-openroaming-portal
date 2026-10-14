@@ -170,12 +170,8 @@
                     {% endif %}
                 </div>
 
-                {# Turnstile Checker #}
-                {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\OperationMode::ON').value %}
-                    <div class="ml-3 mt-5">
-                        {{ form_widget(formPassword.security) }}
-                    </div>
-                {% endif %}
+                {# CAPTCHA Verification Partial #}
+                {{ render_captcha(formPassword) }}
 
                 <button {{ stimulus_target('fields', 'button') }}
                         class="mt-6 w-[180px] btn-primary cursor-not-allowed"

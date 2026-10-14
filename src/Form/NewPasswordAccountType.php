@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace App\Form;
 
 use App\DTO\NewPasswordAccountDTO;
+use App\Enum\CaptchaProviderEnum;
 use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Repository\SettingRepository;
+use App\Service\Captcha\CaptchaValidator;
 use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
@@ -23,15 +26,12 @@ class NewPasswordAccountType extends AbstractType
 {
     public function __construct(
         private readonly TranslatorInterface $translator,
-        private readonly SettingRepository $settingRepository
+        private readonly CaptchaValidator $captchaValidator,
     ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $turnstileCheckerValue = $this->settingRepository->findOneBy(
-            ['name' => SettingName::TURNSTILE_CHECKER->value]
-        )?->getValue();
 
         if ($options['require_current_password']) {
             $builder->add('password', PasswordType::class, [
@@ -68,14 +68,10 @@ class NewPasswordAccountType extends AbstractType
                 'required' => true,
             ]);
 
-        if ($turnstileCheckerValue === OperationMode::ON->value) {
-            $builder->add('security', TurnstileType::class, [
-                'attr' => [
-                    'data-action' => 'contact',
-                    'data-theme' => 'light',
-                    'data-language' => $this->translator->getLocale(),
-                ],
-                'label' => false,
+        if ($this->captchaValidator->getActiveProvider() !== CaptchaProviderEnum::OFF->value) {
+            $builder->add('captcha', HiddenType::class, [
+                'required' => false,
+                'mapped' => false,
             ]);
         }
     }
