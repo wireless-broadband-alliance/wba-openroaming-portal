@@ -7,7 +7,6 @@ use App\DTO\InstallationProgressDTO;
 use App\DTO\SecurityTxtDTO;
 use App\Entity\InstallationProgress;
 use App\Entity\User;
-use App\Enum\CaptchaProviderEnum;
 use App\Enum\DataBaseSetupType;
 use App\Enum\DefaultUser;
 use App\Enum\InstallationStep;
@@ -524,6 +523,9 @@ readonly class InstallationService
         );
     }
 
+    /**
+     * @throws EncryptionException
+     */
     public function saveCaptchaSettings(CaptchaDTO $dto, InstallationProgress $installationProgress): void
     {
         $installationProgress->setCaptchaProvider($dto->provider);
@@ -572,10 +574,10 @@ readonly class InstallationService
             }
         }
 
-        // Persist provider choice to settings table
+        // Persist provider choice to settings table (store the enum's string value)
         $settingProvider = $this->settingRepository->findOneBy(['name' => SettingName::CAPTCHA_PROVIDER->value]);
         if ($settingProvider) {
-            $settingProvider->setValue($dto->provider);
+            $settingProvider->setValue($dto->provider?->value);
             $this->entityManager->persist($settingProvider);
         }
 

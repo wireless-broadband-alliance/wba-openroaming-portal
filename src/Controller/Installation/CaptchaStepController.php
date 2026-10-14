@@ -98,7 +98,7 @@ class CaptchaStepController extends AbstractController
                         $this->translator->trans('captcha.saveSuccess', [], 'controllers')
                     );
 
-                    // Dynamically calculates the next step (which will now be SECURITY_TXT)
+                    // Dynamically calculates the next step (SECURITY_TXT)
                     $nextStep = $this->installationService->getStep($lastInstallation);
 
                     return $this->installationFlow->redirectTo($nextStep);
