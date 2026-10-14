@@ -24,9 +24,11 @@
         }) }}
     {% endif %}
 
-    {% set selectedProvider = form.provider.vars.value %}
+    <twig:CaptchaStepForm :form="form" :captchaDTO="formDTO">
+        {% set selectedProvider = form.provider.vars.value %}
+        {% set turnstileValue = constant('App\\Enum\\CaptchaProviderEnum::TURNSTILE').value %}
+        {% set recaptcha3Value = constant('App\\Enum\\CaptchaProviderEnum::RECAPTCHA3').value %}
 
-    <div data-controller="captcha-step-provider" class="flex flex-col">
         {{ form_start(form, { attr: { autocomplete: 'off' } }) }}
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -50,8 +52,6 @@
                     {{ form_widget(form.provider, {
                         attr: {
                             class: 'form-widget',
-                            'data-captcha-step-provider-target': 'select',
-                            'data-action': 'change->captcha-step-provider#update',
                         },
                     }) }}
                     {% if form_errors(form.provider) %}
@@ -63,9 +63,7 @@
             </div>
 
             {# ================= CLOUDFLARE TURNSTILE CARD ================= #}
-            <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5 {{ selectedProvider != constant('App\\Enum\\CaptchaProviderEnum::TURNSTILE').value ? 'hidden' : '' }}"
-                 data-captcha-step-provider-target="item"
-                 data-captcha-step-provider-value="{{ constant('App\\Enum\\CaptchaProviderEnum::TURNSTILE').value }}"
+            <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5 {{ selectedProvider != turnstileValue ? 'hidden' : '' }}"
                     {{ stimulus_controller('card') }}>
 
                 <div class="border-b border-slate-100 pb-4 flex flex-row justify-between items-start">
@@ -117,9 +115,7 @@
             </div>
 
             {# ================= GOOGLE RECAPTCHA V3 CARD ================= #}
-            <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5 {{ selectedProvider != constant('App\\Enum\\CaptchaProviderEnum::RECAPTCHA3').value ? 'hidden' : '' }}"
-                 data-captcha-step-provider-target="item"
-                 data-captcha-step-provider-value="{{ constant('App\\Enum\\CaptchaProviderEnum::RECAPTCHA3').value }}"
+            <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5 {{ selectedProvider != recaptcha3Value ? 'hidden' : '' }}"
                     {{ stimulus_controller('card') }}>
 
                 <div class="border-b border-slate-100 pb-4 flex flex-row justify-between items-start">
@@ -184,6 +180,6 @@
 
         {{ form_row(form._token) }}
         {{ form_end(form, {render_rest: false}) }}
-    </div>
+    </twig:CaptchaStepForm>
 
 {% endblock %}
