@@ -33,6 +33,7 @@ readonly class ApiResponseService
 
         $prefix = match ($version) {
             ApiVersion::API_V3 => '/api/v3',
+            ApiVersion::API_V4 => '/api/v4',
         };
 
         foreach ($routes as $name => $route) {
@@ -97,6 +98,7 @@ readonly class ApiResponseService
     {
         $configFile = match ($version) {
             ApiVersion::API_V3 => __DIR__ . '/../../config/api/api_responses_v3.php',
+            ApiVersion::API_V4 => __DIR__ . '/../../config/api/api_responses_v4.php',
         };
 
         return require $configFile;
