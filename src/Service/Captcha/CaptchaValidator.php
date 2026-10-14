@@ -53,6 +53,20 @@ readonly class CaptchaValidator
         }
     }
 
+    /**
+     * Checks a secret key BEFORE it is saved (e.g. from the installation form).
+     *
+     * @return array{success: bool, error?: string}
+     */
+    public function validateCredentials(CaptchaProviderEnum $provider, ?string $secretKey): array
+    {
+        return match ($provider) {
+            CaptchaProviderEnum::TURNSTILE => $this->turnstileValidator->validateCredentials($secretKey),
+            CaptchaProviderEnum::RECAPTCHA3 => $this->recaptcha3Validator->validateCredentials($secretKey),
+            default => ['success' => true],
+        };
+    }
+
     public function validateApiPayload(array $payload, ?string $clientIp): ?BaseResponse
     {
         $provider = $this->getActiveProvider();

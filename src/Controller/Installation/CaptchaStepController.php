@@ -10,10 +10,12 @@ use App\Enum\InstallationStep;
 use App\Exception\EncryptionException;
 use App\Form\CaptchaStepType;
 use App\Security\Voter\UserAuthenticationVoter;
+use App\Service\Captcha\CaptchaValidator;
 use App\Service\GetSettings;
 use App\Service\InstallationFlow;
 use App\Service\InstallationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -32,6 +34,7 @@ class CaptchaStepController extends AbstractController
         private readonly InstallationFlow $installationFlow,
         private readonly GetSettings $getSettings,
         private readonly TranslatorInterface $translator,
+        private readonly CaptchaValidator $captchaValidator,
     ) {
     }
 
@@ -51,7 +54,6 @@ class CaptchaStepController extends AbstractController
         }
 
         $computedStep = $this->installationService->getStep($lastInstallation);
-
 
         // Guard: Redirect if current computed step is NOT CAPTCHA
         $redirect = $this->installationFlow->redirectIfStep(
@@ -74,24 +76,38 @@ class CaptchaStepController extends AbstractController
         $form = $this->createForm(CaptchaStepType::class, $dto);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            try {
-                $this->installationService->saveCaptchaSettings($dto, $lastInstallation);
+        if ($dto->provider instanceof CaptchaProviderEnum && $form->isSubmitted() && $form->isValid()) {
+            $isRecaptcha = $dto->provider->isRecaptcha3();
+            $secretField = $isRecaptcha ? 'recaptcha3Secret' : 'turnstileSecret';
+            $secret = $isRecaptcha ? $dto->recaptcha3Secret : $dto->turnstileSecret;
 
-                $this->addFlash(
-                    'success',
-                    $this->translator->trans('captcha.saveSuccess', [], 'controllers')
+            $credentials = $this->captchaValidator->validateCredentials($dto->provider, $secret);
+
+            if (!$credentials['success']) {
+                $form->get($secretField)->addError(
+                    new FormError(
+                        $credentials['error'] ?? $this->translator->trans('captcha.saveError', [], 'controllers')
+                    )
                 );
+            } else {
+                try {
+                    $this->installationService->saveCaptchaSettings($dto, $lastInstallation);
 
-                // Dynamically calculates the next step (which will now be SECURITY_TXT)
-                $nextStep = $this->installationService->getStep($lastInstallation);
+                    $this->addFlash(
+                        'success',
+                        $this->translator->trans('captcha.saveSuccess', [], 'controllers')
+                    );
 
-                return $this->installationFlow->redirectTo($nextStep);
-            } catch (Throwable) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('captcha.saveError', [], 'controllers')
-                );
+                    // Dynamically calculates the next step (which will now be SECURITY_TXT)
+                    $nextStep = $this->installationService->getStep($lastInstallation);
+
+                    return $this->installationFlow->redirectTo($nextStep);
+                } catch (Throwable) {
+                    $this->addFlash(
+                        'error',
+                        $this->translator->trans('captcha.saveError', [], 'controllers')
+                    );
+                }
             }
         }
 
