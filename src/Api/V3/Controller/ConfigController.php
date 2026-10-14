@@ -47,14 +47,15 @@ class ConfigController extends AbstractController
      */
     private function getSettings(): array
     {
+        $captchaProvider = $this->getSettingValueRaw(SettingName::CAPTCHA_PROVIDER->value);
+        $isTurnstile = $captchaProvider === CaptchaProviderEnum::TURNSTILE->value;
+
         $data['platform'] = [
             SettingName::PLATFORM_MODE->value => $this->getSettingValueRaw(SettingName::PLATFORM_MODE->value),
             SettingName::USER_VERIFICATION->value => $this->getSettingValueConverted(
                 SettingName::USER_VERIFICATION->value
             ),
-            SettingName::CAPTCHA_PROVIDER->value => $this->getSettingValueRaw(
-                SettingName::CAPTCHA_PROVIDER->value
-            ),
+            'TURNSTILE_CHECKER' => $isTurnstile,
             SettingName::CONTACT_EMAIL->value => $this->getSettingValueRaw(SettingName::CONTACT_EMAIL->value),
             SettingName::TOS->value => $this->resolveTosValue(),
             SettingName::PRIVACY_POLICY->value => $this->resolvePrivacyPolicyValue(),
@@ -84,10 +85,7 @@ class ConfigController extends AbstractController
             ),
         ];
 
-        // Active CAPTCHA provider site keys
-        $captchaProvider = $this->getSettingValueRaw(SettingName::CAPTCHA_PROVIDER->value);
-
-        if ($captchaProvider === CaptchaProviderEnum::TURNSTILE->value) {
+        if ($isTurnstile) {
             $turnstileKey = $this->getDecryptedSettingValue(SettingName::TURNSTILE_KEY->value);
             if ($turnstileKey === '' && $this->parameterBag->has('app.turnstile_key')) {
                 $turnstileKey = (string)$this->parameterBag->get('app.turnstile_key');
@@ -95,12 +93,6 @@ class ConfigController extends AbstractController
 
             $data['turnstile'] = [
                 'TURNSTILE_KEY' => $turnstileKey,
-            ];
-        } elseif ($captchaProvider === CaptchaProviderEnum::RECAPTCHA3->value) {
-            $recaptchaKey = $this->getDecryptedSettingValue(SettingName::RECAPTCHA3_KEY->value);
-
-            $data['recaptcha3'] = [
-                'RECAPTCHA3_KEY' => $recaptchaKey,
             ];
         }
 

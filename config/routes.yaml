@@ -28,3 +28,9 @@ api_v3:
     prefix: /api/v3
     resource: '../src/Api/V3/Controller/'
     type: attribute
+
+# API V4
+api_v4:
+    prefix: /api/v4
+    resource: '../src/Api/V4/Controller/'
+    type: attribute
