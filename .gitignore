@@ -2,8 +2,9 @@
 /.env.local
 /.env.local.php
 /.env.*.local
+# Each installation creates its own prod vault, so none of its files may be committed.
+# The dev vault (config/secrets/dev/) IS committed on purpose: its key only protects fake local/CI data.
 /config/secrets/prod/*
-/config/secrets/dev/*
 /public/bundles/
 /vendor/
 ###< symfony/framework-bundle ###
