@@ -8,15 +8,47 @@ use App\Exception\EncryptionException;
 use Exception;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
+/**
+ * AES-256-GCM encryption using a key that lives in the Symfony vault (secret name: ENCRYPTION_KEY).
+ *
+ * Output format: "v2:" + base64( IV (12) || TAG (16) || CIPHERTEXT )
+ *
+ * The "v2:" prefix makes the format self-describing, so values written by the legacy
+ * (APP_SECRET-based) scheme can be told apart and migrated, and future key/algorithm
+ * rotations can add "v3:" without guessing.
+ */
 class EncryptionService
 {
-    private string $cipher = "aes-256-gcm";
-    private const int TAG_LENGTH = 16; // 128-bit authentication tag
+    public const string PREFIX = 'v2:';
 
+    private const string CIPHER = 'aes-256-gcm';
+    private const int TAG_LENGTH = 16;
+    private const int MIN_SECRET_LENGTH = 32;
+    private const string KDF_INFO = 'app-data-encryption-v2';
+
+    private readonly string $key;
+
+    /**
+     * @throws EncryptionException
+     */
     public function __construct(
-        #[Autowire(env: 'APP_SECRET')]
-        private readonly string $encryptionSecret
+        #[Autowire(env: 'ENCRYPTION_KEY')]
+        string $encryptionKey
     ) {
+        if (strlen($encryptionKey) < self::MIN_SECRET_LENGTH) {
+            throw new EncryptionException(
+                'ENCRYPTION_KEY must be at least ' . self::MIN_SECRET_LENGTH . ' characters long.'
+            );
+        }
+
+        // Derive a proper 256-bit key. Never feed a raw passphrase to openssl_encrypt():
+        // PHP silently pads/truncates it to the key size.
+        $this->key = hash_hkdf('sha256', $encryptionKey, 32, self::KDF_INFO);
+    }
+
+    public function isEncrypted(string $value): bool
+    {
+        return str_starts_with($value, self::PREFIX);
     }
 
     /**
@@ -24,12 +56,10 @@ class EncryptionService
      */
     public function encrypt(string $plainText): string
     {
-        $ivLength = openssl_cipher_iv_length($this->cipher); // 12 bytes for GCM
+        $ivLength = openssl_cipher_iv_length(self::CIPHER);
 
         if (!is_int($ivLength) || $ivLength <= 0) {
-            throw new EncryptionException(
-                'Unable to determine IV length for cipher "' . $this->cipher . '".'
-            );
+            throw new EncryptionException('Unable to determine IV length for cipher "' . self::CIPHER . '".');
         }
 
         try {
@@ -42,11 +72,11 @@ class EncryptionService
             );
         }
 
-        $tag = ''; // Passed by reference; filled by openssl_encrypt
+        $tag = '';
         $encryptedRaw = openssl_encrypt(
             $plainText,
-            $this->cipher,
-            $this->encryptionSecret,
+            self::CIPHER,
+            $this->key,
             OPENSSL_RAW_DATA,
             $iv,
             $tag,
@@ -58,48 +88,41 @@ class EncryptionService
             throw new EncryptionException('Encryption failed.');
         }
 
-        // Bundle IV (12 bytes) + Tag (16 bytes) + Ciphertext into base64
-        return base64_encode($iv . $tag . $encryptedRaw);
+        return self::PREFIX . base64_encode($iv . $tag . $encryptedRaw);
     }
 
     /**
      * @throws EncryptionException
      */
-    public function decrypt(string $encryptedRaw): string
+    public function decrypt(string $encrypted): string
     {
-        $decoded = base64_decode($encryptedRaw, true);
+        if (!$this->isEncrypted($encrypted)) {
+            throw new EncryptionException(
+                'Value is not in the v2 format. Run "php bin/console app:cra:migrate-to-vault" first.'
+            );
+        }
+
+        $decoded = base64_decode(substr($encrypted, strlen(self::PREFIX)), true);
 
         if ($decoded === false) {
             throw new EncryptionException('Invalid base64-encoded value.');
         }
 
-        $ivLength = openssl_cipher_iv_length($this->cipher); // 12 bytes for GCM
+        $ivLength = openssl_cipher_iv_length(self::CIPHER);
 
         if (!is_int($ivLength) || $ivLength <= 0) {
-            throw new EncryptionException(
-                'Unable to determine IV length for cipher "' . $this->cipher . '".'
-            );
+            throw new EncryptionException('Unable to determine IV length for cipher "' . self::CIPHER . '".');
         }
 
-        $tagLength = self::TAG_LENGTH; // 16 bytes
-
-        if (strlen($decoded) <= ($ivLength + $tagLength)) {
+        if (strlen($decoded) <= ($ivLength + self::TAG_LENGTH)) {
             throw new EncryptionException('Encrypted value is too short to contain a valid IV and Tag.');
         }
 
-        // Extract IV, Tag, and Ciphertext
         $iv = substr($decoded, 0, $ivLength);
-        $tag = substr($decoded, $ivLength, $tagLength);
-        $ciphertext = substr($decoded, $ivLength + $tagLength);
+        $tag = substr($decoded, $ivLength, self::TAG_LENGTH);
+        $ciphertext = substr($decoded, $ivLength + self::TAG_LENGTH);
 
-        $data = openssl_decrypt(
-            $ciphertext,
-            $this->cipher,
-            $this->encryptionSecret,
-            OPENSSL_RAW_DATA,
-            $iv,
-            $tag
-        );
+        $data = openssl_decrypt($ciphertext, self::CIPHER, $this->key, OPENSSL_RAW_DATA, $iv, $tag);
 
         if (!is_string($data)) {
             throw new EncryptionException('Unable to decrypt value or authentication tag validation failed.');
