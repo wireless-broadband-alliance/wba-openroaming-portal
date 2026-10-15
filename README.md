@@ -262,7 +262,11 @@ The OpenRoaming Provisioning Portal utilizes environment variables for its confi
 Below is an overview of the different variables and their functions:
 
 - `APP_ENV`: This sets the environment mode for the Symfony application. It can be `dev` or `prod`.
-- `APP_SECRET`: This is the application secret used by Symfony for encrypting cookies and generating CSRF tokens.
+- `APP_SECRET`: This is the application secret used by Symfony for encrypting cookies and generating CSRF tokens. It is
+  stored in the Symfony secrets vault, not in `.env` (see [Installation Guide](docs/INSTALLATION.md)).
+- `ENCRYPTION_KEY`: The key that protects the data the portal encrypts at rest (settings, tokens, 2FA secrets, SMS
+  parameters, phone numbers). It is stored in the Symfony secrets vault, not in `.env`. If it is lost, the encrypted
+  data cannot be recovered.
 - `DATABASE_URL`: This is the connection string for the primary MySQL database. It should be in the
   format `mysql://user:pass@host:port/dbname`.
 - `DATABASE_FREERADIUS_URL`: This is the connection string for the FreeRADIUS MySQL database, used for RADIUS related

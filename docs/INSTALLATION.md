@@ -19,10 +19,11 @@ The OpenRoaming Provisioning Portal is designed and expected to run behind an **
 
 - **Traffic Termination**: TLS/SSL connections are terminated at the upstream load balancer. The load balancer forwards plain HTTP requests to port `80` of the web container.
 - **Required Headers**: Your upstream load balancer MUST pass the following standard headers:
-  - `X-Forwarded-Proto`: Must be set to `https` for secure requests (essential for Symfony HTTPS scheme detection, SAML/OAuth redirect URL construction, and Nginx HSTS header emission).
-  - `X-Forwarded-For`: Preserves client IP addresses.
-  - `X-Forwarded-Host`: Preserves the requested hostname.
-  - `X-Forwarded-Port`: Preserves the original port (`443`).
+    - `X-Forwarded-Proto`: Must be set to `https` for secure requests (essential for Symfony HTTPS scheme detection,
+      SAML/OAuth redirect URL construction, and Nginx HSTS header emission).
+    - `X-Forwarded-For`: Preserves client IP addresses.
+    - `X-Forwarded-Host`: Preserves the requested hostname.
+    - `X-Forwarded-Port`: Preserves the original port (`443`).
 - **Configuring `TRUSTED_PROXIES`**: Set the `TRUSTED_PROXIES` environment variable in `.env` to the IP address(es) or CIDR block(s) of your SSL offloading load balancer / reverse proxy:
   ```env
   TRUSTED_PROXIES=10.0.0.0/8,192.168.1.1
@@ -60,7 +61,40 @@ sudo composer install     # PHP dependencies
 docker-compose -f docker-compose-local.yml up -d
 ```
 
-## 3. **Check Containers Status**
+## 3. **Create the Secrets Vault (`ENCRYPTION_KEY` and `APP_SECRET`)**
+
+The portal encrypts sensitive data at rest (system settings, database URIs, RADIUS tokens, 2FA secrets, SMS provider
+parameters and phone numbers) with an `ENCRYPTION_KEY`, and Symfony needs an `APP_SECRET` for sessions and cookies.
+Neither of them is defined in `.env`: both live in the **Symfony secrets vault**. Create the vault **once per
+installation**, with the containers from step 2 running and **before** step 8 (migrations and fixtures):
+
+```bash
+docker compose exec web php bin/console secrets:generate-keys --env=prod
+docker compose exec web sh -c 'openssl rand -hex 32 | php bin/console secrets:set ENCRYPTION_KEY - --env=prod'
+docker compose exec web php bin/console secrets:set APP_SECRET --random --env=prod
+docker compose exec web php bin/console secrets:list --env=prod
+```
+
+The last command lists the secret names (their values stay hidden). You should see `ENCRYPTION_KEY` and `APP_SECRET`.
+
+**Important:**
+
+- The vault is created per environment. Run the portal with `APP_ENV=prod` in your `.env` so that this `prod` vault is
+  the one in use. The `dev` vault that ships with the project uses a **publicly known key** and must never be used on a
+  portal that holds real data.
+- The files are written to `config/secrets/prod/`. Mount that directory as a volume of the `web` service in
+  `docker-compose.yml`, so it survives container re-creation:
+  ```yaml
+  volumes:
+    - ./config/secrets/prod/:/var/www/openroaming/config/secrets/prod/
+  ```
+- `config/secrets/prod/prod.decrypt.private.php` unlocks every secret. **Never commit it or share it.**
+- **Back up the whole `config/secrets/prod/` directory** in a safe place, separate from your database backups. If the
+  `ENCRYPTION_KEY` is lost, the encrypted data **cannot be recovered**.
+- Do not also define `ENCRYPTION_KEY` or `APP_SECRET` in `.env` or in the container environment: a real environment
+  variable always overrides the vault.
+
+## 4. **Check Containers Status**
 
 After executing the previous command, ensure that all containers for each service are
 appropriately formed. The following command may be used to verify the status of each container, example:
@@ -69,7 +103,7 @@ appropriately formed. The following command may be used to verify the status of 
 docker ps
 ```
 
-## 4. **Build Tailwind Dependencies**
+## 5. **Build Tailwind Dependencies**
 
 First, enter the `web` container:
 
@@ -103,7 +137,7 @@ php bin/console tailwind:build -w
 > For a complete guide on building and managing assets in different environments (development or production), please
 > refer to the [Asset Mapper Documentation](ASSETMAPPER.md).
 
-### 5. **Upload Certificates**
+### 6. **Upload Certificates**
 
 Still inside the `web` container, upload your certificate files to the portal.
 
@@ -134,7 +168,7 @@ public/signing-keys/ca/ca.pem
 > Make sure `ca.pem` is in the `ca/` subfolder — the portal uses this folder specifically for trusted root CAs.
 > You can copy files from your host machine into the container or directly into the folder before creating profiles.
 
-## 6. **Generate PFX Signing Key**
+## 7. **Generate PFX Signing Key**
 
 While still inside the `web` container, go to the `tools` directory and run the PFX generation script:
 
@@ -143,7 +177,7 @@ cd tools
 sh generatePfxSigningKey.sh
 ```
 
-## 7. **Migrations, Fixtures and Permissions**
+## 8. **Migrations, Fixtures and Permissions**
 
 Still inside of the`web` container, you need to run this 3 commands to load
 the database schema, load is respective settings and add permissions to a specific folder to save images:
@@ -172,7 +206,7 @@ Make sure to check the `src/DataFixtures/SettingFixture.php` file for any refere
 migrations about
 the database on the migrations folder of the project.
 
-## 8. **Generate JWT Keys**
+## 9. **Generate JWT Keys**
 
 This step is required for the **API** configuration. To enable JWT authentication, you need to generate a key pair (
 private and public keys). Make sure to run the
@@ -195,7 +229,7 @@ This command will create the following files in the `config/jwt` directory:
 
 Make sure to keep these keys secure, especially the private key.
 
-## 9. **Configure JWT and CORS**
+## 10. **Configure JWT and CORS**
 
 Make sure this configuration is set up on `.env` the JWT and CORS environment variables
 in your `.env` file:
@@ -338,7 +372,10 @@ installation:
 4. **DevMode instead of Production**: It's essential to switch the OpenRoaming Provisioning Portal to Production Mode (
    prod) when deploying it on the internet. Running the portal in Development Mode (dev) can lead to security
    vulnerabilities and suboptimal performance. Again please gou check your `.env` file and change it to prod.
-5. **Generate Pfx-Signing-Key**: If you get a **Permission denied** error while trying to run the script, you have to
+5. **`Environment variable not found: "ENCRYPTION_KEY"` (or `"APP_SECRET"`)**: The secrets vault was not created, or
+   `config/secrets/prod/` is not available inside the `web` container, or `APP_ENV` does not match the environment the
+   vault was created for. Follow step 3 and check that `APP_ENV=prod` is set in `.env`.
+6. **Generate Pfx-Signing-Key**: If you get a **Permission denied** error while trying to run the script, you have to
    grant executable permissions to the script file before executing it.
 
 To solve this, use the chmod command inside the `web` container, to give the script executable rights.

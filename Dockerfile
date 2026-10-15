@@ -46,8 +46,11 @@ COPY . .
 COPY ./.env.sample /app/.env
 
 # Install Composer dependencies and warm cache
+# ENCRYPTION_KEY / APP_SECRET below are throwaway build-time values (needed only so the container can boot
+# during cache warmup). They are exported inside this RUN only and are NOT stored in the image.
 RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/memory.ini \
  && echo "error_reporting=E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED" > /usr/local/etc/php/conf.d/error_reporting.ini \
+ && export ENCRYPTION_KEY="build-time-placeholder-not-a-secret-0000" APP_SECRET="build-time-placeholder-not-a-secret-0000" \
  && composer install --optimize-autoloader --no-interaction --no-progress \
  && php bin/console cache:warmup --env=prod
 
@@ -117,7 +120,8 @@ COPY . /var/www/openroaming
 COPY --from=vendor /app /var/www/openroaming
 
 # Asset compilation and cache optimization
-RUN php bin/console cache:clear --env=prod --no-debug \
+RUN export ENCRYPTION_KEY="build-time-placeholder-not-a-secret-0000" APP_SECRET="build-time-placeholder-not-a-secret-0000" \
+ && php bin/console cache:clear --env=prod --no-debug \
  && php bin/console tailwind:build --minify --env=prod \
  && php bin/console asset-map:compile --env=prod
 
