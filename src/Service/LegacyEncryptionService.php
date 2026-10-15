@@ -16,6 +16,7 @@ use App\Exception\EncryptionException;
 final class LegacyEncryptionService
 {
     private const string CIPHER = 'aes-256-gcm';
+    private const int IV_LENGTH = 12; // 96-bit nonce, the standard size for GCM
     private const int TAG_LENGTH = 16;
 
     public function __construct(private readonly string $legacySecret)
@@ -33,19 +34,13 @@ final class LegacyEncryptionService
             throw new EncryptionException('Invalid base64-encoded value.');
         }
 
-        $ivLength = openssl_cipher_iv_length(self::CIPHER);
-
-        if (!is_int($ivLength) || $ivLength <= 0) {
-            throw new EncryptionException('Unable to determine IV length.');
-        }
-
-        if (strlen($decoded) <= ($ivLength + self::TAG_LENGTH)) {
+        if (strlen($decoded) <= (self::IV_LENGTH + self::TAG_LENGTH)) {
             throw new EncryptionException('Encrypted value is too short to contain a valid IV and Tag.');
         }
 
-        $iv = substr($decoded, 0, $ivLength);
-        $tag = substr($decoded, $ivLength, self::TAG_LENGTH);
-        $ciphertext = substr($decoded, $ivLength + self::TAG_LENGTH);
+        $iv = substr($decoded, 0, self::IV_LENGTH);
+        $tag = substr($decoded, self::IV_LENGTH, self::TAG_LENGTH);
+        $ciphertext = substr($decoded, self::IV_LENGTH + self::TAG_LENGTH);
 
         // Legacy behaviour: the raw secret is used directly as the key.
         $data = openssl_decrypt($ciphertext, self::CIPHER, $this->legacySecret, OPENSSL_RAW_DATA, $iv, $tag);
