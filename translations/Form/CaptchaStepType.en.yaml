@@ -2,6 +2,7 @@ captcha:
   provider:
     turnstile: "Cloudflare Turnstile"
     recaptcha3: "Google reCAPTCHA v3"
+    off: 'OFF'
   turnstile:
     key:
       label: "Turnstile Site Key"

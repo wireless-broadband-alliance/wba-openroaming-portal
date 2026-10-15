@@ -48,3 +48,4 @@ networksAndAccessPoints: 'Redes & Pontos de Acesso'
 mapSettings: 'Configurações do Mapa'
 security: 'Segurança'
 cvdConfiguration: 'Configuração da Divulgação Coordenada de Vulnerabilidades'
+captchaProvider: "Fornecedor de CAPTCHA"

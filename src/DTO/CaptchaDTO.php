@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\DTO;
 
 use App\Enum\CaptchaProviderEnum;
+use App\Enum\SettingName;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class CaptchaDTO
@@ -47,4 +48,41 @@ class CaptchaDTO
         ],
     )]
     public ?string $recaptcha3Secret = null;
+
+    /**
+     * Initialize DTO from settings array.
+     *
+     * @param array<string, array{value: string|null, description?: string}> $data
+     */
+    public function __construct(array $data = [])
+    {
+        $rawProvider = $data[SettingName::CAPTCHA_PROVIDER->value]['value'] ?? null;
+
+        if ($rawProvider !== null) {
+            $this->provider = $rawProvider instanceof CaptchaProviderEnum
+                ? $rawProvider
+                : CaptchaProviderEnum::tryFrom((string) $rawProvider);
+        }
+
+        $this->turnstileKey = $data[SettingName::TURNSTILE_KEY->value]['value'] ?? null;
+        $this->turnstileSecret = $data[SettingName::TURNSTILE_SECRET->value]['value'] ?? null;
+        $this->recaptcha3Key = $data[SettingName::RECAPTCHA3_KEY->value]['value'] ?? null;
+        $this->recaptcha3Secret = $data[SettingName::RECAPTCHA3_SECRET->value]['value'] ?? null;
+    }
+
+    /**
+     * Map the DTO back to an array for SettingsService.
+     *
+     * @return array<string, array{value: string|null}>
+     */
+    public function toArray(): array
+    {
+        return [
+            SettingName::CAPTCHA_PROVIDER->value => ['value' => $this->provider?->value],
+            SettingName::TURNSTILE_KEY->value => ['value' => $this->turnstileKey],
+            SettingName::TURNSTILE_SECRET->value => ['value' => $this->turnstileSecret],
+            SettingName::RECAPTCHA3_KEY->value => ['value' => $this->recaptcha3Key],
+            SettingName::RECAPTCHA3_SECRET->value => ['value' => $this->recaptcha3Secret],
+        ];
+    }
 }

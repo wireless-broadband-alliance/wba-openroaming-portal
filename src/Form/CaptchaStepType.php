@@ -25,13 +25,20 @@ class CaptchaStepType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $choices = [
+            CaptchaProviderEnum::TURNSTILE,
+            CaptchaProviderEnum::RECAPTCHA3,
+        ];
+
+        if ($options['allow_off']) {
+            // Adds OFF option to choices if allowed
+            array_unshift($choices, CaptchaProviderEnum::OFF);
+        }
+
         $builder
             ->add('provider', EnumType::class, [
                 'class' => CaptchaProviderEnum::class,
-                'choices' => [
-                    CaptchaProviderEnum::TURNSTILE,
-                    CaptchaProviderEnum::RECAPTCHA3,
-                ],
+                'choices' => $choices,
                 'choice_label' => fn(CaptchaProviderEnum $provider) => $this->translator->trans(
                     'captcha.provider.' . strtolower($provider->name),
                     [],
@@ -74,6 +81,9 @@ class CaptchaStepType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => CaptchaDTO::class,
+            'allow_off' => false,
         ]);
+
+        $resolver->setAllowedTypes('allow_off', 'bool');
     }
 }

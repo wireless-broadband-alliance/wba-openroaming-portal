@@ -23,13 +23,18 @@ class CaptchaStepForm extends AbstractController
     #[LiveProp]
     public ?CaptchaDTO $captchaDTO = null;
 
+    #[LiveProp]
+    public bool $allowOff = false;
+
     /**
      * @return FormInterface<mixed>
      */
     #[\Override]
     protected function instantiateForm(): FormInterface
     {
-        return $this->createForm(CaptchaStepType::class, $this->captchaDTO);
+        return $this->createForm(CaptchaStepType::class, $this->captchaDTO, [
+            'allow_off' => $this->allowOff,
+        ]);
     }
 
     #[LiveAction]
