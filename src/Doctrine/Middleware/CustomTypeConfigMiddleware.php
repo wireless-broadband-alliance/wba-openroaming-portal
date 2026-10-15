@@ -12,6 +12,7 @@ use Doctrine\DBAL\Driver\Middleware;
 use Doctrine\DBAL\Types\Exception\TypesException;
 use Doctrine\DBAL\Types\Type;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Doctrine\Bundle\DoctrineBundle\Attribute\AsMiddleware;
 
 /**
  * Doctrine types are created statically, so they cannot receive services by injection.
@@ -19,6 +20,8 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
  *
  * OpenRoaming only uses ONE vault secret: ENCRYPTION_KEY.
  */
+
+#[AsMiddleware]
 readonly class CustomTypeConfigMiddleware implements Middleware
 {
     public function __construct(

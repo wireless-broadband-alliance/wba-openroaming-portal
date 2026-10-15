@@ -4,11 +4,20 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Entity\InstallationProgress;
+use App\Entity\OTPcode;
+use App\Entity\Setting;
+use App\Entity\SMSProviderParam;
+use App\Entity\User;
+use App\Entity\UserRadiusProfile;
 use App\Exception\EncryptionException;
 use App\Service\EncryptionService;
 use App\Service\LegacyEncryptionService;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\MappingException;
 use RuntimeException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -18,25 +27,82 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Throwable;
 
+/**
+ * Re-encrypts every value written with the legacy scheme (key = raw APP_SECRET, no prefix)
+ * into the vault scheme ("v2:" + ENCRYPTION_KEY).
+ *
+ * Both the old EncryptionService and the old EncryptedStringType used the same legacy format, so
+ * this one command covers both of them. Columns that use the new EncryptedPhoneNumberType are
+ * handled by app:cra:encrypt-phone-numbers.
+ *
+ * The whole run is ONE transaction: any error rolls everything back. Already migrated values
+ * ("v2:") are skipped, so the command is safe to run again.
+ */
 #[AsCommand(
     name: 'app:cra:migrate-to-vault',
     description: 'Re-encrypts data from the legacy APP_SECRET scheme to the vault-managed ENCRYPTION_KEY.'
 )]
 final class MigrateEncryptionToVaultCommand extends Command
 {
+    /** Size of IV (12) + TAG (16): anything that decodes to <= this can never be legacy ciphertext. */
+    private const int LEGACY_MIN_BYTES = 28;
+
+    private const string ARGON2ID_PREFIX = '$argon2id$';
+
     /**
-     * Every column that was written with the OLD EncryptionService (APP_SECRET).
-     * Format: table => [primary key column, [encrypted columns]]
+     * Every column that was written with the OLD scheme.
      *
-     * user.two_fa_secret, sms_provider_param, ...). Columns handled by the Doctrine
-     * Encrypted*Type classes are NOT listed here unless they also use EncryptionService.
+     * Table and column names are read from the Doctrine metadata, never hard-coded.
+     *
+     * 'where' (optional) restricts the rows by another field: [field => list of allowed values].
+     * Needed for Setting, where only some rows are encrypted.
+     *
+     * @var list<array{class: class-string, fields: list<string>, where?: array{field: string, in: list<string>}}>
      */
     private const array TARGETS = [
-        'Setting' => ['id', ['value']],
+        [
+            'class' => Setting::class,
+            'fields' => ['value'],
+            'where' => [
+                'field' => 'name',
+                'in' => [
+                    'SYNC_LDAP_SERVER',
+                    'SYNC_LDAP_BIND_USER_DN',
+                    'SYNC_LDAP_BIND_USER_PASSWORD',
+                    'SYNC_LDAP_SEARCH_BASE_DN',
+                    'BREAKING_GLASS_ADMIN_EMAIL',
+                    'CLOUDFLARE_TOKEN',
+                ],
+            ],
+        ],
+        [
+            'class' => InstallationProgress::class,
+            'fields' => ['dbOpenRoaming', 'dbFreeradius', 'turnstileKey', 'turnstileSecret', 'jwtPassphrase'],
+        ],
+        [
+            'class' => UserRadiusProfile::class,
+            'fields' => ['radius_token'],
+        ],
+        [
+            // type: encrypted_string
+            'class' => User::class,
+            'fields' => ['twoFAsecret'],
+        ],
+        [
+            // type: encrypted_string
+            'class' => SMSProviderParam::class,
+            'fields' => ['value'],
+        ],
+        [
+            // Legacy backup codes. Rows already hashed with Argon2id are skipped.
+            'class' => OTPcode::class,
+            'fields' => ['code'],
+        ],
     ];
 
     public function __construct(
         private readonly Connection $connection,
+        private readonly EntityManagerInterface $entityManager,
         private readonly EncryptionService $encryptionService,
     ) {
         parent::__construct();
@@ -82,13 +148,15 @@ final class MigrateEncryptionToVaultCommand extends Command
         );
 
         $legacy = new LegacyEncryptionService($legacySecret);
-        $stats = ['migrated' => 0, 'skipped' => 0];
+
+        /** @var array<string, array{migrated: int, plaintext: int, skipped: int}> $report */
+        $report = [];
 
         $this->connection->beginTransaction();
 
         try {
-            foreach (self::TARGETS as $table => [$pk, $columns]) {
-                $this->migrateTable($legacy, $table, $pk, $columns, $dryRun, $stats);
+            foreach (self::TARGETS as $target) {
+                $this->migrateTarget($legacy, $target, $dryRun, $report);
             }
 
             if ($dryRun) {
@@ -97,7 +165,9 @@ final class MigrateEncryptionToVaultCommand extends Command
                 $this->connection->commit();
             }
         } catch (Throwable $e) {
-            $this->connection->rollBack();
+            if ($this->connection->isTransactionActive()) {
+                $this->connection->rollBack();
+            }
             $io->error('Aborted, nothing was changed: ' . $e->getMessage());
 
             return Command::FAILURE;
@@ -107,12 +177,25 @@ final class MigrateEncryptionToVaultCommand extends Command
             unset($legacy, $legacySecret);
         }
 
+        $rows = [];
+        $totals = ['migrated' => 0, 'plaintext' => 0, 'skipped' => 0];
+        foreach ($report as $label => $stats) {
+            $rows[] = [$label, $stats['migrated'], $stats['plaintext'], $stats['skipped']];
+            foreach ($totals as $key => $_) {
+                $totals[$key] += $stats[$key];
+            }
+        }
+        $rows[] = ['TOTAL', $totals['migrated'], $totals['plaintext'], $totals['skipped']];
+
+        $io->table(['Column', 'Re-encrypted', 'Plain text encrypted', 'Skipped'], $rows);
+
         $io->success(
             sprintf(
-                '%s: %d value(s) re-encrypted, %d skipped (empty or already v2).',
+                '%s: %d value(s) re-encrypted, %d plain-text value(s) encrypted, %d skipped (empty, already v2 or hashed).',
                 $dryRun ? 'Dry run' : 'Done',
-                $stats['migrated'],
-                $stats['skipped']
+                $totals['migrated'],
+                $totals['plaintext'],
+                $totals['skipped']
             )
         );
 
@@ -124,37 +207,67 @@ final class MigrateEncryptionToVaultCommand extends Command
     }
 
     /**
-     * @param list<string> $columns
-     * @param array{migrated: int, skipped: int} $stats
+     * @param array{class: class-string, fields: list<string>, where?: array{field: string, in: list<string>}} $target
+     * @param array<string, array{migrated: int, plaintext: int, skipped: int}> $report
      * @throws Exception
+     * @throws MappingException
      */
-    private function migrateTable(
+    private function migrateTarget(
         LegacyEncryptionService $legacy,
-        string $table,
-        string $pk,
-        array $columns,
+        array $target,
         bool $dryRun,
-        array &$stats
+        array &$report
     ): void {
-        $quotedTable = $this->connection->quoteSingleIdentifier($table);
-        $quotedPk = $this->connection->quoteSingleIdentifier($pk);
+        $metadata = $this->entityManager->getClassMetadata($target['class']);
+        $tableName = $metadata->getTableName();
+        $quotedTable = $this->connection->quoteSingleIdentifier($tableName);
+        $quotedPk = $this->connection->quoteSingleIdentifier($metadata->getSingleIdentifierColumnName());
 
-        foreach ($columns as $column) {
+        foreach ($target['fields'] as $field) {
+            $column = $metadata->getColumnName($field);
             $quotedCol = $this->connection->quoteSingleIdentifier($column);
-            $rows = $this->connection->fetchAllAssociative(
-                "SELECT $quotedPk AS id, $quotedCol AS val FROM $quotedTable"
-            );
+            $label = $tableName . '.' . $column;
 
-            foreach ($rows as $row) {
+            $sql = "SELECT $quotedPk AS id, $quotedCol AS val FROM $quotedTable";
+            $params = [];
+            $types = [];
+
+            if (isset($target['where'])) {
+                $whereColumn = $this->connection->quoteSingleIdentifier(
+                    $metadata->getColumnName($target['where']['field'])
+                );
+                $sql .= " WHERE $whereColumn IN (:names)";
+                $params['names'] = $target['where']['in'];
+                $types['names'] = ArrayParameterType::STRING;
+            }
+
+            $report[$label] = ['migrated' => 0, 'plaintext' => 0, 'skipped' => 0];
+
+            foreach ($this->connection->fetchAllAssociative($sql, $params, $types) as $row) {
                 $value = $row['val'];
 
-                if ($value === null || $value === '' || $this->encryptionService->isEncrypted($value)) {
-                    ++$stats['skipped'];
+                if (
+                    $value === null
+                    || $value === ''
+                    || $this->encryptionService->isEncrypted((string)$value)
+                    || str_starts_with((string)$value, self::ARGON2ID_PREFIX)
+                ) {
+                    ++$report[$label]['skipped'];
                     continue;
                 }
 
+                $value = (string)$value;
+
                 try {
-                    $plain = $legacy->decrypt($value);
+                    if ($this->isLegacyPlaintext($value)) {
+                        // Never was ciphertext (the old types returned such values untouched).
+                        $plain = $value;
+                        ++$report[$label]['plaintext'];
+                    } else {
+                        $plain = $legacy->decrypt($value);
+                        ++$report[$label]['migrated'];
+                    }
+
                     $new = $this->encryptionService->encrypt($plain);
 
                     // Verify the round trip before touching the row.
@@ -162,10 +275,8 @@ final class MigrateEncryptionToVaultCommand extends Command
                         throw new EncryptionException('Round-trip verification failed.');
                     }
                 } catch (EncryptionException $e) {
-                    // Wrong secret, or a value that was never encrypted: stop, roll back, let the operator decide.
-                    throw new RuntimeException(
-                        sprintf('%s.%s id=%s: %s', $table, $column, $row['id'], $e->getMessage()), 0, $e
-                    );
+                    // Wrong secret or corrupted data: stop, roll back, let the operator decide.
+                    throw new RuntimeException(sprintf('%s id=%s: %s', $label, $row['id'], $e->getMessage()), 0, $e);
                 }
 
                 if (!$dryRun) {
@@ -174,9 +285,18 @@ final class MigrateEncryptionToVaultCommand extends Command
                         ['val' => $new, 'id' => $row['id']]
                     );
                 }
-
-                ++$stats['migrated'];
             }
         }
+    }
+
+    /**
+     * Legacy ciphertext is always base64 and always longer than IV + TAG.
+     * Anything else is a value the old code stored (and returned) as plain text.
+     */
+    private function isLegacyPlaintext(string $value): bool
+    {
+        $decoded = base64_decode($value, true);
+
+        return $decoded === false || strlen($decoded) <= self::LEGACY_MIN_BYTES;
     }
 }
