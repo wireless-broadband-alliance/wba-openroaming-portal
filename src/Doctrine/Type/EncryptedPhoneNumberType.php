@@ -17,7 +17,7 @@ use RuntimeException;
 /**
  * Stores a libphonenumber PhoneNumber as AES-256-GCM ciphertext: base64( IV (12) || TAG (16) || CIPHERTEXT ).
  *
- * The key is injected by App\Doctrine\Middleware\CustomTypeConfigMiddleware (vault secret APP_SECRET).
+ * The key is injected by App\Doctrine\Middleware\CustomTypeConfigMiddleware (vault secret ENCRYPTION_KEY).
  *
  * NOTE: written for DBAL 4 (Doctrine\DBAL\Types\Exception\*). On DBAL 3.x replace the exceptions with
  * ConversionException::conversionFailed() / ConversionException::conversionFailedInvalidType().
@@ -29,6 +29,7 @@ class EncryptedPhoneNumberType extends Type
 {
     public const string NAME = 'encrypted_phone_number';
     private const string CIPHER = 'aes-256-gcm';
+    private const int IV_LENGTH = 12; // 96-bit nonce, the standard size for GCM
     private const int TAG_LENGTH = 16;
     private const int MIN_SECRET_LENGTH = 32;
 
@@ -121,7 +122,7 @@ class EncryptedPhoneNumberType extends Type
     {
         if (strlen($secret) < self::MIN_SECRET_LENGTH) {
             throw new RuntimeException(
-                'APP_SECRET must be at least ' . self::MIN_SECRET_LENGTH . ' characters long.'
+                'ENCRYPTION_KEY must be at least ' . self::MIN_SECRET_LENGTH . ' characters long.'
             );
         }
 
@@ -140,13 +141,7 @@ class EncryptedPhoneNumberType extends Type
 
     private function encrypt(string $plainText): string
     {
-        $ivLength = openssl_cipher_iv_length(self::CIPHER);
-
-        if (!is_int($ivLength) || $ivLength < 1) {
-            throw new RuntimeException('Unable to determine valid IV length for cipher.');
-        }
-
-        $iv = random_bytes($ivLength);
+        $iv = random_bytes(self::IV_LENGTH);
         $tag = '';
 
         $encryptedRaw = openssl_encrypt(
@@ -173,9 +168,8 @@ class EncryptedPhoneNumberType extends Type
     private function decrypt(string $stored): string
     {
         $decoded = base64_decode($stored, true);
-        $ivLength = openssl_cipher_iv_length(self::CIPHER);
 
-        if ($decoded === false || !is_int($ivLength) || strlen($decoded) <= ($ivLength + self::TAG_LENGTH)) {
+        if ($decoded === false || strlen($decoded) <= (self::IV_LENGTH + self::TAG_LENGTH)) {
             throw ValueNotConvertible::new(
                 '[redacted]',
                 self::NAME,
@@ -183,9 +177,9 @@ class EncryptedPhoneNumberType extends Type
             );
         }
 
-        $iv = substr($decoded, 0, $ivLength);
-        $tag = substr($decoded, $ivLength, self::TAG_LENGTH);
-        $ciphertext = substr($decoded, $ivLength + self::TAG_LENGTH);
+        $iv = substr($decoded, 0, self::IV_LENGTH);
+        $tag = substr($decoded, self::IV_LENGTH, self::TAG_LENGTH);
+        $ciphertext = substr($decoded, self::IV_LENGTH + self::TAG_LENGTH);
 
         $plain = openssl_decrypt($ciphertext, self::CIPHER, $this->getKey(), OPENSSL_RAW_DATA, $iv, $tag);
 
