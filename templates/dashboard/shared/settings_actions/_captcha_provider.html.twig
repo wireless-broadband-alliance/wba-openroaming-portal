@@ -167,12 +167,20 @@
     {# Footer #}
     <div class="mt-8 divider-solid"></div>
 
-    <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
-        <button type="submit" class="btn-primary"
-                onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general') }}')">
-            {{ 'saveChanges'|trans({}, 'settings_actions_general') }}
-        </button>
-    </div>
+    {# Form Actions conditional rendering based on voter write permission #}
+    {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::CAPTCHA_PROVIDER_WRITE')) %}
+        <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
+            <a href="{{ path('app_dashboard_regenerate_code_admin', {type: constant('App\\Enum\\SettingType::CAPTCHA_PROVIDER').value}) }}"
+               data-confirm="{{ 'resetMessage'|trans({}, 'settings_actions_general')|e('html_attr') }}"
+               class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
+                {{ 'reset'|trans({}, 'settings_actions_general') }}
+            </a>
+            <button type="submit" class="btn-primary"
+                    onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general') }}')">
+                {{ 'saveChanges'|trans({}, 'settings_actions_general') }}
+            </button>
+        </div>
+    {% endif %}
 
     {{ form_rest(form) }}
     {{ form_end(form, {render_rest: false}) }}

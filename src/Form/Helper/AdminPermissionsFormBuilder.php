@@ -43,6 +43,7 @@ readonly class AdminPermissionsFormBuilder
             'map' => 'map',
             'installation' => 'installation',
             'securityTxt' => 'securityTxt',
+            'captchaProvider' => 'captchaProvider',
         ];
 
         foreach ($permissions as $field => $translationKey) {

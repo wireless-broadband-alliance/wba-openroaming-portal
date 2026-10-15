@@ -77,6 +77,8 @@ final class UserAuthenticationVoter extends Voter
     public const string INSTALLATION_WRITE = 'INSTALLATION_WRITE';
     public const string SECURITY_TXT_READ = 'SECURITY_TXT_READ';
     public const string SECURITY_TXT_WRITE = 'SECURITY_TXT_WRITE';
+    public const string CAPTCHA_PROVIDER_WRITE = 'CAPTCHA_PROVIDER_WRITE';
+    public const string CAPTCHA_PROVIDER_READ = 'CAPTCHA_PROVIDER_READ';
 
     #[Override]
     protected function supports(string $attribute, mixed $subject): bool
@@ -148,6 +150,9 @@ final class UserAuthenticationVoter extends Voter
 
                 self::SECURITY_TXT_READ,
                 self::SECURITY_TXT_WRITE,
+
+                self::CAPTCHA_PROVIDER_WRITE,
+                self::CAPTCHA_PROVIDER_READ,
                 ]
         );
     }
@@ -295,6 +300,10 @@ final class UserAuthenticationVoter extends Voter
             self::SECURITY_TXT_READ => $this->hasPermission($user, AdminPermissionsType::SECURITY_TXT_READ) ||
                 $this->hasPermission($user, AdminPermissionsType::SECURITY_TXT_WRITE),
 
+            self::CAPTCHA_PROVIDER_WRITE => $this->hasPermission($user, AdminPermissionsType::CAPTCHA_PROVIDER_WRITE),
+            self::CAPTCHA_PROVIDER_READ => $this->hasPermission($user, AdminPermissionsType::CAPTCHA_PROVIDER_READ) ||
+                $this->hasPermission($user, AdminPermissionsType::CAPTCHA_PROVIDER_WRITE),
+
             default => false,
         };
     }
@@ -326,7 +335,10 @@ final class UserAuthenticationVoter extends Voter
             || $this->hasPermission($user, AdminPermissionsType::CRON_SCHEDULE_WRITE)
 
             || $this->hasPermission($user, AdminPermissionsType::CERTIFICATES_MANAGEMENT_READ)
-            || $this->hasPermission($user, AdminPermissionsType::CERTIFICATES_MANAGEMENT_WRITE);
+            || $this->hasPermission($user, AdminPermissionsType::CERTIFICATES_MANAGEMENT_WRITE)
+
+            || $this->hasPermission($user, AdminPermissionsType::CAPTCHA_PROVIDER_READ)
+            || $this->hasPermission($user, AdminPermissionsType::CAPTCHA_PROVIDER_WRITE);
     }
 
     private function hasUserAuthentication(User $user): bool

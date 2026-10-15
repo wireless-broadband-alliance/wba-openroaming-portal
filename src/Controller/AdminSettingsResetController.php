@@ -237,6 +237,7 @@ class AdminSettingsResetController extends AbstractController
                 SettingType::SCHEDULE->value,
                 SettingType::RETURN_APPS->value,
                 SettingType::SECURITY_TXT->value,
+                SettingType::CAPTCHA_PROVIDER->value,
             ], true)
         ) {
             $lastResend = $this->eventRepository->findLatest2FACodeAttemptEvent(

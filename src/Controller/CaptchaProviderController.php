@@ -18,6 +18,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class CaptchaProviderController extends AbstractController
@@ -31,6 +32,7 @@ class CaptchaProviderController extends AbstractController
     ) {
     }
     #[Route('/dashboard/settings/captchaProvider', name: 'admin_dashboard_settings_captchaProvider')]
+    #[IsGranted(UserAuthenticationVoter::CAPTCHA_PROVIDER_READ)]
     public function captchaProvider(Request $request): Response
     {
         /** @var array<string, array{value: string, description: string}> $data */
@@ -38,8 +40,7 @@ class CaptchaProviderController extends AbstractController
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        // todo: make new permissions for this page
-        $canWrite = $this->isGranted(UserAuthenticationVoter::PLATFORM_STATUS_WRITE);
+        $canWrite = $this->isGranted(UserAuthenticationVoter::CAPTCHA_PROVIDER_WRITE);
 
         // Initialize DTO from settings
         $dto = new CaptchaDTO($data);
@@ -56,7 +57,7 @@ class CaptchaProviderController extends AbstractController
             // Log the event
             $this->eventActions->saveEvent(
                 $currentUser,
-                AnalyticalEventType::SETTING_PLATFORM_STATUS_REQUEST->value, // todo: make a proper event for this action
+                AnalyticalEventType::CAPTCHA_PROVIDER_REQUEST->value,
                 new DateTime(),
                 [
                     EventMetadataKeysType::IP->value => $request->getClientIp(),

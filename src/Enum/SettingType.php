@@ -22,6 +22,8 @@ enum SettingType: string implements TranslatableInterface
     case RETURN_APPS = 'settingReturnApps';
     case SECURITY_TXT = 'settingSecurityTxt';
 
+    case CAPTCHA_PROVIDER = 'settingCaptchaProvider';
+
     public function trans(TranslatorInterface $translator, ?string $locale = null): string
     {
         return $translator->trans($this->getTranslationKey(), locale: $locale);
