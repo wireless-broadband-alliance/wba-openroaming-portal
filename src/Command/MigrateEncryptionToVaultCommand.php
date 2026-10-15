@@ -191,7 +191,8 @@ final class MigrateEncryptionToVaultCommand extends Command
 
         $io->success(
             sprintf(
-                '%s: %d value(s) re-encrypted, %d plain-text value(s) encrypted, %d skipped (empty, already v2 or hashed).',
+                '%s: %d value(s) re-encrypted, %d plain-text value(s) encrypted, 
+                %d skipped (empty, already v2 or hashed).',
                 $dryRun ? 'Dry run' : 'Done',
                 $totals['migrated'],
                 $totals['plaintext'],

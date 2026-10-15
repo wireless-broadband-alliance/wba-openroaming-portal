@@ -126,7 +126,8 @@ final class PrepareReleaseV1150Command extends Command
             if ($code !== Command::SUCCESS) {
                 $io->error(
                     sprintf(
-                        'Step "%s" failed. Nothing after it was run. Fix the cause and re-run this command (all steps are safe to repeat), or restore your backup.',
+                        'Step "%s" failed. Nothing after it was run. Fix the cause and 
+                        re-run this command (all steps are safe to repeat), or restore your backup.',
                         $title
                     )
                 );

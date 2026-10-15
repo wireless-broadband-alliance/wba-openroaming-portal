@@ -65,7 +65,8 @@ class EncryptPhoneNumbersCommand extends Command
             /** @var QuestionHelper $helper */
             $helper = $this->getHelper('question');
             $question = new ConfirmationQuestion(
-                'This action will encrypt all legacy plain-text phone numbers. Make sure you have a database backup. [y/N] ',
+                'This action will encrypt all legacy plain-text phone numbers.
+                 Make sure you have a database backup. [y/N] ',
                 false
             );
 
@@ -118,10 +119,12 @@ class EncryptPhoneNumbersCommand extends Command
 
                 // Round-trip check before writing.
                 $roundTrip = $type->convertToPHPValue($encryptedValue, $platform);
-                if ($roundTrip === null || $util->format($roundTrip, PhoneNumberFormat::E164) !== $util->format(
+                if (
+                    $roundTrip === null || $util->format($roundTrip, PhoneNumberFormat::E164) !== $util->format(
                         $parsed,
                         PhoneNumberFormat::E164
-                    )) {
+                    )
+                ) {
                     throw new \RuntimeException(sprintf('Round-trip verification failed for user id=%s.', $row['id']));
                 }
 
