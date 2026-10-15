@@ -22,6 +22,7 @@ class EncryptionService
     public const string PREFIX = 'v2:';
 
     private const string CIPHER = 'aes-256-gcm';
+    private const int IV_LENGTH = 12; // 96-bit nonce, the standard size for GCM
     private const int TAG_LENGTH = 16;
     private const int MIN_SECRET_LENGTH = 32;
     private const string KDF_INFO = 'app-data-encryption-v2';
@@ -56,14 +57,8 @@ class EncryptionService
      */
     public function encrypt(string $plainText): string
     {
-        $ivLength = openssl_cipher_iv_length(self::CIPHER);
-
-        if (!is_int($ivLength) || $ivLength <= 0) {
-            throw new EncryptionException('Unable to determine IV length for cipher "' . self::CIPHER . '".');
-        }
-
         try {
-            $iv = random_bytes($ivLength);
+            $iv = random_bytes(self::IV_LENGTH);
         } catch (Exception $e) {
             throw new EncryptionException(
                 'Failed to generate a cryptographically strong IV.',
@@ -108,19 +103,13 @@ class EncryptionService
             throw new EncryptionException('Invalid base64-encoded value.');
         }
 
-        $ivLength = openssl_cipher_iv_length(self::CIPHER);
-
-        if (!is_int($ivLength) || $ivLength <= 0) {
-            throw new EncryptionException('Unable to determine IV length for cipher "' . self::CIPHER . '".');
-        }
-
-        if (strlen($decoded) <= ($ivLength + self::TAG_LENGTH)) {
+        if (strlen($decoded) <= (self::IV_LENGTH + self::TAG_LENGTH)) {
             throw new EncryptionException('Encrypted value is too short to contain a valid IV and Tag.');
         }
 
-        $iv = substr($decoded, 0, $ivLength);
-        $tag = substr($decoded, $ivLength, self::TAG_LENGTH);
-        $ciphertext = substr($decoded, $ivLength + self::TAG_LENGTH);
+        $iv = substr($decoded, 0, self::IV_LENGTH);
+        $tag = substr($decoded, self::IV_LENGTH, self::TAG_LENGTH);
+        $ciphertext = substr($decoded, self::IV_LENGTH + self::TAG_LENGTH);
 
         $data = openssl_decrypt($ciphertext, self::CIPHER, $this->key, OPENSSL_RAW_DATA, $iv, $tag);
 
