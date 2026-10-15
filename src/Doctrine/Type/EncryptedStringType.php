@@ -82,7 +82,7 @@ class EncryptedStringType extends Type
 
     private function service(): EncryptionService
     {
-        if ($this->encryptionService === null) {
+        if (!$this->encryptionService instanceof EncryptionService) {
             throw new RuntimeException('EncryptionService was not configured for ' . self::NAME . '.');
         }
 

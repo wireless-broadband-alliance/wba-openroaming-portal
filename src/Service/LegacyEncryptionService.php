@@ -13,13 +13,13 @@ use App\Exception\EncryptionException;
  * APP_SECRET the operator types in. Delete this class (and the command) once every
  * installation has been migrated.
  */
-final class LegacyEncryptionService
+final readonly class LegacyEncryptionService
 {
     private const string CIPHER = 'aes-256-gcm';
     private const int IV_LENGTH = 12; // 96-bit nonce, the standard size for GCM
     private const int TAG_LENGTH = 16;
 
-    public function __construct(private readonly string $legacySecret)
+    public function __construct(private string $legacySecret)
     {
     }
 
