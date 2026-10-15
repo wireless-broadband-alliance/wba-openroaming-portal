@@ -93,10 +93,10 @@
         </div>
 
         {# ================= PROVIDER CONFIGURATION CARD ================= #}
-        <div class="transition bg-white rounded-md p-6 w-full {{ selectedProvider == captchaOffVal ? 'hidden' : '' }}" {{ stimulus_controller('card') }}>
+        <div class="transition bg-white rounded-md p-6 w-full {{ selectedProvider == captchaOffVal ? 'hidden' : '' }}">
 
             {# CLOUDFLARE TURNSTILE FIELDS #}
-            <div class="{{ selectedProvider != turnstileValue ? 'hidden' : '' }}">
+            <div class="{{ selectedProvider != turnstileValue ? 'hidden' : '' }}" {{ stimulus_controller('card') }}>
                 <div class="flex flex-row justify-between">
                     <div class="text-base font-medium text-center break-normal md:break-all">
                         <h1 class="text-lg md:text-xl whitespace-nowrap">{{ 'turnstileLabel'|trans({}, 'captcha') }}</h1>
@@ -129,7 +129,7 @@
             </div>
 
             {# GOOGLE RECAPTCHA V3 FIELDS #}
-            <div class="{{ selectedProvider != recaptcha3Value ? 'hidden' : '' }}">
+            <div class="{{ selectedProvider != recaptcha3Value ? 'hidden' : '' }}" {{ stimulus_controller('card') }}>
                 <div class="flex flex-row justify-between">
                     <div class="text-base font-medium text-center break-normal md:break-all">
                         <h1 class="text-lg md:text-xl whitespace-nowrap">{{ 'recaptcha3Label'|trans({}, 'captcha') }}</h1>
