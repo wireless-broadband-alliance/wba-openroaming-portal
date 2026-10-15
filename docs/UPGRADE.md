@@ -7,14 +7,15 @@
 3. [Upgrade Path Matrix](#upgrade-path-matrix)
 4. [Upgrade Checklist](#upgrade-checklist)
 5. [Step-by-Step Procedure](#step-by-step-procedure)
-6. [Release-Specific Notes: Version 1.14.2](#release-specific-notes-version-1142)
-7. [Release-Specific Notes: Version 1.14.1](#release-specific-notes-version-1141)
-8. [Release-Specific Notes: Version 1.14.0](#release-specific-notes-version-1140)
-9. [Release-Specific Notes: Version 1.13.0](#release-specific-notes-version-1130)
-10. [Release-Specific Notes: Version 1.8.1](#release-specific-notes-version-181)
-11. [Release-Specific Notes: Version 1.7.x](#release-specific-notes-version-17x)
-12. [Troubleshooting & Rollback](#troubleshooting--rollback)
-13. [Additional Resources](#additional-resources)
+6. [Release-Specific Notes: Version 1.15.0](#release-specific-notes-version-1150)
+7. [Release-Specific Notes: Version 1.14.2](#release-specific-notes-version-1142)
+8. [Release-Specific Notes: Version 1.14.1](#release-specific-notes-version-1141)
+9. [Release-Specific Notes: Version 1.14.0](#release-specific-notes-version-1140)
+10. [Release-Specific Notes: Version 1.13.0](#release-specific-notes-version-1130)
+11. [Release-Specific Notes: Version 1.8.1](#release-specific-notes-version-181)
+12. [Release-Specific Notes: Version 1.7.x](#release-specific-notes-version-17x)
+13. [Troubleshooting & Rollback](#troubleshooting--rollback)
+14. [Additional Resources](#additional-resources)
 
 ---
 
@@ -115,6 +116,7 @@ Use this table to determine the exact upgrade steps based on your current versio
 | 1.13.1          | 1.14.0         | Run `php bin/console doctrine:migrations:migrate`. Next, run `php bin/console app:cra:migrate-all --yes` to execute all CRA data encryption steps at once (including Installation Progress data). Then complete the mandatory **Security.txt Configuration** step in the Installation Wizard. **Breaking:** API v1 and v2 are removed (use `/api/v3`) and the JWT TTL is now 15 minutes. Review your `.env` and Docker Compose setup (see [Release-Specific Notes: Version 1.14.0](#release-specific-notes-version-1140)). Perform these actions while the portal is **offline or restricted**. |
 | 1.14.0          | 1.14.1         | Patch release — no database migrations or configuration changes required. Fixes Windows Wi-Fi profile XML signing failures (`xmlsec1`).                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | 1.14.1          | 1.14.2         | Patch release — no database migrations or configuration changes required. Fixes Root CA SHA-1 hash formatting for Windows EAPHost schema validation, installation wizard `.env` sync, OAuth controller wiring, API user registration flows, and password reset token verification logic.                                                                                                                                                                                                                                                                                                        |
+| 1.14.2          | 1.15.0         | Run `php bin/console doctrine:migrations:migrate`. Next, run `php bin/console import:turnstileSettings` to encrypt your existing `TURNSTILE_KEY` / `TURNSTILE_SECRET` from `.env` and store them in the database. **Breaking:** API v3 is deprecated and the `/config` response changed (`platform.TURNSTILE_CHECKER` is replaced by `platform.CAPTCHA_PROVIDER`); migrate clients and mobile apps to `/api/v4` (see [Release-Specific Notes: Version 1.15.0](#release-specific-notes-version-1150)). Perform these actions while the portal is **offline or restricted**.                      |
 
 ---
 
@@ -123,22 +125,19 @@ Use this table to determine the exact upgrade steps based on your current versio
 Use the following checklist before starting the upgrade process:
 
 * [ ] **Verify System Requirements**
-* Confirm the target environment matches all required dependencies (e.g., PHP, MySQL).
-
+    * Confirm the target environment matches all required dependencies (e.g., PHP, MySQL).
 
 * [ ] **Create Backups**
-* Database
-* Configuration files
-* User data
-
+    * Database
+    * Configuration files
+    * User data
 
 * [ ] **Review Changelog**
-* Read release notes or [CHANGELOG.md](../CHANGELOG.md) for breaking changes or mandatory steps.
-
+    * Read release notes or [CHANGELOG.md](../CHANGELOG.md) for breaking changes or mandatory steps.
 
 * [ ] **Complete Pre-Upgrade Steps**
-* Ensure your current version aligns with the **Upgrade Path Matrix**.
-* Run all pre-upgrade commands for intermediate versions.
+    * Ensure your current version aligns with the **Upgrade Path Matrix**.
+    * Run all pre-upgrade commands for intermediate versions.
 
 ---
 
@@ -170,10 +169,11 @@ docker compose up -d
 
 4. **Run any version-specific commands**
    Check the [Upgrade Path Matrix](#upgrade-path-matrix) for your current version and
-   run any required commands inside the container. Example:
+   run any required commands inside the container. Examples:
 
 ```bash
 docker compose exec web php bin/console doctrine:migrations:migrate
+docker compose exec web php bin/console import:turnstileSettings
 ```
 
 5. **Clear the cache**
@@ -188,6 +188,106 @@ docker compose exec web php bin/console cache:clear
 ```bash
 docker compose logs -f web
 ```
+
+---
+
+## Release-Specific Notes: Version 1.15.0
+
+**Scenario**: Your current version is **1.14.2** (or earlier 1.14.x), and you want to upgrade to **1.15.0**.
+
+> **Important:** Perform the database migration and the Turnstile settings import below while the portal is
+> **offline or restricted**, and make sure you have a fresh database backup.
+
+### 1. Breaking Changes to Review Before Upgrading
+
+* **API v3 is deprecated; API v4 (`/api/v4`) is now the primary API.**
+  The base configuration response changed to support multi-provider CAPTCHA (`TURNSTILE`, `RECAPTCHA3`, or `OFF`).
+  The main `/api` documentation endpoint now redirects to v4 by default. All client integrations and mobile
+  applications should migrate to `/api/v4`.
+
+* **Base configuration payload overhaul (`/config`).**
+    * The boolean flag `platform.TURNSTILE_CHECKER` was removed and replaced by the enum `platform.CAPTCHA_PROVIDER`
+      (`TURNSTILE`, `RECAPTCHA3`, or `OFF`).
+    * The fixed `turnstile` object was replaced by a dynamic key that strictly reflects the active provider. For
+      example, when `CAPTCHA_PROVIDER` is `RECAPTCHA3`, the response contains a `recaptcha3` object with
+      `RECAPTCHA3_KEY`.
+
+  *Legacy API v3 config response:*
+  ```json
+  {
+    "success": true,
+    "data": {
+      "platform": {
+        "TURNSTILE_CHECKER": true
+      },
+      "turnstile": {
+        "TURNSTILE_KEY": "0x4AAAAAAAbU9Fvdl8WH6GRk"
+      }
+    }
+  }
+  ```
+
+  *New API v4 config response:*
+  ```json
+  {
+    "success": true,
+    "data": {
+      "platform": {
+        "CAPTCHA_PROVIDER": "RECAPTCHA3"
+      },
+      "recaptcha3": {
+        "RECAPTCHA3_KEY": "6LfJmOstAAAAAD274T05Q_1HRdEd8KuX3ETgmPJm"
+      }
+    }
+  }
+  ```
+
+* **CAPTCHA token fields on protected endpoints (v4).**
+  Login, registration, password reset, SMS registration/reset, and 2FA enablement now accept the token that matches
+  the active provider: `turnstile_token` or `recaptcha_token`. When the provider is `OFF`, no token is required.
+  Complete request bodies, provider behaviors, and response schemas are documented in the API v4 documentation.
+
+### 2. Required Database Migrations
+
+Run Doctrine migrations to set up the required settings structures:
+
+```bash
+php bin/console doctrine:migrations:migrate
+```
+
+### 3. Required One-Time Action: Import Turnstile Settings
+
+After the migration, run the import command to encrypt and sync your existing `.env` Turnstile keys into the
+database:
+
+```bash
+php bin/console import:turnstileSettings
+```
+
+The command reads `TURNSTILE_KEY` and `TURNSTILE_SECRET` from the environment variables, encrypts them at rest via
+`EncryptionService`, and creates or updates them in the `Setting` table.
+
+> **Important:** Keep `TURNSTILE_KEY` and `TURNSTILE_SECRET` in your `.env` until the command has finished
+> successfully, since it reads them from there.
+
+### 4. Other Improvements in This Release
+
+* **Installation Wizard:** CAPTCHA provider configuration is now fully integrated into the initial setup and
+  installation wizard flow.
+* **Dynamic CAPTCHA provider API:** System configuration endpoints and base API routes now dynamically report and
+  query the currently active CAPTCHA provider (`TURNSTILE`, `RECAPTCHA3`, or `OFF`).
+
+### 5. Post-Upgrade Verification
+
+* [ ] The migrations and `import:turnstileSettings` completed without errors.
+* [ ] `GET /api/v4/config` returns `platform.CAPTCHA_PROVIDER` and the matching provider block.
+* [ ] Clients, mobile apps and integrations use `/api/v4` and no longer read `TURNSTILE_CHECKER`.
+* [ ] CAPTCHA-protected flows (login, registration, password reset, SMS registration/reset, 2FA enablement) work with
+  the active provider.
+* [ ] The Turnstile key and secret are stored encrypted in the `Setting` table, not as plaintext.
+
+> **Breaking Changes:**
+> Please always review the [CHANGELOG.md](../CHANGELOG.md) for detailed information.
 
 ---
 
@@ -296,8 +396,9 @@ updates, or configuration changes are required.
 
 * **API v1 and v2 have been permanently removed.**
   As announced in the [Release V1.9.0 deprecation notice](../CHANGELOG.md#api-deprecation-notice), all `/api/v1` and
-  `/api/v2` routes no longer exist. **API v3 is the only supported API version.** Any client or integration still
-  calling `/api/v1` or `/api/v2` must be updated to `/api/v3` **before** upgrading.
+  `/api/v2` routes no longer exist. **API v3 was the only supported API version in this release** (it is deprecated
+  as of 1.15.0 in favor of `/api/v4`). Any client or integration still calling `/api/v1` or `/api/v2` must be updated
+  **before** upgrading.
 
 * **JWT token lifetime reduced (CRA Annex I §1.2).**
   The token TTL for the privileged IAM API dropped from 3600s (1 hour) to **900s (15 minutes)**, and token refresh
@@ -425,7 +526,8 @@ php bin/console clear:expired-user-data --yes
 ### 7. Post-Upgrade Verification
 
 * [ ] The Installation Wizard was completed and the Security.txt configuration is saved.
-* [ ] Integrations authenticate against `/api/v3` and handle the 15-minute JWT lifetime (token refresh).
+* [ ] Integrations authenticate against `/api/v3` (or `/api/v4` from 1.15.0) and handle the 15-minute JWT lifetime
+  (token refresh).
 * [ ] `METRICS_ALLOWED_IPS` only contains the intended monitoring hosts.
 * [ ] The portal connects to both databases (OpenRoaming and FreeRADIUS) with the new TLS settings.
 * [ ] Logins with Google, Microsoft, SAML, 2FA and TOTP still work for existing users.
@@ -534,20 +636,23 @@ After completing the steps above, upgrade to version **1.7.x** following the usu
 
 ## Troubleshooting & Rollback
 
-| Issue                                                                          | Cause                                                                 | Solution                                                                                                                                          |
-|--------------------------------------------------------------------------------|-----------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
-| Errors running migrations                                                      | Invalid or old `Event` records                                        | Run `php bin/console clear:eventEntity` to clean up.                                                                                              |
-| Missing JWT keypair                                                            | Skipped step during 1.4.0                                             | Run `php bin/console lexik:jwt:generate-keypair`.                                                                                                 |
-| `reset:allocate-providers` missing                                             | Skipped upgrade to 1.6                                                | Upgrade to 1.6 and then run the command.                                                                                                          |
-| Schema mismatch                                                                | Schema updates not applied                                            | Run `php bin/console doctrine:schema:update --force`.                                                                                             |
-| Cache issues                                                                   | Stale or old cache files                                              | Run `php bin/console cache:clear`.                                                                                                                |
-| Installation Wizard shows up again after 1.14.0                                | The migration resets `InstallProgress` to `IN_PROGRESS`               | Expected behaviour. Complete the mandatory Security.txt Configuration step in the wizard.                                                         |
-| API clients get 404 on `/api/v1` or `/api/v2`                                  | API v1 and v2 were removed in 1.14.0                                  | Update the integration to `/api/v3`.                                                                                                              |
-| API tokens stop working after about 15 minutes                                 | JWT TTL reduced to 900s in 1.14.0                                     | Use the token refresh endpoints described in the API documentation.                                                                               |
-| Users or admins cannot log in after the encryption                             | An encryption step failed or ran partially                            | Check the command output, then re-run `php bin/console app:cra:migrate-all --yes` (commands are safe to re-run).                                  |
-| Installation Wizard steps fail to decrypt after 1.14.0                         | `InstallationProgress` still holds plaintext values                   | Run `php bin/console app:cra:encrypt-installation-progress` (or the full `app:cra:migrate-all --yes` suite).                                      |
-| `/metrics` returns 403 after 1.14.0                                            | `METRICS_ALLOWED_IPS` no longer defaults to `0.0.0.0/0`               | Add your monitoring hosts to `METRICS_ALLOWED_IPS` in `.env`.                                                                                     |
-| Windows Wi-Fi profile import fails with "Unexpected error" ("Erro inesperado") | Unformatted Root CA SHA-1 thumbprint violating Windows EAPHost schema | Upgrade to 1.14.2+ and re-save certificate settings to ensure the thumbprint is formatted as space-separated byte pairs (e.g., `ca bd 2a 79...`). |
+| Issue                                                                                                         | Cause                                                                                                                | Solution                                                                                                                                          |
+|---------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
+| Errors running migrations                                                                                     | Invalid or old `Event` records                                                                                       | Run `php bin/console clear:eventEntity` to clean up.                                                                                              |
+| Missing JWT keypair                                                                                           | Skipped step during 1.4.0                                                                                            | Run `php bin/console lexik:jwt:generate-keypair`.                                                                                                 |
+| `reset:allocate-providers` missing                                                                            | Skipped upgrade to 1.6                                                                                               | Upgrade to 1.6 and then run the command.                                                                                                          |
+| Schema mismatch                                                                                               | Schema updates not applied                                                                                           | Run `php bin/console doctrine:schema:update --force`.                                                                                             |
+| Cache issues                                                                                                  | Stale or old cache files                                                                                             | Run `php bin/console cache:clear`.                                                                                                                |
+| Installation Wizard shows up again after 1.14.0                                                               | The migration resets `InstallProgress` to `IN_PROGRESS`                                                              | Expected behaviour. Complete the mandatory Security.txt Configuration step in the wizard.                                                         |
+| API clients get 404 on `/api/v1` or `/api/v2`                                                                 | API v1 and v2 were removed in 1.14.0                                                                                 | Update the integration to `/api/v4` (or `/api/v3` if you are still on 1.14.x).                                                                    |
+| API tokens stop working after about 15 minutes                                                                | JWT TTL reduced to 900s in 1.14.0                                                                                    | Use the token refresh endpoints described in the API documentation.                                                                               |
+| Users or admins cannot log in after the encryption                                                            | An encryption step failed or ran partially                                                                           | Check the command output, then re-run `php bin/console app:cra:migrate-all --yes` (commands are safe to re-run).                                  |
+| Installation Wizard steps fail to decrypt after 1.14.0                                                        | `InstallationProgress` still holds plaintext values                                                                  | Run `php bin/console app:cra:encrypt-installation-progress` (or the full `app:cra:migrate-all --yes` suite).                                      |
+| `/metrics` returns 403 after 1.14.0                                                                           | `METRICS_ALLOWED_IPS` no longer defaults to `0.0.0.0/0`                                                              | Add your monitoring hosts to `METRICS_ALLOWED_IPS` in `.env`.                                                                                     |
+| Windows Wi-Fi profile import fails with "Unexpected error" ("Erro inesperado")                                | Unformatted Root CA SHA-1 thumbprint violating Windows EAPHost schema                                                | Upgrade to 1.14.2+ and re-save certificate settings to ensure the thumbprint is formatted as space-separated byte pairs (e.g., `ca bd 2a 79...`). |
+| Mobile app or client breaks after 1.15.0 because `TURNSTILE_CHECKER` or `turnstile` is missing from `/config` | The v4 config response uses `platform.CAPTCHA_PROVIDER` and a dynamic provider block                                 | Migrate the client to `/api/v4` and read `CAPTCHA_PROVIDER` to decide which CAPTCHA widget to load.                                               |
+| CAPTCHA-protected endpoints reject requests after 1.15.0                                                      | Wrong token field for the active provider                                                                            | Send `turnstile_token` for `TURNSTILE`, `recaptcha_token` for `RECAPTCHA3`, and no token when the provider is `OFF`.                              |
+| Turnstile keys are empty or CAPTCHA fails after 1.15.0                                                        | `import:turnstileSettings` was not run, or `TURNSTILE_KEY` / `TURNSTILE_SECRET` were missing from `.env` when it ran | Restore the values in `.env` and run `php bin/console import:turnstileSettings`.                                                                  |
 
 ### Rollback Procedure
 
