@@ -250,3 +250,4 @@ securityTxtSettingsResetSuccessfully: "Settings have been reset successfully."
 captcha:
   saveSuccess: "CAPTCHA settings saved successfully."
   saveError: "An error occurred while saving CAPTCHA settings."
+captchaProviderResetSuccessfully: "Settings have been reset successfully."

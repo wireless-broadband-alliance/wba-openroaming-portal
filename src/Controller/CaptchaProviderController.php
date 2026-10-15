@@ -31,7 +31,7 @@ class CaptchaProviderController extends AbstractController
         private readonly EventActions $eventActions,
     ) {
     }
-    #[Route('/dashboard/settings/captchaProvider', name: 'admin_dashboard_settings_captchaProvider')]
+    #[Route('/dashboard/settings/captchaProvider', name: 'admin_dashboard_settings_captcha_provider')]
     #[IsGranted(UserAuthenticationVoter::CAPTCHA_PROVIDER_READ)]
     public function captchaProvider(Request $request): Response
     {
@@ -71,7 +71,7 @@ class CaptchaProviderController extends AbstractController
                 'success',
                 $this->translator->trans('newChangesAppliedSuccessfully', [], 'controllers')
             );
-            return $this->redirectToRoute('admin_dashboard_settings_captchaProvider');
+            return $this->redirectToRoute('admin_dashboard_settings_captcha_provider');
         }
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [

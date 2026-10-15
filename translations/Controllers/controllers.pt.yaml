@@ -248,3 +248,4 @@ securityTxtSettingsResetSuccessfully: "As definições foram repostas com sucess
 captcha:
   saveSuccess: "Definições de CAPTCHA guardadas com sucesso."
   saveError: "Ocorreu um erro ao guardar as definições de CAPTCHA."
+captchaProviderResetSuccessfully: "As definições foram repostas com sucesso."
