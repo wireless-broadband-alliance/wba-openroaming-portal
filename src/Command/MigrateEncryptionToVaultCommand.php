@@ -156,7 +156,7 @@ final class MigrateEncryptionToVaultCommand extends Command
 
         try {
             foreach (self::TARGETS as $target) {
-                $this->migrateTarget($legacy, $target, $dryRun, $report);
+                $report = array_merge($report, $this->migrateTarget($legacy, $target, $dryRun));
             }
 
             if ($dryRun) {
@@ -191,8 +191,8 @@ final class MigrateEncryptionToVaultCommand extends Command
 
         $io->success(
             sprintf(
-                '%s: %d value(s) re-encrypted, %d plain-text value(s) encrypted, 
-                %d skipped (empty, already v2 or hashed).',
+                '%s: %d value(s) re-encrypted, %d plain-text value(s) encrypted, '
+                . '%d skipped (empty, already v2 or hashed).',
                 $dryRun ? 'Dry run' : 'Done',
                 $totals['migrated'],
                 $totals['plaintext'],
@@ -209,16 +209,16 @@ final class MigrateEncryptionToVaultCommand extends Command
 
     /**
      * @param array{class: class-string, fields: list<string>, where?: array{field: string, in: list<string>}} $target
-     * @param array<string, array{migrated: int, plaintext: int, skipped: int}> $report
+     * @return array<string, array{migrated: int, plaintext: int, skipped: int}> stats per "table.column"
      * @throws Exception
      * @throws MappingException
      */
     private function migrateTarget(
         LegacyEncryptionService $legacy,
         array $target,
-        bool $dryRun,
-        array &$report
-    ): void {
+        bool $dryRun
+    ): array {
+        $report = [];
         $metadata = $this->entityManager->getClassMetadata($target['class']);
         $tableName = $metadata->getTableName();
         $quotedTable = $this->connection->quoteSingleIdentifier($tableName);
@@ -242,7 +242,7 @@ final class MigrateEncryptionToVaultCommand extends Command
                 $types['names'] = ArrayParameterType::STRING;
             }
 
-            $report[$label] = ['migrated' => 0, 'plaintext' => 0, 'skipped' => 0];
+            $stats = ['migrated' => 0, 'plaintext' => 0, 'skipped' => 0];
 
             foreach ($this->connection->fetchAllAssociative($sql, $params, $types) as $row) {
                 $value = $row['val'];
@@ -253,7 +253,7 @@ final class MigrateEncryptionToVaultCommand extends Command
                     || $this->encryptionService->isEncrypted((string)$value)
                     || str_starts_with((string)$value, self::ARGON2ID_PREFIX)
                 ) {
-                    ++$report[$label]['skipped'];
+                    ++$stats['skipped'];
                     continue;
                 }
 
@@ -263,10 +263,10 @@ final class MigrateEncryptionToVaultCommand extends Command
                     if ($this->isLegacyPlaintext($value)) {
                         // Never was ciphertext (the old types returned such values untouched).
                         $plain = $value;
-                        ++$report[$label]['plaintext'];
+                        ++$stats['plaintext'];
                     } else {
                         $plain = $legacy->decrypt($value);
-                        ++$report[$label]['migrated'];
+                        ++$stats['migrated'];
                     }
 
                     $new = $this->encryptionService->encrypt($plain);
@@ -287,7 +287,11 @@ final class MigrateEncryptionToVaultCommand extends Command
                     );
                 }
             }
+
+            $report[$label] = $stats;
         }
+
+        return $report;
     }
 
     /**
