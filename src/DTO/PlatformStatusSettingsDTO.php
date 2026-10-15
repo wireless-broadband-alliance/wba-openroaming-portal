@@ -25,9 +25,6 @@ class PlatformStatusSettingsDTO
     public ?string $platformMode = null;
 
     #[Assert\NotBlank(message: 'selectOption')]
-    public ?string $turnstileChecker = null;
-
-    #[Assert\NotBlank(message: 'selectOption')]
     public ?string $apiStatus = null;
 
     #[Assert\NotBlank(message: 'timerValueRequired')]
@@ -54,7 +51,6 @@ class PlatformStatusSettingsDTO
     {
         $this->userVerification = $data[SettingName::USER_VERIFICATION->value]['value'] ?? null;
         $this->platformMode = $data[SettingName::PLATFORM_MODE->value]['value'] ?? null;
-        $this->turnstileChecker = $data[SettingName::TURNSTILE_CHECKER->value]['value'] ?? null;
         $this->apiStatus = $data[SettingName::API_STATUS->value]['value'] ?? null;
         $this->timeIntervalBetweenRequests =
             isset($data[SettingName::EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS->value]['value'])
@@ -79,7 +75,6 @@ class PlatformStatusSettingsDTO
         return [
             SettingName::USER_VERIFICATION->value => ['value' => $this->userVerification],
             SettingName::PLATFORM_MODE->value => ['value' => $this->platformMode],
-            SettingName::TURNSTILE_CHECKER->value => ['value' => $this->turnstileChecker],
             SettingName::API_STATUS->value => ['value' => $this->apiStatus],
             SettingName::EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS->value => ['value' => $this->timeIntervalBetweenRequests],
             SettingName::EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS->value =>

@@ -39,14 +39,6 @@ class PlatformStatusSettingsType extends AbstractType
                 'required' => false,
                 'disabled' => $this->disabled,
             ])
-            ->add('turnstileChecker', ChoiceType::class, [
-                'choices' => [
-                    OperationMode::ON->value => OperationMode::ON->value,
-                    OperationMode::OFF->value => OperationMode::OFF->value,
-                ],
-                'required' => false,
-                'disabled' => $this->disabled,
-            ])
             ->add('apiStatus', ChoiceType::class, [
                 'choices' => [
                     OperationMode::ON->value => OperationMode::ON->value,
