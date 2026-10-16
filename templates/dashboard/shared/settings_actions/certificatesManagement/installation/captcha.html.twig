@@ -29,7 +29,7 @@
         {% set turnstileValue = constant('App\\Enum\\CaptchaProviderEnum::TURNSTILE').value %}
         {% set recaptcha3Value = constant('App\\Enum\\CaptchaProviderEnum::RECAPTCHA3').value %}
 
-        {{ form_start(form, { attr: { autocomplete: 'off' } }) }}
+        {{ form_start(form, {attr: {autocomplete: 'off'}}) }}
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
@@ -91,7 +91,7 @@
                         attr: {
                             class: 'form-widget',
                             placeholder: '0x4AAAAAAA...',
-                        }
+                        },
                     }) }}
                     {% if form_errors(form.turnstileKey) %}
                         <div class="text-xs text-red-500 font-medium mt-1">{{ form_errors(form.turnstileKey) }}</div>
@@ -106,7 +106,7 @@
                         attr: {
                             class: 'form-widget',
                             placeholder: '0x4AAAAAAA...',
-                        }
+                        },
                     }) }}
                     {% if form_errors(form.turnstileSecret) %}
                         <div class="text-xs text-red-500 font-medium mt-1">{{ form_errors(form.turnstileSecret) }}</div>
@@ -143,7 +143,7 @@
                         attr: {
                             class: 'form-widget',
                             placeholder: '6Ld...',
-                        }
+                        },
                     }) }}
                     {% if form_errors(form.recaptcha3Key) %}
                         <div class="text-xs text-red-500 font-medium mt-1">{{ form_errors(form.recaptcha3Key) }}</div>
@@ -158,7 +158,7 @@
                         attr: {
                             class: 'form-widget',
                             placeholder: '6Ld...',
-                        }
+                        },
                     }) }}
                     {% if form_errors(form.recaptcha3Secret) %}
                         <div class="text-xs text-red-500 font-medium mt-1">{{ form_errors(form.recaptcha3Secret) }}</div>

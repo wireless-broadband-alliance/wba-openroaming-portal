@@ -4,7 +4,7 @@
     {% set recaptcha3Value = constant('App\\Enum\\CaptchaProviderEnum::RECAPTCHA3').value %}
     {% set selectedProvider = form.provider.vars.value.value|default(form.provider.vars.value) %}
 
-    {{ form_start(form, { attr: { autocomplete: 'off' } }) }}
+    {{ form_start(form, {attr: {autocomplete: 'off'}}) }}
     {{ form_widget(form._token) }}
 
     <div class="grid gap-4 grid-cols-1 p-2" {{ stimulus_controller('radio-card') }}>

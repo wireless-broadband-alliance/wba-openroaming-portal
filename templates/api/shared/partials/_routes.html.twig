@@ -90,7 +90,7 @@
                                         <p class="text-sm font-semibold text-blue-600 mb-2">Request Body</p>
                                         {{ include('api/shared/partials/_request_body.html.twig', {
                                             body: route.requestBody|filter((v, k) => k != samlTitle),
-                                            uid: loop.parent.loop.index ~ '-' ~ loop.index
+                                            uid: loop.parent.loop.index ~ '-' ~ loop.index,
                                         }) }}
                                     </div>
                                 {% endif %}
