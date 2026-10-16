@@ -76,7 +76,7 @@ class CaptchaStepController extends AbstractController
         $form = $this->createForm(CaptchaStepType::class, $dto);
         $form->handleRequest($request);
 
-        if ($dto->provider instanceof CaptchaProviderEnum && $form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $isRecaptcha = $dto->provider->isRecaptcha3();
             $secretField = $isRecaptcha ? 'recaptcha3Secret' : 'turnstileSecret';
             $secret = $isRecaptcha ? $dto->recaptcha3Secret : $dto->turnstileSecret;

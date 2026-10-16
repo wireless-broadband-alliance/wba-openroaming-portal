@@ -284,18 +284,6 @@ class SiteController extends AbstractController
                 $formRegistrationDemo->handleRequest($request);
                 if ($formRegistrationDemo->isSubmitted() && $formRegistrationDemo->isValid()) {
                     $payload = $request->request->all();
-                    if ($data[SettingName::TURNSTILE_CHECKER->value]['value'] === OperationMode::ON->value) {
-                        $turnstileResponse = $request->request->get('cf-turnstile-response');
-                        // Validate the Turnstile CAPTCHA
-                        if (empty($turnstileResponse)) {
-                            $this->addFlash(
-                                'error',
-                                $this->translator->trans('invalidCaptcha', [], 'landing')
-                            );
-
-                            return $this->redirectToRoute('app_landing');
-                        }
-                    }
 
                     if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
                         $this->addFlash('error', $this->translator->trans('selectOperatingSystem', [], 'controllers'));

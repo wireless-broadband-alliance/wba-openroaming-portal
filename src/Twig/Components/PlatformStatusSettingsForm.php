@@ -54,8 +54,6 @@ final class PlatformStatusSettingsForm extends AbstractController
                 $this->platformStatusSettingsDTO->platformMode,
             SettingName::USER_VERIFICATION->value =>
                 $this->platformStatusSettingsDTO->userVerification,
-            SettingName::TURNSTILE_CHECKER->value =>
-                $this->platformStatusSettingsDTO->turnstileChecker,
             SettingName::API_STATUS->value =>
                 $this->platformStatusSettingsDTO->apiStatus,
         ], false);

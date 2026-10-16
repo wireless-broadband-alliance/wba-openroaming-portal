@@ -90,7 +90,8 @@ class ConfigController extends AbstractController
         if ($captchaProvider === CaptchaProviderEnum::TURNSTILE->value) {
             $turnstileKey = $this->getDecryptedSettingValue(SettingName::TURNSTILE_KEY->value);
             if ($turnstileKey === '' && $this->parameterBag->has('app.turnstile_key')) {
-                $turnstileKey = (string)$this->parameterBag->get('app.turnstile_key');
+                $key = $this->parameterBag->get('app.turnstile_key');
+                $turnstileKey = \is_string($key) ? $key : '';
             }
 
             $data['turnstile'] = [

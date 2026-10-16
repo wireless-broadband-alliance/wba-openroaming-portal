@@ -67,6 +67,9 @@ readonly class CaptchaValidator
         };
     }
 
+    /**
+     * @param array<string, mixed> $payload
+     */
     public function validateApiPayload(array $payload, ?string $clientIp): ?BaseResponse
     {
         $provider = $this->getActiveProvider();

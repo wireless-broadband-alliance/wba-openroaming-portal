@@ -58,10 +58,8 @@ class CaptchaDTO
     {
         $rawProvider = $data[SettingName::CAPTCHA_PROVIDER->value]['value'] ?? null;
 
-        if ($rawProvider !== null) {
-            $this->provider = $rawProvider instanceof CaptchaProviderEnum
-                ? $rawProvider
-                : CaptchaProviderEnum::tryFrom((string) $rawProvider);
+        if (\is_string($rawProvider)) {
+            $this->provider = CaptchaProviderEnum::tryFrom($rawProvider);
         }
 
         $this->turnstileKey = $data[SettingName::TURNSTILE_KEY->value]['value'] ?? null;
