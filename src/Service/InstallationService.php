@@ -189,7 +189,7 @@ readonly class InstallationService
                 InstallationWidgetStepsEnum::SETTINGS->value => $progress->getTrustedProxies(
                 ) !== null || $progress->getJwtPassphrase() !== null,
                 InstallationWidgetStepsEnum::CAPTCHA->value => $progress->getCaptchaProvider(
-                ) !== null,
+                ) instanceof \App\Enum\CaptchaProviderEnum,
                 InstallationWidgetStepsEnum::SECURITY_TXT->value => $progress->getSecurityContact(
                 ) !== null && $progress->getSecurityExpires() instanceof \DateTimeInterface,
                 InstallationWidgetStepsEnum::ADMIN_CREDENTIALS->value => $progress->getEmailAdmin(

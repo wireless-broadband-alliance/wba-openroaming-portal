@@ -1,32 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Twig;
 
 use App\Enum\CaptchaProviderEnum;
 use App\Service\Captcha\CaptchaValidator;
 use Symfony\Component\Form\FormView;
+use Twig\Attribute\AsTwigFunction;
 use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
-use Twig\Extension\AbstractExtension;
-use Twig\TwigFunction;
 
-class CaptchaExtension extends AbstractExtension
+class CaptchaExtension
 {
     public function __construct(
         private readonly CaptchaValidator $captchaValidator
     ) {
-    }
-
-    public function getFunctions(): array
-    {
-        return [
-            new TwigFunction('render_captcha', [$this, 'renderCaptcha'], [
-                'needs_environment' => true,
-                'is_safe' => ['html'],
-            ]),
-        ];
     }
 
     /**
@@ -34,6 +25,7 @@ class CaptchaExtension extends AbstractExtension
      * @throws RuntimeError
      * @throws LoaderError
      */
+    #[AsTwigFunction(name: 'render_captcha', needsEnvironment: true, isSafe: ['html'])]
     public function renderCaptcha(Environment $twig, mixed $formOrField): string
     {
         if (!$formOrField instanceof FormView) {
