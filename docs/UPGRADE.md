@@ -7,15 +7,16 @@
 3. [Upgrade Path Matrix](#upgrade-path-matrix)
 4. [Upgrade Checklist](#upgrade-checklist)
 5. [Step-by-Step Procedure](#step-by-step-procedure)
-6. [Release-Specific Notes: Version 1.15.0](#release-specific-notes-version-1150)
-7. [Release-Specific Notes: Version 1.14.2](#release-specific-notes-version-1142)
-8. [Release-Specific Notes: Version 1.14.1](#release-specific-notes-version-1141)
-9. [Release-Specific Notes: Version 1.14.0](#release-specific-notes-version-1140)
-10. [Release-Specific Notes: Version 1.13.0](#release-specific-notes-version-1130)
-11. [Release-Specific Notes: Version 1.8.1](#release-specific-notes-version-181)
-12. [Release-Specific Notes: Version 1.7.x](#release-specific-notes-version-17x)
-13. [Troubleshooting & Rollback](#troubleshooting--rollback)
-14. [Additional Resources](#additional-resources)
+6. [Release-Specific Notes: Version 1.16.0](#release-specific-notes-version-1160)
+7. [Release-Specific Notes: Version 1.15.0](#release-specific-notes-version-1150)
+8. [Release-Specific Notes: Version 1.14.2](#release-specific-notes-version-1142)
+9. [Release-Specific Notes: Version 1.14.1](#release-specific-notes-version-1141)
+10. [Release-Specific Notes: Version 1.14.0](#release-specific-notes-version-1140)
+11. [Release-Specific Notes: Version 1.13.0](#release-specific-notes-version-1130)
+12. [Release-Specific Notes: Version 1.8.1](#release-specific-notes-version-181)
+13. [Release-Specific Notes: Version 1.7.x](#release-specific-notes-version-17x)
+14. [Troubleshooting & Rollback](#troubleshooting--rollback)
+15. [Additional Resources](#additional-resources)
 
 ---
 
@@ -95,28 +96,29 @@ Upgrading your system requires caution and preparation. Follow these general gui
 
 Use this table to determine the exact upgrade steps based on your current version.
 
-| Current Version | Target Version | Required Actions                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-|-----------------|----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `< 1.4.0`       | 1.4.0          | Run `php bin/console clear:eventEntity` to remove invalid legacy records before continuing.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| 1.4.0           | 1.7.0          | Run `php bin/console lexik:jwt:generate-keypair` **before upgrading**.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| 1.5.0           | 1.7.0          | Run `php bin/console reset:allocate-providers` before proceeding.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| 1.6.0           | 1.7.0          | No additional steps required; proceed directly after reviewing the changelog.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| 1.7.x           | 1.8.0          | Run `php bin/console doctrine:schema:update --force` to apply required schema changes.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| ≤ 1.8.0         | 1.8.1          | Run `php bin/console doctrine:migrations:migrate` to apply optimizations and remove the deprecated `verificationCode` field.                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| 1.8.1           | 1.9.0          | Run `php bin/console doctrine:migrations:migrate`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| 1.9.0           | 1.9.1          | Minor patch release — no commands required.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| 1.9.1           | 1.10.0         | Run `php bin/console doctrine:migrations:migrate`. After upgrading, run `php bin/console prepare-release:v1100` **once** to migrate existing administrator permissions to the new Super Admin role hierarchy. Then fix VichUploader cache permissions: `chown -R www-data:www-data /var/www/openroaming/var/cache/prod/vich_uploader && chmod -R 777 /var/www/openroaming/var/cache/prod/vich_uploader`. All actions should be performed while the portal is **offline or restricted**.                                                                                                         |
-| 1.10.x          | 1.11.0         | No migrations required. Update `.env` file: change `serverVersion=8` to `serverVersion=8.0.44` (or your actual MySQL version) in both `DATABASE_URL` and `DATABASE_FREERADIUS_URL`. Refer to `.env.sample` for reference.                                                                                                                                                                                                                                                                                                                                                                       |
-| 1.11.0          | 1.11.1         | Run `php bin/console doctrine:migrations:migrate`. To remove outdated settings from the database.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| 1.11.1          | 1.11.2         | No migrations required. Font files for Inter are now self-hosted under `public/fonts/inter/`. No additional steps required.                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| 1.11.2          | 1.12.0         | Run `php bin/console doctrine:migrations:migrate` to apply new configuration settings.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| 1.12.0          | 1.12.1         | Updated configuration variables default value to follow better practices (bool instead of ON & OFF, please consult the `env.sample` for more details).                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| 1.12.1          | 1.13.0         | Run `php bin/console doctrine:migrations:migrate` to set up the new `AccessPoint`, `Network`, and `SMSProvider`/`SMSProviderParam` tables. Then run `php bin/console prepare:multiSMSMigration` **once** to migrate existing BudgetSMS API credentials from the `Settings` table to the new dedicated `SMSProvider` management system. Perform both actions while the portal is **offline or restricted**.                                                                                                                                                                                      |
-| 1.13.0          | 1.13.1         | No migration or actions required.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| 1.13.1          | 1.14.0         | Run `php bin/console doctrine:migrations:migrate`. Next, run `php bin/console app:cra:migrate-all --yes` to execute all CRA data encryption steps at once (including Installation Progress data). Then complete the mandatory **Security.txt Configuration** step in the Installation Wizard. **Breaking:** API v1 and v2 are removed (use `/api/v3`) and the JWT TTL is now 15 minutes. Review your `.env` and Docker Compose setup (see [Release-Specific Notes: Version 1.14.0](#release-specific-notes-version-1140)). Perform these actions while the portal is **offline or restricted**. |
-| 1.14.0          | 1.14.1         | Patch release — no database migrations or configuration changes required. Fixes Windows Wi-Fi profile XML signing failures (`xmlsec1`).                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| 1.14.1          | 1.14.2         | Patch release — no database migrations or configuration changes required. Fixes Root CA SHA-1 hash formatting for Windows EAPHost schema validation, installation wizard `.env` sync, OAuth controller wiring, API user registration flows, and password reset token verification logic.                                                                                                                                                                                                                                                                                                        |
-| 1.14.2          | 1.15.0         | Run `php bin/console doctrine:migrations:migrate`. Next, run `php bin/console import:turnstileSettings` to encrypt your existing `TURNSTILE_KEY` / `TURNSTILE_SECRET` from `.env` and store them in the database. **Breaking:** API v3 is deprecated and the `/config` response changed (`platform.TURNSTILE_CHECKER` is replaced by `platform.CAPTCHA_PROVIDER`); migrate clients and mobile apps to `/api/v4` (see [Release-Specific Notes: Version 1.15.0](#release-specific-notes-version-1150)). Perform these actions while the portal is **offline or restricted**.                      |
+| Current Version | Target Version | Required Actions                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+|-----------------|----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `< 1.4.0`       | 1.4.0          | Run `php bin/console clear:eventEntity` to remove invalid legacy records before continuing.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| 1.4.0           | 1.7.0          | Run `php bin/console lexik:jwt:generate-keypair` **before upgrading**.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| 1.5.0           | 1.7.0          | Run `php bin/console reset:allocate-providers` before proceeding.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| 1.6.0           | 1.7.0          | No additional steps required; proceed directly after reviewing the changelog.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| 1.7.x           | 1.8.0          | Run `php bin/console doctrine:schema:update --force` to apply required schema changes.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ≤ 1.8.0         | 1.8.1          | Run `php bin/console doctrine:migrations:migrate` to apply optimizations and remove the deprecated `verificationCode` field.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| 1.8.1           | 1.9.0          | Run `php bin/console doctrine:migrations:migrate`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| 1.9.0           | 1.9.1          | Minor patch release — no commands required.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| 1.9.1           | 1.10.0         | Run `php bin/console doctrine:migrations:migrate`. After upgrading, run `php bin/console prepare-release:v1100` **once** to migrate existing administrator permissions to the new Super Admin role hierarchy. Then fix VichUploader cache permissions: `chown -R www-data:www-data /var/www/openroaming/var/cache/prod/vich_uploader && chmod -R 777 /var/www/openroaming/var/cache/prod/vich_uploader`. All actions should be performed while the portal is **offline or restricted**.                                                                                                                                                                                                                                                                      |
+| 1.10.x          | 1.11.0         | No migrations required. Update `.env` file: change `serverVersion=8` to `serverVersion=8.0.44` (or your actual MySQL version) in both `DATABASE_URL` and `DATABASE_FREERADIUS_URL`. Refer to `.env.sample` for reference.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| 1.11.0          | 1.11.1         | Run `php bin/console doctrine:migrations:migrate`. To remove outdated settings from the database.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| 1.11.1          | 1.11.2         | No migrations required. Font files for Inter are now self-hosted under `public/fonts/inter/`. No additional steps required.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| 1.11.2          | 1.12.0         | Run `php bin/console doctrine:migrations:migrate` to apply new configuration settings.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| 1.12.0          | 1.12.1         | Updated configuration variables default value to follow better practices (bool instead of ON & OFF, please consult the `env.sample` for more details).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| 1.12.1          | 1.13.0         | Run `php bin/console doctrine:migrations:migrate` to set up the new `AccessPoint`, `Network`, and `SMSProvider`/`SMSProviderParam` tables. Then run `php bin/console prepare:multiSMSMigration` **once** to migrate existing BudgetSMS API credentials from the `Settings` table to the new dedicated `SMSProvider` management system. Perform both actions while the portal is **offline or restricted**.                                                                                                                                                                                                                                                                                                                                                   |
+| 1.13.0          | 1.13.1         | No migration or actions required.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| 1.13.1          | 1.14.0         | Run `php bin/console doctrine:migrations:migrate`. Next, run `php bin/console app:cra:migrate-all --yes` to execute all CRA data encryption steps at once (including Installation Progress data). Then complete the mandatory **Security.txt Configuration** step in the Installation Wizard. **Breaking:** API v1 and v2 are removed (use `/api/v3`) and the JWT TTL is now 15 minutes. Review your `.env` and Docker Compose setup (see [Release-Specific Notes: Version 1.14.0](#release-specific-notes-version-1140)). Perform these actions while the portal is **offline or restricted**.                                                                                                                                                              |
+| 1.14.0          | 1.14.1         | Patch release — no database migrations or configuration changes required. Fixes Windows Wi-Fi profile XML signing failures (`xmlsec1`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| 1.14.1          | 1.14.2         | Patch release — no database migrations or configuration changes required. Fixes Root CA SHA-1 hash formatting for Windows EAPHost schema validation, installation wizard `.env` sync, OAuth controller wiring, API user registration flows, and password reset token verification logic.                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| 1.14.2          | 1.15.0         | Create the production vault and `ENCRYPTION_KEY` (`php bin/console secrets:generate-keys --env=prod`, then `secrets:set ENCRYPTION_KEY - --env=prod`). Then run `php bin/console prepare-release:v1150 --dry-run` followed by `php bin/console prepare-release:v1150` **once**: it applies the database migrations, re-encrypts all data with the vault key and encrypts phone numbers. Afterwards remove `APP_SECRET` from `.env`, store a new one in the vault (`secrets:set APP_SECRET --random --env=prod`) and clear the cache. Back up `config/secrets/prod/`. Perform all actions while the portal is **offline or restricted** and with a fresh database backup. See [Release-Specific Notes: Version 1.15.0](#release-specific-notes-version-1150). |
+| 1.15.0          | 1.16.0         | Run `php bin/console doctrine:migrations:migrate`. Next, run `php bin/console import:turnstileSettings` to encrypt your existing `TURNSTILE_KEY` / `TURNSTILE_SECRET` from `.env` and store them in the database. **Breaking:** API v3 is deprecated and the `/config` response changed (`platform.TURNSTILE_CHECKER` is replaced by `platform.CAPTCHA_PROVIDER`); migrate clients and mobile apps to `/api/v4` (see [Release-Specific Notes: Version 1.15.0](#release-specific-notes-version-1160)). Perform these actions while the portal is **offline or restricted**.                                                                                                                                                                                   |
 
 ---
 
@@ -191,12 +193,15 @@ docker compose logs -f web
 
 ---
 
-## Release-Specific Notes: Version 1.15.0
+## Release-Specific Notes: Version 1.16.0
 
-**Scenario**: Your current version is **1.14.2** (or earlier 1.14.x), and you want to upgrade to **1.15.0**.
+**Scenario**: Your current version is **1.15.0**, and you want to upgrade to **1.16.0**.
 
 > **Important:** Perform the database migration and the Turnstile settings import below while the portal is
 > **offline or restricted**, and make sure you have a fresh database backup.
+>
+> Complete the [1.15.0 steps](#release-specific-notes-version-1150) (secrets vault and `prepare-release:v1150`) first:
+> `import:turnstileSettings` encrypts the Turnstile keys with the vault `ENCRYPTION_KEY`.
 
 ### 1. Breaking Changes to Review Before Upgrading
 
@@ -285,6 +290,140 @@ The command reads `TURNSTILE_KEY` and `TURNSTILE_SECRET` from the environment va
 * [ ] CAPTCHA-protected flows (login, registration, password reset, SMS registration/reset, 2FA enablement) work with
   the active provider.
 * [ ] The Turnstile key and secret are stored encrypted in the `Setting` table, not as plaintext.
+
+> **Breaking Changes:**
+> Please always review the [CHANGELOG.md](../CHANGELOG.md) for detailed information.
+
+---
+
+## Release-Specific Notes: Version 1.15.0
+
+**Scenario**: Your current version is **1.14.2** (or an earlier 1.14.x), and you want to upgrade to **1.15.0**.
+
+> **Important:** This release re-encrypts existing data in place with a new key. Perform every step below while the
+> portal is **offline or restricted**, with a fresh **database backup** and a **copy of your current `.env`** (it holds
+> the legacy `APP_SECRET` that the migration needs).
+>
+> If you are on a version older than 1.14.0, upgrade to **1.14.2** first and complete its steps. Do not jump straight
+> to 1.15.0.
+
+### 1. What Changes
+
+* Data encrypted at rest (sensitive settings, Installation Progress values, RADIUS tokens, TOTP/2FA secrets, SMS
+  provider parameters) is now protected by a dedicated `ENCRYPTION_KEY` stored in the Symfony secrets vault instead of
+  `APP_SECRET`. Encrypted values are stored with a `v2:` prefix.
+* User phone numbers are now encrypted at rest. The `User.phoneNumber` column is widened to `VARCHAR(512)`, and users
+  can no longer be searched by phone number in SQL.
+* There is no fallback key and no silent plain-text fallback any more. If `ENCRYPTION_KEY` is missing or wrong, the
+  portal fails loudly instead of reading or writing unprotected data.
+* A single command, `prepare-release:v1150`, performs all the one-time data steps.
+
+### 2. Required Actions
+
+Run the commands from your portal directory. `docker compose exec` opens an interactive terminal by default, which the
+migration needs for the hidden `APP_SECRET` prompt (do not add `-T`).
+
+1. **Back up** the database and your current `.env`.
+
+2. **Update and restart the containers** (set the new image tag in `docker-compose.yml`, then):
+
+   ```bash
+   docker compose pull
+   docker compose up -d
+   ```
+
+3. **Create the production vault and `ENCRYPTION_KEY`** (once per installation):
+
+   ```bash
+   docker compose exec web php bin/console secrets:generate-keys --env=prod
+   docker compose exec web sh -c 'openssl rand -hex 32 | php bin/console secrets:set ENCRYPTION_KEY - --env=prod'
+   ```
+
+   This creates the files in `config/secrets/prod/`. Two of them need your attention:
+
+    * `prod.decrypt.private.php` unlocks every secret in the vault. **Never commit it or share it.** It must survive
+      container re-creation (mount `./config/secrets/prod/` as a volume of the `web` service) and must be part of your
+      backups.
+    * If you lose the `ENCRYPTION_KEY`, the encrypted data **cannot be recovered**. Keep a copy of the whole
+      `config/secrets/prod/` directory in a safe place, separate from the database backup.
+
+   Do not define `ENCRYPTION_KEY` in `.env` or in the container environment as well: a real environment variable
+   overrides the vault.
+
+4. **Rehearse** the data steps. Nothing is written in a dry run:
+
+   ```bash
+   docker compose exec web php bin/console prepare-release:v1150 --dry-run
+   ```
+
+   When asked, paste your **current** `APP_SECRET` (the value in your `.env`). The input is hidden, so nothing is shown
+   while you type. The report lists, per column, how many values would be re-encrypted, how many plain-text values would
+   be encrypted and how many are skipped. If it stops with `Unable to decrypt value (wrong secret or corrupted data)`,
+   the `APP_SECRET` you entered is not the one that encrypted the data. Nothing was changed.
+
+5. **Run the migration for real**:
+
+   ```bash
+   docker compose exec web php bin/console prepare-release:v1150
+   ```
+
+   Confirm that the portal is offline and that you have a backup, then paste the `APP_SECRET` again. The command runs,
+   in this order: a vault preflight check, the database migrations, `app:cra:migrate-to-vault` (one all-or-nothing
+   transaction) and `app:cra:encrypt-phone-numbers`. If a step fails, nothing after it is run: fix the cause and run the
+   command again. Every step is safe to repeat.
+
+6. **Clear the cache**:
+
+   ```bash
+   docker compose exec web php bin/console cache:clear
+   ```
+
+7. **Replace `APP_SECRET`**. After a successful migration it no longer protects any stored data. Remove the
+   `APP_SECRET=` line from `.env` (and from any Docker environment that defines it), then store a new random value in
+   the vault and restart:
+
+   ```bash
+   docker compose exec web php bin/console secrets:set APP_SECRET --random --env=prod
+   docker compose up -d --force-recreate web
+   ```
+
+   > **Note:** This logs every user out and invalidates existing remember-me cookies, signed URLs and issued API
+   > tokens. This is expected.
+
+### 3. Post-Upgrade Verification
+
+* [ ] `prepare-release:v1150` finished with `All steps completed`, and running it a second time changes nothing.
+* [ ] Logins with local accounts, Google, Microsoft, SAML, 2FA and TOTP work for existing users.
+* [ ] The Installation Wizard, the LDAP settings and the Cloudflare certificate settings open without errors.
+* [ ] SMS providers send messages, and user phone numbers are displayed correctly in the dashboard and in the user
+  export.
+* [ ] `phoneNumber` values in the `User` table are base64 text (about 60 characters), no longer readable numbers.
+* [ ] `APP_SECRET` is no longer defined in `.env`, and `ENCRYPTION_KEY` appears in
+  `php bin/console secrets:list --env=prod` (the values stay hidden unless you pass `--reveal`).
+* [ ] A copy of `config/secrets/prod/` is stored in your backups.
+
+### 4. Rollback
+
+The old version cannot read data written by this release. To go back, restore the database backup **together with** the
+previous `.env` and the previous image tag. Rolling back only the code leaves the portal unable to read the encrypted
+data.
+
+### 5. For Developers
+
+* The secrets vault is **never committed**: `config/secrets/` is git-ignored for every environment. Each developer
+  creates a local dev vault once, after cloning:
+
+  ```bash
+  php bin/console secrets:generate-keys
+  openssl rand -hex 32 | php bin/console secrets:set ENCRYPTION_KEY -
+  php bin/console secrets:set APP_SECRET --random
+  ```
+
+* Data encrypted with one dev vault cannot be read with another. If you regenerate your dev keys, reset your local
+  database (drop, create, migrate and load fixtures), otherwise you get `Unable to decrypt value or authentication tag
+  validation failed`.
+* Tests and CI do not use the vault. `phpunit.xml.dist` defines throwaway `ENCRYPTION_KEY` and `APP_SECRET` values, and
+  the CI jobs that run `composer install` set their own in `.gitlab-ci.yml`.
 
 > **Breaking Changes:**
 > Please always review the [CHANGELOG.md](../CHANGELOG.md) for detailed information.
@@ -397,7 +536,7 @@ updates, or configuration changes are required.
 * **API v1 and v2 have been permanently removed.**
   As announced in the [Release V1.9.0 deprecation notice](../CHANGELOG.md#api-deprecation-notice), all `/api/v1` and
   `/api/v2` routes no longer exist. **API v3 was the only supported API version in this release** (it is deprecated
-  as of 1.15.0 in favor of `/api/v4`). Any client or integration still calling `/api/v1` or `/api/v2` must be updated
+  as of 1.16.0 in favor of `/api/v4`). Any client or integration still calling `/api/v1` or `/api/v2` must be updated
   **before** upgrading.
 
 * **JWT token lifetime reduced (CRA Annex I §1.2).**
@@ -526,7 +665,7 @@ php bin/console clear:expired-user-data --yes
 ### 7. Post-Upgrade Verification
 
 * [ ] The Installation Wizard was completed and the Security.txt configuration is saved.
-* [ ] Integrations authenticate against `/api/v3` (or `/api/v4` from 1.15.0) and handle the 15-minute JWT lifetime
+* [ ] Integrations authenticate against `/api/v3` (or `/api/v4` from 1.16.0) and handle the 15-minute JWT lifetime
   (token refresh).
 * [ ] `METRICS_ALLOWED_IPS` only contains the intended monitoring hosts.
 * [ ] The portal connects to both databases (OpenRoaming and FreeRADIUS) with the new TLS settings.
@@ -636,23 +775,24 @@ After completing the steps above, upgrade to version **1.7.x** following the usu
 
 ## Troubleshooting & Rollback
 
-| Issue                                                                                                         | Cause                                                                                                                | Solution                                                                                                                                          |
-|---------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
-| Errors running migrations                                                                                     | Invalid or old `Event` records                                                                                       | Run `php bin/console clear:eventEntity` to clean up.                                                                                              |
-| Missing JWT keypair                                                                                           | Skipped step during 1.4.0                                                                                            | Run `php bin/console lexik:jwt:generate-keypair`.                                                                                                 |
-| `reset:allocate-providers` missing                                                                            | Skipped upgrade to 1.6                                                                                               | Upgrade to 1.6 and then run the command.                                                                                                          |
-| Schema mismatch                                                                                               | Schema updates not applied                                                                                           | Run `php bin/console doctrine:schema:update --force`.                                                                                             |
-| Cache issues                                                                                                  | Stale or old cache files                                                                                             | Run `php bin/console cache:clear`.                                                                                                                |
-| Installation Wizard shows up again after 1.14.0                                                               | The migration resets `InstallProgress` to `IN_PROGRESS`                                                              | Expected behaviour. Complete the mandatory Security.txt Configuration step in the wizard.                                                         |
-| API clients get 404 on `/api/v1` or `/api/v2`                                                                 | API v1 and v2 were removed in 1.14.0                                                                                 | Update the integration to `/api/v4` (or `/api/v3` if you are still on 1.14.x).                                                                    |
-| API tokens stop working after about 15 minutes                                                                | JWT TTL reduced to 900s in 1.14.0                                                                                    | Use the token refresh endpoints described in the API documentation.                                                                               |
-| Users or admins cannot log in after the encryption                                                            | An encryption step failed or ran partially                                                                           | Check the command output, then re-run `php bin/console app:cra:migrate-all --yes` (commands are safe to re-run).                                  |
-| Installation Wizard steps fail to decrypt after 1.14.0                                                        | `InstallationProgress` still holds plaintext values                                                                  | Run `php bin/console app:cra:encrypt-installation-progress` (or the full `app:cra:migrate-all --yes` suite).                                      |
-| `/metrics` returns 403 after 1.14.0                                                                           | `METRICS_ALLOWED_IPS` no longer defaults to `0.0.0.0/0`                                                              | Add your monitoring hosts to `METRICS_ALLOWED_IPS` in `.env`.                                                                                     |
-| Windows Wi-Fi profile import fails with "Unexpected error" ("Erro inesperado")                                | Unformatted Root CA SHA-1 thumbprint violating Windows EAPHost schema                                                | Upgrade to 1.14.2+ and re-save certificate settings to ensure the thumbprint is formatted as space-separated byte pairs (e.g., `ca bd 2a 79...`). |
-| Mobile app or client breaks after 1.15.0 because `TURNSTILE_CHECKER` or `turnstile` is missing from `/config` | The v4 config response uses `platform.CAPTCHA_PROVIDER` and a dynamic provider block                                 | Migrate the client to `/api/v4` and read `CAPTCHA_PROVIDER` to decide which CAPTCHA widget to load.                                               |
-| CAPTCHA-protected endpoints reject requests after 1.15.0                                                      | Wrong token field for the active provider                                                                            | Send `turnstile_token` for `TURNSTILE`, `recaptcha_token` for `RECAPTCHA3`, and no token when the provider is `OFF`.                              |
-| Turnstile keys are empty or CAPTCHA fails after 1.15.0                                                        | `import:turnstileSettings` was not run, or `TURNSTILE_KEY` / `TURNSTILE_SECRET` were missing from `.env` when it ran | Restore the values in `.env` and run `php bin/console import:turnstileSettings`.                                                                  |
+| Issue                                                                                                              | Cause                                                                                                                                      | Solution                                                                                                                                                                        |
+|--------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Errors running migrations                                                                                          | Invalid or old `Event` records                                                                                                             | Run `php bin/console clear:eventEntity` to clean up.                                                                                                                            |
+| Missing JWT keypair                                                                                                | Skipped step during 1.4.0                                                                                                                  | Run `php bin/console lexik:jwt:generate-keypair`.                                                                                                                               |
+| `reset:allocate-providers` missing                                                                                 | Skipped upgrade to 1.6                                                                                                                     | Upgrade to 1.6 and then run the command.                                                                                                                                        |
+| Schema mismatch                                                                                                    | Schema updates not applied                                                                                                                 | Run `php bin/console doctrine:schema:update --force`.                                                                                                                           |
+| Cache issues                                                                                                       | Stale or old cache files                                                                                                                   | Run `php bin/console cache:clear`.                                                                                                                                              |
+| Installation Wizard shows up again after 1.14.0                                                                    | The migration resets `InstallProgress` to `IN_PROGRESS`                                                                                    | Expected behaviour. Complete the mandatory Security.txt Configuration step in the wizard.                                                                                       |
+| API clients get 404 on `/api/v1` or `/api/v2`                                                                      | API v1 and v2 were removed in 1.14.0                                                                                                       | Update the integration to `/api/v3`.                                                                                                                                            |
+| API tokens stop working after about 15 minutes                                                                     | JWT TTL reduced to 900s in 1.14.0                                                                                                          | Use the token refresh endpoints described in the API documentation.                                                                                                             |
+| Users or admins cannot log in after the encryption                                                                 | An encryption step failed or ran partially                                                                                                 | Check the command output, then re-run `php bin/console app:cra:migrate-all --yes` (commands are safe to re-run).                                                                |
+| Installation Wizard steps fail to decrypt after 1.14.0                                                             | `InstallationProgress` still holds plaintext values                                                                                        | Run `php bin/console app:cra:encrypt-installation-progress` (or the full `app:cra:migrate-all --yes` suite).                                                                    |
+| `/metrics` returns 403 after 1.14.0                                                                                | `METRICS_ALLOWED_IPS` no longer defaults to `0.0.0.0/0`                                                                                    | Add your monitoring hosts to `METRICS_ALLOWED_IPS` in `.env`.                                                                                                                   |
+| Windows Wi-Fi profile import fails with "Unexpected error" ("Erro inesperado")                                     | Unformatted Root CA SHA-1 thumbprint violating Windows EAPHost schema                                                                      | Upgrade to 1.14.2+ and re-save certificate settings to ensure the thumbprint is formatted as space-separated byte pairs (e.g., `ca bd 2a 79...`).                               |
+| `Vault preflight failed` when running `prepare-release:v1150`, or `Environment variable not found: ENCRYPTION_KEY` | The production vault was not created, `config/secrets/prod/` is not available inside the container, or `ENCRYPTION_KEY` is missing from it | Create the vault with `secrets:generate-keys --env=prod` and `secrets:set ENCRYPTION_KEY - --env=prod`, and make sure `config/secrets/prod/` is mounted in the `web` container. |
+| `Unable to decrypt value (wrong secret or corrupted data)` during `app:cra:migrate-to-vault`                       | The `APP_SECRET` typed at the prompt is not the one that encrypted the data                                                                | Nothing was changed (the command is all-or-nothing). Use the `APP_SECRET` from the `.env` of the version you are upgrading from and run the command again.                      |
+| `Value is not in the v2 format` after upgrading to 1.15.0                                                          | Existing data was not migrated yet                                                                                                         | Run `php bin/console prepare-release:v1150` (it is safe to re-run).                                                                                                             |
+| Everyone is logged out and API tokens stop working after replacing `APP_SECRET`                                    | `APP_SECRET` signs sessions, remember-me cookies and API token nonces                                                                      | Expected after rotating `APP_SECRET`. Users sign in again.                                                                                                                      |
 
 ### Rollback Procedure
 

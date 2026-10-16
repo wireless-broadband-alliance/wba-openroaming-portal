@@ -19,6 +19,7 @@ services:
       - ./config/jwt/:/var/www/openroaming/config/jwt/
       - ./self-signed-ssl/ssl.crt:/etc/nginx/ssl/ssl.crt:ro
       - ./self-signed-ssl/ssl.key:/etc/nginx/ssl/ssl.key:ro
+      - ./config/secrets/prod/:/var/www/openroaming/config/secrets/prod/
     ports:
       - "80:80"
       - "443:443"

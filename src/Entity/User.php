@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Doctrine\Type\EncryptedStringType;
+use App\Doctrine\Type\EncryptedPhoneNumberType;
 use App\Doctrine\Type\HashedStringType;
 use App\Enum\DefaultUser;
 use App\Repository\UserRepository;
@@ -92,7 +93,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $deletedAt = null;
 
-    #[ORM\Column(type: 'phone_number', nullable: true)]
+    #[ORM\Column(type: EncryptedPhoneNumberType::NAME, nullable: true)]
     private ?PhoneNumber $phoneNumber = null;
 
     #[ORM\Column(nullable: true)]
