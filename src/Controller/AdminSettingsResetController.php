@@ -210,7 +210,6 @@ class AdminSettingsResetController extends AbstractController
                 'event' => AnalyticalEventType::CAPTCHA_PROVIDER_REQUEST->value,
                 'route' => 'admin_dashboard_settings_captcha_provider',
             ],
-
         };
     }
 

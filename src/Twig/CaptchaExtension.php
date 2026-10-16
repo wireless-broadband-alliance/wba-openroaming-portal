@@ -43,7 +43,8 @@ class CaptchaExtension extends AbstractExtension
         // Safely resolve the captcha field:
         // 1. If passed full form, look for 'captcha' child.
         // 2. If passed specific captcha field, verify its name/type or use it directly.
-        $captchaField = $formOrField->children['captcha'] ?? ($formOrField->vars['name'] === 'captcha' ? $formOrField : null);
+        $captchaField = $formOrField->children['captcha'] ??
+            ($formOrField->vars['name'] === 'captcha' ? $formOrField : null);
 
         if (!$captchaField) {
             return '';

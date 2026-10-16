@@ -87,7 +87,8 @@ class RegistrationSMSController extends AbstractController
         $registrationDTO->password = $data['password'] ?? null;
         $registrationDTO->firstName = $data['first_name'] ?? null;
         $registrationDTO->lastName = $data['last_name'] ?? null;
-        $registrationDTO->captchaToken = $data['turnstile_token'] ?? $data['captcha_token'] ?? $data['recaptcha_token'] ?? null;
+        $registrationDTO->captchaToken = $data['turnstile_token'] ??
+            $data['captcha_token'] ?? $data['recaptcha_token'] ?? null;
 
         // Validate the registration DTO
         $violations = $this->validator->validate($registrationDTO);
@@ -425,7 +426,8 @@ class RegistrationSMSController extends AbstractController
                     if ($result !== '' && $result !== '0') {
                         return new BaseResponse(200, [
                             'success' => sprintf(
-                                'If the phone number exists, we have sent a new code to: %s. You have %d attempt(s) left.',
+                                'If the phone number exists, we have sent a new code to: %s. 
+                                You have %d attempt(s) left.',
                                 $user->getUuid(),
                                 $attemptsLeft
                             ),

@@ -23,7 +23,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class CaptchaProviderController extends AbstractController
 {
-
     public function __construct(
         private readonly GetSettings $getSettings,
         private readonly TranslatorInterface $translator,
@@ -80,6 +79,5 @@ class CaptchaProviderController extends AbstractController
             'data' => $data,
             'user' => $currentUser,
         ]);
-
     }
 }

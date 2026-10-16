@@ -51,28 +51,48 @@ class CaptchaStepType extends AbstractType
                 'required' => false,
                 'label' => $this->translator->trans('captcha.turnstile.key.label', [], 'CaptchaStepType'),
                 'attr' => [
-                    'placeholder' => $this->translator->trans('captcha.turnstile.key.placeholder', [], 'CaptchaStepType'),
+                    'placeholder' => $this->translator->trans(
+                        'captcha.turnstile.key.placeholder',
+                        [],
+                        'CaptchaStepType'
+                    ),
                 ],
             ])
             ->add('turnstileSecret', TextType::class, [
                 'required' => false,
-                'label' => $this->translator->trans('captcha.turnstile.secret.label', [], 'CaptchaStepType'),
+                'label' => $this->translator->trans(
+                    'captcha.turnstile.secret.label',
+                    [],
+                    'CaptchaStepType'
+                ),
                 'attr' => [
-                    'placeholder' => $this->translator->trans('captcha.turnstile.secret.placeholder', [], 'CaptchaStepType'),
+                    'placeholder' => $this->translator->trans(
+                        'captcha.turnstile.secret.placeholder',
+                        [],
+                        'CaptchaStepType'
+                    ),
                 ],
             ])
             ->add('recaptcha3Key', TextType::class, [
                 'required' => false,
                 'label' => $this->translator->trans('captcha.recaptcha3.key.label', [], 'CaptchaStepType'),
                 'attr' => [
-                    'placeholder' => $this->translator->trans('captcha.recaptcha3.key.placeholder', [], 'CaptchaStepType'),
+                    'placeholder' => $this->translator->trans(
+                        'captcha.recaptcha3.key.placeholder',
+                        [],
+                        'CaptchaStepType'
+                    ),
                 ],
             ])
             ->add('recaptcha3Secret', TextType::class, [
                 'required' => false,
                 'label' => $this->translator->trans('captcha.recaptcha3.secret.label', [], 'CaptchaStepType'),
                 'attr' => [
-                    'placeholder' => $this->translator->trans('captcha.recaptcha3.secret.placeholder', [], 'CaptchaStepType'),
+                    'placeholder' => $this->translator->trans(
+                        'captcha.recaptcha3.secret.placeholder',
+                        [],
+                        'CaptchaStepType'
+                    ),
                 ],
             ]);
     }
