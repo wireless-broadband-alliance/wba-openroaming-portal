@@ -309,8 +309,10 @@ data.
 ### 5. For Developers
 
 * `php bin/console secrets:generate-keys` and `secrets:set ENCRYPTION_KEY` create the **dev** vault in
-  `config/secrets/dev/`, which is committed so the whole team shares it. The prod decryption key
-  (`config/secrets/prod/prod.decrypt.private.php`) is git-ignored and must never be committed.
+  `config/secrets/dev/`. The encrypted secrets and the public key are committed so the whole team shares them, but
+  decryption keys (`config/secrets/*/*.decrypt.private.php`) are git-ignored for **every** environment and must never
+  be committed. Get the dev decryption key from a teammate, or provide it as the `SYMFONY_DECRYPTION_SECRET`
+  environment variable (base64 of the key file).
 * The test environment does not use the dev vault. Define a throwaway `ENCRYPTION_KEY` (32+ characters) in `.env.test`.
 
 > **Breaking Changes:**

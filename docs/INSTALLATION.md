@@ -19,8 +19,7 @@ The OpenRoaming Provisioning Portal is designed and expected to run behind an **
 
 - **Traffic Termination**: TLS/SSL connections are terminated at the upstream load balancer. The load balancer forwards plain HTTP requests to port `80` of the web container.
 - **Required Headers**: Your upstream load balancer MUST pass the following standard headers:
-    - `X-Forwarded-Proto`: Must be set to `https` for secure requests (essential for Symfony HTTPS scheme detection,
-      SAML/OAuth redirect URL construction, and Nginx HSTS header emission).
+    - `X-Forwarded-Proto`: Must be set to `https` for secure requests (essential for Symfony HTTPS scheme detection, SAML/OAuth redirect URL construction, and Nginx HSTS header emission).
     - `X-Forwarded-For`: Preserves client IP addresses.
     - `X-Forwarded-Host`: Preserves the requested hostname.
     - `X-Forwarded-Port`: Preserves the original port (`443`).
@@ -80,8 +79,8 @@ The last command lists the secret names (their values stay hidden). You should s
 **Important:**
 
 - The vault is created per environment. Run the portal with `APP_ENV=prod` in your `.env` so that this `prod` vault is
-  the one in use. The `dev` vault that ships with the project uses a **publicly known key** and must never be used on a
-  portal that holds real data.
+  the one in use. The `dev` vault is meant for development only and must never be used on a portal that holds real
+  data.
 - The files are written to `config/secrets/prod/`. Mount that directory as a volume of the `web` service in
   `docker-compose.yml`, so it survives container re-creation:
   ```yaml
