@@ -45,9 +45,6 @@ return [
     '@orchidjs/sifter' => [
         'version' => '1.1.0',
     ],
-    '@orchidjs/unicode-variants' => [
-        'version' => '1.1.2',
-    ],
     'tom-select/dist/css/tom-select.default.min.css' => [
         'version' => '2.6.2',
         'type' => 'css',
@@ -102,18 +99,12 @@ return [
         'version' => '1.2.3',
         'type' => 'css',
     ],
-    'axios' => [
-        'version' => '1.19.0',
-    ],
     'quill2-emoji' => [
         'version' => '0.1.2',
     ],
     'quill2-emoji/dist/style.css' => [
         'version' => '0.1.2',
         'type' => 'css',
-    ],
-    'quill-resize-image' => [
-        'version' => '1.0.11',
     ],
     'quill-toggle-fullscreen-button' => [
         'version' => '0.2.0',
@@ -563,5 +554,14 @@ return [
     'leaflet/dist/leaflet.css' => [
         'version' => '1.9.4',
         'type' => 'css',
+    ],
+    '@orchidjs/unicode-variants' => [
+        'version' => '1.2.2',
+    ],
+    'axios' => [
+        'version' => '1.20.0',
+    ],
+    'quill-resize-image' => [
+        'version' => '1.0.12',
     ],
 ];
