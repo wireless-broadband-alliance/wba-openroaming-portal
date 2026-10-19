@@ -201,15 +201,15 @@ readonly class InstallationService
         if ($progress instanceof InstallationProgress) {
             return [
                 InstallationWidgetStepsEnum::DATABASE->value => $progress->getDbOpenRoaming(
-                ) !== null || $progress->getDbFreeradius() !== null,
+                    ) !== null || $progress->getDbFreeradius() !== null,
                 InstallationWidgetStepsEnum::SETTINGS->value => $progress->getTrustedProxies(
-                ) !== null || $progress->getTurnstileKey() !== null,
+                    ) !== null || $progress->getTurnstileKey() !== null,
                 InstallationWidgetStepsEnum::SECURITY_TXT->value => $progress->getSecurityContact(
-                ) !== null && $progress->getSecurityExpires() instanceof \DateTimeInterface,
+                    ) !== null && $progress->getSecurityExpires() instanceof \DateTimeInterface,
                 InstallationWidgetStepsEnum::ADMIN_CREDENTIALS->value => $progress->getEmailAdmin(
-                ) !== null && $progress->isAdminConfirmed(),
+                    ) !== null && $progress->isAdminConfirmed(),
                 InstallationWidgetStepsEnum::SUMMARY->value => $progress->getInstallationState(
-                ) === ProcessStatusType::COMPLETED,
+                    ) === ProcessStatusType::COMPLETED,
             ];
         }
 
@@ -274,14 +274,24 @@ readonly class InstallationService
 
         $projectDir = $this->parameterBag->get('kernel.project_dir');
 
-        // Logo file check
-        $logoPath = !empty($customerLogo) ? $projectDir . '/public' . $customerLogo : null;
-        $hasLogo = $logoPath && file_exists($logoPath);
+        // Logo file check: $logoPath is only set when the file exists
+        $logoPath = null;
+        if (!empty($customerLogo)) {
+            $candidateLogoPath = $projectDir . '/public' . $customerLogo;
+            if (file_exists($candidateLogoPath)) {
+                $logoPath = $candidateLogoPath;
+            }
+        }
 
-        // Footer Banner file check
-        $isFooterEnabled = ($footerImageEnabledSetting === OperationMode::ON->value) && !empty($footerImageSetting);
-        $footerPath = $isFooterEnabled ? $projectDir . '/public' . $footerImageSetting : null;
-        $hasFooter = $isFooterEnabled && $footerPath && file_exists($footerPath);
+        // Footer Banner file check: $footerPath is only set when enabled and the file exists
+        $footerPath = null;
+        if ($footerImageEnabledSetting === OperationMode::ON->value && !empty($footerImageSetting)) {
+            $candidateFooterPath = $projectDir . '/public' . $footerImageSetting;
+            if (file_exists($candidateFooterPath)) {
+                $footerPath = $candidateFooterPath;
+            }
+        }
+        $hasFooter = $footerPath !== null;
 
         $email = new TemplatedEmail()
             ->from(
@@ -301,11 +311,11 @@ readonly class InstallationService
                 'footerImageEnabled' => $hasFooter,
             ]);
 
-        if ($hasLogo) {
+        if ($logoPath !== null) {
             $email->embedFromPath($logoPath, 'logo_cid');
         }
 
-        if ($hasFooter) {
+        if ($footerPath !== null) {
             $email->embedFromPath($footerPath, 'footer_cid');
         }
 
