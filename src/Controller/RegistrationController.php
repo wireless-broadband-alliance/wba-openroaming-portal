@@ -197,10 +197,7 @@ class RegistrationController extends AbstractController
 
     /**
      * Handle the sms registration.
-     */
-    /**
-     * @throws NonUniqueResultException
-     * @throws RandomException
+     *
      * @throws ClientExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
@@ -299,9 +296,11 @@ class RegistrationController extends AbstractController
             );
 
             // Send SMS
+            // Use a real newline: the SMS provider URL-encodes the message itself,
+            // so a pre-encoded "%0A" would be sent as the literal text "%0A".
             $message = $this->translator->trans('yourAccountPasswordIs', [], 'controllers')
                 . $randomPassword
-                . "%0A"
+                . "\n"
                 . $this->translator->trans('verificationCodeIs', [], 'controllers')
                 . $user->getTwoFAcode();
             $this->sendSMS->sendSmsNoValidation($user, $message);
