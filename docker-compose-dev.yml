@@ -16,7 +16,7 @@ services:
       - ./service-config/nginx/sites:/etc/nginx/conf.d:ro
       - ./service-config/supervisor/supervisord-dev.conf:/etc/supervisor/conf.d/supervisord.conf:ro
       - ./config/jwt/:/var/www/openroaming/config/jwt/
-      - ./config/secrets/prod/:/var/www/openroaming/config/secrets/prod/
+      - ./config/secrets/:/var/www/openroaming/config/secrets/
     ports:
       - "80:80"
   mysql:
