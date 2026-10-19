@@ -214,7 +214,7 @@ class SiteController extends AbstractController
             if (
                 $data[SettingName::LOGIN_WITH_UUID_ONLY->value]["value"] === 'true' ||
                 (!$currentUser->getUserExternalAuths()->isEmpty() && $currentUser->getUserExternalAuths(
-                )[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value)
+                    )[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value)
             ) {
                 if (
                     $currentUser->getTwoFAType() !==
@@ -251,8 +251,9 @@ class SiteController extends AbstractController
         }
 
         // Check if the current user has a provider
+        // ($userExternalAuths is only filled when $currentUser is set, see the verification block above)
         $externalAuthsData = [];
-        if (!empty($userExternalAuths) && $currentUser) {
+        if (!empty($userExternalAuths)) {
             // Populate the externalAuthsData array
             foreach ($userExternalAuths as $userExternalAuth) {
                 $externalAuthsData[$currentUser->getId()][] = [
