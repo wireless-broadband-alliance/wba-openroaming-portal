@@ -85,7 +85,7 @@ The last command lists the secret names (their values stay hidden). You should s
   `docker-compose.yml`, so it survives container re-creation:
   ```yaml
   volumes:
-    - ./config/secrets/prod/:/var/www/openroaming/config/secrets/prod/
+    - ./config/secrets/prod/:/var/www/openroaming/config/secrets/
   ```
 - `config/secrets/prod/prod.decrypt.private.php` unlocks every secret. **Never commit it or share it.**
 - **Back up the whole `config/secrets/prod/` directory** in a safe place, separate from your database backups. If the
