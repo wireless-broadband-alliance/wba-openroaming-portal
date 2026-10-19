@@ -61,18 +61,6 @@
             "migrations/.gitignore"
         ]
     },
-    "easycorp/easyadmin-bundle": {
-        "version": "4.24",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "4.14",
-            "ref": "13b3e524d1038a6861ad6c7fc64e31b644ba0c54"
-        },
-        "files": [
-            "config/routes/easyadmin.yaml"
-        ]
-    },
     "knpuniversity/oauth2-client-bundle": {
         "version": "2.15",
         "recipe": {
@@ -446,15 +434,6 @@
             "config/packages/twig.yaml",
             "templates/base.html.twig"
         ]
-    },
-    "symfony/uid": {
-        "version": "7.3",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "7.0",
-            "ref": "0df5844274d871b37fc3816c57a768ffc60a43a5"
-        }
     },
     "symfony/ux-autocomplete": {
         "version": "2.31",
