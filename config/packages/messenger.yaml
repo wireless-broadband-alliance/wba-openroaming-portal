@@ -19,9 +19,7 @@ framework:
             messenger.bus.default: []
 
         routing:
-#             Symfony\Component\Mailer\Messenger\SendEmailMessage: async
-            Symfony\Component\Notifier\Message\ChatMessage: async
-            Symfony\Component\Notifier\Message\SmsMessage: async
+        #             Symfony\Component\Mailer\Messenger\SendEmailMessage: async
 
-            # Route your messages to the transports
-            # 'App\Message\YourMessage': async
+        # Route your messages to the transports
+        # 'App\Message\YourMessage': async
