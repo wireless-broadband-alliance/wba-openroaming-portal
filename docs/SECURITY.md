@@ -49,8 +49,8 @@ public issues, merge requests or discussions for security vulnerabilities.
 | **Triage & Assessment**    | Within **5 business days**                                                                          |
 | **Remediation / Patching** | **Critical:** 14 calendar days<br>**High:** 30 calendar days<br>**Medium/Low:** 60–90 calendar days |
 
-Fixes are published as a new release, documented in the [CHANGELOG.md](CHANGELOG.md) and, when required, in
-[UPGRADE.md](docs/UPGRADE.md).
+Fixes are published as a new release, documented in the [CHANGELOG.md](../CHANGELOG.md) and, when required, in
+[UPGRADE.md](UPGRADE.md).
 
 ---
 
