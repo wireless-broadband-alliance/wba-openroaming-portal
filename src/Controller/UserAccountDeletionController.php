@@ -24,6 +24,7 @@ use libphonenumber\PhoneNumber;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -98,6 +99,10 @@ class UserAccountDeletionController extends AbstractController
             );
 
             return $this->redirectToRoute('app_landing');
+        }
+
+        if ($data instanceof JsonResponse) {
+            return $data;
         }
 
         $loginWithUuidOnly = ($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] ?? null) === 'true';
