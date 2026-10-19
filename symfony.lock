@@ -322,18 +322,6 @@
             "config/packages/monolog.yaml"
         ]
     },
-    "symfony/notifier": {
-        "version": "7.4",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "5.0",
-            "ref": "b912054fd9639f5fad62493cc24439048c2fd045"
-        },
-        "files": [
-            "config/packages/notifier.yaml"
-        ]
-    },
     "symfony/phpunit-bridge": {
         "version": "7.4",
         "recipe": {
