@@ -77,9 +77,7 @@ class NetworkSearchForm
     #[ExposeInTemplate]
     public function getNetworkCounts(): int
     {
-        if ($this->cachedCounts === null) {
-            $this->cachedCounts = $this->networkRepository->countAll();
-        }
+        $this->cachedCounts ??= $this->networkRepository->countAll();
 
         return $this->cachedCounts;
     }
