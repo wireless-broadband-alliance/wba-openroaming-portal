@@ -111,11 +111,9 @@ class AccessPointsSearchForm
     #[ExposeInTemplate]
     public function getAccessPointCounts(): array
     {
-        if ($this->cachedCounts === null) {
-            $this->cachedCounts = [
-                'all' => $this->accessPointRepository->count(['network' => $this->network]),
-            ];
-        }
+        $this->cachedCounts ??= [
+            'all' => $this->accessPointRepository->count(['network' => $this->network]),
+        ];
 
         return $this->cachedCounts;
     }

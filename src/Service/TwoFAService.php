@@ -256,14 +256,24 @@ readonly class TwoFAService
 
             $projectDir = $this->parameterBag->get('kernel.project_dir');
 
-            // Logo file check
-            $logoPath = !empty($customerLogo) ? $projectDir . '/public' . $customerLogo : null;
-            $hasLogo = $logoPath && file_exists($logoPath);
+            // Logo file check: $logoPath is only set when the file exists
+            $logoPath = null;
+            if (!empty($customerLogo)) {
+                $candidateLogoPath = $projectDir . '/public' . $customerLogo;
+                if (file_exists($candidateLogoPath)) {
+                    $logoPath = $candidateLogoPath;
+                }
+            }
 
-            // Footer Banner file check
-            $isFooterEnabled = ($footerImageEnabledSetting === OperationMode::ON->value) && !empty($footerImageSetting);
-            $footerPath = $isFooterEnabled ? $projectDir . '/public' . $footerImageSetting : null;
-            $hasFooter = $isFooterEnabled && $footerPath && file_exists($footerPath);
+            // Footer Banner file check: $footerPath is only set when enabled and the file exists
+            $footerPath = null;
+            if ($footerImageEnabledSetting === OperationMode::ON->value && !empty($footerImageSetting)) {
+                $candidateFooterPath = $projectDir . '/public' . $footerImageSetting;
+                if (file_exists($candidateFooterPath)) {
+                    $footerPath = $candidateFooterPath;
+                }
+            }
+            $hasFooter = $footerPath !== null;
 
             if ($eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value) {
                 // LOGIN_WITH_UUID_ONLY_CODE
@@ -364,11 +374,11 @@ readonly class TwoFAService
                     ]);
             }
 
-            if ($hasLogo) {
+            if ($logoPath !== null) {
                 $email->embedFromPath($logoPath, 'logo_cid');
             }
 
-            if ($hasFooter) {
+            if ($footerPath !== null) {
                 $email->embedFromPath($footerPath, 'footer_cid');
             }
 

@@ -49,15 +49,7 @@ final class SMSSettingsForm extends AbstractController
         // Create form manually to trigger validation
         $form = $this->createForm(SMSSettingsType::class, $this->SMSSettingsDTO);
 
-        // Normalize array inputs (convert non-array to array safely)
-        /** @var string[]|string $regions */
-        $regions = $this->SMSSettingsDTO->defaultRegionPhoneInputs;
-
-        if (!is_array($regions)) {
-            $regions = empty($regions)
-                ? []
-                : array_map(trim(...), explode(',', (string)$regions));
-        }
+        $regions = $this->SMSSettingsDTO->defaultRegionPhoneInputs ?? [];
 
         // Submit current DTO data (manual mapping)
         $form->submit([

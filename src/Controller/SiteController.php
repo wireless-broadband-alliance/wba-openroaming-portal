@@ -251,8 +251,9 @@ class SiteController extends AbstractController
         }
 
         // Check if the current user has a provider
+        // ($userExternalAuths is only filled when $currentUser is set, see the verification block above)
         $externalAuthsData = [];
-        if (!empty($userExternalAuths) && $currentUser) {
+        if (!empty($userExternalAuths)) {
             // Populate the externalAuthsData array
             foreach ($userExternalAuths as $userExternalAuth) {
                 $externalAuthsData[$currentUser->getId()][] = [

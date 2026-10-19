@@ -92,13 +92,11 @@ class UserSearchForm
     #[ExposeInTemplate]
     public function getUserCounts(): array
     {
-        if ($this->cachedCounts === null) {
-            $this->cachedCounts = [
-                'all' => $this->userRepository->countUsers(null, 'all'),
-                'verified' => $this->userRepository->countVerifiedUsers(),
-                'banned' => $this->userRepository->countBannedUsers(),
-            ];
-        }
+        $this->cachedCounts ??= [
+            'all' => $this->userRepository->countUsers(null, 'all'),
+            'verified' => $this->userRepository->countVerifiedUsers(),
+            'banned' => $this->userRepository->countBannedUsers(),
+        ];
 
         return $this->cachedCounts;
     }
