@@ -69,7 +69,7 @@ installation**, with the containers from step 2 running and **before** step 8 (m
 
 ```bash
 docker compose exec web php bin/console secrets:generate-keys --env=prod
-docker compose exec web sh -c 'openssl rand -hex 32 | php bin/console secrets:set ENCRYPTION_KEY - --env=prod'
+docker compose exec web sh -c 'openssl rand -hex 32 | tr -d "\n" | php bin/console secrets:set ENCRYPTION_KEY - --env=prod'
 docker compose exec web php bin/console secrets:set APP_SECRET --random --env=prod
 docker compose exec web php bin/console secrets:list --env=prod
 ```

@@ -234,7 +234,7 @@ migration needs for the hidden `APP_SECRET` prompt (do not add `-T`).
 
    ```bash
    docker compose exec web php bin/console secrets:generate-keys --env=prod
-   docker compose exec web sh -c 'openssl rand -hex 32 | php bin/console secrets:set ENCRYPTION_KEY - --env=prod'
+   docker compose exec web sh -c 'openssl rand -hex 32 | tr -d "\n" | php bin/console secrets:set ENCRYPTION_KEY - --env=prod'
    ```
 
    This creates the files in `config/secrets/prod/`. Two of them need your attention:
@@ -308,12 +308,17 @@ data.
 
 ### 5. For Developers
 
-* `php bin/console secrets:generate-keys` and `secrets:set ENCRYPTION_KEY` create the **dev** vault in
-  `config/secrets/dev/`. The encrypted secrets and the public key are committed so the whole team shares them, but
-  decryption keys (`config/secrets/*/*.decrypt.private.php`) are git-ignored for **every** environment and must never
-  be committed. Get the dev decryption key from a teammate, or provide it as the `SYMFONY_DECRYPTION_SECRET`
-  environment variable (base64 of the key file).
-* The test environment does not use the dev vault. Define a throwaway `ENCRYPTION_KEY` (32+ characters) in `.env.test`.
+* Nothing under `config/secrets/` is committed. Each developer creates their own dev vault once, inside the `web`
+  container:
+  ```bash
+  php bin/console secrets:generate-keys --env=dev
+  openssl rand -hex 32 | tr -d "\n" | php bin/console secrets:set ENCRYPTION_KEY - --env=dev
+  php bin/console secrets:set APP_SECRET --random --env=dev
+  php bin/console secrets:list --env=dev
+  ```
+  A new dev vault cannot read data encrypted with another one, so reset your local database after creating it.
+* The test environment does not use any vault. PHPUnit gets throwaway `ENCRYPTION_KEY` and `APP_SECRET` values from
+  `phpunit.xml.dist`, and the CI jobs get them from `.gitlab-ci.yml`.
 
 > **Breaking Changes:**
 > Please always review the [CHANGELOG.md](../CHANGELOG.md) for detailed information.
