@@ -45,9 +45,13 @@ RUN apk add --no-cache \
 COPY . .
 COPY ./.env.sample /app/.env
 
-# Install Composer dependencies and warm cache
+# Install Composer dependencies and warm cache.
+# ENCRYPTION_KEY / APP_SECRET are throwaway build-time placeholders: they are exported inside
+# this RUN only and are NOT stored in the image. At runtime the real values come from the vault.
 RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/memory.ini \
  && echo "error_reporting=E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED" > /usr/local/etc/php/conf.d/error_reporting.ini \
+ && export ENCRYPTION_KEY=0000000000000000000000000000000000000000000000000000000000000000 \
+           APP_SECRET=build-placeholder-not-a-secret \
  && composer install --optimize-autoloader --no-interaction --no-progress \
  && php bin/console cache:warmup
 
