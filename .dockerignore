@@ -1,1 +1,10 @@
 .git/
+.idea/
+node_modules/
+vendor/
+var/
+config/secrets/
+.env
+.env.*.local
+*.cache
+supervisord.pid

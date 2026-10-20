@@ -336,7 +336,7 @@ migration needs for the hidden `APP_SECRET` prompt (do not add `-T`).
 
    ```bash
    docker compose exec web php bin/console secrets:generate-keys --env=prod
-   docker compose exec web sh -c 'openssl rand -hex 32 | php bin/console secrets:set ENCRYPTION_KEY - --env=prod'
+   docker compose exec web sh -c 'openssl rand -hex 32 | tr -d "\n" | php bin/console secrets:set ENCRYPTION_KEY - --env=prod'
    ```
 
    This creates the files in `config/secrets/prod/`. Two of them need your attention:
@@ -410,8 +410,17 @@ data.
 
 ### 5. For Developers
 
-* The secrets vault is **never committed**: `config/secrets/` is git-ignored for every environment. Each developer
-  creates a local dev vault once, after cloning:
+* Nothing under `config/secrets/` is committed. Each developer creates their own dev vault once, inside the `web`
+  container:
+  ```bash
+  php bin/console secrets:generate-keys --env=dev
+  openssl rand -hex 32 | tr -d "\n" | php bin/console secrets:set ENCRYPTION_KEY - --env=dev
+  php bin/console secrets:set APP_SECRET --random --env=dev
+  php bin/console secrets:list --env=dev
+  ```
+  A new dev vault cannot read data encrypted with another one, so reset your local database after creating it.
+* The test environment does not use any vault. PHPUnit gets throwaway `ENCRYPTION_KEY` and `APP_SECRET` values from
+  `phpunit.xml.dist`, and the CI jobs get them from `.gitlab-ci.yml`.
 
   ```bash
   php bin/console secrets:generate-keys
