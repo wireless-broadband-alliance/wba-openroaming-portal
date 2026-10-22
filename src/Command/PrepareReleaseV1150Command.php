@@ -55,7 +55,7 @@ final class PrepareReleaseV1150Command extends Command
         #[Autowire(env: 'ENCRYPTION_KEY')]
         #[SensitiveParameter]
         private readonly string $encryptionKey,
-        #[Autowire('%kernel.environment%')]
+        #[Autowire(param: 'kernel.environment')]
         private readonly string $environment,
     ) {
         parent::__construct();
@@ -360,7 +360,7 @@ final class PrepareReleaseV1150Command extends Command
 
         $sql .= ' LIMIT ' . self::SAMPLE_SIZE;
 
-        return array_map('strval', $this->connection->fetchFirstColumn($sql, $params, $types));
+        return array_map(strval(...), $this->connection->fetchFirstColumn($sql, $params, $types));
     }
 
     /**
@@ -380,7 +380,7 @@ final class PrepareReleaseV1150Command extends Command
             }
 
             try {
-                (new EncryptionService($variant))->decrypt($failedSample);
+                new EncryptionService($variant)->decrypt($failedSample);
 
                 return sprintf(
                     'The data decrypts with %s. Store exactly that value in the vault '
