@@ -5,6 +5,7 @@ namespace App\Api\V3\Controller;
 use App\Api\V3\BaseResponse;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\ApiVersion;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
@@ -71,7 +72,7 @@ class TwoFAController extends AbstractController
             $captchaError = $this->captchaValidator->validateApiPayload(
                 $data,
                 $request->getClientIp(),
-                3
+                ApiVersion::API_V3
             )) instanceof BaseResponse
         ) {
             return $captchaError->toResponse();

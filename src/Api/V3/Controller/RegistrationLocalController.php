@@ -8,6 +8,7 @@ use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
+use App\Enum\ApiVersion;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\PlatformMode;
 use App\Enum\SettingName;
@@ -100,7 +101,7 @@ class RegistrationLocalController extends AbstractController
             $captchaError = $this->captchaValidator->validateApiPayload(
                 $data,
                 $request->getClientIp(),
-                3
+                ApiVersion::API_V3
             )) instanceof BaseResponse
         ) {
             return $captchaError->toResponse();
@@ -227,7 +228,7 @@ class RegistrationLocalController extends AbstractController
             ($captchaError = $this->captchaValidator->validateApiPayload(
                 $data,
                 $request->getClientIp(),
-                3
+                ApiVersion::API_V3
             )) instanceof BaseResponse
         ) {
             return $captchaError->toResponse();
