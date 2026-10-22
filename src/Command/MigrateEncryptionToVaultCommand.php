@@ -10,6 +10,7 @@ use App\Entity\Setting;
 use App\Entity\SMSProviderParam;
 use App\Entity\User;
 use App\Entity\UserRadiusProfile;
+use App\Enum\SettingName;
 use App\Exception\EncryptionException;
 use App\Service\EncryptionService;
 use App\Service\LegacyEncryptionService;
@@ -57,21 +58,23 @@ final class MigrateEncryptionToVaultCommand extends Command
      * 'where' (optional) restricts the rows by another field: [field => list of allowed values].
      * Needed for Setting, where only some rows are encrypted.
      *
+     * Public so that prepare-release:v1150 can test-decrypt the same columns before running.
+     *
      * @var list<array{class: class-string, fields: list<string>, where?: array{field: string, in: list<string>}}>
      */
-    private const array TARGETS = [
+    public const array TARGETS = [
         [
             'class' => Setting::class,
             'fields' => ['value'],
             'where' => [
                 'field' => 'name',
                 'in' => [
-                    'SYNC_LDAP_SERVER',
-                    'SYNC_LDAP_BIND_USER_DN',
-                    'SYNC_LDAP_BIND_USER_PASSWORD',
-                    'SYNC_LDAP_SEARCH_BASE_DN',
-                    'BREAKING_GLASS_ADMIN_EMAIL',
-                    'CLOUDFLARE_TOKEN',
+                    SettingName::SYNC_LDAP_SERVER->value,
+                    SettingName::SYNC_LDAP_BIND_USER_DN->value,
+                    SettingName::SYNC_LDAP_BIND_USER_PASSWORD->value,
+                    SettingName::SYNC_LDAP_SEARCH_BASE_DN->value,
+                    SettingName::BREAKING_GLASS_ADMIN_EMAIL->value,
+                    SettingName::CLOUDFLARE_TOKEN->value,
                 ],
             ],
         ],
@@ -156,7 +159,8 @@ final class MigrateEncryptionToVaultCommand extends Command
 
         try {
             foreach (self::TARGETS as $target) {
-                $report = array_merge($report, $this->migrateTarget($legacy, $target, $dryRun));
+                // Keys are unique "table.column" labels, so a union is enough (no copy of $report per iteration).
+                $report += $this->migrateTarget($legacy, $target, $dryRun);
             }
 
             if ($dryRun) {
