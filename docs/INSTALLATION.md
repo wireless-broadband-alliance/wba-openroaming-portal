@@ -65,7 +65,12 @@ docker-compose -f docker-compose-local.yml up -d
 The portal encrypts sensitive data at rest (system settings, database URIs, RADIUS tokens, 2FA secrets, SMS provider
 parameters and phone numbers) with an `ENCRYPTION_KEY`, and Symfony needs an `APP_SECRET` for sessions and cookies.
 Neither of them is defined in `.env`: both live in the **Symfony secrets vault**. Create the vault **once per
-installation**, with the containers from step 2 running and **before** step 8 (migrations and fixtures):
+installation**, with the containers from step 2 running and **before** step 8 (migrations and fixtures).
+
+The vault is created **per environment** (`prod` or `dev`). Follow the option that matches the scenario you chose in
+step 2.
+
+#### a) **Production (`prod` vault)**
 
 ```bash
 docker compose exec web php bin/console secrets:generate-keys --env=prod
@@ -78,9 +83,8 @@ The last command lists the secret names (their values stay hidden). You should s
 
 **Important:**
 
-- The vault is created per environment. Run the portal with `APP_ENV=prod` in your `.env` so that this `prod` vault is
-  the one in use. The `dev` vault is meant for development only and must never be used on a portal that holds real
-  data.
+- Run the portal with `APP_ENV=prod` in your `.env` so that this `prod` vault is the one in use. The `dev` vault is
+  meant for development only and must never be used on a portal that holds real data.
 - The files are written to `config/secrets/prod/`. Mount that directory as a volume of the `web` service in
   `docker-compose.yml`, so it survives container re-creation:
   ```yaml
@@ -90,6 +94,33 @@ The last command lists the secret names (their values stay hidden). You should s
 - `config/secrets/prod/prod.decrypt.private.php` unlocks every secret. **Never commit it or share it.**
 - **Back up the whole `config/secrets/prod/` directory** in a safe place, separate from your database backups. If the
   `ENCRYPTION_KEY` is lost, the encrypted data **cannot be recovered**.
+- Do not also define `ENCRYPTION_KEY` or `APP_SECRET` in `.env` or in the container environment: a real environment
+  variable always overrides the vault.
+
+#### b) **Local Development / Testing (`dev` vault)**
+
+If you started the containers with `docker-compose-local.yml`, create a separate `dev` vault instead:
+
+```bash
+docker compose -f docker-compose-local.yml exec web php bin/console secrets:generate-keys --env=dev
+docker compose -f docker-compose-local.yml exec web sh -c 'openssl rand -hex 32 | tr -d "\n" | php bin/console secrets:set ENCRYPTION_KEY - --env=dev'
+docker compose -f docker-compose-local.yml exec web php bin/console secrets:set APP_SECRET --random --env=dev
+docker compose -f docker-compose-local.yml exec web php bin/console secrets:list --env=dev
+```
+
+The last command lists the secret names (their values stay hidden). You should see `ENCRYPTION_KEY` and `APP_SECRET`.
+
+**Important:**
+
+- Set `APP_ENV=dev` in your `.env` so that this `dev` vault is the one in use.
+- The files are written to `config/secrets/dev/`. With `docker-compose-local.yml` the project folder is mounted from
+  your host, so the vault already lives on your machine and survives container re-creation. No extra volume is needed.
+- If you get a permission error writing to `config/secrets/dev/`, run the commands as the owner of the project files
+  or fix the folder ownership on the host.
+- Use only test data with the `dev` vault. **Never** copy the `dev` vault to a production portal, and never copy the
+  `prod` vault to a development machine.
+- If you delete or regenerate the `dev` vault, data already encrypted in your local database can no longer be
+  decrypted. In that case, reset the local database and run step 8 again.
 - Do not also define `ENCRYPTION_KEY` or `APP_SECRET` in `.env` or in the container environment: a real environment
   variable always overrides the vault.
 
@@ -371,9 +402,10 @@ installation:
 4. **DevMode instead of Production**: It's essential to switch the OpenRoaming Provisioning Portal to Production Mode (
    prod) when deploying it on the internet. Running the portal in Development Mode (dev) can lead to security
    vulnerabilities and suboptimal performance. Again please gou check your `.env` file and change it to prod.
-5. **`Environment variable not found: "ENCRYPTION_KEY"` (or `"APP_SECRET"`)**: The secrets vault was not created, or
-   `config/secrets/prod/` is not available inside the `web` container, or `APP_ENV` does not match the environment the
-   vault was created for. Follow step 3 and check that `APP_ENV=prod` is set in `.env`.
+5. **`Environment variable not found: "ENCRYPTION_KEY"` (or `"APP_SECRET"`)**: The secrets vault was not created, the
+   vault directory (`config/secrets/prod/` or `config/secrets/dev/`) is not available inside the `web` container, or
+   `APP_ENV` does not match the environment the vault was created for. Follow step 3 (option a for `prod`, option b
+   for `dev`) and check that `APP_ENV` in `.env` matches the vault you created.
 6. **Generate Pfx-Signing-Key**: If you get a **Permission denied** error while trying to run the script, you have to
    grant executable permissions to the script file before executing it.
 
@@ -384,7 +416,7 @@ To solve this, use the chmod command inside the `web` container, to give the scr
 - chmod +x tools/generatePfxSigningKey.sh
 ```
 
-6. **VichUploader Cache Directory Not Writable (HTTP 500 Error)**:
+7. **VichUploader Cache Directory Not Writable (HTTP 500 Error)**:
    You may encounter an Internal Server Error 500 caused by the `vich_uploader` cache directory not being writable (
    `var/cache/prod/vich_uploader`). This typically happens after deployments or cache regeneration when folder
    permissions are incorrect.
