@@ -114,7 +114,7 @@ readonly class CaptchaValidator
 
     private function createErrorResponse(string $message, ApiVersion $apiVersion): BaseResponseV3 | BaseResponseV4
     {
-        return $apiVersion === 3
+        return $apiVersion === ApiVersion::API_V3
             ? new BaseResponseV3(400, null, $message)
             : new BaseResponseV4(400, null, $message);
     }
