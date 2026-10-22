@@ -13,6 +13,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\MappingException;
+use RuntimeException;
 use SensitiveParameter;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -180,8 +181,8 @@ final class PrepareReleaseV1150Command extends Command
         // 1. Environment: the data is encrypted with the key of the active vault.
         if ($this->environment !== 'prod') {
             $message = sprintf(
-                'APP_ENV is "%s", so the key of the "%s" vault (config/secrets/%s/) is in use. Data encrypted ' . ' 
-                now can only be read while the portal keeps running in this environment.',
+                'APP_ENV is "%s", so the key of the "%s" vault (config/secrets/%s/) is in use. Data encrypted ' .
+                'now can only be read while the portal keeps running in this environment.',
                 $this->environment,
                 $this->environment,
                 $this->environment
