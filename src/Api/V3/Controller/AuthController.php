@@ -10,7 +10,6 @@ use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
-use App\Enum\CaptchaProviderEnum;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\SettingName;
 use App\Enum\SMSResponse;
@@ -90,7 +89,11 @@ class AuthController extends AbstractController
         }
 
         // Single call handles checking provider status, token extraction, and response formatting
-        if ($captchaError = $this->captchaValidator->validateApiPayload($data, $request->getClientIp())) {
+        if ((
+            $captchaError = $this->captchaValidator->validateApiPayload(
+                $data,
+                $request->getClientIp()
+            )) instanceof BaseResponse) {
             return $captchaError->toResponse();
         }
 

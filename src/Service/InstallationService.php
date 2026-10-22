@@ -152,7 +152,7 @@ readonly class InstallationService
             return InstallationStep::SETTINGS;
         }
 
-        if (!$installationProgress->getCaptchaProvider()) {
+        if (!$installationProgress->getCaptchaProvider() instanceof CaptchaProviderEnum) {
             return InstallationStep::CAPTCHA;
         }
 
