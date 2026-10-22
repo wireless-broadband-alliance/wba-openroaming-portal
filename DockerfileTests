@@ -35,7 +35,7 @@ RUN apk add --no-cache \
     opcache \
     ldap \
     memcached-3.2.0 \
-    yaml-2.2.3 \
+    yaml \
  && apk add --no-cache --virtual .gnupg-build-deps $PHPIZE_DEPS gpgme-dev libgpg-error-dev \
  && pecl install gnupg-1.5.0 \
  && docker-php-ext-enable gnupg \
