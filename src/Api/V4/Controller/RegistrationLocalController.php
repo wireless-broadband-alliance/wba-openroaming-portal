@@ -95,11 +95,13 @@ class RegistrationLocalController extends AbstractController
             )->toResponse();
         }
 
-        if ((
+        if (
+            (
             $captchaError = $this->captchaValidator->validateApiPayload(
                 $data,
                 $request->getClientIp()
-            )) instanceof BaseResponse) {
+            )) instanceof BaseResponse
+        ) {
             return $captchaError->toResponse();
         }
 
@@ -220,10 +222,12 @@ class RegistrationLocalController extends AbstractController
         }
 
         // Single call handles provider check, token resolution, and error response formatting
-        if (($captchaError = $this->captchaValidator->validateApiPayload(
+        if (
+            ($captchaError = $this->captchaValidator->validateApiPayload(
                 $data,
                 $request->getClientIp()
-            )) instanceof BaseResponse) {
+            )) instanceof BaseResponse
+        ) {
             return $captchaError->toResponse();
         }
 

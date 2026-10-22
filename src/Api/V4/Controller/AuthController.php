@@ -89,11 +89,13 @@ class AuthController extends AbstractController
         }
 
         // Single call handles checking provider status, token extraction, and response formatting
-        if ((
+        if (
+            (
             $captchaError = $this->captchaValidator->validateApiPayload(
                 $data,
                 $request->getClientIp()
-            )) instanceof BaseResponse) {
+            )) instanceof BaseResponse
+        ) {
             return $captchaError->toResponse();
         }
 
