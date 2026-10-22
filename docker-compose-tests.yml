@@ -1,0 +1,46 @@
+---
+# Test-only stack: throwaway MySQL plus a PHPUnit container.
+# Run: docker compose -f docker-compose-test.yml run --rm tests
+services:
+  tests:
+    build:
+      context: .
+      dockerfile: DockerfileTests
+    image: openroaming-tests
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      APP_ENV: test
+      # Doctrine adds "_test" automatically, so the real DB is "openroaming_test"
+      DATABASE_URL: "mysql://root:root@mysql-test:3306/openroaming?serverVersion=8.0&charset=utf8mb4"
+      # Must match phpunit.xml.dist, otherwise encrypted fixture data can't be decrypted
+      APP_SECRET: test-app-secret-not-a-real-secret-00000000
+      ENCRYPTION_KEY: test-encryption-key-not-a-real-secret-0000
+    volumes:
+      # Live code from your laptop, so edits apply without rebuilding
+      - ./:/var/www/openroaming
+      # Keep the image's vendor/ (it isn't on your laptop)
+      - /var/www/openroaming/vendor
+    depends_on:
+      mysql-test:
+        condition: service_healthy
+    command: >
+      sh -c "php bin/console doctrine:database:create --if-not-exists &&
+             php bin/console doctrine:migrations:migrate -n &&
+             php bin/console doctrine:fixtures:load -n &&
+             php bin/phpunit --testdox"
+
+  mysql-test:
+    image: mysql:8.0
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    # DB lives in RAM: clean every run, and no clash with your dev MySQL
+    tmpfs:
+      - /var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot" ]
+      interval: 3s
+      timeout: 3s
+      retries: 30
