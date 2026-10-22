@@ -106,7 +106,8 @@ class RegistrationSMSController extends AbstractController
             (
             $captchaError = $this->captchaValidator->validateApiPayload(
                 $data,
-                $request->getClientIp()
+                $request->getClientIp(),
+                3
             )) instanceof BaseResponse
         ) {
             return $captchaError->toResponse();
@@ -263,7 +264,8 @@ class RegistrationSMSController extends AbstractController
         if (
             ($captchaError = $this->captchaValidator->validateApiPayload(
                 $dataRequest,
-                $request->getClientIp()
+                $request->getClientIp(),
+                3
             )) instanceof BaseResponse
         ) {
             return $captchaError->toResponse();

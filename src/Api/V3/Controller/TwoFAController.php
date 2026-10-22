@@ -70,7 +70,8 @@ class TwoFAController extends AbstractController
             (
             $captchaError = $this->captchaValidator->validateApiPayload(
                 $data,
-                $request->getClientIp()
+                $request->getClientIp(),
+                3
             )) instanceof BaseResponse
         ) {
             return $captchaError->toResponse();

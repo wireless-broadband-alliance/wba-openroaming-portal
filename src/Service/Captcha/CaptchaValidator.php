@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Service\Captcha;
 
-use App\Api\V4\BaseResponse;
+use App\Api\V4\BaseResponse as BaseResponseV4;
+use App\Api\V3\BaseResponse as BaseResponseV3;
 use App\Enum\CaptchaProviderEnum;
 use App\Enum\SettingName;
 use App\Repository\SettingRepository;
@@ -70,8 +71,11 @@ readonly class CaptchaValidator
     /**
      * @param array<string, mixed> $payload
      */
-    public function validateApiPayload(array $payload, ?string $clientIp): ?BaseResponse
-    {
+    public function validateApiPayload(
+        array $payload,
+        ?string $clientIp,
+        int $apiVersion = 4
+    ): null | BaseResponseV3 | BaseResponseV4 {
         $provider = $this->getActiveProvider();
 
         if ($provider === CaptchaProviderEnum::OFF->value) {
@@ -86,26 +90,32 @@ readonly class CaptchaValidator
         };
 
         if ($tokenKey === null) {
-            return new BaseResponse(400, null, 'CAPTCHA validation failed');
+            return $this->createErrorResponse('CAPTCHA validation failed', $apiVersion);
         }
 
         $token = $payload[$tokenKey] ?? '';
 
         if (!is_string($token) || trim($token) === '') {
-            return new BaseResponse(400, null, 'CAPTCHA validation failed');
+            return $this->createErrorResponse('CAPTCHA validation failed', $apiVersion);
         }
 
         $validation = $this->validate($token, $clientIp);
 
         if (!$validation['success']) {
-            return new BaseResponse(
-                400,
-                null,
-                $validation['error'] ?? 'CAPTCHA validation failed'
+            return $this->createErrorResponse(
+                $validation['error'] ?? 'CAPTCHA validation failed',
+                $apiVersion
             );
         }
 
         return null;
+    }
+
+    private function createErrorResponse(string $message, int $apiVersion): BaseResponseV3 | BaseResponseV4
+    {
+        return $apiVersion === 3
+            ? new BaseResponseV3(400, null, $message)
+            : new BaseResponseV4(400, null, $message);
     }
 
     /**

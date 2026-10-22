@@ -7,6 +7,7 @@ use App\DTO\InstallationProgressDTO;
 use App\DTO\SecurityTxtDTO;
 use App\Entity\InstallationProgress;
 use App\Entity\User;
+use App\Enum\CaptchaProviderEnum;
 use App\Enum\DataBaseSetupType;
 use App\Enum\DefaultUser;
 use App\Enum\InstallationStep;
