@@ -7,14 +7,15 @@
 3. [Upgrade Path Matrix](#upgrade-path-matrix)
 4. [Upgrade Checklist](#upgrade-checklist)
 5. [Step-by-Step Procedure](#step-by-step-procedure)
-6. [Release-Specific Notes: Version 1.14.2](#release-specific-notes-version-1142)
-7. [Release-Specific Notes: Version 1.14.1](#release-specific-notes-version-1141)
-8. [Release-Specific Notes: Version 1.14.0](#release-specific-notes-version-1140)
-9. [Release-Specific Notes: Version 1.13.0](#release-specific-notes-version-1130)
-10. [Release-Specific Notes: Version 1.8.1](#release-specific-notes-version-181)
-11. [Release-Specific Notes: Version 1.7.x](#release-specific-notes-version-17x)
-12. [Troubleshooting & Rollback](#troubleshooting--rollback)
-13. [Additional Resources](#additional-resources)
+6. [Release-Specific Notes: Version 1.15.0](#release-specific-notes-version-1150)
+7. [Release-Specific Notes: Version 1.14.2](#release-specific-notes-version-1142)
+8. [Release-Specific Notes: Version 1.14.1](#release-specific-notes-version-1141)
+9. [Release-Specific Notes: Version 1.14.0](#release-specific-notes-version-1140)
+10. [Release-Specific Notes: Version 1.13.0](#release-specific-notes-version-1130)
+11. [Release-Specific Notes: Version 1.8.1](#release-specific-notes-version-181)
+12. [Release-Specific Notes: Version 1.7.x](#release-specific-notes-version-17x)
+13. [Troubleshooting & Rollback](#troubleshooting--rollback)
+14. [Additional Resources](#additional-resources)
 
 ---
 
@@ -115,6 +116,7 @@ Use this table to determine the exact upgrade steps based on your current versio
 | 1.13.1          | 1.14.0         | Run `php bin/console doctrine:migrations:migrate`. Next, run `php bin/console app:cra:migrate-all --yes` to execute all CRA data encryption steps at once (including Installation Progress data). Then complete the mandatory **Security.txt Configuration** step in the Installation Wizard. **Breaking:** API v1 and v2 are removed (use `/api/v3`) and the JWT TTL is now 15 minutes. Review your `.env` and Docker Compose setup (see [Release-Specific Notes: Version 1.14.0](#release-specific-notes-version-1140)). Perform these actions while the portal is **offline or restricted**. |
 | 1.14.0          | 1.14.1         | Patch release — no database migrations or configuration changes required. Fixes Windows Wi-Fi profile XML signing failures (`xmlsec1`).                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | 1.14.1          | 1.14.2         | Patch release — no database migrations or configuration changes required. Fixes Root CA SHA-1 hash formatting for Windows EAPHost schema validation, installation wizard `.env` sync, OAuth controller wiring, API user registration flows, and password reset token verification logic.                                                                                                                                                                                                                                                                                                        |
+| `< 1.14.0`      | 1.15.0         | Not supported directly. Upgrade to 1.14.2 first and complete its steps (see the 1.14.0 notes), then follow the 1.15.0 row below.                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 
 ---
 
@@ -188,6 +190,164 @@ docker compose exec web php bin/console cache:clear
 ```bash
 docker compose logs -f web
 ```
+
+---
+
+## Release-Specific Notes: Version 1.15.0
+
+**Scenario**: Your current version is **1.14.2** (or an earlier 1.14.x), and you want to upgrade to **1.15.0**.
+
+> **Important:** This release re-encrypts existing data in place with a new key. Perform every step below while the
+> portal is **offline or restricted**, with a fresh **database backup** and a **copy of your current `.env`** (it holds
+> the legacy `APP_SECRET` that the migration needs).
+>
+> If you are on a version older than 1.14.0, upgrade to **1.14.2** first and complete its steps. Do not jump straight
+> to 1.15.0.
+
+### 1. What Changes
+
+* Data encrypted at rest (sensitive settings, Installation Progress values, RADIUS tokens, TOTP/2FA secrets, SMS
+  provider parameters) is now protected by a dedicated `ENCRYPTION_KEY` stored in the Symfony secrets vault instead of
+  `APP_SECRET`. Encrypted values are stored with a `v2:` prefix.
+* User phone numbers are now encrypted at rest. The `User.phoneNumber` column is widened to `VARCHAR(512)`, and users
+  can no longer be searched by phone number in SQL.
+* There is no fallback key and no silent plain-text fallback any more. If `ENCRYPTION_KEY` is missing or wrong, the
+  portal fails loudly instead of reading or writing unprotected data.
+* A single command, `prepare-release:v1150`, performs all the one-time data steps.
+
+### 2. Required Actions
+
+Run the commands from your portal directory. `docker compose exec` opens an interactive terminal by default, which the
+migration needs for the hidden `APP_SECRET` prompt (do not add `-T`).
+
+1. **Back up** the database and your current `.env`.
+
+2. **Update and restart the containers** (set the new image tag in `docker-compose.yml`, then):
+
+   ```bash
+   docker compose pull
+   docker compose up -d
+   ```
+
+3. **Check the environment and the vault before touching any data.** The migration encrypts with the key of the
+   vault that is active when it runs, so this must be the `prod` vault, and it must be the one the portal keeps using:
+
+   ```bash
+   docker compose exec web php bin/console about | grep -iE "environment|debug"
+   docker compose exec web php bin/console secrets:list --env=prod
+   ```
+
+    * `Environment` must be `prod` and `Debug` must be `false`. If not, set `APP_ENV=prod` in `.env`, run
+      `docker compose up -d --force-recreate web` and check again. Do **not** continue in `dev`.
+    * If `ENCRYPTION_KEY` is already listed, **skip step 4**: the vault exists already, and setting the key again would
+      make any data it already protects unreadable.
+    * There must be no `config/secrets/dev/` directory on the server.
+
+4. **Create the production vault and `ENCRYPTION_KEY`** (once per installation, only if step 3 did not list it):
+
+   ```bash
+   docker compose exec web php bin/console secrets:generate-keys --env=prod
+   docker compose exec web sh -c 'openssl rand -hex 32 | tr -d "\n" | php bin/console secrets:set ENCRYPTION_KEY - --env=prod'
+   ```
+
+   Type the second command exactly as shown. `tr -d "\n"` matters: the key is used byte for byte, and a key stored
+   with a trailing newline (for example created with `echo`) is a different key from the same text without it.
+
+   This creates the files in `config/secrets/prod/`. Two of them need your attention:
+
+    * `prod.decrypt.private.php` unlocks every secret in the vault. **Never commit it or share it.** It must survive
+      container re-creation (keep the `./config/secrets/` volume of the `web` service in `docker-compose.yml`) and must
+      be part of your backups.
+    * If you lose the `ENCRYPTION_KEY`, the encrypted data **cannot be recovered**. Keep a copy of the whole
+      `config/secrets/prod/` directory in a safe place, separate from the database backup.
+
+   Do not define `ENCRYPTION_KEY` in `.env` or in the container environment as well: a real environment variable
+   overrides the vault.
+
+5. **Rehearse** the data steps. Nothing is written in a dry run:
+
+   ```bash
+   docker compose exec web php bin/console prepare-release:v1150 --dry-run
+   ```
+
+   When asked, paste your **current** `APP_SECRET` (the value in your `.env`). The input is hidden, so nothing is shown
+   while you type. The report lists, per column, how many values would be re-encrypted, how many plain-text values would
+   be encrypted and how many are skipped. If it stops with `Unable to decrypt value (wrong secret or corrupted data)`,
+   the `APP_SECRET` you entered is not the one that encrypted the data. Nothing was changed.
+
+6. **Run the migration for real**:
+
+   ```bash
+   docker compose exec web php bin/console prepare-release:v1150
+   ```
+
+   Confirm that the portal is offline and that you have a backup, then paste the `APP_SECRET` again. The command runs,
+   in this order: a vault preflight check (it refuses to run when `APP_ENV` is not `prod`, when `ENCRYPTION_KEY` has
+   a stray newline that no data depends on yet, or when data already encrypted with `v2:` does not decrypt with the
+   current key), the database migrations, `app:cra:migrate-to-vault` (one all-or-nothing
+   transaction) and `app:cra:encrypt-phone-numbers`. If a step fails, nothing after it is run: fix the cause and run the
+   command again. Every step is safe to repeat.
+
+   From this moment the data belongs to this `ENCRYPTION_KEY`. Never run `secrets:set ENCRYPTION_KEY` again and never
+   change `APP_ENV` on this installation (see "The Encryption Key Belongs to the Database" in
+   [INSTALLATION.md](INSTALLATION.md#the-encryption-key-belongs-to-the-database)).
+
+7. **Clear the cache**:
+
+   ```bash
+   docker compose exec web php bin/console cache:clear
+   ```
+
+8. **Replace `APP_SECRET`**. After a successful migration it no longer protects any stored data. Remove the
+   `APP_SECRET=` line from `.env` (and from any Docker environment that defines it), then store a new random value in
+   the vault and restart:
+
+   ```bash
+   docker compose exec web php bin/console secrets:set APP_SECRET --random --env=prod
+   docker compose up -d --force-recreate web
+   ```
+
+   > **Note:** This logs every user out and invalidates existing remember-me cookies, signed URLs and issued API
+   > tokens. This is expected.
+
+### 3. Post-Upgrade Verification
+
+* [ ] `prepare-release:v1150` finished with `All steps completed`, and running it a second time changes nothing.
+* [ ] Logins with local accounts, Google, Microsoft, SAML, 2FA and TOTP work for existing users.
+* [ ] The Installation Wizard, the LDAP settings and the Cloudflare certificate settings open without errors.
+* [ ] SMS providers send messages, and user phone numbers are displayed correctly in the dashboard and in the user
+  export.
+* [ ] `phoneNumber` values in the `User` table are base64 text (about 60 characters), no longer readable numbers.
+* [ ] `APP_SECRET` is no longer defined in `.env`, and `ENCRYPTION_KEY` appears in
+  `php bin/console secrets:list --env=prod` (the values stay hidden unless you pass `--reveal`).
+* [ ] A copy of `config/secrets/prod/` is stored in your backups.
+* [ ] `php bin/console about` shows `Environment prod`, and there is no `config/secrets/dev/` directory on the server.
+* [ ] After `docker compose up -d --force-recreate web`, the portal still opens the pages listed above (the vault
+  survived the re-creation).
+
+### 4. Rollback
+
+The old version cannot read data written by this release. To go back, restore the database backup **together with** the
+previous `.env` and the previous image tag. Rolling back only the code leaves the portal unable to read the encrypted
+data.
+
+### 5. For Developers
+
+* Nothing under `config/secrets/` is committed. Each developer creates their own dev vault once, inside the `web`
+  container:
+  ```bash
+  php bin/console secrets:generate-keys --env=dev
+  openssl rand -hex 32 | tr -d "\n" | php bin/console secrets:set ENCRYPTION_KEY - --env=dev
+  php bin/console secrets:set APP_SECRET --random --env=dev
+  php bin/console secrets:list --env=dev
+  ```
+  A new dev vault cannot read data encrypted with another one, so reset your local database after creating it.
+* `prepare-release:v1150` only runs with `APP_ENV=prod`. On a local development database, pass `--allow-non-prod`.
+* The test environment does not use any vault. PHPUnit gets throwaway `ENCRYPTION_KEY` and `APP_SECRET` values from
+  `phpunit.xml.dist`, and the CI jobs get them from `.gitlab-ci.yml`.
+
+> **Breaking Changes:**
+> Please always review the [CHANGELOG.md](../CHANGELOG.md) for detailed information.
 
 ---
 
@@ -534,20 +694,26 @@ After completing the steps above, upgrade to version **1.7.x** following the usu
 
 ## Troubleshooting & Rollback
 
-| Issue                                                                          | Cause                                                                 | Solution                                                                                                                                          |
-|--------------------------------------------------------------------------------|-----------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
-| Errors running migrations                                                      | Invalid or old `Event` records                                        | Run `php bin/console clear:eventEntity` to clean up.                                                                                              |
-| Missing JWT keypair                                                            | Skipped step during 1.4.0                                             | Run `php bin/console lexik:jwt:generate-keypair`.                                                                                                 |
-| `reset:allocate-providers` missing                                             | Skipped upgrade to 1.6                                                | Upgrade to 1.6 and then run the command.                                                                                                          |
-| Schema mismatch                                                                | Schema updates not applied                                            | Run `php bin/console doctrine:schema:update --force`.                                                                                             |
-| Cache issues                                                                   | Stale or old cache files                                              | Run `php bin/console cache:clear`.                                                                                                                |
-| Installation Wizard shows up again after 1.14.0                                | The migration resets `InstallProgress` to `IN_PROGRESS`               | Expected behaviour. Complete the mandatory Security.txt Configuration step in the wizard.                                                         |
-| API clients get 404 on `/api/v1` or `/api/v2`                                  | API v1 and v2 were removed in 1.14.0                                  | Update the integration to `/api/v3`.                                                                                                              |
-| API tokens stop working after about 15 minutes                                 | JWT TTL reduced to 900s in 1.14.0                                     | Use the token refresh endpoints described in the API documentation.                                                                               |
-| Users or admins cannot log in after the encryption                             | An encryption step failed or ran partially                            | Check the command output, then re-run `php bin/console app:cra:migrate-all --yes` (commands are safe to re-run).                                  |
-| Installation Wizard steps fail to decrypt after 1.14.0                         | `InstallationProgress` still holds plaintext values                   | Run `php bin/console app:cra:encrypt-installation-progress` (or the full `app:cra:migrate-all --yes` suite).                                      |
-| `/metrics` returns 403 after 1.14.0                                            | `METRICS_ALLOWED_IPS` no longer defaults to `0.0.0.0/0`               | Add your monitoring hosts to `METRICS_ALLOWED_IPS` in `.env`.                                                                                     |
-| Windows Wi-Fi profile import fails with "Unexpected error" ("Erro inesperado") | Unformatted Root CA SHA-1 thumbprint violating Windows EAPHost schema | Upgrade to 1.14.2+ and re-save certificate settings to ensure the thumbprint is formatted as space-separated byte pairs (e.g., `ca bd 2a 79...`). |
+| Issue                                                                                                                                     | Cause                                                                                                                                                                                                      | Solution                                                                                                                                                                                                                                                              |
+|-------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Errors running migrations                                                                                                                 | Invalid or old `Event` records                                                                                                                                                                             | Run `php bin/console clear:eventEntity` to clean up.                                                                                                                                                                                                                  |
+| Missing JWT keypair                                                                                                                       | Skipped step during 1.4.0                                                                                                                                                                                  | Run `php bin/console lexik:jwt:generate-keypair`.                                                                                                                                                                                                                     |
+| `reset:allocate-providers` missing                                                                                                        | Skipped upgrade to 1.6                                                                                                                                                                                     | Upgrade to 1.6 and then run the command.                                                                                                                                                                                                                              |
+| Schema mismatch                                                                                                                           | Schema updates not applied                                                                                                                                                                                 | Run `php bin/console doctrine:schema:update --force`.                                                                                                                                                                                                                 |
+| Cache issues                                                                                                                              | Stale or old cache files                                                                                                                                                                                   | Run `php bin/console cache:clear`.                                                                                                                                                                                                                                    |
+| Installation Wizard shows up again after 1.14.0                                                                                           | The migration resets `InstallProgress` to `IN_PROGRESS`                                                                                                                                                    | Expected behaviour. Complete the mandatory Security.txt Configuration step in the wizard.                                                                                                                                                                             |
+| API clients get 404 on `/api/v1` or `/api/v2`                                                                                             | API v1 and v2 were removed in 1.14.0                                                                                                                                                                       | Update the integration to `/api/v3`.                                                                                                                                                                                                                                  |
+| API tokens stop working after about 15 minutes                                                                                            | JWT TTL reduced to 900s in 1.14.0                                                                                                                                                                          | Use the token refresh endpoints described in the API documentation.                                                                                                                                                                                                   |
+| Users or admins cannot log in after the encryption                                                                                        | An encryption step failed or ran partially                                                                                                                                                                 | Check the command output, then re-run `php bin/console app:cra:migrate-all --yes` (commands are safe to re-run).                                                                                                                                                      |
+| Installation Wizard steps fail to decrypt after 1.14.0                                                                                    | `InstallationProgress` still holds plaintext values                                                                                                                                                        | Run `php bin/console app:cra:encrypt-installation-progress` (or the full `app:cra:migrate-all --yes` suite).                                                                                                                                                          |
+| `/metrics` returns 403 after 1.14.0                                                                                                       | `METRICS_ALLOWED_IPS` no longer defaults to `0.0.0.0/0`                                                                                                                                                    | Add your monitoring hosts to `METRICS_ALLOWED_IPS` in `.env`.                                                                                                                                                                                                         |
+| Windows Wi-Fi profile import fails with "Unexpected error" ("Erro inesperado")                                                            | Unformatted Root CA SHA-1 thumbprint violating Windows EAPHost schema                                                                                                                                      | Upgrade to 1.14.2+ and re-save certificate settings to ensure the thumbprint is formatted as space-separated byte pairs (e.g., `ca bd 2a 79...`).                                                                                                                     |
+| `Vault preflight failed` when running `prepare-release:v1150`, or `Environment variable not found: ENCRYPTION_KEY`                        | The production vault was not created, `config/secrets/prod/` is not available inside the container, or `ENCRYPTION_KEY` is missing from it                                                                 | Create the vault with `secrets:generate-keys --env=prod` and `secrets:set ENCRYPTION_KEY - --env=prod`, and make sure `config/secrets/prod/` is mounted in the `web` container.                                                                                       |
+| `Unable to decrypt value (wrong secret or corrupted data)` during `app:cra:migrate-to-vault`                                              | The `APP_SECRET` typed at the prompt is not the one that encrypted the data                                                                                                                                | Nothing was changed (the command is all-or-nothing). Use the `APP_SECRET` from the `.env` of the version you are upgrading from and run the command again.                                                                                                            |
+| `Value is not in the v2 format` after upgrading to 1.15.0                                                                                 | Existing data was not migrated yet                                                                                                                                                                         | Run `php bin/console prepare-release:v1150` (it is safe to re-run).                                                                                                                                                                                                   |
+| Everyone is logged out and API tokens stop working after replacing `APP_SECRET`                                                           | `APP_SECRET` signs sessions, remember-me cookies and API token nonces                                                                                                                                      | Expected after rotating `APP_SECRET`. Users sign in again.                                                                                                                                                                                                            |
+| HTTP 500 `Could not convert database value to "encrypted_string" ... Stored value could not be decrypted` on data already in `v2:` format | The active `ENCRYPTION_KEY` is not the one that encrypted the data: the migration ran under another `APP_ENV` (the `dev` vault), the key was set again afterwards, or it gained or lost a trailing newline | Do **not** set a new key or re-run the migration. Run `php bin/console about` to see the active environment, compare `secrets:list --reveal` for `prod`, `dev` and your vault backups, and put the key that wrote the data back into the `prod` vault, byte for byte. |
+| `Unable to write in the "var/cache/prod" directory`                                                                                       | The cache was created by `root` (a console command run with `-u root`)                                                                                                                                     | `docker compose exec -u root web chown -R www-data:www-data /var/www/openroaming/var`, then run console commands as `www-data`.                                                                                                                                       |
 
 ### Rollback Procedure
 

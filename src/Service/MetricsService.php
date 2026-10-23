@@ -125,9 +125,7 @@ readonly class MetricsService
 
             foreach ($externalAuths as $auth) {
                 $provider = $auth->getProvider();
-                if (!isset($providerCounts[$provider])) {
-                    $providerCounts[$provider] = 0;
-                }
+                $providerCounts[$provider] ??= 0;
                 $providerCounts[$provider]++;
             }
 
@@ -195,9 +193,7 @@ readonly class MetricsService
 
             foreach ($allProfiles as $profile) {
                 $status = $profile->getStatus();
-                if (!isset($profilesByStatus[$status])) {
-                    $profilesByStatus[$status] = 0;
-                }
+                $profilesByStatus[$status] ??= 0;
                 $profilesByStatus[$status]++;
             }
 

@@ -48,7 +48,8 @@
 
         <!-- ###+ symfony/framework-bundle ### -->
         <env name="APP_ENV" value="dev"/>
-        <env name="APP_SECRET" value=""/>
+        <env name="APP_SECRET" value="test-app-secret-not-a-real-secret-00000000" force="true"/>
+        <env name="ENCRYPTION_KEY" value="test-encryption-key-not-a-real-secret-0000" force="true"/>
         <env name="APP_SHARE_DIR" value="var/share"/>
         <!-- ###- symfony/framework-bundle ### -->
 

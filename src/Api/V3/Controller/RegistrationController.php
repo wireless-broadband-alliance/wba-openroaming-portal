@@ -595,7 +595,7 @@ class RegistrationController extends AbstractController
         try {
             $message = 'Your account password is: '
                 . $registrationDTO->password
-                . '%0A'
+                . "\n"
                 . 'Verification code is: '
                 . $user->getTwoFAcode();
 
