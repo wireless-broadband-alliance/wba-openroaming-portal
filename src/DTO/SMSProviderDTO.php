@@ -36,7 +36,8 @@ class SMSProviderDTO
     #[Assert\Length(max: 64, maxMessage: 'fieldCannotBeLongerThan')]
     public ?string $handle = null;
 
-    #[Assert\Length(max: 16, maxMessage: 'fieldCannotBeLongerThan')]
+    // Length is validated in validateBudgetSms(): the limit depends on whether
+    // the sender ID is numeric (16) or alphanumeric (11).
     public ?string $from = null;
 
     public static function fromEntity(SMSProvider $provider): self
@@ -91,12 +92,14 @@ class SMSProviderDTO
 
         // BudgetSMS: numeric sender ID max 16 digits, OR alphanumeric max 11 characters
         // (their own error codes 2002/2003 — see the Send SMS error code list).
-        $isValidSenderId = ctype_digit($this->from)
-            ? strlen($this->from) <= 16
-            : strlen($this->from) <= 11;
+        $isNumeric = ctype_digit($this->from);
+        $limit = $isNumeric ? 16 : 11;
 
-        if (!$isValidSenderId) {
-            $context->buildViolation('invalidSenderId')->atPath('from')->addViolation();
+        if (strlen($this->from) > $limit) {
+            $context->buildViolation('invalidSenderId')
+                ->setParameter('{{ limit }}', (string)$limit)
+                ->atPath('from')
+                ->addViolation();
         }
     }
 }

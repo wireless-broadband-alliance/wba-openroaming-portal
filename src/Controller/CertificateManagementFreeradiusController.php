@@ -401,7 +401,6 @@ class CertificateManagementFreeradiusController extends AbstractController
                 }
 
                 $this->certificateWriterUpdateService->updateFromParsedCertificates(
-                    $caParsed,
                     $certParsed
                 );
 
@@ -789,9 +788,9 @@ class CertificateManagementFreeradiusController extends AbstractController
                     $normalizedCertParsed['fingerprintSHA1'] = $certParsed['fingerprintSHA1'];
                 }
 
-                if ($normalizedCaParsed && $normalizedCertParsed) {
+                if ($normalizedCaParsed && $normalizedCertParsed && $certParsed !== null) {
                     $this->certificateWriterUpdateService
-                        ->updateFromParsedCertificates($normalizedCaParsed, $certParsed);
+                        ->updateFromParsedCertificates($certParsed);
                 }
             } else {
                 // Update process entity

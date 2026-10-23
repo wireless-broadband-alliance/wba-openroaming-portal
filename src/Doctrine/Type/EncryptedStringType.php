@@ -1,17 +1,31 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Doctrine\Type;
 
+use App\Exception\EncryptionException;
+use App\Service\EncryptionService;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Types\Exception\ValueNotConvertible;
 use Doctrine\DBAL\Types\Type;
-use Exception;
 use RuntimeException;
 
+/**
+ * Encrypts string columns with the same scheme as App\Service\EncryptionService
+ * ("v2:" + base64(IV || TAG || CIPHERTEXT), key from the vault secret ENCRYPTION_KEY).
+ *
+ * The service is injected by App\Doctrine\Middleware\CustomTypeConfigMiddleware.
+ * There is NO fallback key and NO silent fallback to "return the raw value":
+ * a value that does not decrypt is an error, never plaintext.
+ *
+ * NOTE: written for DBAL 4. On DBAL 3.x use ConversionException::conversionFailed() instead.
+ */
 class EncryptedStringType extends Type
 {
-    public const NAME = 'encrypted_string';
-    private const string CIPHER = 'aes-256-gcm';
-    private const int TAG_LENGTH = 16;
+    public const string NAME = 'encrypted_string';
+
+    private ?EncryptionService $encryptionService = null;
 
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
@@ -20,74 +34,35 @@ class EncryptedStringType extends Type
         return $platform->getStringTypeDeclarationSQL($column);
     }
 
-    public function convertToDatabaseValue($value, AbstractPlatform $platform): ?string
+    public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): ?string
     {
         if ($value === null || $value === '') {
             return $value;
-        }
-
-        $ivLength = openssl_cipher_iv_length(self::CIPHER); // 12 bytes for GCM
-        if ($ivLength < 1) {
-            throw new RuntimeException('Unable to determine valid IV length for cipher.');
         }
 
         try {
-            $iv = random_bytes($ivLength);
-        } catch (Exception) {
-            throw new RuntimeException('Failed to generate a cryptographically strong IV.');
+            return $this->service()->encrypt((string)$value);
+        } catch (EncryptionException $e) {
+            throw ValueNotConvertible::new('[redacted]', self::NAME, 'Encryption failed', $e);
         }
-
-        $secretKey = $this->getSecretKey();
-
-        $tag = '';
-        $encryptedRaw = openssl_encrypt(
-            (string) $value,
-            self::CIPHER,
-            $secretKey,
-            OPENSSL_RAW_DATA,
-            $iv,
-            $tag,
-            '',
-            self::TAG_LENGTH
-        );
-
-        if ($encryptedRaw === false) {
-            throw new RuntimeException('Encryption failed during database conversion.');
-        }
-
-        // Pack IV (12b) + Tag (16b) + Ciphertext into Base64
-        return base64_encode($iv . $tag . $encryptedRaw);
     }
 
-    public function convertToPHPValue($value, AbstractPlatform $platform): ?string
+    public function convertToPHPValue(mixed $value, AbstractPlatform $platform): ?string
     {
         if ($value === null || $value === '') {
             return $value;
         }
 
-        $decoded = base64_decode((string) $value, true);
-        $ivLength = openssl_cipher_iv_length(self::CIPHER); // 12 bytes
-        $tagLength = self::TAG_LENGTH; // 16 bytes
-
-        if ($decoded === false || strlen($decoded) <= ($ivLength + $tagLength)) {
-            return (string) $value;
+        try {
+            return $this->service()->decrypt((string)$value);
+        } catch (EncryptionException $e) {
+            throw ValueNotConvertible::new(
+                '[redacted]',
+                self::NAME,
+                'Stored value could not be decrypted',
+                $e
+            );
         }
-
-        $secretKey = $this->getSecretKey();
-        $iv = substr($decoded, 0, $ivLength);
-        $tag = substr($decoded, $ivLength, $tagLength);
-        $ciphertext = substr($decoded, $ivLength + $tagLength);
-
-        $decrypted = openssl_decrypt(
-            $ciphertext,
-            self::CIPHER,
-            $secretKey,
-            OPENSSL_RAW_DATA,
-            $iv,
-            $tag
-        );
-
-        return $decrypted !== false ? $decrypted : (string) $value;
     }
 
     public function getName(): string
@@ -95,8 +70,22 @@ class EncryptedStringType extends Type
         return self::NAME;
     }
 
-    private function getSecretKey(): string
+    public function requiresSQLCommentHint(AbstractPlatform $platform): bool
     {
-        return $_ENV['APP_SECRET'] ?? $_SERVER['APP_SECRET'] ?? 'default_fallback_secret_key';
+        return true;
+    }
+
+    public function setEncryptionService(EncryptionService $encryptionService): void
+    {
+        $this->encryptionService = $encryptionService;
+    }
+
+    private function service(): EncryptionService
+    {
+        if (!$this->encryptionService instanceof EncryptionService) {
+            throw new RuntimeException('EncryptionService was not configured for ' . self::NAME . '.');
+        }
+
+        return $this->encryptionService;
     }
 }

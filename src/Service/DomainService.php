@@ -22,14 +22,29 @@ readonly class DomainService
         return $ascii ?: $domain;
     }
 
-    public function isValidDomain(string $domain): bool
+    public function isValidDomain(string $domain, bool $checkDns = true): bool
     {
-        return (bool)filter_var(
+        $isValidSyntax = (bool)filter_var(
             $domain,
             FILTER_VALIDATE_DOMAIN,
             FILTER_FLAG_HOSTNAME
         );
+
+        if (!$isValidSyntax) {
+            return false;
+        }
+
+        // Optional: Check if the domain has active DNS records (A, AAAA, CNAME, or MX)
+        if ($checkDns) {
+            return checkdnsrr($domain, 'A')
+                || checkdnsrr($domain, 'AAAA')
+                || checkdnsrr($domain, 'CNAME')
+                || checkdnsrr($domain, 'MX');
+        }
+
+        return true;
     }
+
     public function detectMatchType(string $domain): DomainMatchType
     {
         return str_starts_with($domain, '*.')

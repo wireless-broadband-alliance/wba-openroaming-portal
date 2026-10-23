@@ -415,6 +415,18 @@ class ProfileController extends AbstractController
             throw new RuntimeException('Failed to load Windows template file');
         }
 
+        $rawHash = $this->settingRepository->findOneBy([
+            'name' => SettingName::RADIUS_TRUSTED_ROOT_CA_SHA1_HASH->value
+        ])?->getValue() ?? '';
+
+        $pattern = '/^([0-9A-F]{2}\s){19}[0-9A-F]{2}$/';
+
+        if (preg_match($pattern, $rawHash)) {
+            $formattedHash = $rawHash;
+        } else {
+            $cleanHash = str_replace([' ', ':'], '', $rawHash);
+            $formattedHash = strtoupper(trim(chunk_split($cleanHash, 2, ' ')));
+        }
         $profile = str_replace([
             '@USERNAME@',
             '@PASSWORD@',
@@ -429,9 +441,7 @@ class ProfileController extends AbstractController
             $this->generateWindowsUuid(),
             $this->settingRepository->findOneBy(['name' => SettingName::DOMAIN_NAME->value])->getValue(),
             $this->settingRepository->findOneBy(['name' => SettingName::RADIUS_TLS_NAME->value])->getValue(),
-            $this->settingRepository->findOneBy([
-                'name' => SettingName::RADIUS_TRUSTED_ROOT_CA_SHA1_HASH->value
-            ])->getValue(),
+            $formattedHash,
             $this->settingRepository->findOneBy(['name' => SettingName::DISPLAY_NAME->value])->getValue(),
         ], $profile);
 

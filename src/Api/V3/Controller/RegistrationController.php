@@ -21,6 +21,7 @@ use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
 use App\Service\EmailGenerator;
 use App\Service\EventActions;
+use App\Service\HashArgon2idService;
 use App\Service\SendSMS;
 use App\Service\UserStatusChecker;
 use DateInterval;
@@ -65,7 +66,8 @@ class RegistrationController extends AbstractController
         private readonly EmailGenerator $emailGenerator,
         private readonly ValidatorInterface $validator,
         private readonly PhoneNumberUtil $phoneNumberUtil,
-        private readonly UserStatusChecker $userStatusChecker
+        private readonly UserStatusChecker $userStatusChecker,
+        private readonly HashArgon2idService $hashArgon2idService
     ) {
     }
 
@@ -98,17 +100,10 @@ class RegistrationController extends AbstractController
         $violations = $this->validator->validate($registrationDTO);
 
         if (count($violations) > 0) {
-            $errors = [];
-
-            foreach ($violations as $violation) {
-                $propertyPath = $violation->getPropertyPath();
-                $errors[$propertyPath][] = $violation->getMessage();
-            }
-
             return new BaseResponse(
                 400,
-                $errors,
-                'Invalid data.'
+                null,
+                $violations[0]->getMessage()
             )->toResponse();
         }
 
@@ -362,15 +357,16 @@ class RegistrationController extends AbstractController
 
                     $this->eventRepository->save($latestEvent, true);
 
-                    $randomPassword = bin2hex(random_bytes(4));
-                    $hashedPassword = $this->userPasswordHasher->hashPassword($user, $randomPassword);
-                    $user->setPassword($hashedPassword);
+                    // Generate a plain-text verification code for the email link
+                    $rawTwoFaCode = bin2hex(random_bytes(16)); // e.g. "a3f890b2e14c76d..."
+                    $hashedCode = $this->hashArgon2idService->hash($rawTwoFaCode);
+                    $user->setTwoFAcode($hashedCode);
                     $user->setForgotPasswordRequest(true);
                     $this->entityManager->persist($user);
                     $this->entityManager->flush();
 
-                    // Send the actual forgot password email, the same has the UI has
-                    $this->emailGenerator->sendForgotPasswordEmail($user);
+
+                    $this->emailGenerator->sendForgotPasswordEmail($user, $rawTwoFaCode);
 
                     // Defines the Event to the table
                     $eventMetadata = [
@@ -599,7 +595,7 @@ class RegistrationController extends AbstractController
         try {
             $message = 'Your account password is: '
                 . $registrationDTO->password
-                . '%0A'
+                . "\n"
                 . 'Verification code is: '
                 . $user->getTwoFAcode();
 

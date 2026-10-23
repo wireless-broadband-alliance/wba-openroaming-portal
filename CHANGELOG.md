@@ -1,3 +1,101 @@
+## Release v1.15.0
+
+### Breaking Changes & Security Requirements
+
+- **Encryption Key Moved to the Symfony Secrets Vault (`ENCRYPTION_KEY`)**: Everything the portal encrypts at rest
+  (sensitive system settings, Installation Progress values, RADIUS tokens, TOTP/2FA secrets, SMS provider parameters and
+  phone numbers) was protected with `APP_SECRET`, the same value Symfony uses for cookies and CSRF tokens. It is now
+  protected by a dedicated `ENCRYPTION_KEY` stored in the Symfony secrets vault (`config/secrets/<env>/`).
+  - `EncryptionService` use a dedicated 256-bit key from `ENCRYPTION_KEY` (HKDF-SHA256) and refuses to start with
+    a
+    key shorter than 32 characters.
+  - Encrypted values are now written as `v2:` + base64(IV || tag || ciphertext) using AES-256-GCM. The prefix makes
+    the
+    format self-describing, so legacy values can be told apart and future key rotations are possible.
+  - The hardcoded fallback key of `EncryptedStringType` (`default_fallback_secret_key`) was removed. There is also no
+    longer a silent fallback that returned a value as plain text when it could not be decrypted: a value that does not
+    decrypt is now an error. Error messages raised by the encrypted types no longer contain the stored value.
+  - **Required Action**: Every existing installation must run the new release command **once** after upgrading, while
+    the portal is **offline or restricted** and with a fresh database backup:
+    ```bash
+    php bin/console prepare-release:v1150
+    ```
+    Run it with `--dry-run` first to validate the data without writing anything. See
+    [Upgrade Guide](docs/UPGRADE.md#release-specific-notes-version-1150) for the complete procedure, including how to
+    create the production vault.
+
+- **New Release Command `prepare-release:v1150`**: Runs every one-time step of this release in the correct order. Each
+  step is safe to re-run if one of them fails.
+  1. Runs a read-only preflight before touching any data, and refuses to continue when:
+    - `APP_ENV` is not `prod`, because the data would be encrypted with another vault's key (pass `--allow-non-prod`
+      on a local development database only);
+    - `ENCRYPTION_KEY` does not resolve from the vault or fails an encrypt/decrypt round trip;
+    - data already encrypted with `v2:` (and already encrypted phone numbers) does not decrypt with the current
+      `ENCRYPTION_KEY`. Up to 50 values per column are checked, and the command tells you whether the data decrypts
+      with the same key without, or with, a trailing newline;
+    - `ENCRYPTION_KEY` starts or ends with whitespace (usually a newline added by `echo`) and no data depends on it
+      yet. If existing data was encrypted with the key exactly as it is, it only shows a warning not to remove the
+      whitespace.
+  2. Applies the database migrations (widens `User.phoneNumber` so it can hold encrypted data).
+  3. `app:cra:migrate-to-vault`: asks (hidden input) for the current `APP_SECRET`, then re-encrypts, in a single
+     all-or-nothing transaction, every value written with the legacy scheme. Plain-text values left over from older
+     versions are encrypted as well.
+  4. `app:cra:encrypt-phone-numbers`: encrypts the existing plain-text phone numbers.
+
+- **Phone Numbers Encrypted at Rest**: `User.phoneNumber` is now stored encrypted (AES-256-GCM, key derived from
+  `ENCRYPTION_KEY`) through the new `encrypted_phone_number` Doctrine type.
+  - The column is widened to `VARCHAR(512)` by a database migration.
+  - Each value uses a random IV, so users can no longer be searched or filtered by phone number in SQL.
+
+- **`APP_SECRET` No Longer Protects Stored Data**: After the migration, remove the plain `APP_SECRET` from `.env` and
+  store a new random value in the vault (`php bin/console secrets:set APP_SECRET --random --env=prod`). A real
+  environment variable always overrides the vault, so the old value must be removed from `.env` and from your Docker
+  environment. Rotating it logs every user out and invalidates existing remember-me cookies, signed URLs and issued API
+  tokens.
+
+- **The Encryption Key Belongs to the Database**: Encrypted data can only be read with the exact `ENCRYPTION_KEY` that
+  wrote it, byte for byte. Set it once per installation and never set it again, never change `APP_ENV` on a portal
+  that holds data (the `dev` and `prod` vaults hold different keys), and move `config/secrets/prod/` together with the
+  database. Otherwise every page that reads encrypted data fails with HTTP 500
+  `Could not convert database value to "encrypted_string" ... Stored value could not be decrypted`. See
+  [Installation Guide](docs/INSTALLATION.md#the-encryption-key-belongs-to-the-database).
+
+- **Upgrade Path**: Installations older than **1.14.0** must upgrade to **1.14.2** and complete its steps before
+  upgrading to 1.15.0.
+
+### Other CRA Compliance Fixes
+
+- Removed the hardcoded fallback encryption key.
+- Encrypted values can no longer be returned as plain text when decryption fails.
+- Phone numbers are no longer stored in plain text.
+- Exceptions from the encrypted Doctrine types never include the stored value.
+
+### Documentation
+
+- Installation and Upgrade guides: the environment and vault must be checked before creating `ENCRYPTION_KEY`. No `dev`
+  vault may exist on a server, and console commands must run on the container as `www-data`, not `root`.
+- Fixed the vault volume example in the Installation Guide: it now mounts `./config/secrets/`, matching
+  `docker-compose.yml`.
+- New troubleshooting entries: `Stored value could not be decrypted`, `Unable to write in the "var/cache/prod"
+  directory`, `Permission denied` when creating the vault, and the new `prepare-release:v1150` preflight errors.
+
+## Release v1.14.2
+
+- **Windows EAPHost Root CA Hash Formatting**: Fixed an issue where raw SHA-1 certificate thumbprints extracted by the
+  certificate wizard caused Windows Wi-Fi provisioning (ms-settings:wifi-provisioning) to fail during profile import.
+  Root
+  CA SHA-1 hashes are now automatically sanitized into 20 space-separated hex pairs (e.g., ca bd 2a 79...) to comply
+  with
+  Windows XML schema validation.
+- **API User Registration & External Providers**: Fixed issues in the registration API endpoints involving external OAuth providers (Google and Microsoft) and updated payload validation logic to improve onboarding stability.
+- **Password Reset & Token Verification**: Fixed a bug where password reset emails contained the hashed token instead of the plain-text verification code, rendering reset links invalid. Corrected the API validation logic to properly compare incoming raw tokens against the Argon2id hashes stored in the database.
+- Fix invalid dependency injection service wiring for `GoogleController` and `MicrosoftController` in `services.yaml`
+  that caused `TypeError` 500.
+- Fix API forgot password reset flow where raw Argon2id hashes and unencoded characters in verification links caused
+  validation failures on `/forgot-password/link`.
+- Fix bug where .env settings were not updated in the database following post-login listener verification
+  during an active installation flow.
+
 ## Release V1.14.1
 
 - **Windows Profile XML Signing (`KEY-NOT-FOUND`):** Fixed an issue where `xmlsec1` failed with `KEY-NOT-FOUND` when
@@ -185,7 +283,7 @@ Please make sure to execute the new migration to update and use the new required
   ```bash
   php bin/console doctrine:migrations:migrate
   ```
-  
+
 # Release V1.11.2
 
 - Eliminate external CDN dependency on `rsms.me``assets/fonts/inter/`
@@ -266,33 +364,33 @@ No migrations are needed for this release
 - It's required to run the new migrations this will set up the new entities for the new domains, sources page (
   `DomainsBlacklist`, `DomainsSource`), installation widget with the certificates management (`InstalationWidget`,
   `Certificate` & `CertificateSetupProcess`) & the Fingerprints for apps associations with the portal
-    - Run the migrations with:
-      ```bash
-      php bin/console doctrine:migrations:migrate
-      ```
+  - Run the migrations with:
+    ```bash
+    php bin/console doctrine:migrations:migrate
+    ```
 - **Required one-time action:** After upgrading, run
   the [PrepareReleaseV1100Command.php](src/Command/PrepareReleaseV1100Command.php) to migrate
   existing administrator permissions to the new **Super Admin** role hierarchy.
   This command should be executed **only once** and while the portal is **offline or restricted**. Also this command
   change the ca.pem cert location (`/signing-keys/ca`)
-    - Run the command with:
-      ```bash
-      php bin/console prepare-release:v1100
-      ```
+  - Run the command with:
+    ```bash
+    php bin/console prepare-release:v1100
+    ```
 
 - **Required one-time action:** Fix directory permissions for VichUploader cache to resolve an Internal Server Error 500
   caused by a non-writable folder (`var/cache/prod/vich_uploader`).
   This step ensures the web server can correctly write uploaded file metadata and prevents upload failures after
   deployment.
-    - Run the following commands:
+  - Run the following commands:
 
-      ```bash
-      chown -R www-data:www-data /var/www/openroaming/var/cache/prod/vich_uploader
-      chmod -R 777 /var/www/openroaming/var/cache/prod/vich_uploader
-      ```
+    ```bash
+    chown -R www-data:www-data /var/www/openroaming/var/cache/prod/vich_uploader
+    chmod -R 777 /var/www/openroaming/var/cache/prod/vich_uploader
+    ```
 
-    - This should be executed **once after deployment or when cache directories are recreated**, ideally during
-      maintenance or while the portal is in a controlled state.
+  - This should be executed **once after deployment or when cache directories are recreated**, ideally during
+    maintenance or while the portal is in a controlled state.
 
 # Release V1.9.1
 
@@ -311,11 +409,11 @@ No migrations are needed for this release
 - Landing page UI rework for authenticated users.
 - Improve landing page by centralizing the display content for better notice and for mobile user focused.
 - Installation of a new text editor open-source alternative for free commercial use.
-    - Remove TinyMice text editor bundle from the project because it's not valid for commercial use.
-    - Fix and rework customization page to also have this custom editor for (page_tile, page_description &
-      additional_label).
+  - Remove TinyMice text editor bundle from the project because it's not valid for commercial use.
+  - Fix and rework customization page to also have this custom editor for (page_tile, page_description &
+    additional_label).
 - New checker on the `GetSettings` service to also verify if there is any missing or duplicated setting on the DB.
-    - More Project optimizations reduce the amount of number of queries made in most of the pages.
+  - More Project optimizations reduce the amount of number of queries made in most of the pages.
 - Password toggle reveal implementation for inputs.
 - New UI design for email templates.
 - Responsive Translations (Available: EN & PT-PT) - Administrator can just add new configurations for YAML
@@ -330,11 +428,11 @@ No migrations are needed for this release
   for new users account creation.
 - Rework landing/dashboard authentications because of the new feature - DTO Implementation to improve code optimization
   and add a new login method selector emails || phoneNumber authentication.
-    - Fix minor bugs & conflicts with the new DTO and authentication form.
+  - Fix minor bugs & conflicts with the new DTO and authentication form.
 - Add a new eventSubscriber to avoid the admin of hard changing the DB value `USER_VERIFICATION` setting to `OFF`, when
   the `PLATFORM_MODE` setting is `ON`.
-    - When that happens, it could brake the user account registration system for email & phoneNumbers on the landing
-      page.
+  - When that happens, it could brake the user account registration system for email & phoneNumbers on the landing
+    page.
 - **Fix bug 500** on `/dashboard/statistics/freeradius` in case the connection details are invalid and the portal can
   reach
   the server, added a new JSON error message for details.
@@ -348,20 +446,20 @@ No migrations are needed for this release
 - New command for freeradius profile connection of each user, now the `UserRadiusProfile` entity saves the start/end
   connection of the user profiles when the freeradius server gets a new request. (For later graphics generations and
   user details)
-    - This new command is configurable on the page `dashboard/settings/schedule` because he is also cron based.
+  - This new command is configurable on the page `dashboard/settings/schedule` because he is also cron based.
 - New bundle installed `composer require symfony/lock` required for the command next execution only start when the
   current active ends.
 - Symfony version increase for maintained version (7.4.3), it bug fixes and security fixes with support until November
-    2028.
+  2028.
 - NPM webpack-cli deprecations fixed to the latest stabled release (
-    - (https://www.npmjs.com/package/webpack-cli/v/5.1.4)) compatible with "@symfony/webpack-encore": "^5.1.0".
+  - (https://www.npmjs.com/package/webpack-cli/v/5.1.4)) compatible with "@symfony/webpack-encore": "^5.1.0".
 - New validation on the Admin Authentication Methods page to check whether the project has all required certificates.
 - It's required to run the new migrations to set up the new entity for the translations (
   `SettingTranslation`), and the new setting for the login with uuid (`LOGIN_WITH_UUID_ONLY`).
-    - Run the migrations with:
-      ```bash
-      php bin/console doctrine:migrations:migrate
-      ```
+  - Run the migrations with:
+    ```bash
+    php bin/console doctrine:migrations:migrate
+    ```
 
 ## API Deprecation Notice
 
@@ -490,10 +588,10 @@ Failure to migrate before the end of the grace period may result in **loss of ac
 - Resolved an issue where editing a user account caused the ban action to also disable the account, which conflicted
   with the error messages in the landing page authenticator
 - Migrated from the deprecated to its actively maintained forks:
-    - [nbgrp/onelogin-saml-bundle](https://github.com/nbgrp/onelogin-saml-bundle) for ongoing support and updates.
-    - [tetrapi/onelogin-saml-bundle](https://github.com/tetrapi/onelogin-saml-bundle) as an alternative with additional
-      fixes for compatibility with Symfony 7.2.5 and deprecation warnings. `php-saml`
-      `onelogin-saml-bundle`
+  - [nbgrp/onelogin-saml-bundle](https://github.com/nbgrp/onelogin-saml-bundle) for ongoing support and updates.
+  - [tetrapi/onelogin-saml-bundle](https://github.com/tetrapi/onelogin-saml-bundle) as an alternative with additional
+    fixes for compatibility with Symfony 7.2.5 and deprecation warnings. `php-saml`
+    `onelogin-saml-bundle`
 
 - Fix validation for JWT tokens to prevent 500 errors during API authentication.
 - Added validation on the **Authentication Methods** page, to check if the provider is active before submitting the
@@ -516,17 +614,17 @@ Failure to migrate before the end of the grace period may result in **loss of ac
 - New Setting for API Status (ON & OFF)
 - SideBar Admin UI changes
 - Two-Factor Authentication Implementation
-    - New endpoint for 2FA request codes
-    - Rework old endpoints authentication endpoint (local/google/saml/microsoft)to implement with 2FA
-    - New settings page **/dashboard/settings/twoFA**
-    - New implementation on landing page depending on the enforcement level
-        - NOT_ENFORCED
-        - ENFORCED_FOR_LOCAL
-        - ENFORCED_FOR_ALL
-    - New Two-factor authentication selection
-        - Email
-        - SMS
-        - TOTP (Google Authenticator && Microsoft Authenticator)
+  - New endpoint for 2FA request codes
+  - Rework old endpoints authentication endpoint (local/google/saml/microsoft)to implement with 2FA
+  - New settings page **/dashboard/settings/twoFA**
+  - New implementation on landing page depending on the enforcement level
+    - NOT_ENFORCED
+    - ENFORCED_FOR_LOCAL
+    - ENFORCED_FOR_ALL
+  - New Two-factor authentication selection
+    - Email
+    - SMS
+    - TOTP (Google Authenticator && Microsoft Authenticator)
 - Microsoft Login Implementation - New authentication provider / New endpoint
 
 > **Important**: In this release, the fields googleId, saml_identifier and Allocate Providers Command were eliminated.

@@ -24,6 +24,7 @@ use libphonenumber\PhoneNumber;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -100,14 +101,14 @@ class UserAccountDeletionController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        $loginWithUuidOnly = false;
-        if (is_array($data) && isset($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'])) {
-            $loginWithUuidOnly = $data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === 'true';
+        if ($data instanceof JsonResponse) {
+            return $data;
         }
+
+        $loginWithUuidOnly = ($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] ?? null) === 'true';
 
         if (
             $loginWithUuidOnly
-            && is_array($data)
             && ($data[SettingName::PLATFORM_MODE->value]['value'] ?? null) === PlatformMode::LIVE->value
         ) {
             if (
@@ -210,9 +211,9 @@ class UserAccountDeletionController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        // Check if the local account has a phoneNumber of an email
+        // Check if the local account has a phoneNumber or an email
         if ($currentUser->getPhoneNumber() === null && empty($currentUser->getEmail())) {
-            $this->redirectToRoute('app_landing');
+            return $this->redirectToRoute('app_landing');
         }
 
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser->getId()]);

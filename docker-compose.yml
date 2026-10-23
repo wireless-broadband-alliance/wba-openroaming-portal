@@ -1,7 +1,7 @@
 ---
 services:
   web:
-    image: ghcr.io/wireless-broadband-alliance/wba-openroaming-portal:1.14.1
+    image: ghcr.io/wireless-broadband-alliance/wba-openroaming-portal:1.15.0
     security_opt:
       - no-new-privileges:true
     env_file:
@@ -18,6 +18,7 @@ services:
       - ./service-config/supervisor/supervisord-dev.conf:/etc/supervisor/conf.d/supervisord.conf:ro
       - ./service-config/php-fpm/www.conf:/usr/local/etc/php-fpm.d/www.conf:ro
       - ./config/jwt/:/var/www/openroaming/config/jwt/
+      - ./config/secrets/:/var/www/openroaming/config/secrets/
     ports:
       - "80:80"
   mysql:

@@ -2,3 +2,21 @@ include:
   - project: 'tcs/tatrapi-sa/ci-templates'
     file: '/php/symfony/.gitlab-ci.yml'
     # ref: 'v1.0.0'
+
+# The shared template runs "composer install" (which triggers cache:clear) in these jobs.
+# They have no access to the dev secrets vault because the private key is not in git,
+# so they get throwaway values instead. These are NOT secrets and are used for CI only.
+test-rector:
+  variables:
+    ENCRYPTION_KEY: "ci-throwaway-key-not-a-secret-0123456789abcdef"
+    APP_SECRET: "ci-throwaway-app-secret-not-a-secret-0123456789"
+
+test-twig:
+  variables:
+    ENCRYPTION_KEY: "ci-throwaway-key-not-a-secret-0123456789abcdef"
+    APP_SECRET: "ci-throwaway-app-secret-not-a-secret-0123456789"
+
+test-phpstan:
+  variables:
+    ENCRYPTION_KEY: "ci-throwaway-key-not-a-secret-0123456789abcdef"
+    APP_SECRET: "ci-throwaway-app-secret-not-a-secret-0123456789"
