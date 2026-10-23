@@ -319,13 +319,11 @@ class MapAccessPointExportController extends AbstractController
                 $groupedErrors = [];
                 foreach ($rowErrors as $err) {
                     $key = $err['field'] . '|' . $err['message'];
-                    if (!isset($groupedErrors[$key])) {
-                        $groupedErrors[$key] = [
-                            'field'   => $err['field'],
-                            'message' => $err['message'],
-                            'rows'    => [],
-                        ];
-                    }
+                    $groupedErrors[$key] ??= [
+                        'field'   => $err['field'],
+                        'message' => $err['message'],
+                        'rows'    => [],
+                    ];
                     $groupedErrors[$key]['rows'][] = [
                         'row'  => $err['row'],
                         'name' => $err['name'],

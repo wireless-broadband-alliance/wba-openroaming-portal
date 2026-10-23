@@ -4,6 +4,7 @@ doctrine:
             revisor_geometry: App\Doctrine\Type\MySQLGeometryType
             point: App\Doctrine\Type\PointType
             encrypted_string: App\Doctrine\Type\EncryptedStringType
+            encrypted_phone_number: App\Doctrine\Type\EncryptedPhoneNumberType
             hashed_string: App\Doctrine\Type\HashedStringType
         connections:
             default:

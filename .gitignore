@@ -2,7 +2,9 @@
 /.env.local
 /.env.local.php
 /.env.*.local
-/config/secrets/prod/prod.decrypt.private.php
+# Secrets vaults are never committed: each environment and each installation generates its own
+# (php bin/console secrets:generate-keys). See INSTALLATION.md.
+/config/secrets/*
 /public/bundles/
 /vendor/
 ###< symfony/framework-bundle ###

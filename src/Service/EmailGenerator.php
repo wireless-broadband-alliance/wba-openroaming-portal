@@ -389,15 +389,16 @@ readonly class EmailGenerator
         }
 
         // Embed Footer Banner
-        $isFooterEnabled = ($footerImageEnabled === OperationMode::ON->value) && !empty($footerImage);
-        $footerPath = $isFooterEnabled ? $projectDir . '/public' . $footerImage : null;
-        $hasFooter = $isFooterEnabled && $footerPath && file_exists($footerPath);
+        $hasFooter = false;
+        if ($footerImageEnabled === OperationMode::ON->value && !empty($footerImage)) {
+            $footerPath = $projectDir . '/public' . $footerImage;
+            if (file_exists($footerPath)) {
+                $email->embedFromPath($footerPath, 'footer_cid');
+                $hasFooter = true;
+            }
+        }
 
         $context['footerImageEnabled'] = $hasFooter;
-
-        if ($hasFooter) {
-            $email->embedFromPath($footerPath, 'footer_cid');
-        }
 
         $email->context($context);
     }

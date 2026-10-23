@@ -1,10 +1,17 @@
 FROM php:8.4-alpine3.21
 ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV TZ=UTC
+WORKDIR /var/www/openroaming
 
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 
-# Install test tools, CLI packages, and required PHP extensions
+# Install test tools, CLI packages, and required PHP extensions.
+# memcached / yaml / gnupg are built from GitHub sources instead of PECL,
+# because pecl.php.net is blocked behind the corporate VPN.
+# php-gnupg needs its "phpc" git submodule, so it is cloned and built with phpize
+# (same as "pecl install"), because gnupg 1.5.0 prints PHP 8.4 deprecation notices
+# that make install-php-extensions' load check fail.
 RUN apk add --no-cache \
     git \
     zip \
@@ -18,8 +25,12 @@ RUN apk add --no-cache \
     gnupg \
     gpgme \
     libgpg-error \
+    libmemcached-libs \
+    yaml \
     sqlite \
  && (wget --no-check-certificate -O /usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt https://tetrapi.pt/gp/PaloAlto_SSLInspection_ForwardTrust.crt 2>/dev/null && update-ca-certificates || true) \
+ && apk add --no-cache --virtual .ext-build-deps $PHPIZE_DEPS \
+    gpgme-dev libgpg-error-dev libmemcached-dev zlib-dev cyrus-sasl-dev yaml-dev \
  && install-php-extensions \
     intl \
     zip \
@@ -34,12 +45,18 @@ RUN apk add --no-cache \
     exif \
     opcache \
     ldap \
-    memcached-3.2.0 \
-    yaml \
- && apk add --no-cache --virtual .gnupg-build-deps $PHPIZE_DEPS gpgme-dev libgpg-error-dev \
- && pecl install gnupg-1.5.0 \
+    php-memcached-dev/php-memcached@v3.2.0 \
+    php/pecl-file_formats-yaml@2.2.5 \
+ && git clone --depth 1 --branch gnupg-1.5.0 --recurse-submodules --shallow-submodules https://github.com/php-gnupg/php-gnupg.git /tmp/php-gnupg \
+ && cd /tmp/php-gnupg \
+ && phpize \
+ && ./configure \
+ && make -j"$(nproc)" \
+ && make install \
  && docker-php-ext-enable gnupg \
- && apk del .gnupg-build-deps \
+ && cd / \
+ && rm -rf /tmp/php-gnupg \
+ && apk del .ext-build-deps \
  && echo "memory_limit=2G" > /usr/local/etc/php/conf.d/memory.ini \
  && echo "error_reporting=E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED" > /usr/local/etc/php/conf.d/error_reporting.ini \
  && rm -f /usr/local/bin/install-php-extensions
