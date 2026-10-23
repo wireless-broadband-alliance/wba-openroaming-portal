@@ -6,9 +6,11 @@
   (sensitive system settings, Installation Progress values, RADIUS tokens, TOTP/2FA secrets, SMS provider parameters and
   phone numbers) was protected with `APP_SECRET`, the same value Symfony uses for cookies and CSRF tokens. It is now
   protected by a dedicated `ENCRYPTION_KEY` stored in the Symfony secrets vault (`config/secrets/<env>/`).
-  - `EncryptionService` derives a dedicated 256-bit key from `ENCRYPTION_KEY` (HKDF-SHA256) and refuses to start with a
+  - `EncryptionService` use a dedicated 256-bit key from `ENCRYPTION_KEY` (HKDF-SHA256) and refuses to start with
+    a
     key shorter than 32 characters.
-  - Encrypted values are now written as `v2:` + base64(IV || tag || ciphertext) using AES-256-GCM. The prefix makes the
+  - Encrypted values are now written as `v2:` + base64(IV || tag || ciphertext) using AES-256-GCM. The prefix makes
+    the
     format self-describing, so legacy values can be told apart and future key rotations are possible.
   - The hardcoded fallback key of `EncryptedStringType` (`default_fallback_secret_key`) was removed. There is also no
     longer a silent fallback that returned a value as plain text when it could not be decrypted: a value that does not
@@ -24,7 +26,16 @@
 
 - **New Release Command `prepare-release:v1150`**: Runs every one-time step of this release in the correct order. Each
   step is safe to re-run if one of them fails.
-  1. Checks that `ENCRYPTION_KEY` resolves from the vault, before touching any data.
+  1. Runs a read-only preflight before touching any data, and refuses to continue when:
+    - `APP_ENV` is not `prod`, because the data would be encrypted with another vault's key (pass `--allow-non-prod`
+      on a local development database only);
+    - `ENCRYPTION_KEY` does not resolve from the vault or fails an encrypt/decrypt round trip;
+    - data already encrypted with `v2:` (and already encrypted phone numbers) does not decrypt with the current
+      `ENCRYPTION_KEY`. Up to 50 values per column are checked, and the command tells you whether the data decrypts
+      with the same key without, or with, a trailing newline;
+    - `ENCRYPTION_KEY` starts or ends with whitespace (usually a newline added by `echo`) and no data depends on it
+      yet. If existing data was encrypted with the key exactly as it is, it only shows a warning not to remove the
+      whitespace.
   2. Applies the database migrations (widens `User.phoneNumber` so it can hold encrypted data).
   3. `app:cra:migrate-to-vault`: asks (hidden input) for the current `APP_SECRET`, then re-encrypts, in a single
      all-or-nothing transaction, every value written with the legacy scheme. Plain-text values left over from older
@@ -42,6 +53,13 @@
   environment. Rotating it logs every user out and invalidates existing remember-me cookies, signed URLs and issued API
   tokens.
 
+- **The Encryption Key Belongs to the Database**: Encrypted data can only be read with the exact `ENCRYPTION_KEY` that
+  wrote it, byte for byte. Set it once per installation and never set it again, never change `APP_ENV` on a portal
+  that holds data (the `dev` and `prod` vaults hold different keys), and move `config/secrets/prod/` together with the
+  database. Otherwise every page that reads encrypted data fails with HTTP 500
+  `Could not convert database value to "encrypted_string" ... Stored value could not be decrypted`. See
+  [Installation Guide](docs/INSTALLATION.md#the-encryption-key-belongs-to-the-database).
+
 - **Upgrade Path**: Installations older than **1.14.0** must upgrade to **1.14.2** and complete its steps before
   upgrading to 1.15.0.
 
@@ -51,6 +69,15 @@
 - Encrypted values can no longer be returned as plain text when decryption fails.
 - Phone numbers are no longer stored in plain text.
 - Exceptions from the encrypted Doctrine types never include the stored value.
+
+### Documentation
+
+- Installation and Upgrade guides: the environment and vault must be checked before creating `ENCRYPTION_KEY`. No `dev`
+  vault may exist on a server, and console commands must run on the container as `www-data`, not `root`.
+- Fixed the vault volume example in the Installation Guide: it now mounts `./config/secrets/`, matching
+  `docker-compose.yml`.
+- New troubleshooting entries: `Stored value could not be decrypted`, `Unable to write in the "var/cache/prod"
+  directory`, `Permission denied` when creating the vault, and the new `prepare-release:v1150` preflight errors.
 
 ## Release v1.14.2
 

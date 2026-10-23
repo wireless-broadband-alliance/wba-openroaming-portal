@@ -72,6 +72,25 @@ step 2.
 
 #### a) **Production (`prod` vault)**
 
+Before you start, check that the portal runs in `prod` and that no vault exists yet:
+
+```bash
+docker compose exec web php bin/console about | grep -iE "environment|debug"
+docker compose exec web php bin/console secrets:list --env=prod
+```
+
+`Environment` must be `prod`. If `ENCRYPTION_KEY` is already listed, **stop here**: the vault already exists, and
+creating it again makes the data it protects unreadable.
+
+The container runs as `www-data`, so it must be able to write `config/secrets/` on the host. If the commands below fail
+with "Permission denied", give the folder to `www-data` (uid 33) on the host. Do **not** run them as `root` instead:
+
+```bash
+mkdir -p config/secrets/prod && chown -R 33:33 config/secrets
+```
+
+Then create the vault:
+
 ```bash
 docker compose exec web php bin/console secrets:generate-keys --env=prod
 docker compose exec web sh -c 'openssl rand -hex 32 | tr -d "\n" | php bin/console secrets:set ENCRYPTION_KEY - --env=prod'
@@ -84,12 +103,17 @@ The last command lists the secret names (their values stay hidden). You should s
 **Important:**
 
 - Run the portal with `APP_ENV=prod` in your `.env` so that this `prod` vault is the one in use. The `dev` vault is
-  meant for development only and must never be used on a portal that holds real data.
-- The files are written to `config/secrets/prod/`. Mount that directory as a volume of the `web` service in
-  `docker-compose.yml`, so it survives container re-creation:
+  meant for development only and must never be used on a portal that holds real data. Set `APP_ENV=prod` **before**
+  step 8: data is encrypted with the key of whichever vault is active at that moment, and switching `APP_ENV`
+  afterwards leaves the portal unable to read it (
+  see [The Encryption Key Belongs to the Database](#the-encryption-key-belongs-to-the-database)).
+- Do not create a `dev` vault on a server. If `config/secrets/dev/` exists there, a single command run with the wrong
+  environment silently encrypts data with the wrong key.
+- The files are written to `config/secrets/prod/`. The `web` service in `docker-compose.yml` mounts `config/secrets/`
+  from the host, so the vault survives container re-creation. Keep this volume:
   ```yaml
   volumes:
-    - ./config/secrets/prod/:/var/www/openroaming/config/secrets/
+    - ./config/secrets/:/var/www/openroaming/config/secrets/
   ```
 - `config/secrets/prod/prod.decrypt.private.php` unlocks every secret. **Never commit it or share it.**
 - **Back up the whole `config/secrets/prod/` directory** in a safe place, separate from your database backups. If the
@@ -123,6 +147,31 @@ The last command lists the secret names (their values stay hidden). You should s
   decrypted. In that case, reset the local database and run step 8 again.
 - Do not also define `ENCRYPTION_KEY` or `APP_SECRET` in `.env` or in the container environment: a real environment
   variable always overrides the vault.
+
+#### The Encryption Key Belongs to the Database
+
+Every encrypted value in the database can only be read with the exact `ENCRYPTION_KEY` that wrote it. Treat the key
+and the database as a pair:
+
+- **Set `ENCRYPTION_KEY` once and never set it again** on an installation that already has data. Running
+  `secrets:set ENCRYPTION_KEY` a second time does not re-encrypt anything: it replaces the key and makes all existing
+  data unreadable (`Stored value could not be decrypted`). Before setting it, check that it does not exist yet:
+  ```bash
+  docker compose exec web php bin/console secrets:list --env=prod
+  ```
+- **The key is compared byte for byte**, including a trailing newline. Always pipe it through `tr -d "\n"` as shown
+  above. Never use `echo "..." | secrets:set`, which adds a newline. If an existing key already ends with `\n`
+  (visible with `secrets:list --reveal`), leave it as it is: removing the newline also changes the key.
+- **Never change `APP_ENV` on a portal that holds data**, and never run console commands with a different `--env`
+  than the portal uses. The `dev` and `prod` vaults hold different keys.
+- **Moving a database** to another server (for example production to QA) means moving its `config/secrets/prod/`
+  directory with it.
+- Changing the key requires re-encrypting the data. Do not attempt it by hand.
+- When upgrading an existing installation to 1.15.0, `prepare-release:v1150` checks these rules before touching any
+  data. It refuses to run when `APP_ENV` is not `prod`, when `ENCRYPTION_KEY` has a stray newline that no data depends
+  on yet, or when data already encrypted with `v2:` does not decrypt with the current key. If data already depends on
+  a key with a trailing newline, it only shows a warning: in that case **do not remove the newline**. See the
+  [Upgrade Guide](UPGRADE.md#release-specific-notes-version-1150).
 
 ## 4. **Check Containers Status**
 
@@ -406,7 +455,25 @@ installation:
    vault directory (`config/secrets/prod/` or `config/secrets/dev/`) is not available inside the `web` container, or
    `APP_ENV` does not match the environment the vault was created for. Follow step 3 (option a for `prod`, option b
    for `dev`) and check that `APP_ENV` in `.env` matches the vault you created.
-6. **Generate Pfx-Signing-Key**: If you get a **Permission denied** error while trying to run the script, you have to
+6. **`Could not convert database value to "encrypted_string" ... Stored value could not be decrypted` (HTTP 500)**:
+   The active `ENCRYPTION_KEY` is not the one that encrypted the data. Usual causes: the data was encrypted while the
+   portal ran with another `APP_ENV` (another vault), `ENCRYPTION_KEY` was set again after the data was written, or
+   the key gained or lost a trailing newline. **Do not set a new key and do not run the migration again.** Check which
+   environment is active (`php bin/console about`), compare `secrets:list --reveal --env=prod` with
+   `--env=dev` and with your vault backups, and restore the key that wrote the data. See
+   [The Encryption Key Belongs to the Database](#the-encryption-key-belongs-to-the-database).
+7. **`Unable to write in the "var/cache/prod" directory`**: The cache was created by `root` (for example by
+   `docker exec -u root ... bin/console`). Give it back to the web server user and always run console commands as
+   that user:
+   ```bash
+   docker compose exec -u root web chown -R www-data:www-data /var/www/openroaming/var
+   docker compose exec -u www-data web php bin/console cache:clear
+   ```
+8. **`Permission denied` when creating the vault (`secrets:generate-keys` / `secrets:set`)**: The host folder
+   `config/secrets/` belongs to `root`, and the container runs as `www-data`. Fix the ownership on the host
+   (`chown -R 33:33 config/secrets`) instead of running the commands as `root`: files and cache created by `root` cause
+   the errors described in item 7.
+9. **Generate Pfx-Signing-Key**: If you get a **Permission denied** error while trying to run the script, you have to
    grant executable permissions to the script file before executing it.
 
 To solve this, use the chmod command inside the `web` container, to give the script executable rights.
@@ -416,12 +483,12 @@ To solve this, use the chmod command inside the `web` container, to give the scr
 - chmod +x tools/generatePfxSigningKey.sh
 ```
 
-7. **VichUploader Cache Directory Not Writable (HTTP 500 Error)**:
-   You may encounter an Internal Server Error 500 caused by the `vich_uploader` cache directory not being writable (
-   `var/cache/prod/vich_uploader`). This typically happens after deployments or cache regeneration when folder
-   permissions are incorrect.
+10. **VichUploader Cache Directory Not Writable (HTTP 500 Error)**:
+    You may encounter an Internal Server Error 500 caused by the `vich_uploader` cache directory not being writable (
+    `var/cache/prod/vich_uploader`). This typically happens after deployments or cache regeneration when folder
+    permissions are incorrect.
 
-   To fix this, ensure correct ownership and permissions:
+To fix this, ensure correct ownership and permissions:
 
    ```bash
    chown -R www-data:www-data /var/www/openroaming/var/cache/prod/vich_uploader
