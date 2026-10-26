@@ -1,7 +1,7 @@
 # =========================
 # Stage 1: Build / Composer stage
 # =========================
-FROM php:8.4-fpm-alpine3.21 AS vendor
+FROM php:8.4-fpm-alpine AS vendor
 ENV COMPOSER_ALLOW_SUPERUSER=1
 WORKDIR /app
 
@@ -36,7 +36,7 @@ RUN apk add --no-cache \
     ldap \
     memcached-3.2.0 \
  && apk add --no-cache --virtual .gnupg-build-deps $PHPIZE_DEPS gpgme-dev libgpg-error-dev \
- && pecl install gnupg-1.5.0 \
+ && pecl install gnupg-1.5.4 \
  && docker-php-ext-enable gnupg \
  && apk del .gnupg-build-deps \
  && rm -f /usr/local/bin/install-php-extensions
@@ -57,7 +57,7 @@ RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/memory.ini \
 # =========================
 # Stage 2: Final runtime image
 # =========================
-FROM php:8.4-fpm-alpine3.21 AS runtime
+FROM php:8.4-fpm-alpine AS runtime
 ENV TZ=UTC
 WORKDIR /var/www/openroaming
 ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
