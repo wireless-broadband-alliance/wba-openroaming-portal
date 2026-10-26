@@ -169,10 +169,18 @@ final class MigrateEncryptionToVaultCommand extends Command
                 $this->connection->commit();
             }
         } catch (Throwable $e) {
-            if ($this->connection->isTransactionActive()) {
-                $this->connection->rollBack();
+            try {
+                if ($this->connection->isTransactionActive()) {
+                    $this->connection->rollBack();
+                }
+            } catch (Throwable) {
+                // Connection state is already broken; report the original error below.
             }
-            $io->error('Aborted, nothing was changed: ' . $e->getMessage());
+            $io->error(
+                'Aborted: ' . $e->getMessage() . ' Some rows may already have been written if the transaction '
+                . 'was lost. Fix the cause and run the command again (already migrated values are skipped), '
+                . 'or restore your backup.'
+            );
 
             return Command::FAILURE;
         } finally {

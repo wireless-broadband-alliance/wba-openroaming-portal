@@ -28,4 +28,9 @@ final class Version20261015125120 extends AbstractMigration
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE User CHANGE phoneNumber phoneNumber VARCHAR(35) DEFAULT NULL');
     }
+
+    public function isTransactional(): bool
+    {
+        return false;
+    }
 }
