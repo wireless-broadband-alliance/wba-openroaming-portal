@@ -1,3 +1,22 @@
+## Release v1.15.1
+
+### Security Fixes
+
+- **PHP Runtime Updated to 8.4.27**: The PHP version used by the portal container was upgraded to **8.4.27** (released
+  upstream on 2026-10-22) to pick up the security fixes published for the PHP 8.4 branch.
+  See the [PHP 8.4.27 changelog](https://www.php.net/ChangeLog-8.php#8.4.27) for the full list.
+  - **Required Action**: Rebuild the Docker images so the containers run the patched PHP version:
+    ```bash
+    docker compose build --pull
+    docker compose up -d
+    ```
+  - Confirm the version running inside the web container:
+    ```bash
+    php -v
+    ```
+
+No migrations or one-time commands are needed for this release.
+
 ## Release v1.15.0
 
 ### Breaking Changes & Security Requirements
