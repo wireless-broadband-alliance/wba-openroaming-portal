@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\Event;
 use App\Entity\OTPcode;
 use App\Entity\User;
+use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\OperationMode;

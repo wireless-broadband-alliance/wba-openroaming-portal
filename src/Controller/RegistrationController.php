@@ -384,7 +384,7 @@ class RegistrationController extends AbstractController
             && $verificationCode !== ''
             && $this->hashArgon2idService->verifyHash($verificationCode, $user->getTwoFAcode());
 
-        if ($isCodeValid && $user instanceof User && $user->getUuid() === $uuid) {
+        if ($isCodeValid && $user->getUuid() === $uuid) {
             // UUID-only logins (authLocal) don't create a USER_CREATION event, so validate
             // against the moment the code was generated. Registration keeps the event check.
             $isLinkExpired = $isUuidOnly
