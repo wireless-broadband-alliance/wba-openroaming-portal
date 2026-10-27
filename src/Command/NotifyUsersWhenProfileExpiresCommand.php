@@ -98,7 +98,7 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
 
             $sendNotification = true;
 
-            if ($notificationResendInterval && $lastNotification) {
+            if ($notificationResendInterval && $lastNotification instanceof Notification) {
                 $dateToResend = new DateTime(
                     $lastNotification->getLastNotification()->format('Y-m-d H:i:s')
                 )->modify('+' . $notificationResendInterval->getValue() . ' days');

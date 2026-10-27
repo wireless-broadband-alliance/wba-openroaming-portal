@@ -12,6 +12,7 @@ use App\Enum\EventMetadataKeysType;
 use App\Enum\UserProvider;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use libphonenumber\PhoneNumber;
 use Random\RandomException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -96,7 +97,7 @@ readonly class UserCreationService
             $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
             $userAuths->setProviderId(UserProvider::EMAIL->value);
             $userAuths->setUser($user);
-        } elseif ($userAddDTO->accountType === UserProvider::PHONE_NUMBER->value && $userAddDTO->phoneNumber) {
+        } elseif ($userAddDTO->accountType === UserProvider::PHONE_NUMBER->value && $userAddDTO->phoneNumber instanceof PhoneNumber) {
             $user->setPhoneNumber($userAddDTO->phoneNumber);
             $user->setUuid(
                 '+' .

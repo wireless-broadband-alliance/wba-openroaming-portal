@@ -285,7 +285,7 @@ class RegistrationLocalController extends AbstractController
 
                 // Check if enough time has passed since the last password reset request
                 if (
-                    !$latestEvent ||
+                    !$latestEvent instanceof Event ||
                     ($lastVerificationCodeTime
                         instanceof DateTime &&
                         $lastVerificationCodeTime->add(

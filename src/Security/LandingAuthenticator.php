@@ -16,6 +16,7 @@ use App\Repository\UserRepository;
 use App\Service\Captcha\CaptchaValidator;
 use App\Service\TwoFAService;
 use libphonenumber\NumberParseException;
+use libphonenumber\PhoneNumber;
 use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -224,7 +225,7 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
                     if ($session instanceof Session) {
                         $firstAuth = $user->getUserExternalAuths()->first();
                         $isSmsUser = ($firstAuth && $firstAuth->getProviderId() === UserProvider::PHONE_NUMBER->value)
-                            || ($user->getPhoneNumber() && !$user->getEmail());
+                            || ($user->getPhoneNumber() instanceof PhoneNumber && !$user->getEmail());
 
                         $messageKey = $isSmsUser ? 'verificationCodeSentSms' : 'verificationCodeSent';
 
