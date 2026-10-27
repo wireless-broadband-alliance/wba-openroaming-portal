@@ -1,6 +1,5 @@
 @import "../vendor/leaflet.markercluster/dist/MarkerCluster.Default.css";
 @import "../vendor/leaflet.markercluster/dist/MarkerCluster.css";
-@import "../vendor/leaflet/dist/leaflet.css";
 
 @tailwind base;
 @tailwind components;
