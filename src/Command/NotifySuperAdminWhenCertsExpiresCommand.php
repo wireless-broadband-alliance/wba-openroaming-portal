@@ -64,7 +64,10 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
                             );
                         $now = new DateTime();
                         $limit = $now->modify('-7 days');
-                        if (!$lastNotification instanceof Notification || $lastNotification->getLastNotification() < $limit) {
+                        if (
+                            !$lastNotification instanceof Notification ||
+                            $lastNotification->getLastNotification() < $limit
+                        ) {
                             $this->emailGenerator->sendNotifyExpiredCertEmail($user);
                             $this->notificationService->createNotification(
                                 $user,
@@ -78,7 +81,10 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
                         );
                         $now = new DateTime();
                         $limitTreeDays = $now->modify('-1 days');
-                        if (!$lastNotification instanceof Notification || $lastNotification->getLastNotification() < $limitTreeDays) {
+                        if (
+                            !$lastNotification instanceof Notification ||
+                            $lastNotification->getLastNotification() < $limitTreeDays
+                        ) {
                             $this->emailGenerator->sendNotifyExpiresCertEmail($user, $certLimitDate);
                             $this->notificationService->createNotification(
                                 $user,
@@ -92,7 +98,10 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
                         );
                         $now = new DateTime();
                         $limitTreeDays = $now->modify('-3 days');
-                        if (!$lastNotification instanceof Notification || $lastNotification->getLastNotification() < $limitTreeDays) {
+                        if (
+                            !$lastNotification instanceof Notification ||
+                            $lastNotification->getLastNotification() < $limitTreeDays
+                        ) {
                             $this->emailGenerator->sendNotifyExpiresCertEmail($user, $certLimitDate);
                             $this->notificationService->createNotification(
                                 $user,
@@ -106,7 +115,10 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
                         );
                         $now = new DateTime();
                         $limitWeek = $now->modify('-7 days');
-                        if (!$lastNotification instanceof Notification || $lastNotification->getLastNotification() < $limitWeek) {
+                        if (
+                            !$lastNotification instanceof Notification ||
+                            $lastNotification->getLastNotification() < $limitWeek
+                        ) {
                             $this->emailGenerator->sendNotifyExpiresCertEmail($user, $certLimitDate);
                             $this->notificationService->createNotification(
                                 $user,
@@ -120,7 +132,10 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
                         );
                         $now = new DateTime();
                         $limitMonth = $now->modify('-30 days');
-                        if (!$lastNotification instanceof Notification || $lastNotification->getLastNotification() < $limitMonth) {
+                        if (
+                            !$lastNotification instanceof Notification ||
+                            $lastNotification->getLastNotification() < $limitMonth
+                        ) {
                             $this->emailGenerator->sendNotifyExpiresCertEmail($user, $certLimitDate);
                             $this->notificationService->createNotification(
                                 $user,
@@ -134,7 +149,10 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
                         );
                         $now = new DateTime();
                         $limitMonth = $now->modify('-60 days');
-                        if (!$lastNotification instanceof Notification || $lastNotification->getLastNotification() < $limitMonth) {
+                        if (
+                            !$lastNotification instanceof Notification ||
+                            $lastNotification->getLastNotification() < $limitMonth
+                        ) {
                             $this->emailGenerator->sendNotifyExpiresCertEmail($user, $certLimitDate);
                             $this->notificationService->createNotification(
                                 $user,
@@ -148,7 +166,10 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
                         );
                         $now = new DateTime();
                         $limitMonth = $now->modify('-90 days');
-                        if (!$lastNotification instanceof Notification || $lastNotification->getLastNotification() < $limitMonth) {
+                        if (
+                            !$lastNotification instanceof Notification ||
+                            $lastNotification->getLastNotification() < $limitMonth
+                        ) {
                             $this->emailGenerator->sendNotifyExpiresCertEmail($user, $certLimitDate);
                             $this->notificationService->createNotification(
                                 $user,

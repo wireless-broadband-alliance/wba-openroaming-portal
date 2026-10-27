@@ -97,7 +97,10 @@ readonly class UserCreationService
             $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
             $userAuths->setProviderId(UserProvider::EMAIL->value);
             $userAuths->setUser($user);
-        } elseif ($userAddDTO->accountType === UserProvider::PHONE_NUMBER->value && $userAddDTO->phoneNumber instanceof PhoneNumber) {
+        } elseif (
+            $userAddDTO->accountType === UserProvider::PHONE_NUMBER->value &&
+            $userAddDTO->phoneNumber instanceof PhoneNumber
+        ) {
             $user->setPhoneNumber($userAddDTO->phoneNumber);
             $user->setUuid(
                 '+' .
