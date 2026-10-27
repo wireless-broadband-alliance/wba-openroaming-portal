@@ -19,6 +19,7 @@ use App\Repository\UserRepository;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use libphonenumber\PhoneNumber;
 use Random\RandomException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -383,7 +384,7 @@ readonly class TwoFAService
             }
 
             $this->mailer->send($email);
-        } elseif ($messageType === UserTwoFactorAuthenticationStatus::SMS->value || $user->getPhoneNumber()) {
+        } elseif ($messageType === UserTwoFactorAuthenticationStatus::SMS->value || $user->getPhoneNumber() instanceof PhoneNumber) {
             if (
                 in_array(
                     $eventType,
@@ -624,7 +625,7 @@ readonly class TwoFAService
         )->getValue();
         if ($twoFAStatus === TwoFAType::ENFORCED_FOR_LOCAL->value) {
             if (
-                $user->getUserExternalAuths()[0] &&
+                $user->getUserExternalAuths()[0] instanceof UserExternalAuth &&
                 $user->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value
             ) {
                 return $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value;

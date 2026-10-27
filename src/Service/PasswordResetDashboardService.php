@@ -13,6 +13,7 @@ use App\Repository\UserExternalAuthRepository;
 use DateInterval;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use libphonenumber\PhoneNumber;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -72,7 +73,7 @@ readonly class PasswordResetDashboardService
 
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
 
-        if ($user->getPhoneNumber() && $userExternalAuth?->getProviderId() === UserProvider::PHONE_NUMBER->value) {
+        if ($user->getPhoneNumber() instanceof PhoneNumber && $userExternalAuth?->getProviderId() === UserProvider::PHONE_NUMBER->value) {
             return array_merge($flashes, $this->handleSmsReset($user, $newPassword, $clientIp, $byUser));
         }
 
@@ -107,8 +108,8 @@ readonly class PasswordResetDashboardService
             : null;
         $resetAttempts = $latestEventMetadata['resetAttempts'] ?? 0;
 
-        $canSend = (!$latestEvent || $resetAttempts < 3)
-            && (!$latestEvent || ($lastResetTime instanceof DateTime && $lastResetTime->add(
+        $canSend = (!$latestEvent instanceof Event || $resetAttempts < 3)
+            && (!$latestEvent instanceof Event || ($lastResetTime instanceof DateTime && $lastResetTime->add(
                 $minInterval
             ) < $currentTime));
 
