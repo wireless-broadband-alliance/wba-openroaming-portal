@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\CertificateSetupProcess;
 use App\Entity\User;
 use App\Entity\UserRadiusProfile;
 use App\Enum\AnalyticalEventType;
@@ -374,7 +375,7 @@ class ProfileController extends AbstractController
         // Block Windows 10 profiles if FreeRADIUS cert is not EV
         if ($isWindows10) {
             $currentProcess = $this->certificateProcessCheckerService->getCurrentProcess();
-            if ($currentProcess && !$currentProcess->isFreeradiusCertEV()) {
+            if ($currentProcess instanceof CertificateSetupProcess && !$currentProcess->isFreeradiusCertEV()) {
                 $this->addFlash(
                     'error',
                     $this->translator->trans('freeradius_is_not_ev_cert_warning', [], 'controllers')

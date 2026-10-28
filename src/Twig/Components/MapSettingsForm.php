@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormErrorIterator;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
@@ -42,9 +43,9 @@ final class MapSettingsForm extends AbstractController
         $form = $this->createForm(MapSettingsType::class, $this->mapSettingsDTO);
 
         $currentRequest = $this->requestStack->getCurrentRequest();
-        $isLiveRequest = $currentRequest && $currentRequest->headers->has('X-Live-Component-Action');
+        $isLiveRequest = $currentRequest instanceof Request && $currentRequest->headers->has('X-Live-Component-Action');
 
-        if ($form->isSubmitted() === false && $isLiveRequest) {
+        if ($isLiveRequest && $form->isSubmitted() === false) {
             $form->submit([], false);
         }
 

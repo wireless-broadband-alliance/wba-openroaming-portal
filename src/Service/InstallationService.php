@@ -126,7 +126,7 @@ readonly class InstallationService
         // Admin Email Confirmation
         if ($progress->getEmailAdmin() === null) {
             $superAdmin = $this->userRepository->findSuperAdmin();
-            if ($superAdmin && $superAdmin->getEmail() !== DefaultUser::ADMIN->value) {
+            if ($superAdmin instanceof User && $superAdmin->getEmail() !== DefaultUser::ADMIN->value) {
                 $progress->setEmailAdmin($superAdmin->getEmail());
                 $progress->setAdminConfirmed(true);
             }

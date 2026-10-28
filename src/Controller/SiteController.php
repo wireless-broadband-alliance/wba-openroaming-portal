@@ -355,7 +355,7 @@ class SiteController extends AbstractController
                 }
             }
 
-            if ($request->isMethod('POST') && $this->getUser()) {
+            if ($request->isMethod('POST') && $this->getUser() instanceof UserInterface) {
                 $payload = $request->request->all();
                 if (!array_key_exists('radio-os', $payload)) {
                     if (!array_key_exists('detected-os', $payload)) {

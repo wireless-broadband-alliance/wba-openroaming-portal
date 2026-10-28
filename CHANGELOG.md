@@ -1,3 +1,15 @@
+## Release v1.15.2
+
+- **FreeRADIUS certificate upload:** valid, publicly trusted certificates
+  (for example SSL.com EV) no longer fail with "Unable to resolve trusted
+  root" when the uploaded `chain.pem` includes a cross-signed root
+  certificate. The CA is now resolved from the trusted self-signed root in
+  the system trust store instead of following the cross-signed copy up to
+  a legacy root that may be untrusted or missing.
+  (`CertificateCAGeneratorService`)
+
+No migrations or one-time commands are needed for this release.
+
 ## Release v1.15.1
 
 ### Security Fixes

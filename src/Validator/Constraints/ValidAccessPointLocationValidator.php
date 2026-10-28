@@ -3,6 +3,7 @@
 namespace App\Validator\Constraints;
 
 use App\DTO\AccessPointDTO;
+use App\Entity\Network;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Symfony\Component\Validator\Constraint;
@@ -30,7 +31,7 @@ class ValidAccessPointLocationValidator extends ConstraintValidator
             return;
         }
 
-        if ($value->latitude === null || $value->longitude === null || !$value->network) {
+        if ($value->latitude === null || $value->longitude === null || !$value->network instanceof Network) {
             return;
         }
 

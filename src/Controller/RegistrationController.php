@@ -371,7 +371,7 @@ class RegistrationController extends AbstractController
         $isUuidOnly = filter_var($loginUuidOnlySetting?->getValue(), FILTER_VALIDATE_BOOLEAN);
 
         // Check if the user has been previously verified only with UUID login OFF
-        if (!$isUuidOnly && $user && $user->isVerified() && !$user->isForgotPasswordRequest()) {
+        if (!$isUuidOnly && $user instanceof User && $user->isVerified() && !$user->isForgotPasswordRequest()) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('accountAlreadyVerified', [], 'controllers')
@@ -384,7 +384,7 @@ class RegistrationController extends AbstractController
             && $verificationCode !== ''
             && $this->hashArgon2idService->verifyHash($verificationCode, $user->getTwoFAcode());
 
-        if ($user && $user->getUuid() === $uuid && $isCodeValid) {
+        if ($isCodeValid && $user->getUuid() === $uuid) {
             // UUID-only logins (authLocal) don't create a USER_CREATION event, so validate
             // against the moment the code was generated. Registration keeps the event check.
             $isLinkExpired = $isUuidOnly

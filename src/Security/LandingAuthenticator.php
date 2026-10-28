@@ -14,6 +14,7 @@ use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\TwoFAService;
 use libphonenumber\NumberParseException;
+use libphonenumber\PhoneNumber;
 use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
 use PixelOpen\CloudflareTurnstileBundle\Http\CloudflareTurnstileHttpClient;
@@ -219,7 +220,7 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
                         // Determine if user is SMS based on UserExternalAuth provider_id or missing email
                         $firstAuth = $user->getUserExternalAuths()->first();
                         $isSmsUser = ($firstAuth && $firstAuth->getProviderId() === UserProvider::PHONE_NUMBER->value)
-                            || ($user->getPhoneNumber() && !$user->getEmail());
+                            || ($user->getPhoneNumber() instanceof PhoneNumber && !$user->getEmail());
 
                         $messageKey = $isSmsUser ? 'verificationCodeSentSms' : 'verificationCodeSent';
 

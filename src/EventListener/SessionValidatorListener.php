@@ -19,6 +19,8 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 readonly class SessionValidatorListener
 {
@@ -46,7 +48,7 @@ readonly class SessionValidatorListener
 
         // Check if the user is authenticated
         $token = $this->tokenStorage->getToken();
-        if (!$token || !$token->getUser()) {
+        if (!$token instanceof TokenInterface || !$token->getUser() instanceof UserInterface) {
             return;
         }
 
