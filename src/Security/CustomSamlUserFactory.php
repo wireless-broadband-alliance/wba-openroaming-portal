@@ -24,6 +24,7 @@ use Nbgrp\OneloginSamlBundle\Security\User\SamlUserFactoryInterface;
 use RuntimeException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -198,7 +199,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
     private function extractStandardAttributesFromRequest(): array
     {
         $request = $this->requestStack->getCurrentRequest();
-        if (!$request || !$request->request->has('SAMLResponse')) {
+        if (!$request instanceof Request || !$request->request->has('SAMLResponse')) {
             return [];
         }
 

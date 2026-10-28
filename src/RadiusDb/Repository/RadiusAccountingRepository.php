@@ -126,7 +126,7 @@ class RadiusAccountingRepository extends ServiceEntityRepository
             ->groupBy('ra.realm, ra.acctStartTime');
 
         // Apply date filters if provided
-        if ($startDate && $endDate) {
+        if ($startDate instanceof DateTime && $endDate instanceof DateTime) {
             $queryBuilder
                 ->andWhere('ra.acctStartTime >= :startDate')
                 ->andWhere('ra.acctStopTime <= :endDate')

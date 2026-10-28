@@ -6,9 +6,9 @@ use App\Entity\CertificateSetupProcess;
 use App\Entity\InstallationProgress;
 use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
-use App\Enum\ProcessStatusType;
 use App\Enum\CertificateRouteAccess;
 use App\Enum\CertificateTestResult;
+use App\Enum\ProcessStatusType;
 use App\Repository\CertificateSetupProcessRepository;
 use App\Repository\InstallationProgressRepository;
 use DateTimeImmutable;
@@ -54,7 +54,7 @@ readonly class CertificateProcessCheckerService
         $process = $this->getCurrentProcess();
 
         if (
-            $info && (!$process ||
+            $info && (!$process instanceof CertificateSetupProcess ||
                 $process->getStatus() === ProcessStatusType::ABORTED)
         ) {
             return [
@@ -63,7 +63,7 @@ readonly class CertificateProcessCheckerService
             ];
         }
         if (
-            !$info && (!$process ||
+            !$info && (!$process instanceof CertificateSetupProcess ||
                 $process->getStatus() === ProcessStatusType::ABORTED ||
                 $process->getStatus() === ProcessStatusType::COMPLETED)
         ) {

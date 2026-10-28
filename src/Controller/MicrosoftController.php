@@ -313,7 +313,7 @@ class MicrosoftController extends AbstractController
             // Create a new token with the authenticated user
             $token = new UsernamePasswordToken($user, $firewallName, $user->getRoles());
 
-            if ($request && $request->hasSession()) {
+            if ($request instanceof Request && $request->hasSession()) {
                 $session = $request->getSession();
                 $session->set('_security_' . $firewallName, serialize($token));
             }

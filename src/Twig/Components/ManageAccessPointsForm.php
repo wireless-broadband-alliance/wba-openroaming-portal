@@ -11,6 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormErrorIterator;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
@@ -61,9 +62,9 @@ final class ManageAccessPointsForm extends AbstractController
         $form = $this->createForm(CreateAccessPointType::class, $this->accessPointDTO, ['disabled' => !$canWrite]);
 
         $currentRequest = $this->requestStack->getCurrentRequest();
-        $isLiveRequest = $currentRequest && $currentRequest->headers->has('X-Live-Component-Action');
+        $isLiveRequest = $currentRequest instanceof Request && $currentRequest->headers->has('X-Live-Component-Action');
 
-        if ($form->isSubmitted() === false && $isLiveRequest) {
+        if ($isLiveRequest && $form->isSubmitted() === false) {
             $form->submit([], false);
         }
 

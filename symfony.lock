@@ -49,12 +49,12 @@
         ]
     },
     "doctrine/doctrine-migrations-bundle": {
-        "version": "3.2",
+        "version": "3.7",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",
-            "version": "3.1",
-            "ref": "1d01ec03c6ecbd67c3375c5478c9a423ae5d6a33"
+            "version": "3.7",
+            "ref": "22bf81c4b6beb7c8258f08ab92f4007306880a18"
         },
         "files": [
             "config/packages/doctrine_migrations.yaml",
@@ -375,7 +375,7 @@
             "repo": "github.com/symfony/recipes",
             "branch": "main",
             "version": "7.4",
-            "ref": "c42fee7802181cdd50f61b8622715829f5d2335c"
+            "ref": "02d47835088cd548c827e5d53b3c4b361bca3390"
         },
         "files": [
             "config/packages/security.yaml",
@@ -452,12 +452,12 @@
         ]
     },
     "symfony/ux-leaflet-map": {
-        "version": "3.2",
+        "version": "3.6",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",
             "version": "2.19",
-            "ref": "bed7e7f6d7c04e0de9665859ddbf0e842e5323e3"
+            "ref": "d376949f6444ac2fb753ec20a07a799a98ce209e"
         }
     },
     "symfony/ux-live-component": {

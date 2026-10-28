@@ -73,6 +73,13 @@ class CertificateCAGeneratorService
                 return $current;
             }
 
+            // Prefer a trusted self-signed root that directly issued this cert, so cross-signed
+            // roots in the chain (e.g. SSL.com Root 2022 cross-signed by SecureTrust) are skipped
+            $trustedRoot = $this->findTrustedRootIssuer($current);
+            if ($trustedRoot !== null) {
+                return $trustedRoot;
+            }
+
             // Try to find issuer from pool
             $issuer = $this->findIssuerInPool($current, $pool);
             if ($issuer) {
@@ -203,6 +210,18 @@ class CertificateCAGeneratorService
         return array_find(
             $this->extractPemCertificates($store),
             fn($trusted) => $this->verifySignature($cert, $trusted)
+        );
+    }
+
+    /**
+     * Find a self-signed root in the system trust store that issued the given cert
+     */
+    private function findTrustedRootIssuer(string $cert): ?string
+    {
+        $store = file_get_contents('/etc/ssl/certs/ca-certificates.crt') ?: '';
+        return array_find(
+            $this->extractPemCertificates($store),
+            fn($trusted) => $this->isSelfSigned($trusted) && $this->verifySignature($cert, $trusted)
         );
     }
 

@@ -11,6 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormErrorIterator;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
@@ -55,17 +56,17 @@ final class ManageNetworksForm extends AbstractController
         $form = $this->createForm(CreateNetworkType::class, $this->networkDTO, ['disabled' => !$canWrite]);
 
         $currentRequest = $this->requestStack->getCurrentRequest();
-        $isLiveRequest = $currentRequest && $currentRequest->headers->has('X-Live-Component-Action');
+        $isLiveRequest = $currentRequest instanceof Request && $currentRequest->headers->has('X-Live-Component-Action');
 
-        if ($form->isSubmitted() === false && $isLiveRequest) {
+        if ($isLiveRequest && $form->isSubmitted() === false) {
             $form->submit([], false);
         }
 
         foreach ($form->getErrors() as $error) {
             if (
                 $error->getCause() &&
-                $error->getCause()->getPropertyPath() === 'data.geometryJson' &&
-                $form->has('geometryJson')
+                $form->has('geometryJson') &&
+                $error->getCause()->getPropertyPath() === 'data.geometryJson'
             ) {
                 $form->get('geometryJson')->addError(new FormError($error->getMessage()));
             }
@@ -87,7 +88,7 @@ final class ManageNetworksForm extends AbstractController
      */
     public function getValidAccessPoints(): array
     {
-        if (!$this->network || !$this->network->getId()) {
+        if (!$this->network instanceof \App\Entity\Network || !$this->network->getId()) {
             return [];
         }
 
