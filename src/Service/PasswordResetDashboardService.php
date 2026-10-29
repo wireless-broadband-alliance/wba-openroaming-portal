@@ -73,8 +73,19 @@ readonly class PasswordResetDashboardService
 
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
 
-        if ($user->getPhoneNumber() instanceof PhoneNumber && $userExternalAuth?->getProviderId() === UserProvider::PHONE_NUMBER->value) {
-            return array_merge($flashes, $this->handleSmsReset($user, $newPassword, $clientIp, $byUser));
+        if (
+            $user->getPhoneNumber() instanceof PhoneNumber &&
+            $userExternalAuth?->getProviderId() === UserProvider::PHONE_NUMBER->value
+        ) {
+            return array_merge(
+                $flashes,
+                $this->handleSmsReset(
+                    $user,
+                    $newPassword,
+                    $clientIp,
+                    $byUser
+                )
+            );
         }
 
         return $flashes;
@@ -108,8 +119,8 @@ readonly class PasswordResetDashboardService
             : null;
         $resetAttempts = $latestEventMetadata['resetAttempts'] ?? 0;
 
-        $canSend = (!$latestEvent instanceof \App\Entity\Event || $resetAttempts < 3)
-            && (!$latestEvent instanceof \App\Entity\Event || ($lastResetTime instanceof DateTime && $lastResetTime->add(
+        $canSend = (!$latestEvent instanceof Event || $resetAttempts < 3)
+            && (!$latestEvent instanceof Event || ($lastResetTime instanceof DateTime && $lastResetTime->add(
                 $minInterval
             ) < $currentTime));
 

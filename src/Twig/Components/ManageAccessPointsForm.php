@@ -64,7 +64,7 @@ final class ManageAccessPointsForm extends AbstractController
         $currentRequest = $this->requestStack->getCurrentRequest();
         $isLiveRequest = $currentRequest instanceof Request && $currentRequest->headers->has('X-Live-Component-Action');
 
-        if ($form->isSubmitted() === false && $isLiveRequest) {
+        if ($isLiveRequest && $form->isSubmitted() === false) {
             $form->submit([], false);
         }
 

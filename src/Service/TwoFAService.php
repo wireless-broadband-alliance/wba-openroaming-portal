@@ -385,8 +385,10 @@ readonly class TwoFAService
             }
 
             $this->mailer->send($email);
-        } elseif ($messageType === UserTwoFactorAuthenticationStatus::SMS->value || $user->getPhoneNumber(
-            ) instanceof PhoneNumber) {
+        } elseif (
+            $messageType === UserTwoFactorAuthenticationStatus::SMS->value ||
+            $user->getPhoneNumber() instanceof PhoneNumber
+        ) {
             if (
                 in_array(
                     $eventType,
