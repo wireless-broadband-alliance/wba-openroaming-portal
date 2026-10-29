@@ -7,11 +7,11 @@ use App\Enum\PlatformMode;
 use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelInterface;
 
-readonly class PlatformModeSubscriber implements EventSubscriberInterface
+readonly class PlatformModeSubscriber
 {
     public function __construct(
         private KernelInterface $kernel,
@@ -19,14 +19,7 @@ readonly class PlatformModeSubscriber implements EventSubscriberInterface
         private SettingRepository $settingRepository,
     ) {
     }
-
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            'kernel.request' => ['onKernelRequest', 100],
-        ];
-    }
-
+    #[AsEventListener(event: 'kernel.request', priority: 100)]
     public function onKernelRequest(RequestEvent $event): void
     {
         if (!$event->isMainRequest()) {

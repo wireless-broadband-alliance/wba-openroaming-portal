@@ -8,10 +8,11 @@ use App\Api\V3\BaseResponse;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTExpiredEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTInvalidEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTNotFoundEvent;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class JWTExceptionListener implements EventSubscriberInterface
+class JWTExceptionListener
 {
     /** @var string[] */
     private array $excludeRoutes = [
@@ -22,21 +23,12 @@ class JWTExceptionListener implements EventSubscriberInterface
         'api_v1_auth_microsoft',
         'api_v2_auth_microsoft',
     ];
-
     public function __construct(
         private readonly TranslatorInterface $translator,
     ) {
     }
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            // Higher number = higher priority, executed first
-            'lexik_jwt_authentication.on_jwt_not_found' => ['onJWTNotFound', 0],
-            'lexik_jwt_authentication.on_jwt_invalid'   => ['onJWTInvalid', 0],
-            'lexik_jwt_authentication.on_jwt_expired'   => ['onJWTExpired', 0],
-        ];
-    }
 
+    #[AsEventListener(event: 'lexik_jwt_authentication.on_jwt_not_found', priority: 0)]
     public function onJWTNotFound(JWTNotFoundEvent $event): void
     {
         $request = $event->getRequest();
@@ -58,7 +50,7 @@ class JWTExceptionListener implements EventSubscriberInterface
             );
         $event->setResponse($response->toResponse());
     }
-
+    #[AsEventListener(event: 'lexik_jwt_authentication.on_jwt_invalid', priority: 0)]
     public function onJWTInvalid(JWTInvalidEvent $event): void
     {
         $response =
@@ -73,8 +65,7 @@ class JWTExceptionListener implements EventSubscriberInterface
             );
         $event->setResponse($response->toResponse());
     }
-
-
+    #[AsEventListener(event: 'lexik_jwt_authentication.on_jwt_expired', priority: 0)]
     public function onJWTExpired(JWTExpiredEvent $event): void
     {
         $response =
