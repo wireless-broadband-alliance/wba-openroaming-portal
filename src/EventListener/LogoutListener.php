@@ -3,19 +3,12 @@
 namespace App\EventListener;
 
 use App\Enum\SessionStatus;
-use MongoDB\Driver\Session;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 
-class LogoutListener implements EventSubscriberInterface
+class LogoutListener
 {
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            LogoutEvent::class => 'onLogout',
-        ];
-    }
-
+    #[AsEventListener(event: LogoutEvent::class)]
     public function onLogout(LogoutEvent $event): void
     {
         $request = $event->getRequest();

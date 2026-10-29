@@ -8,23 +8,16 @@ use App\Enum\EventMetadataKeysType;
 use App\Service\EventActions;
 use DateTime;
 use DateTimeInterface;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 
-readonly class LogoutSuccessListener implements EventSubscriberInterface
+readonly class LogoutSuccessListener
 {
     public function __construct(
         private EventActions $eventActions,
     ) {
     }
-
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            LogoutEvent::class => 'onLogoutSuccess',
-        ];
-    }
-
+    #[AsEventListener(event: LogoutEvent::class)]
     public function onLogoutSuccess(LogoutEvent $event): void
     {
         $token = $event->getToken();
