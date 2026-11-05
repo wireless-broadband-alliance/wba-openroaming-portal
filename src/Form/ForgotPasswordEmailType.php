@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Form;
 
 use App\Enum\CaptchaProviderEnum;
+use App\Form\Type\CaptchaType;
 use App\Service\Captcha\CaptchaValidator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -26,11 +26,9 @@ class ForgotPasswordEmailType extends AbstractType
     {
         $builder->add('email', EmailType::class);
 
+        // CaptchaType verifies the token server-side on submit
         if ($this->captchaValidator->getActiveProvider() !== CaptchaProviderEnum::OFF->value) {
-            $builder->add('captcha', HiddenType::class, [
-                'required' => false,
-                'mapped' => false,
-            ]);
+            $builder->add('captcha', CaptchaType::class);
         }
     }
 
