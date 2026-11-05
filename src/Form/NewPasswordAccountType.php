@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Form;
 
 use App\DTO\NewPasswordAccountDTO;
+use App\Enum\CaptchaAction;
 use App\Enum\CaptchaProviderEnum;
 use App\Form\Type\CaptchaType;
 use App\Service\Captcha\CaptchaValidator;
@@ -65,7 +66,12 @@ class NewPasswordAccountType extends AbstractType
 
         // CaptchaType verifies the token server-side on submit
         if ($this->captchaValidator->getActiveProvider() !== CaptchaProviderEnum::OFF->value) {
-            $builder->add('captcha', CaptchaType::class);
+            $builder->add('captcha', CaptchaType::class, [
+                // Same form type, two different endpoints: logged-in password change vs forgot-password reset
+                'captcha_action' => $options['require_current_password']
+                    ? CaptchaAction::CHANGE_PASSWORD
+                    : CaptchaAction::RESET_PASSWORD,
+            ]);
         }
     }
 

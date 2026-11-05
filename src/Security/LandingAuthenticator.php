@@ -4,6 +4,7 @@ namespace App\Security;
 
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\CaptchaAction;
 use App\Enum\CaptchaProviderEnum;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
@@ -116,7 +117,11 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
                 );
             }
 
-            $validation = $this->captchaValidator->validate($captchaToken, $request->getClientIp());
+            $validation = $this->captchaValidator->validate(
+                $captchaToken,
+                $request->getClientIp(),
+                CaptchaAction::LOGIN
+            );
 
             if (!$validation['success']) {
                 throw new CustomUserMessageAuthenticationException(

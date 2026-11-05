@@ -6,6 +6,7 @@ use App\DTO\LoginChoiceDTO;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\CaptchaAction;
 use App\Enum\CaptchaProviderEnum;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\FirewallType;
@@ -294,7 +295,7 @@ class SecurityController extends AbstractController
                     $user->setUuid($loginChoiceDTO->email);
                     $user->setEmail($loginChoiceDTO->email);
 
-                    // Generate a random password
+                    // Generate a random password that meets the password policy (see PasswordGenerator)
                     $randomPassword = $this->passwordGenerator->generate();
 
                     // Hash the password
@@ -428,7 +429,7 @@ class SecurityController extends AbstractController
                     }
                 } else {
                     $user = new User();
-                    // Generate a random password
+                    // Generate a random password that meets the password policy (see PasswordGenerator)
                     $randomPassword = $this->passwordGenerator->generate();
                     // Hash the password
                     $hashedPassword = $this->userPasswordHasher->hashPassword($user, $randomPassword);
@@ -765,7 +766,7 @@ class SecurityController extends AbstractController
             return false;
         }
 
-        return $this->captchaValidator->validate($token, $request->getClientIp())['success'];
+        return $this->captchaValidator->validate($token, $request->getClientIp(), CaptchaAction::MAGIC_LINK)['success'];
     }
 
     #[Route(path: '/dashboard/logout', name: 'app_dashboard_logout')]

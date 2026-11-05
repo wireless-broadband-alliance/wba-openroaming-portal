@@ -5,6 +5,7 @@ namespace App\Api\V4\Controller;
 use App\Api\BaseResponseInterface;
 use App\Api\V4\BaseResponse;
 use App\Entity\User;
+use App\Enum\CaptchaAction;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\UserProvider;
@@ -71,7 +72,8 @@ class TwoFAController extends AbstractController
             (
             $captchaError = $this->captchaValidator->validateApiPayload(
                 $data,
-                $request->getClientIp()
+                $request->getClientIp(),
+                CaptchaAction::API_TWO_FA
             )) instanceof BaseResponse
         ) {
             return $captchaError->toResponse();
@@ -105,10 +107,7 @@ class TwoFAController extends AbstractController
             return new BaseResponse(401, null, 'Invalid credentials')->toResponse();
         }
 
-        $statusCheckerResponse = $this->userStatusChecker->checkUserStatus(
-            $user,
-            BaseResponse::class
-        );
+        $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user, BaseResponse::class);
         if ($statusCheckerResponse instanceof BaseResponseInterface) {
             return $statusCheckerResponse->toResponse();
         }
@@ -120,7 +119,7 @@ class TwoFAController extends AbstractController
             return new BaseResponse(
                 409,
                 null,
-                'Two-factor authentication is already enabled for this account. Disable it before selecting a new method.'
+                'Two-factor authentication is already enabled for this account. Disable it before enrolling a new method.'
             )->toResponse();
         }
 
@@ -221,9 +220,7 @@ class TwoFAController extends AbstractController
         $code = (string)$data['code'];
 
         if (!in_array($type, ['totp', 'email', 'sms'], true)) {
-            return new BaseResponse(
-                400, null, 'Invalid data: type must be one of totp, email or sms.'
-            )->toResponse();
+            return new BaseResponse(400, null, 'Invalid data: type must be one of totp, email or sms.')->toResponse();
         }
 
         // Check if user exists are valid
@@ -249,7 +246,7 @@ class TwoFAController extends AbstractController
             return new BaseResponse(
                 409,
                 null,
-                'Two-factor authentication is already enabled for this account. Disable it before selecting a new method.'
+                'Two-factor authentication is already enabled for this account. Disable it before enrolling a new method.'
             )->toResponse();
         }
 

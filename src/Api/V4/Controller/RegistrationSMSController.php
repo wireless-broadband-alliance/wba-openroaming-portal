@@ -6,6 +6,7 @@ use App\Api\V4\BaseResponse;
 use App\DTO\Api\UserSMSRegistrationDTO;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
+use App\Enum\CaptchaAction;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\ForgotPasswordEnum;
@@ -107,7 +108,8 @@ class RegistrationSMSController extends AbstractController
             (
             $captchaError = $this->captchaValidator->validateApiPayload(
                 $data,
-                $request->getClientIp()
+                $request->getClientIp(),
+                CaptchaAction::API_REGISTER_SMS
             )) instanceof BaseResponse
         ) {
             return $captchaError->toResponse();
@@ -261,7 +263,8 @@ class RegistrationSMSController extends AbstractController
         if (
             ($captchaError = $this->captchaValidator->validateApiPayload(
                 $dataRequest,
-                $request->getClientIp()
+                $request->getClientIp(),
+                CaptchaAction::API_RESET_SMS
             )) instanceof BaseResponse
         ) {
             return $captchaError->toResponse();

@@ -6,6 +6,7 @@ use App\Api\V3\BaseResponse;
 use App\DTO\Api\UserSMSRegistrationDTO;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
+use App\Enum\CaptchaAction;
 use App\Enum\AnalyticalEventType;
 use App\Enum\ApiVersion;
 use App\Enum\EventMetadataKeysType;
@@ -109,6 +110,7 @@ class RegistrationSMSController extends AbstractController
             $captchaError = $this->captchaValidator->validateApiPayload(
                 $data,
                 $request->getClientIp(),
+                CaptchaAction::API_REGISTER_SMS,
                 ApiVersion::API_V3
             )) instanceof BaseResponse
         ) {
@@ -264,6 +266,7 @@ class RegistrationSMSController extends AbstractController
             ($captchaError = $this->captchaValidator->validateApiPayload(
                 $dataRequest,
                 $request->getClientIp(),
+                CaptchaAction::API_RESET_SMS,
                 ApiVersion::API_V3
             )) instanceof BaseResponse
         ) {

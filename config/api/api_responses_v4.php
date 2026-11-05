@@ -19,10 +19,17 @@
 /** Decodes a JSON example into an associative array (the partial expects arrays, never stdClass). */
 $json = static fn(string $payload): array => json_decode($payload, true, 512, JSON_THROW_ON_ERROR);
 
-$captchaNote = 'The CAPTCHA_PROVIDER setting (TURNSTILE, RECAPTCHA3 or OFF) decides which token is required: '
+/**
+ * CAPTCHA note for a protected endpoint. $action is the reCAPTCHA v3 action that endpoint expects
+ * (App\Enum\CaptchaAction): the server rejects tokens created for any other action.
+ */
+$captchaNote = static fn(string $action): string =>
+    'The CAPTCHA_PROVIDER setting (TURNSTILE, RECAPTCHA3 or OFF) decides which token is required: '
     . 'send turnstile_token when it is TURNSTILE or recaptcha_token when it is RECAPTCHA3; '
     . 'no token is needed when it is OFF. A token for a different provider than the active one is ignored '
-    . 'and the request fails with "CAPTCHA validation failed".';
+    . 'and the request fails with "CAPTCHA validation failed". '
+    . 'With RECAPTCHA3 the token must be created with the action "' . $action . '" '
+    . '(grecaptcha.execute(siteKey, {action: "' . $action . '"})); a token created for another action is rejected.';
 
 /**
  * Flat request body for CAPTCHA-protected endpoints. The partial renders requestBody as one JSON block,
@@ -114,7 +121,7 @@ return [
             . 'Only for first enrolment: if the account already has 2FA enabled, the request is rejected with 409 '
             . 'and no new secret or code is generated. Calling it again before validating (2FA still disabled) '
             . 'replaces the pending TOTP secret. '
-            . $captchaNote,
+            . $captchaNote('api_two_fa'),
         'isProtected' => true,
         'requestBody' => $captchaBody(
             [
@@ -203,7 +210,7 @@ return [
         'routePrefix' => '/api/v4/auth/local',
         'section' => 'Auth',
         'description' => 'This endpoint authenticates a user using their UUID and password. '
-            . $captchaNote . ' '
+            . $captchaNote('api_login') . ' '
             . 'The platform can require authentication with Two-Factor: the twoFACode parameter will be asked '
             . 'based on the TWO_FACTOR_AUTH_STATUS setting. '
             . 'When the setting LOGIN_WITH_UUID_ONLY is enabled, the authentication process does not require a password. '
@@ -363,7 +370,7 @@ return [
             403 => [
                 'User account is not verified!',
                 'User account is banned from the system!',
-                'Your email domain is not allowed to use this platform!',
+                'our email domain is not allowed to use this platform!',
             ],
             500 => $serverErrors,
         ],
@@ -642,7 +649,7 @@ return [
         'routePrefix' => '/api/v4/auth/local/register',
         'section' => 'Auth',
         'description' => 'This endpoint registers a new user using their email address and password. '
-            . 'The request is protected by CAPTCHA validation. ' . $captchaNote . ' '
+            . 'The request is protected by CAPTCHA validation. ' . $captchaNote('api_register') . ' '
             . 'The email address and password are validated before the user account is created. '
             . 'If the email address is already registered, the endpoint returns a generic successful '
             . 'response to prevent user enumeration. A registration email is sent to newly created users.',
@@ -687,7 +694,7 @@ return [
         'section' => 'Auth',
         'description' => 'This endpoint triggers a password reset for a local auth account. '
             . 'The user must provide their email and the CAPTCHA token for the active provider. '
-            . $captchaNote . ' '
+            . $captchaNote('api_reset_email') . ' '
             . 'The endpoint verifies if the user has an external auth with "PortalAccount" and "EMAIL" providerId, '
             . 'then proceeds with the password reset if the conditions are met.',
         'requestBody' => $captchaBody(
@@ -719,7 +726,7 @@ return [
         'section' => 'Auth',
         'description' => 'This endpoint registers a new user using their phone number and password. '
             . 'The phone number is validated using the provided country code and the request is protected by CAPTCHA validation. '
-            . $captchaNote . ' '
+            . $captchaNote('api_register_sms') . ' '
             . 'A verification code is generated and sent to the registered phone number. '
             . 'The SMS contains only the verification code: the chosen password is never sent back. '
             . 'If the phone number is already registered, the endpoint returns a generic successful response '

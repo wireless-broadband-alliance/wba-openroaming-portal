@@ -3,6 +3,7 @@
 namespace App\Security;
 
 use App\Entity\User;
+use App\Enum\CaptchaAction;
 use App\Enum\CaptchaProviderEnum;
 use App\Enum\FirewallType;
 use App\Enum\SettingName;
@@ -114,7 +115,11 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
                 );
             }
 
-            $validation = $this->captchaValidator->validate($captchaToken, $request->getClientIp());
+            $validation = $this->captchaValidator->validate(
+                $captchaToken,
+                $request->getClientIp(),
+                CaptchaAction::DASHBOARD_LOGIN
+            );
 
             if (!$validation['success']) {
                 throw new CustomUserMessageAuthenticationException(

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Form;
 
 use App\Entity\User;
+use App\Enum\CaptchaAction;
 use App\Enum\CaptchaProviderEnum;
 use App\Form\Type\CaptchaType;
 use App\Service\Captcha\CaptchaValidator;
@@ -33,7 +34,9 @@ class RegistrationFormType extends AbstractType
 
         // CaptchaType verifies the token server-side on submit
         if ($this->captchaValidator->getActiveProvider() !== CaptchaProviderEnum::OFF->value) {
-            $builder->add('captcha', CaptchaType::class);
+            $builder->add('captcha', CaptchaType::class, [
+                'captcha_action' => CaptchaAction::REGISTER,
+            ]);
         }
     }
 

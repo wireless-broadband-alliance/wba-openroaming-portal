@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace App\Service\Captcha;
 
-use App\Api\V3\BaseResponse as BaseResponseV3;
 use App\Api\V4\BaseResponse as BaseResponseV4;
+use App\Api\V3\BaseResponse as BaseResponseV3;
 use App\Enum\ApiVersion;
+use App\Enum\CaptchaAction;
 use App\Enum\CaptchaProviderEnum;
 use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use App\Service\EncryptionService;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 readonly class CaptchaValidator
 {
@@ -30,6 +33,9 @@ readonly class CaptchaValidator
         private TurnstileValidator $turnstileValidator,
         private Recaptcha3Validator $recaptcha3Validator,
         private LoggerInterface $logger,
+        private RequestStack $requestStack,
+        #[Autowire('%kernel.environment%')]
+        private string $environment,
     ) {
     }
 
@@ -62,7 +68,7 @@ readonly class CaptchaValidator
      */
     public function getActiveProvider(): string
     {
-        return $this->getProvider()->value ?? self::INVALID_PROVIDER;
+        return $this->getProvider()?->value ?? self::INVALID_PROVIDER;
     }
 
     public function getSiteKey(): string
@@ -105,10 +111,12 @@ readonly class CaptchaValidator
 
     /**
      * @param array<string, mixed> $payload
+     * @param CaptchaAction $action the action this endpoint expects (one of the API_* cases)
      */
     public function validateApiPayload(
         array $payload,
         ?string $clientIp,
+        CaptchaAction $action,
         ApiVersion $apiVersion = ApiVersion::API_V4
     ): null | BaseResponseV3 | BaseResponseV4 {
         $provider = $this->getProvider();
@@ -135,7 +143,7 @@ readonly class CaptchaValidator
             return $this->createErrorResponse(self::FAILED_MESSAGE, $apiVersion);
         }
 
-        $validation = $this->validateWith($provider, $token, $clientIp);
+        $validation = $this->validateWith($provider, $token, $clientIp, $action);
 
         if (!$validation['success']) {
             return $this->createErrorResponse(
@@ -151,24 +159,61 @@ readonly class CaptchaValidator
      * Browser and API share the same rules: OFF passes, a valid provider verifies the token,
      * missing or unknown configuration fails.
      *
+     * @param CaptchaAction $action the action the calling form/endpoint expects
+     *
      * @return array{success: bool, error?: string}
      */
-    public function validate(string $token, ?string $clientIp = null): array
+    public function validate(string $token, ?string $clientIp, CaptchaAction $action): array
     {
-        return $this->validateWith($this->getProvider(), $token, $clientIp);
+        return $this->validateWith($this->getProvider(), $token, $clientIp, $action);
     }
 
     /**
      * @return array{success: bool, error?: string}
      */
-    private function validateWith(?CaptchaProviderEnum $provider, string $token, ?string $clientIp): array
-    {
+    private function validateWith(
+        ?CaptchaProviderEnum $provider,
+        string $token,
+        ?string $clientIp,
+        CaptchaAction $action,
+    ): array {
+        $expectedHostname = $this->expectedHostname($action);
+
         return match ($provider) {
-            CaptchaProviderEnum::TURNSTILE => $this->turnstileValidator->validate($token, $clientIp),
-            CaptchaProviderEnum::RECAPTCHA3 => $this->recaptcha3Validator->validate($token, $clientIp),
+            // Turnstile: the web widget always sets the action. The mobile apps' Turnstile page
+            // (public/resources/turnstile_html) sets none, so the action is only enforced for web forms.
+            CaptchaProviderEnum::TURNSTILE => $this->turnstileValidator->validate(
+                $token,
+                $clientIp,
+                null,
+                $action->isApi() ? null : $action->value,
+                $expectedHostname
+            ),
+            // reCAPTCHA v3: the action is always enforced, as Google requires (web and API)
+            CaptchaProviderEnum::RECAPTCHA3 => $this->recaptcha3Validator->validate(
+                $token,
+                $clientIp,
+                null,
+                $action->value,
+                $expectedHostname
+            ),
             CaptchaProviderEnum::OFF => ['success' => true],
             null => ['success' => false, 'error' => self::FAILED_MESSAGE],
         };
+    }
+
+    /**
+     * Web tokens must have been solved on this portal's hostname. API tokens come from the mobile apps
+     * (WebView or native SDK), where the provider hostname is not the portal's, so they are not checked.
+     * Skipped in dev, where the portal runs on localhost/IPs and provider test keys report a fixed hostname.
+     */
+    private function expectedHostname(CaptchaAction $action): ?string
+    {
+        if ($action->isApi() || $this->environment === 'dev') {
+            return null;
+        }
+
+        return $this->requestStack->getCurrentRequest()?->getHost();
     }
 
     private function createErrorResponse(string $message, ApiVersion $apiVersion): BaseResponseV3 | BaseResponseV4

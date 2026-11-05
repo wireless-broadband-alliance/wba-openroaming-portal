@@ -4,6 +4,7 @@ namespace App\Api\V3\Controller;
 
 use App\Api\V3\BaseResponse;
 use App\Entity\User;
+use App\Enum\CaptchaAction;
 use App\Enum\AnalyticalEventType;
 use App\Enum\ApiVersion;
 use App\Enum\EventMetadataKeysType;
@@ -17,7 +18,6 @@ use App\Service\TwoFAService;
 use App\Service\UserStatusChecker;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Psr\Cache\InvalidArgumentException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Exception\JsonException;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -73,6 +73,7 @@ class TwoFAController extends AbstractController
             $captchaError = $this->captchaValidator->validateApiPayload(
                 $data,
                 $request->getClientIp(),
+                CaptchaAction::API_TWO_FA,
                 ApiVersion::API_V3
             )) instanceof BaseResponse
         ) {
@@ -176,10 +177,6 @@ class TwoFAController extends AbstractController
         )->toResponse();
     }
 
-    /**
-     * @throws InvalidArgumentException
-     * @throws \JsonException
-     */
     #[Route(
         '/twoFA/validate',
         name: 'api_v3_twoFA_validate',

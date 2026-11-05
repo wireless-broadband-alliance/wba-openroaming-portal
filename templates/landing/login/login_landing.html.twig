@@ -124,7 +124,7 @@
         {% endif %}
 
         {# CAPTCHA Verification Partial #}
-        {{ render_captcha(form) }}
+        {{ render_captcha(form, 'login') }}
 
         <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
         <div class="my-[32px] flex justify-center gap-4">
