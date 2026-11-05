@@ -136,7 +136,7 @@ class AuthController extends AbstractController
             }
         }
 
-        $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
+        $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user, BaseResponse::class);
         if ($statusCheckerResponse instanceof BaseResponseInterface) {
             return $statusCheckerResponse->toResponse();
         }
@@ -409,7 +409,7 @@ class AuthController extends AbstractController
                 $this->entityManager->flush();
             }
 
-            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
+            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user, BaseResponse::class);
             if ($statusCheckerResponse instanceof BaseResponseInterface) {
                 return $statusCheckerResponse->toResponse();
             }
@@ -504,7 +504,10 @@ class AuthController extends AbstractController
                 )->toResponse();
             }
 
-            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
+            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus(
+                $user,
+                BaseResponse::class
+            );
             if ($statusCheckerResponse instanceof BaseResponseInterface) {
                 return $statusCheckerResponse->toResponse();
             }

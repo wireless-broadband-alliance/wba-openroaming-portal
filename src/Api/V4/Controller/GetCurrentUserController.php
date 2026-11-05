@@ -2,6 +2,7 @@
 
 namespace App\Api\V4\Controller;
 
+use App\Api\BaseResponseInterface;
 use App\Api\V4\BaseResponse;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
@@ -41,9 +42,10 @@ class GetCurrentUserController extends AbstractController
     public function getCurrentUser(Request $request): JsonResponse
     {
         $token = $this->tokenStorage->getToken();
+        // Read the user once, so the instanceof check below narrows this variable to User
+        $currentUser = $token?->getUser();
 
-        if ($token instanceof TokenInterface && $token->getUser() instanceof User) {
-            $currentUser = $token->getUser();
+        if ($token instanceof TokenInterface && $currentUser instanceof User) {
             // This line is begin ignore because the getCredentials belongs to another service
             /** @phpstan-ignore-next-line */
             $jwtTokenString = $token->getCredentials();
@@ -56,7 +58,13 @@ class GetCurrentUserController extends AbstractController
                 )->toResponse();
             }
 
-            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($currentUser);
+            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus(
+                $currentUser,
+                BaseResponse::class
+            );
+            if ($statusCheckerResponse instanceof BaseResponseInterface) {
+                return $statusCheckerResponse->toResponse();
+            }
 
             // Utilize the toApiResponse method to generate the response content
             $content = $currentUser->toApiResponse([
