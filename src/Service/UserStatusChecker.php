@@ -2,8 +2,9 @@
 
 namespace App\Service;
 
-use App\Api\V4\BaseResponse as BaseResponseV4;
+use App\Api\BaseResponseInterface;
 use App\Api\V3\BaseResponse as BaseResponseV3;
+use App\Api\V4\BaseResponse as BaseResponseV4;
 use App\Entity\User;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
@@ -24,11 +25,21 @@ readonly class UserStatusChecker
     ) {
     }
 
+    /**
+     * Returns an error response when the account can't use the API (not verified, banned or with a
+     * pending forgot-password request), or null when it can.
+     *
+     * The response is built with the BaseResponse class of the calling API version, so V4 controllers
+     * get a V4 response. Callers should check the result with `instanceof BaseResponseInterface`.
+     *
+     * @param class-string<BaseResponseV3|BaseResponseV4> $responseClass
+     */
     public function checkUserStatus(
-        User $user
-    ): BaseResponseV3|BaseResponseV4|null {
+        User $user,
+        string $responseClass = BaseResponseV3::class
+    ): ?BaseResponseInterface {
         if (!$user->isVerified()) {
-            return new BaseResponseV3(
+            return new $responseClass(
                 401,
                 null,
                 'User account is not verified.'
@@ -37,7 +48,7 @@ readonly class UserStatusChecker
 
         if ($user->getBannedAt() instanceof DateTimeInterface) {
             return
-                new BaseResponseV3(
+                new $responseClass(
                     403,
                     null,
                     'User account is banned from the system.'
@@ -47,7 +58,7 @@ readonly class UserStatusChecker
         // Checks if the user has a "forgot_password_request", if yes, send an error with the authentication
         if ($this->userRepository->findOneBy(['id' => $user->getId(), 'forgot_password_request' => true])) {
             return
-                new BaseResponseV3(
+                new $responseClass(
                     403,
                     null,
                     'Your request cannot be processed at this time due to a pending action.' .

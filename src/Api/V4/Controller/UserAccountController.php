@@ -2,6 +2,7 @@
 
 namespace App\Api\V4\Controller;
 
+use App\Api\BaseResponseInterface;
 use App\Api\V4\BaseResponse;
 use App\Controller\GoogleController;
 use App\Controller\MicrosoftController;
@@ -91,8 +92,11 @@ class UserAccountController extends AbstractController
             $userId = $user->getId(); // event log
             $userUUID = $user->getUuid(); // success message
 
-            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
-            if ($statusCheckerResponse instanceof BaseResponse) {
+            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus(
+                $user,
+                BaseResponse::class
+            );
+            if ($statusCheckerResponse instanceof BaseResponseInterface) {
                 return $statusCheckerResponse->toResponse();
             }
 

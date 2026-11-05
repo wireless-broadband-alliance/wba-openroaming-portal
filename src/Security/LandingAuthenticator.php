@@ -89,18 +89,13 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
                 $identifier = null;
             }
 
-            $userLoader = function (string $id) use ($phoneUtil) {
-                try {
-                    $phoneNumberObj = $phoneUtil->parse($id);
-                } catch (NumberParseException) {
-                    return null;
-                }
-                return $this->userRepository->findOneBy([
-                    'phoneNumber' => $phoneNumberObj,
-                    'deletedAt' => null,
-                    'isDisabled' => false,
-                ]);
-            };
+            // phoneNumber is encrypted with a random IV, so it can't be queried.
+            // Phone users store their E.164 number as uuid (e.g. +351912345678), and $identifier is already E.164.
+            $userLoader = fn(string $id) => $this->userRepository->findOneBy([
+                'uuid' => $id,
+                'deletedAt' => null,
+                'isDisabled' => false,
+            ]);
         } else {
             throw new CustomUserMessageAuthenticationException('Invalid login method.');
         }

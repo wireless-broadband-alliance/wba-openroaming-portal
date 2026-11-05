@@ -2,6 +2,7 @@
 
 namespace App\Api\V4\Controller;
 
+use App\Api\BaseResponseInterface;
 use App\Api\V4\BaseResponse;
 use App\Entity\User;
 use App\Entity\UserRadiusProfile;
@@ -76,11 +77,12 @@ class ProfileController extends AbstractController
         }
 
         $token = $this->tokenStorage->getToken();
-        if (!$token instanceof TokenInterface || !$token->getUser() instanceof User) {
+        // Read the user once, so the instanceof check below narrows this variable to User
+        $currentUser = $token?->getUser();
+        if (!$token instanceof TokenInterface || !$currentUser instanceof User) {
             return new BaseResponse(403, null, 'Unauthorized access!')->toResponse();
         }
 
-        $currentUser = $token->getUser();
         /** @phpstan-ignore-next-line */
         $jwtTokenString = $token->getCredentials();
 
@@ -88,8 +90,8 @@ class ProfileController extends AbstractController
             return new BaseResponse(401, null, 'JWT Token is invalid!')->toResponse();
         }
 
-        $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($currentUser);
-        if ($statusCheckerResponse instanceof BaseResponse) {
+        $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($currentUser, BaseResponse::class);
+        if ($statusCheckerResponse instanceof BaseResponseInterface) {
             return $statusCheckerResponse->toResponse();
         }
 
@@ -118,8 +120,8 @@ class ProfileController extends AbstractController
             $androidLimit = 32;
             $realmSize = strlen($this->getSettingValueRaw(SettingName::RADIUS_REALM_NAME->value)) + 1;
             $username = $this->generateToken($androidLimit - $realmSize) . "@" . $this->getSettingValueRaw(
-                SettingName::RADIUS_REALM_NAME->value
-            );
+                    SettingName::RADIUS_REALM_NAME->value
+                );
             $plainToken = $this->generateToken($androidLimit - $realmSize);
             $encryptedToken = $this->encryptionService->encrypt($plainToken);
 
@@ -221,20 +223,31 @@ class ProfileController extends AbstractController
         try {
             $dataRequest = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException) {
-            return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); // Invalid Json
+            return new BaseResponse(
+                400, null, 'Invalid JSON format'
+            )->toResponse(); // Invalid Json
         }
 
         $token = $this->tokenStorage->getToken();
-        if (!$token instanceof TokenInterface || !$token->getUser() instanceof User) {
+        // Read the user once, so the instanceof check below narrows this variable to User
+        $currentUser = $token?->getUser();
+        if (!$token instanceof TokenInterface || !$currentUser instanceof User) {
             return new BaseResponse(403, null, 'Unauthorized access!')->toResponse();
         }
 
-        $currentUser = $token->getUser();
         /** @phpstan-ignore-next-line */
         $jwtTokenString = $token->getCredentials();
 
         if (!$this->JWTTokenGenerator->isJWTTokenValid($jwtTokenString)) {
             return new BaseResponse(401, null, 'JWT Token is invalid!')->toResponse();
+        }
+
+        $statusCheckerResponse = $this->userStatusChecker->checkUserStatus(
+            $currentUser,
+            BaseResponse::class
+        );
+        if ($statusCheckerResponse instanceof BaseResponseInterface) {
+            return $statusCheckerResponse->toResponse();
         }
 
         $errors = [];
@@ -262,8 +275,8 @@ class ProfileController extends AbstractController
             $androidLimit = 32;
             $realmSize = strlen($this->getSettingValueRaw(SettingName::RADIUS_REALM_NAME->value)) + 1;
             $username = $this->generateToken($androidLimit - $realmSize) . "@" . $this->getSettingValueRaw(
-                SettingName::RADIUS_REALM_NAME->value
-            );
+                    SettingName::RADIUS_REALM_NAME->value
+                );
             $plainToken = $this->generateToken($androidLimit - $realmSize);
             $encryptedToken = $this->encryptionService->encrypt($plainToken);
 
@@ -319,8 +332,8 @@ class ProfileController extends AbstractController
 
         $data = [
             'payloadIdentifier' => 'com.apple.wifi.managed.' . $this->getSettingValueRaw(
-                SettingName::PAYLOAD_IDENTIFIER->value
-            ) . '-2',
+                    SettingName::PAYLOAD_IDENTIFIER->value
+                ) . '-2',
             'payloadType' => 'com.apple.wifi.managed',
             'payloadUUID' => $this->getSettingValueRaw(SettingName::PAYLOAD_IDENTIFIER->value) . '-1',
             'domainName' => $this->getSettingValueRaw(SettingName::DOMAIN_NAME->value),

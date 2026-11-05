@@ -6,13 +6,9 @@ namespace App\Form;
 
 use App\DTO\NewPasswordAccountDTO;
 use App\Enum\CaptchaProviderEnum;
-use App\Enum\OperationMode;
-use App\Enum\SettingName;
-use App\Repository\SettingRepository;
+use App\Form\Type\CaptchaType;
 use App\Service\Captcha\CaptchaValidator;
-use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
@@ -32,7 +28,6 @@ class NewPasswordAccountType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-
         if ($options['require_current_password']) {
             $builder->add('password', PasswordType::class, [
                 'label' => $this->translator->trans(
@@ -68,11 +63,9 @@ class NewPasswordAccountType extends AbstractType
                 'required' => true,
             ]);
 
+        // CaptchaType verifies the token server-side on submit
         if ($this->captchaValidator->getActiveProvider() !== CaptchaProviderEnum::OFF->value) {
-            $builder->add('captcha', HiddenType::class, [
-                'required' => false,
-                'mapped' => false,
-            ]);
+            $builder->add('captcha', CaptchaType::class);
         }
     }
 

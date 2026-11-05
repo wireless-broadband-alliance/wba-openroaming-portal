@@ -76,11 +76,12 @@ class ProfileController extends AbstractController
         }
 
         $token = $this->tokenStorage->getToken();
-        if (!$token instanceof TokenInterface || !$token->getUser() instanceof User) {
+        // Read the user once, so the instanceof check below narrows this variable to User
+        $currentUser = $token?->getUser();
+        if (!$token instanceof TokenInterface || !$currentUser instanceof User) {
             return new BaseResponse(403, null, 'Unauthorized access!')->toResponse();
         }
 
-        $currentUser = $token->getUser();
         /** @phpstan-ignore-next-line */
         $jwtTokenString = $token->getCredentials();
 
@@ -118,8 +119,8 @@ class ProfileController extends AbstractController
             $androidLimit = 32;
             $realmSize = strlen($this->getSettingValueRaw(SettingName::RADIUS_REALM_NAME->value)) + 1;
             $username = $this->generateToken($androidLimit - $realmSize) . "@" . $this->getSettingValueRaw(
-                SettingName::RADIUS_REALM_NAME->value
-            );
+                    SettingName::RADIUS_REALM_NAME->value
+                );
             $plainToken = $this->generateToken($androidLimit - $realmSize);
             $encryptedToken = $this->encryptionService->encrypt($plainToken);
 
@@ -225,16 +226,22 @@ class ProfileController extends AbstractController
         }
 
         $token = $this->tokenStorage->getToken();
-        if (!$token instanceof TokenInterface || !$token->getUser() instanceof User) {
+        // Read the user once, so the instanceof check below narrows this variable to User
+        $currentUser = $token?->getUser();
+        if (!$token instanceof TokenInterface || !$currentUser instanceof User) {
             return new BaseResponse(403, null, 'Unauthorized access!')->toResponse();
         }
 
-        $currentUser = $token->getUser();
         /** @phpstan-ignore-next-line */
         $jwtTokenString = $token->getCredentials();
 
         if (!$this->JWTTokenGenerator->isJWTTokenValid($jwtTokenString)) {
             return new BaseResponse(401, null, 'JWT Token is invalid!')->toResponse();
+        }
+
+        $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($currentUser);
+        if ($statusCheckerResponse instanceof BaseResponse) {
+            return $statusCheckerResponse->toResponse();
         }
 
         $errors = [];

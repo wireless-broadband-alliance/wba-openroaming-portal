@@ -6,6 +6,7 @@ use App\DTO\LoginChoiceDTO;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\CaptchaProviderEnum;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\FirewallType;
 use App\Enum\PlatformMode;
@@ -18,6 +19,7 @@ use App\Form\LoginType;
 use App\Form\TwoFACode;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
+use App\Service\Captcha\CaptchaValidator;
 use App\Service\EmailGenerator;
 use App\Service\EventActions;
 use App\Service\GetSettings;
@@ -83,6 +85,7 @@ class SecurityController extends AbstractController
         private readonly RequestStack $requestStack,
         private readonly EventDispatcherInterface $eventDispatcher,
         private readonly HashArgon2idService $hashArgon2idService,
+        private readonly CaptchaValidator $captchaValidator,
     ) {
     }
 
@@ -231,6 +234,17 @@ class SecurityController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Server-side CAPTCHA check before any side effect (user creation, email/SMS sending).
+            // LoginType keeps the captcha as a plain hidden field because it is rendered in a Live Component
+            // that re-submits the form on every re-render, which would burn the single-use token.
+            if (!$this->isCaptchaValid($request, $form->has('captcha') ? $form->get('captcha')->getData() : null)) {
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('invalidCAPTCHAValidation', [], 'Security')
+                );
+                return $this->redirectToRoute('app_login_magic');
+            }
+
             if ($loginChoiceDTO->loginMethod === UserProvider::EMAIL->value) {
                 $loginUser = $this->userRepository->findOneBy(['uuid' => $loginChoiceDTO->email]);
 
@@ -726,6 +740,30 @@ class SecurityController extends AbstractController
         }
 
         return $this->redirectToRoute('app_login');
+    }
+
+    /**
+     * Verifies the CAPTCHA token with the active provider. Same token sources as LandingAuthenticator:
+     * the form's hidden "captcha" field first, then the provider's own response field.
+     */
+    private function isCaptchaValid(Request $request, mixed $formToken): bool
+    {
+        if ($this->captchaValidator->getActiveProvider() === CaptchaProviderEnum::OFF->value) {
+            return true;
+        }
+
+        $token = is_string($formToken) ? trim($formToken) : '';
+        if ($token === '') {
+            $fallback = $request->request->get('cf-turnstile-response')
+                ?? $request->request->get('g-recaptcha-response');
+            $token = is_string($fallback) ? trim($fallback) : '';
+        }
+
+        if ($token === '') {
+            return false;
+        }
+
+        return $this->captchaValidator->validate($token, $request->getClientIp())['success'];
     }
 
     #[Route(path: '/dashboard/logout', name: 'app_dashboard_logout')]

@@ -2,6 +2,7 @@
 
 namespace App\Api\V4\Controller;
 
+use App\Api\BaseResponseInterface;
 use App\Api\V4\BaseResponse;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
@@ -104,8 +105,11 @@ class TwoFAController extends AbstractController
             return new BaseResponse(401, null, 'Invalid credentials')->toResponse();
         }
 
-        $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
-        if ($statusCheckerResponse instanceof BaseResponse) {
+        $statusCheckerResponse = $this->userStatusChecker->checkUserStatus(
+            $user,
+            BaseResponse::class
+        );
+        if ($statusCheckerResponse instanceof BaseResponseInterface) {
             return $statusCheckerResponse->toResponse();
         }
 
@@ -208,8 +212,8 @@ class TwoFAController extends AbstractController
             return new BaseResponse(401, null, 'Invalid credentials')->toResponse(); # Unauthorized Request Response
         }
 
-        $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
-        if ($statusCheckerResponse instanceof BaseResponse) {
+        $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user, BaseResponse::class);
+        if ($statusCheckerResponse instanceof BaseResponseInterface) {
             return $statusCheckerResponse->toResponse();
         }
 

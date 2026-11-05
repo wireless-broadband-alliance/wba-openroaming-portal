@@ -13,12 +13,14 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Throwable;
 
 /**
  * Hidden CAPTCHA token field that is verified server-side with the active provider
  * (Turnstile / reCAPTCHA v3) on submit. A missing, empty or rejected token adds a
  * form error, so $form->isValid() is false and the handler never reaches its side effects.
+ *
+ * Do NOT use it in forms rendered by a Live Component that re-submits on re-render:
+ * tokens are single-use, so every re-render would consume it.
  *
  * @extends AbstractType<null>
  */
@@ -46,11 +48,10 @@ final class CaptchaType extends AbstractType
 
             $clientIp = $this->requestStack->getCurrentRequest()?->getClientIp();
 
-            // validate() throws when the provider rejects the token (or can't be reached).
-            // Fail closed: any failure means the form is invalid.
-            try {
-                $this->captchaValidator->validate($token, $clientIp);
-            } catch (Throwable) {
+            // validate() returns array{success: bool, error?: string}; it does not throw on a rejected token.
+            $result = $this->captchaValidator->validate(trim($token), $clientIp);
+
+            if (!$result['success']) {
                 $form->addError(new FormError('captcha.invalid'));
             }
         });

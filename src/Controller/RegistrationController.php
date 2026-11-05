@@ -22,6 +22,7 @@ use App\Service\HashArgon2idService;
 use App\Service\MagicLinkService;
 use App\Service\SendSMS;
 use App\Service\UserCreationService;
+use App\Service\UserSessionService;
 use DateTime;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
@@ -56,9 +57,10 @@ class RegistrationController extends AbstractController
      * @param UserRepository $userRepository The repository for accessing user data.
      * @param GetSettings $getSettings The instance of the GetSettings class.
      * @param SendSMS $sendSMS Calls the sendSMS service
-     * @param TokenStorageInterface $tokenStorage Used to authenticate users after register with SMS
+     * @param TokenStorageInterface $tokenStorage Used to authenticate users after confirming the account
      * @param EventActions $eventActions Used to generate event related to the User creation
      * @param EmailGenerator $emailGenerator Used to generate and send emails for the user
+     * @param UserSessionService $userSessionService Logs users in manually with a clean session
      */
     public function __construct(
         private readonly UserRepository $userRepository,
@@ -76,7 +78,8 @@ class RegistrationController extends AbstractController
         private readonly PhoneNumberUtil $phoneNumberUtil,
         private readonly RateLimiterFactoryInterface $verifyAccountLimiter,
         private readonly SettingRepository $settingRepository,
-        private readonly HashArgon2idService $hashArgon2idService
+        private readonly HashArgon2idService $hashArgon2idService,
+        private readonly UserSessionService $userSessionService,
     ) {
     }
 
@@ -262,17 +265,12 @@ class RegistrationController extends AbstractController
 
             $formattedPhone = $this->phoneNumberUtil->format($phoneNumber, PhoneNumberFormat::E164);
 
-            // Check by UUID
+            // phoneNumber is encrypted (random IV) and can't be queried; phone users have their E.164 number as uuid
             $userByUuid = $this->userRepository->findOneBy([
                 'uuid' => $formattedPhone
             ]);
 
-            // Check by PhoneNumber
-            $userByPhone = $this->userRepository->findOneBy([
-                'phoneNumber' => $phoneNumber
-            ]);
-
-            if ($userByUuid || $userByPhone) {
+            if ($userByUuid) {
                 $this->addFlash(
                     'error',
                     $this->translator->trans('userWithSamePhoneNumber', [], 'controllers')
@@ -309,16 +307,12 @@ class RegistrationController extends AbstractController
                 $this->translator->trans('messageSentWithPasswordAndVerificationCode', [], 'controllers')
             );
 
-            // Authenticate the user
-            $token = new UsernamePasswordToken($user, FirewallType::LANDING->value, $user->getRoles());
-            $this->tokenStorage->setToken($token);
+            // Log the new user in with a clean session (drops flags left by any previous account)
+            $this->userSessionService->loginUser($user, FirewallType::LANDING->value);
 
-            // Store the authentication token in the session
-            $session = $this->requestStack->getSession();
-            $session->set('_security_main', serialize($token));
-
-            // Redirect the user after successful registration
-            return $this->redirectToRoute('app_landing');
+            // The SMS already contains the verification code, so go straight to the confirmation page
+            // (going through app_landing would generate and send a second code).
+            return $this->redirectToRoute('app_login_confirmation');
         }
 
         return $this->render('landing/register/register_landing_sms.html.twig', [
