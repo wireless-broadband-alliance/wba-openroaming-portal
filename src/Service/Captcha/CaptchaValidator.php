@@ -34,7 +34,7 @@ readonly class CaptchaValidator
         private Recaptcha3Validator $recaptcha3Validator,
         private LoggerInterface $logger,
         private RequestStack $requestStack,
-        #[Autowire('%kernel.environment%')]
+        #[Autowire(param: 'kernel.environment')]
         private string $environment,
     ) {
     }
