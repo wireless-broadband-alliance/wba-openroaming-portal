@@ -377,7 +377,7 @@ The client must send the current valid JWT in the request body as "current_token
             403 => [
                 'User account is not verified!',
                 'User account is banned from the system!',
-                'our email domain is not allowed to use this platform!',
+                'Your email domain is not allowed to use this platform!',
             ],
             500 => [
                 'An error occurred: Generic server-side error.',

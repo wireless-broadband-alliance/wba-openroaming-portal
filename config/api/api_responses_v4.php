@@ -342,7 +342,7 @@ return [
             403 => [
                 'User account is not verified!',
                 'User account is banned from the system!',
-                'our email domain is not allowed to use this platform!',
+                'Your email domain is not allowed to use this platform!',
             ],
             500 => $serverErrors,
         ],
@@ -390,7 +390,7 @@ return [
             403 => [
                 'User account is not verified!',
                 'User account is banned from the system!',
-                'our email domain is not allowed to use this platform!',
+                'Your email domain is not allowed to use this platform!',
             ],
             500 => $serverErrors,
         ],
