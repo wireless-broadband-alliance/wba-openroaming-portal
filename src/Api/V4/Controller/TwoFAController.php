@@ -113,6 +113,17 @@ class TwoFAController extends AbstractController
             return $statusCheckerResponse->toResponse();
         }
 
+        // Enrolment only. If a second factor is already active, replacing it here would let anyone who
+        // knows the password take over 2FA (e.g. overwrite the TOTP secret) without proving the
+        // current factor. Changing or removing an active method must go through the disable flow first.
+        if ($user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value) {
+            return new BaseResponse(
+                409,
+                null,
+                'Two-factor authentication is already enabled for this account. Disable it before selecting a new method.'
+            )->toResponse();
+        }
+
         // Generate TOTP secret
         if ($type === 'totp') {
             $secret = $this->TOTPService->generateSecret();
@@ -191,12 +202,27 @@ class TwoFAController extends AbstractController
         if (empty($data['password'])) {
             $errors[] = 'password';
         }
+        if (empty($data['type'])) {
+            $errors[] = 'type';
+        }
+        if (empty($data['code'])) {
+            $errors[] = 'code';
+        }
 
         if ($errors !== []) {
             return new BaseResponse(
                 400,
                 ['missing_fields' => $errors],
                 'Invalid data: Missing required fields.'
+            )->toResponse();
+        }
+
+        $type = (string)$data['type'];
+        $code = (string)$data['code'];
+
+        if (!in_array($type, ['totp', 'email', 'sms'], true)) {
+            return new BaseResponse(
+                400, null, 'Invalid data: type must be one of totp, email or sms.'
             )->toResponse();
         }
 
@@ -217,17 +243,26 @@ class TwoFAController extends AbstractController
             return $statusCheckerResponse->toResponse();
         }
 
+        // Same rule as twoFAEnable(): this endpoint only confirms a new enrolment, it never switches an
+        // already active method (that would bypass the current second factor).
+        if ($user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value) {
+            return new BaseResponse(
+                409,
+                null,
+                'Two-factor authentication is already enabled for this account. Disable it before selecting a new method.'
+            )->toResponse();
+        }
 
-        if (
-            ($data['type'] === 'email' || $data['type'] === 'sms') &&
-            $data['code'] === $user->getTwoFAcode()
-        ) {
-            if ($data['type'] === 'email') {
-                $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::EMAIL->value);
-            }
-            if ($data['type'] === 'sms') {
-                $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::SMS->value);
-            }
+        // Email/SMS: codes are stored as Argon2id hashes, so they must be verified through the service
+        // (which also enforces the expiration time), never compared as plain strings.
+        if (($type === 'email' || $type === 'sms') && $this->twoFAService->validate2FACode($user, $code)) {
+            $user->setTwoFAtype(
+                $type === 'email'
+                    ? UserTwoFactorAuthenticationStatus::EMAIL->value
+                    : UserTwoFactorAuthenticationStatus::SMS->value
+            );
+            $this->entityManager->flush();
+
             // Defines the Event to the table
             $eventMetadata = [
                 EventMetadataKeysType::IP->value => $request->getClientIp(),
@@ -249,13 +284,10 @@ class TwoFAController extends AbstractController
             )->toResponse();
         }
 
-        if (
-            $data['type'] === 'totp' && $this->TOTPService->verifyTOTP(
-                $user->getTwoFAsecret(),
-                $data['code']
-            )
-        ) {
+        $secret = $user->getTwoFAsecret();
+        if ($type === 'totp' && $secret !== null && $this->TOTPService->verifyTOTP($secret, $code)) {
             $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::TOTP->value);
+            $this->entityManager->flush();
 
             // Defines the Event to the table
             $eventMetadata = [

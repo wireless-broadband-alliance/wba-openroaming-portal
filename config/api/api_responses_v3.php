@@ -7,12 +7,15 @@ return [
         'description' => 'This endpoint validates a 2FA code (email, SMS, or TOTP). 
     The client must send a valid JWT Bearer token in the Authorization header, 
     along with the 2FA type and confirmation code in the request body. 
-    If the code is valid, 2FA is enabled for that method.',
+    If the code is valid, 2FA is enabled for that method.
+    This endpoint only confirms a first enrolment: if the account already has 2FA enabled it returns 409,
+    and the active method must be disabled before selecting a new one.
+    Email and SMS codes expire after the configured TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME.',
         'isProtected' => true,
         'requestBody' => [
             'uuid' => 'user-uuid-example',
             'password' => 'user-password-example',
-            'type' => 'email or sms or topt',
+            'type' => 'email or sms or totp',
             'code' => '123456'
         ],
         'responses' => [
@@ -31,10 +34,12 @@ return [
             ],
             400 => [
                 'Invalid JSON format',
-                'Missing required body fields'
+                'Invalid data: Missing required fields.',
+                'Invalid data: type must be one of totp, email or sms.'
             ],
             401 => [
                 'JWT Token is invalid!',
+                'Invalid credentials',
                 'User account is not verified.'
             ],
             403 => [
@@ -42,6 +47,9 @@ return [
                 'User account is banned from the system.',
                 "Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action.",
                 'Unauthorized - You do not have permission to access this resource'
+            ],
+            409 => [
+                'Two-factor authentication is already enabled for this account. Disable it before selecting a new method.'
             ],
             500 => [
                 'Unexpected server error occurred'
@@ -57,7 +65,10 @@ return [
             'turnstile_token' => 'valid_test_token',
         ],
         'description' => 'Enables Two-Factor Authentication (2FA) for the authenticated user. 
-        Supports ("totp", "email", "sms"). Requires a valid JWT Bearer token.',
+        Supports ("totp", "email", "sms"). Requires a valid JWT Bearer token.
+        Only for first enrolment: if the account already has 2FA enabled, the request is rejected with 409
+        and no new secret or code is generated. Calling it again before validating (2FA still disabled)
+        replaces the pending TOTP secret.',
         'responses' => [
             200 => [
                 'totp_example' => json_decode(
@@ -144,6 +155,18 @@ return [
                         JSON_THROW_ON_ERROR
                     ),
                 ],
+            ],
+            409 => [
+                'description' => 'Two-factor authentication is already enabled for this account.',
+                'example' => json_decode(
+                    '{
+                    "success": false,
+                    "error": "Two-factor authentication is already enabled for this account. Disable it before selecting a new method."
+                }',
+                    true,
+                    512,
+                    JSON_THROW_ON_ERROR
+                ),
             ],
             500 => [
                 'description' => 'Internal error while generating 2FA code or TOTP secret.',
@@ -576,7 +599,8 @@ The client must send the current valid JWT in the request body as "current_token
         ],
         'description' => 'This endpoint retrieves the profile configuration for Android, including 
                 a user\'s radius profile data, encrypted password, and other relevant settings for the Android
-                 application.',
+                 application. The account must be verified, not banned and without a pending
+                 forgot-password request.',
         'isProtected' => true,
         'responses' => [
             200 => [
@@ -608,10 +632,13 @@ The client must send the current valid JWT in the request body as "current_token
                 'Invalid or missing public key'
             ],
             401 => [
-                'JWT Token is invalid!'
+                'JWT Token is invalid!',
+                'User account is not verified.'
             ],
             403 => [
-                'Unauthorized access!'
+                'Unauthorized access!',
+                'User account is banned from the system.',
+                'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action.'
             ],
             500 => [
                 'Failed to encrypt the password',
@@ -626,7 +653,8 @@ The client must send the current valid JWT in the request body as "current_token
             'public_key' => '-----BEGIN PUBLIC KEY-----\\n<RSA_PUBLIC_KEY>\\n-----END PUBLIC KEY-----'
         ],
         'description' => 'This endpoint retrieves the profile configuration for iOS, including a user\'s radius
-                 profile data, encrypted password, and other relevant settings for the iOS application.',
+                 profile data, encrypted password, and other relevant settings for the iOS application.
+                 The account must be verified, not banned and without a pending forgot-password request.',
         'isProtected' => true,
         'responses' => [
             200 => [
@@ -662,10 +690,13 @@ The client must send the current valid JWT in the request body as "current_token
                 'Invalid or missing public key',
             ],
             401 => [
-                'JWT Token is invalid!'
+                'JWT Token is invalid!',
+                'User account is not verified.'
             ],
             403 => [
-                'Unauthorized access!'
+                'Unauthorized access!',
+                'User account is banned from the system.',
+                'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action.'
             ],
             500 => [
                 'Failed to encrypt the password',

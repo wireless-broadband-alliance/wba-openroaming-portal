@@ -43,6 +43,11 @@ $twoFactorErrors = [
     'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
 ];
 
+$alreadyEnabled2FA = 'Two-factor authentication is already enabled for this account. '
+    . 'Disable it before selecting a new method.';
+
+$accountStatusNote = 'The account must be verified, not banned and without a pending forgot-password request.';
+
 $serverErrors = [
     'An error occurred: Generic server-side error.',
     'JWT key files are missing. Please ensure both private and public keys exist.',
@@ -55,7 +60,10 @@ return [
         'description' => 'This endpoint validates a 2FA code (email, SMS, or TOTP). '
             . 'The client must send a valid JWT Bearer token in the Authorization header, '
             . 'along with the 2FA type and confirmation code in the request body. '
-            . 'If the code is valid, 2FA is enabled for that method.',
+            . 'If the code is valid, 2FA is enabled for that method. '
+            . 'This endpoint only confirms a first enrolment: if the account already has 2FA enabled it returns 409, '
+            . 'and the active method must be disabled before selecting a new one. '
+            . 'Email and SMS codes expire after the configured TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME.',
         'isProtected' => true,
         'requestBody' => [
             'uuid' => 'user-uuid-example',
@@ -76,10 +84,12 @@ return [
             ],
             400 => [
                 'Invalid JSON format',
-                'Missing required body fields',
+                'Invalid data: Missing required fields.',
+                'Invalid data: type must be one of totp, email or sms.',
             ],
             401 => [
                 'JWT Token is invalid!',
+                'Invalid credentials',
                 'User account is not verified.',
             ],
             403 => [
@@ -87,6 +97,9 @@ return [
                 'User account is banned from the system.',
                 'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action.',
                 'Unauthorized - You do not have permission to access this resource',
+            ],
+            409 => [
+                $alreadyEnabled2FA,
             ],
             500 => [
                 'Unexpected server error occurred',
@@ -98,6 +111,9 @@ return [
         'section' => 'TwoFactor',
         'description' => 'Enables Two-Factor Authentication (2FA) for the authenticated user. '
             . 'Supports ("totp", "email", "sms"). Requires a valid JWT Bearer token. '
+            . 'Only for first enrolment: if the account already has 2FA enabled, the request is rejected with 409 '
+            . 'and no new secret or code is generated. Calling it again before validating (2FA still disabled) '
+            . 'replaces the pending TOTP secret. '
             . $captchaNote,
         'isProtected' => true,
         'requestBody' => $captchaBody(
@@ -129,15 +145,20 @@ return [
             400 => [
                 'Code not sent, the user does not have a valid method.',
                 'CAPTCHA validation failed',
+                'Invalid data: Missing required fields.',
             ],
             401 => [
                 'JWT Token is invalid!',
+                'Invalid credentials',
                 'User account is not verified.',
             ],
             403 => [
                 'Unauthorized - You do not have permission to access this resource',
                 'User account is banned from the system.',
                 'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action.',
+            ],
+            409 => [
+                $alreadyEnabled2FA,
             ],
             500 => [
                 'Internal error while generating the 2FA code or TOTP secret.',
@@ -474,7 +495,8 @@ return [
     'api_v4_get_current_user' => [
         'routePrefix' => '/api/v4/user',
         'section' => 'User',
-        'description' => 'This endpoint returns the details of the currently authenticated user.',
+        'description' => 'This endpoint returns the details of the currently authenticated user. '
+            . $accountStatusNote,
         'isProtected' => true,
         'requestBody' => [],
         'responses' => [
@@ -506,11 +528,12 @@ return [
                 'JWT Token not found!',
                 'JWT Token is invalid!',
                 'JWT Token is expired!',
+                'User account is not verified.',
             ],
             403 => [
-                'Unauthorized - You do not have permission to access this resource.',
-                'User account is not verified!',
-                'User account is banned from the system!',
+                'Unauthorized - You do not have permission to access this resource',
+                'User account is banned from the system.',
+                'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action.',
             ],
         ],
     ],
@@ -518,7 +541,8 @@ return [
         'routePrefix' => '/api/v4/config/profile/android',
         'section' => 'Config',
         'description' => 'This endpoint retrieves the profile configuration for Android, including '
-            . 'a user\'s radius profile data, encrypted password, and other relevant settings for the Android application.',
+            . 'a user\'s radius profile data, encrypted password, and other relevant settings for the Android application. '
+            . $accountStatusNote,
         'isProtected' => true,
         // Double quotes on purpose: the partial runs json_encode, so real newlines are displayed as \n.
         'requestBody' => [
@@ -549,9 +573,12 @@ return [
             ],
             401 => [
                 'JWT Token is invalid!',
+                'User account is not verified.',
             ],
             403 => [
                 'Unauthorized access!',
+                'User account is banned from the system.',
+                'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action.',
             ],
             500 => [
                 'Failed to encrypt the password',
@@ -563,7 +590,8 @@ return [
         'routePrefix' => '/api/v4/config/profile/ios',
         'section' => 'Config',
         'description' => 'This endpoint retrieves the profile configuration for iOS, including a user\'s radius '
-            . 'profile data, encrypted password, and other relevant settings for the iOS application.',
+            . 'profile data, encrypted password, and other relevant settings for the iOS application. '
+            . $accountStatusNote,
         'isProtected' => true,
         'requestBody' => [
             'public_key' => "-----BEGIN PUBLIC KEY-----\n<RSA_PUBLIC_KEY>\n-----END PUBLIC KEY-----",
@@ -597,9 +625,12 @@ return [
             ],
             401 => [
                 'JWT Token is invalid!',
+                'User account is not verified.',
             ],
             403 => [
                 'Unauthorized access!',
+                'User account is banned from the system.',
+                'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action.',
             ],
             500 => [
                 'Failed to encrypt the password',
