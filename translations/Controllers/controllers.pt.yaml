@@ -249,3 +249,4 @@ captcha:
   saveSuccess: "Definições de CAPTCHA guardadas com sucesso."
   saveError: "Ocorreu um erro ao guardar as definições de CAPTCHA."
 captchaProviderResetSuccessfully: "As definições foram repostas com sucesso."
+invalidCaptchaCredentials: "As credenciais do CAPTCHA são inválidas ou foram rejeitadas pelo provedor."

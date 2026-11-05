@@ -251,3 +251,4 @@ captcha:
   saveSuccess: "CAPTCHA settings saved successfully."
   saveError: "An error occurred while saving CAPTCHA settings."
 captchaProviderResetSuccessfully: "Settings have been reset successfully."
+invalidCaptchaCredentials: "The provided CAPTCHA credentials are invalid or were rejected by the provider."
