@@ -35,6 +35,9 @@ use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use libphonenumber\PhoneNumber;
+use libphonenumber\PhoneNumberFormat;
+use libphonenumber\PhoneNumberUtil;
 use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -287,7 +290,13 @@ class ForgotPasswordController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $user = $this->userRepository->findOneBy(['phoneNumber' => $user->getPhoneNumber()]);
+            $phoneNumber = $user->getPhoneNumber();
+            // phoneNumber is encrypted (random IV) and can't be queried; phone users have their E.164 number as uuid
+            $user = $phoneNumber instanceof PhoneNumber
+                ? $this->userRepository->findOneBy([
+                    'uuid' => PhoneNumberUtil::getInstance()->format($phoneNumber, PhoneNumberFormat::E164),
+                ])
+                : null;
             if ($user) {
                 $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
                     $user,

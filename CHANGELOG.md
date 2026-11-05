@@ -66,7 +66,23 @@
 - **Environment Turnstile Settings Importer (`import:turnstileSettings`)**: Added a CLI command (
   `php bin/console import:turnstileSettings`) to read `TURNSTILE_KEY` and `TURNSTILE_SECRET` from environment variables,
   encrypt them at rest via `EncryptionService`, and persist or update them in the `Setting` table.
-  
+
+### Bug Fixes
+
+- **Phone Number Login Always Returned "Bad credentials"**: Since phone numbers are encrypted at rest (1.15.0) with a
+  random IV, the same number never produces the same stored value, so lookups by `phoneNumber` could never match a
+  user. Phone-number users are now looked up by their `uuid` (E.164 format, e.g. `+351912345678`) in:
+  - Landing page login (`LandingAuthenticator`);
+  - Admin dashboard login (`DashboardAuthenticator`);
+  - Forgot password by SMS (`ForgotPasswordController`).
+- **SMS Registration Skipped Account Verification**: Registering a new account by phone number in a browser session
+  where another verified account had previously logged in (without logging out) reused that account's verification
+  flag, sending the new, unverified user straight to the profile download page. Previous session flags are now cleared
+  on registration, and the user is redirected directly to the verification code page (`/login/confirmation`) instead of
+  going through the landing page, which also avoids sending a second verification code.
+- **Duplicate Phone Number Check on Registration**: Removed the duplicate-account check by `phoneNumber` in SMS
+  registration, which could never match after the encryption change; the existing check by `uuid` covers this case.
+
 ## Release v1.15.2
 
 - **FreeRADIUS certificate upload:** valid, publicly trusted certificates
