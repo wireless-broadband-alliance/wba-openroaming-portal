@@ -295,7 +295,7 @@ class SecurityController extends AbstractController
                     $user->setUuid($loginChoiceDTO->email);
                     $user->setEmail($loginChoiceDTO->email);
 
-                    // Generate a random password that meets the password policy (see PasswordGenerator)
+                    // Generate a random password
                     $randomPassword = $this->passwordGenerator->generate();
 
                     // Hash the password
@@ -429,7 +429,7 @@ class SecurityController extends AbstractController
                     }
                 } else {
                     $user = new User();
-                    // Generate a random password that meets the password policy (see PasswordGenerator)
+                    // Generate a random password 
                     $randomPassword = $this->passwordGenerator->generate();
                     // Hash the password
                     $hashedPassword = $this->userPasswordHasher->hashPassword($user, $randomPassword);

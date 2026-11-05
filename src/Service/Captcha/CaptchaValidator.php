@@ -68,7 +68,7 @@ readonly class CaptchaValidator
      */
     public function getActiveProvider(): string
     {
-        return $this->getProvider()?->value ?? self::INVALID_PROVIDER;
+        return $this->getProvider()->value ?? self::INVALID_PROVIDER;
     }
 
     public function getSiteKey(): string
