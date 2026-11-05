@@ -28,6 +28,7 @@ use App\Service\EmailGenerator;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\OSDetectionService;
+use App\Service\PasswordGenerator;
 use App\Service\ProfileManager;
 use App\Service\SendSMS;
 use App\Service\TwoFAService;
@@ -70,6 +71,7 @@ class SiteController extends AbstractController
         private readonly LandingAuthenticator $authenticator,
         private readonly EmailGenerator $emailGenerator,
         private readonly SendSMS $sendSMS,
+        private readonly PasswordGenerator $passwordGenerator,
     ) {
     }
 
@@ -295,8 +297,10 @@ class SiteController extends AbstractController
                     $user = $formRegistrationDemo->getData();
                     $user->setEmail($user->getEmail());
                     $user->setCreatedAt(new DateTime());
+                    // Demo accounts are logged in directly and never use this password; it only has to be
+                    // unguessable (uniqid() is derived from the current time, so it could be predicted)
                     $user->setPassword(
-                        $this->userPasswordEncoder->hashPassword($user, uniqid("", true))
+                        $this->userPasswordEncoder->hashPassword($user, $this->passwordGenerator->generate())
                     );
                     $user->setUuid(
                         str_replace('@', "-DEMO-" . uniqid("", true) . "-", $user->getEmail())

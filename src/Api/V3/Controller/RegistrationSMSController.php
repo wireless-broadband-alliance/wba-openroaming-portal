@@ -18,6 +18,7 @@ use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\Captcha\CaptchaValidator;
 use App\Service\EventActions;
+use App\Service\PasswordGenerator;
 use App\Service\SendSMS;
 use DateInterval;
 use DateTime;
@@ -52,6 +53,7 @@ class RegistrationSMSController extends AbstractController
         private readonly CaptchaValidator $captchaValidator,
         private readonly ValidatorInterface $validator,
         private readonly PhoneNumberUtil $phoneNumberUtil,
+        private readonly PasswordGenerator $passwordGenerator,
     ) {
     }
 
@@ -207,11 +209,9 @@ class RegistrationSMSController extends AbstractController
 
         // Send SMS
         try {
-            $message = 'Your account password is: '
-                . $registrationDTO->password
-                . "\n"
-                . 'Verification code is: '
-                . $user->getTwoFAcode();
+            // Never echo the password back: the user chose it, and SMS content stays in provider logs
+            // and on the device lock screen. Only the verification code is needed.
+            $message = 'Verification code is: ' . $user->getTwoFAcode();
 
             $result = $this->sendSMSService->sendSmsNoValidation(
                 $user,
@@ -344,7 +344,7 @@ class RegistrationSMSController extends AbstractController
 
             if ($hasValidPortalAccount) {
                 try {
-                    $randomPassword = bin2hex(random_bytes(4));
+                    $randomPassword = $this->passwordGenerator->generate();
                     $hashedPassword = $this->userPasswordHasher->hashPassword($user, $randomPassword);
 
                     // Retrieve the latest SMS attempt event for the user

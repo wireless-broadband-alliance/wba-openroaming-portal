@@ -20,6 +20,7 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\HashArgon2idService;
 use App\Service\MagicLinkService;
+use App\Service\PasswordGenerator;
 use App\Service\SendSMS;
 use App\Service\UserCreationService;
 use App\Service\UserSessionService;
@@ -80,6 +81,7 @@ class RegistrationController extends AbstractController
         private readonly SettingRepository $settingRepository,
         private readonly HashArgon2idService $hashArgon2idService,
         private readonly UserSessionService $userSessionService,
+        private readonly PasswordGenerator $passwordGenerator,
     ) {
     }
 
@@ -166,7 +168,7 @@ class RegistrationController extends AbstractController
                 );
             } elseif ($data[SettingName::USER_VERIFICATION->value]['value'] === OperationMode::ON->value) {
                 // Generate a random password
-                $randomPassword = bin2hex(random_bytes(4));
+                $randomPassword = $this->passwordGenerator->generate();
 
                 // Hash the password
                 $hashedPassword = $this->userPasswordHasher->hashPassword($user, $randomPassword);
@@ -279,8 +281,8 @@ class RegistrationController extends AbstractController
                 return $this->redirectToRoute('app_register_sms');
             }
 
-            // Generate a random password
-            $randomPassword = bin2hex(random_bytes(4));
+            // Generate a random password that
+            $randomPassword = $this->passwordGenerator->generate();
 
             // Hash the password
             $hashedPassword = $this->userPasswordHasher->hashPassword($user, $randomPassword);

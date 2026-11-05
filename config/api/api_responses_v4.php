@@ -411,7 +411,7 @@ return [
             403 => [
                 'User account is not verified!',
                 'User account is banned from the system!',
-                'Your email domain is not allowed to use this platform!',
+                'our email domain is not allowed to use this platform!',
             ],
             500 => $serverErrors,
         ],
@@ -721,6 +721,7 @@ return [
             . 'The phone number is validated using the provided country code and the request is protected by CAPTCHA validation. '
             . $captchaNote . ' '
             . 'A verification code is generated and sent to the registered phone number. '
+            . 'The SMS contains only the verification code: the chosen password is never sent back. '
             . 'If the phone number is already registered, the endpoint returns a generic successful response '
             . 'to prevent user enumeration.',
         'requestBody' => $captchaBody(
@@ -755,15 +756,19 @@ return [
             ],
             500 => [
                 'Failed to send SMS',
+                'User registered but SMS could not be sent.',
             ],
         ],
     ],
     'api_v4_auth_sms_reset' => [
         'routePrefix' => '/api/v4/auth/sms/reset',
         'section' => 'Auth',
-        'description' => 'This endpoint sends an SMS with a new password and verification code if the user '
+        'description' => 'This endpoint sends an SMS with a new temporary password if the user '
             . 'has a valid PortalAccount and has not exceeded SMS request limits. The endpoint also enforces the '
             . 'time interval between requests and limits the number of attempts allowed. '
+            . 'The temporary password is 16 random characters (letters and digits) and meets the platform password '
+            . 'policy; the account is flagged with a pending password reset, so the user must set a new password '
+            . 'before using the API again. '
             . $captchaNote,
         'requestBody' => $captchaBody(
             [
@@ -787,6 +792,9 @@ return [
                 'Missing required fields: country code, phone number or CAPTCHA token (turnstile_token or recaptcha_token)',
                 'Invalid phone number format or country code.',
                 'Invalid JSON format',
+            ],
+            429 => [
+                'You’ve exceeded the maximum number of attempts to regenerate. Please contact support.',
             ],
             500 => [
                 'An unexpected error occurred while processing the request',

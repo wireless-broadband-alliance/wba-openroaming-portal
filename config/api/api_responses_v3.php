@@ -800,7 +800,8 @@ response to prevent user enumeration. A registration email is sent to newly crea
         'description' => 'This endpoint registers a new user using their phone number and password.
 The phone number is validated using the provided country code and the request is protected
 by CAPTCHA validation when Turnstile is enabled. A verification code is generated and sent
-to the registered phone number. If the phone number is already registered, the endpoint
+to the registered phone number. The SMS contains only the verification code: the chosen
+password is never sent back. If the phone number is already registered, the endpoint
 returns a generic successful response to prevent user enumeration.',
         'responses' => [
             200 => [
@@ -828,7 +829,8 @@ returns a generic successful response to prevent user enumeration.',
             ],
             500 => [
                 'Missing settings: TURNSTILE_CHECKER not found',
-                'Failed to send SMS'
+                'Failed to send SMS',
+                'User registered but SMS could not be sent.'
             ]
         ]
     ],
@@ -862,6 +864,9 @@ returns a generic successful response to prevent user enumeration.',
                 'Missing required fields: country code, phone number, turnstile_token',
                 'Invalid phone number format or country code.',
                 'Invalid JSON format',
+            ],
+            429 => [
+                'You’ve exceeded the maximum number of attempts to regenerate. Please contact support.',
             ],
             500 => [
                 'An unexpected error occurred while processing the request',

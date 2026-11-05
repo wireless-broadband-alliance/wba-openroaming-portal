@@ -25,6 +25,7 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\HashArgon2idService;
 use App\Service\MagicLinkService;
+use App\Service\PasswordGenerator;
 use App\Service\SendSMS;
 use App\Service\TwoFAService;
 use App\Service\UserCreationService;
@@ -86,6 +87,7 @@ class SecurityController extends AbstractController
         private readonly EventDispatcherInterface $eventDispatcher,
         private readonly HashArgon2idService $hashArgon2idService,
         private readonly CaptchaValidator $captchaValidator,
+        private readonly PasswordGenerator $passwordGenerator,
     ) {
     }
 
@@ -293,7 +295,7 @@ class SecurityController extends AbstractController
                     $user->setEmail($loginChoiceDTO->email);
 
                     // Generate a random password
-                    $randomPassword = bin2hex(random_bytes(4));
+                    $randomPassword = $this->passwordGenerator->generate();
 
                     // Hash the password
                     $hashedPassword = $this->userPasswordHasher->hashPassword($user, $randomPassword);
@@ -427,7 +429,7 @@ class SecurityController extends AbstractController
                 } else {
                     $user = new User();
                     // Generate a random password
-                    $randomPassword = bin2hex(random_bytes(4));
+                    $randomPassword = $this->passwordGenerator->generate();
                     // Hash the password
                     $hashedPassword = $this->userPasswordHasher->hashPassword($user, $randomPassword);
 
