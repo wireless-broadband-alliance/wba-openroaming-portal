@@ -775,8 +775,8 @@ return [
             . 'Limits come from the SMS_TIME_INTERVAL_BETWEEN_REQUESTS (cooldown), SMS_ATTEMPTS_NUMBER and '
             . 'SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS settings and are shared with the web forgot-password flow. '
             . 'A request inside the cooldown returns the generic success message without sending anything; '
-            . 'a request over the attempts limit returns 429.'
-            . $captchaNote,
+            . 'a request over the attempts limit returns 429. '
+            . $captchaNote('api_reset_sms'),
         'requestBody' => $captchaBody(
             [
                 'country_code' => 'PT',
