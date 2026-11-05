@@ -223,7 +223,7 @@ class ForgotPasswordController extends AbstractController
                             'error',
                             $this->translator->trans(
                                 'replyCodeTotp',
-                                ['%seconds%' => $seconds],
+                                ['%remainingTime%' => $seconds],
                                 'controllers'
                             )
                         );

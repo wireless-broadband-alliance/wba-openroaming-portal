@@ -1,20 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Form;
 
 use App\Enum\CaptchaProviderEnum;
-use App\Enum\OperationMode;
 use App\Enum\SettingName;
+use App\Form\Type\CaptchaType;
 use App\Repository\SettingRepository;
 use App\Service\Captcha\CaptchaValidator;
 use libphonenumber\PhoneNumberFormat;
 use Misd\PhoneNumberBundle\Form\Type\PhoneNumberType;
-use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @extends AbstractType<null>
@@ -47,11 +46,9 @@ class ForgotPasswordSMSType extends AbstractType
                 'attr' => ['autocomplete' => 'tel'],
             ]);
 
+        // CaptchaType verifies the token server-side on submit
         if ($this->captchaValidator->getActiveProvider() !== CaptchaProviderEnum::OFF->value) {
-            $builder->add('captcha', HiddenType::class, [
-                'required' => false,
-                'mapped' => false,
-            ]);
+            $builder->add('captcha', CaptchaType::class);
         }
     }
 
