@@ -4,22 +4,21 @@ namespace App\Api\V4\Controller;
 
 use App\Api\V4\BaseResponse;
 use App\DTO\Api\UserSMSRegistrationDTO;
-use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
+use App\Enum\ForgotPasswordEnum;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
-use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\Captcha\CaptchaValidator;
 use App\Service\EventActions;
 use App\Service\PasswordGenerator;
+use App\Service\PasswordResetAttemptGuard;
 use App\Service\SendSMS;
-use DateInterval;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -43,7 +42,6 @@ class RegistrationSMSController extends AbstractController
     public function __construct(
         private readonly UserRepository $userRepository,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
-        private readonly EventRepository $eventRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly EventActions $eventActions,
         private readonly SendSMS $sendSMSService,
@@ -53,6 +51,7 @@ class RegistrationSMSController extends AbstractController
         private readonly ValidatorInterface $validator,
         private readonly PhoneNumberUtil $phoneNumberUtil,
         private readonly PasswordGenerator $passwordGenerator,
+        private readonly PasswordResetAttemptGuard $passwordResetAttemptGuard,
     ) {
     }
 
@@ -246,7 +245,6 @@ class RegistrationSMSController extends AbstractController
      * @throws NonUniqueResultException
      * @throws RandomException
      * @throws RedirectionExceptionInterface
-     * @throws \DateMalformedIntervalStringException
      * @throws \DateMalformedStringException
      */
     #[Route('/auth/sms/reset', name: 'api_v4_auth_sms_reset', methods: ['POST'])]
@@ -341,79 +339,39 @@ class RegistrationSMSController extends AbstractController
 
             if ($hasValidPortalAccount) {
                 try {
-                    $randomPassword = $this->passwordGenerator->generate();
-                    $hashedPassword = $this->userPasswordHasher->hashPassword($user, $randomPassword);
-
-                    // Retrieve the latest SMS attempt event for the user
-                    $latestEvent = $this->eventRepository->findLatestSmsAttemptEvent($user);
-                    $smsResendInterval = $this->settingRepository->findOneBy(
-                        ['name' => SettingName::SMS_TIMER_RESEND->value]
-                    )?->getValue();
-                    $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
-                    $maxAttempts = 3;
-                    $currentTime = new DateTime();
-
-                    $verificationAttempts = 1;
-                    if ($latestEvent instanceof Event) {
-                        $latestEventMetadata = $latestEvent->getEventMetadata();
-                        $verificationAttempts = $latestEventMetadata['verificationAttempts'] ?? 0;
-                        $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
-                            ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
-                            : null;
-
-                        if ($lastVerificationCodeTime instanceof DateTime) {
-                            $allowedTime = (clone $lastVerificationCodeTime)->add($minInterval);
-
-                            if ($allowedTime > $currentTime) {
-                                // Protect against spam and RGPD policies - simulate success without actual resend
-                                return new BaseResponse(200, [
-                                    'success' => sprintf(
-                                        'If the phone number exists, a new code has been sent to %s.',
-                                        $user->getPhoneNumber()
-                                    ),
-                                ])->toResponse();
-                            }
-
-                            $verificationAttempts++;
-                        }
-                    }
-
-                    $attemptsLeft = $maxAttempts - $verificationAttempts;
-                    if ($attemptsLeft < 0) {
-                        return new BaseResponse(
-                            429,
-                            null,
-                            'You’ve exceeded the maximum number of attempts to regenerate. Please contact support.'
-                        )->toResponse();
-                    }
-
-                    // Update or create the event record
-                    if (!$latestEvent instanceof Event) {
-                        $latestEvent = new Event();
-                        $latestEvent->setUser($user);
-                        $latestEvent->setEventDatetime($currentTime);
-                        $latestEvent->setEventName(AnalyticalEventType::USER_SMS_ATTEMPT->value);
-                    }
-
-                    $eventMetadata = [
-                        EventMetadataKeysType::IP->value => $request->getClientIp(),
-                        EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-                        EventMetadataKeysType::UUID->value => $user->getUuid(),
-                        EventMetadataKeysType::VERIFICATION_ATTEMPTS->value => $verificationAttempts,
-                    ];
-                    $latestEvent->setEventMetadata($eventMetadata);
-
-                    $this->eventActions->saveEvent(
+                    // Cooldown + attempts limit, checked and recorded atomically per user (shared with the web
+                    // forgot-password flow). Nothing below runs unless the attempt was accepted and saved.
+                    $attempt = $this->passwordResetAttemptGuard->tryRegisterAttempt(
                         $user,
-                        AnalyticalEventType::USER_SMS_ATTEMPT->value,
-                        $currentTime,
-                        $eventMetadata
+                        true,
+                        $request->getClientIp(),
+                        $request->headers->get('User-Agent')
                     );
 
-                    // Set the hashed password for the user
-                    $user->setPassword($hashedPassword);
+                    if (!$attempt[PasswordResetAttemptGuard::ALLOWED]) {
+                        $reason = $attempt[PasswordResetAttemptGuard::REASON];
+                        if ($reason === ForgotPasswordEnum::ATTEMPTS_EXCEEDED->value) {
+                            return new BaseResponse(
+                                429,
+                                null,
+                                'You’ve exceeded the maximum number of attempts to regenerate. '
+                                . 'Please contact support.'
+                            )->toResponse();
+                        }
+
+                        // Cooldown: protect against spam and RGPD policies - simulate success without actual resend
+                        return new BaseResponse(200, [
+                            'success' => sprintf(
+                                'If the phone number exists, a new code has been sent to %s.',
+                                $user->getUuid()
+                            ),
+                        ])->toResponse();
+                    }
+
+                    // Only generate/hash the new password once the attempt has been accepted
+                    $randomPassword = $this->passwordGenerator->generate();
+                    $user->setPassword($this->userPasswordHasher->hashPassword($user, $randomPassword));
                     $user->setForgotPasswordRequest(true);
-                    $this->entityManager->persist($user);
                     $this->entityManager->flush();
 
                     // Send SMS
@@ -437,10 +395,10 @@ class RegistrationSMSController extends AbstractController
                     if ($result !== '' && $result !== '0') {
                         return new BaseResponse(200, [
                             'success' => sprintf(
-                                'If the phone number exists, we have sent a new code to: %s. 
-                                You have %d attempt(s) left.',
+                                'If the phone number exists, we have sent a new code to: %s. '
+                                . 'You have %d attempt(s) left.',
                                 $user->getUuid(),
-                                $attemptsLeft
+                                $attempt[PasswordResetAttemptGuard::ATTEMPTS_LEFT]
                             ),
                         ])->toResponse();
                     }
