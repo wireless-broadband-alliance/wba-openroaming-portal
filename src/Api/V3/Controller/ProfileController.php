@@ -119,8 +119,8 @@ class ProfileController extends AbstractController
             $androidLimit = 32;
             $realmSize = strlen($this->getSettingValueRaw(SettingName::RADIUS_REALM_NAME->value)) + 1;
             $username = $this->generateToken($androidLimit - $realmSize) . "@" . $this->getSettingValueRaw(
-                    SettingName::RADIUS_REALM_NAME->value
-                );
+                SettingName::RADIUS_REALM_NAME->value
+            );
             $plainToken = $this->generateToken($androidLimit - $realmSize);
             $encryptedToken = $this->encryptionService->encrypt($plainToken);
 
