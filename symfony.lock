@@ -58,7 +58,7 @@
         },
         "files": [
             "config/packages/doctrine_migrations.yaml",
-            "src/Migrations/.gitignore"
+            "migrations/.gitignore"
         ]
     },
     "knpuniversity/oauth2-client-bundle": {
