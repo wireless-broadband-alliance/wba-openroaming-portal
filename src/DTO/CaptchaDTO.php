@@ -18,6 +18,7 @@ class CaptchaDTO
         constraints: [
             new Assert\NotBlank(message: 'fieldCannotBeBlank'),
             new Assert\Length(min: 5, max: 255, minMessage: 'minCharacters', maxMessage: 'maxCharacters'),
+            new Assert\Regex(pattern: '/^v2:/', match: false, message: 'keyMustBeDecrypted'),
         ],
     )]
     public ?string $turnstileKey = null;
@@ -27,6 +28,7 @@ class CaptchaDTO
         constraints: [
             new Assert\NotBlank(message: 'fieldCannotBeBlank'),
             new Assert\Length(min: 5, max: 255, minMessage: 'minCharacters', maxMessage: 'maxCharacters'),
+            new Assert\Regex(pattern: '/^v2:/', match: false, message: 'keyMustBeDecrypted'),
         ],
     )]
     public ?string $turnstileSecret = null;
@@ -36,6 +38,7 @@ class CaptchaDTO
         constraints: [
             new Assert\NotBlank(message: 'fieldCannotBeBlank'),
             new Assert\Length(min: 5, max: 255, minMessage: 'minCharacters', maxMessage: 'maxCharacters'),
+            new Assert\Regex(pattern: '/^v2:/', match: false, message: 'keyMustBeDecrypted'),
         ],
     )]
     public ?string $recaptcha3Key = null;
@@ -45,6 +48,7 @@ class CaptchaDTO
         constraints: [
             new Assert\NotBlank(message: 'fieldCannotBeBlank'),
             new Assert\Length(min: 5, max: 255, minMessage: 'minCharacters', maxMessage: 'maxCharacters'),
+            new Assert\Regex(pattern: '/^v2:/', match: false, message: 'keyMustBeDecrypted'),
         ],
     )]
     public ?string $recaptcha3Secret = null;
