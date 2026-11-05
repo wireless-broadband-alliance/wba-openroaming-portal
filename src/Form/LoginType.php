@@ -106,7 +106,11 @@ class LoginType extends AbstractType
             'mapped' => false,
         ]);
 
-        // Add hidden CAPTCHA input if provider is active
+        // Plain hidden field on purpose: do NOT use CaptchaType here.
+        // This form is rendered by Live Components (LoginForm / LoginUUIDForm) that re-submit it on every
+        // re-render, which would consume the single-use token before the real submit.
+        // Server-side verification happens in LandingAuthenticator / DashboardAuthenticator (password login)
+        // and in SecurityController::loginMagic() (magic link).
         if ($this->captchaValidator->getActiveProvider() !== CaptchaProviderEnum::OFF->value) {
             $builder->add('captcha', HiddenType::class, [
                 'required' => false,
