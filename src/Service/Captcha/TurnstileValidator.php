@@ -75,7 +75,8 @@ readonly class TurnstileValidator
             return ['success' => false, 'error' => $msg];
         } catch (Throwable $e) {
             $msg = $this->translator->trans('validationFailed', [], 'TurnstileValidator');
-            $this->logger->error($msg, ['error' => $e->getMessage(), 'payload' => $payload]);
+            // Never log $payload: it contains the provider secret
+            $this->logger->error($msg, ['error' => $e->getMessage(), 'client_ip' => $clientIp]);
 
             return ['success' => false, 'error' => $msg];
         }
@@ -96,8 +97,8 @@ readonly class TurnstileValidator
                     'secret' => $secretKey,
                     'response' => '01AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==',
                 ]),
-                'verify_peer' => false,
-                'verify_host' => false,
+                // TLS certificate and hostname verification stay on (HttpClient default):
+                // this request carries the provider secret.
             ]);
 
             $data = $response->toArray();

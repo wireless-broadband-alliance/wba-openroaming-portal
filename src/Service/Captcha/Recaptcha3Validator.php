@@ -82,7 +82,8 @@ readonly class Recaptcha3Validator
             return ['success' => false, 'error' => $msg];
         } catch (Throwable $e) {
             $msg = $this->translator->trans('validationFailed', [], 'Recaptcha3Validator');
-            $this->logger->error($msg, ['error' => $e->getMessage(), 'payload' => $payload]);
+            // Never log $payload: it contains the provider secret
+            $this->logger->error($msg, ['error' => $e->getMessage(), 'client_ip' => $clientIp]);
 
             return ['success' => false, 'error' => $msg];
         }
@@ -103,8 +104,8 @@ readonly class Recaptcha3Validator
                     'secret' => $secretKey,
                     'response' => 'dummy-token',
                 ]),
-                'verify_peer' => false,
-                'verify_host' => false,
+                // TLS certificate and hostname verification stay on (HttpClient default):
+                // this request carries the provider secret.
             ]);
 
             $data = $response->toArray();
