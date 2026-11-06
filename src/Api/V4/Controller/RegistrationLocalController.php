@@ -7,6 +7,7 @@ use App\DTO\Api\UserEmailRegistrationDTO;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
+use App\Enum\CaptchaAction;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\PlatformMode;
@@ -99,7 +100,8 @@ class RegistrationLocalController extends AbstractController
             (
             $captchaError = $this->captchaValidator->validateApiPayload(
                 $data,
-                $request->getClientIp()
+                $request->getClientIp(),
+                CaptchaAction::API_REGISTER
             )) instanceof BaseResponse
         ) {
             return $captchaError->toResponse();
@@ -225,7 +227,8 @@ class RegistrationLocalController extends AbstractController
         if (
             ($captchaError = $this->captchaValidator->validateApiPayload(
                 $data,
-                $request->getClientIp()
+                $request->getClientIp(),
+                CaptchaAction::API_RESET_EMAIL
             )) instanceof BaseResponse
         ) {
             return $captchaError->toResponse();

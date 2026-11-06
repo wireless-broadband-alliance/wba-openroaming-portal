@@ -8,6 +8,10 @@ To use CAPTCHA in the forms, use the dedicated Twig function:
     {{ render_captcha(form) }}  OR  {{ render_captcha(form.captcha) }}
 ========================================================================================
 
+The action comes from CaptchaType's `captcha_action` option, or from the second argument of
+render_captcha() for forms with a plain hidden field: {{ render_captcha(form, 'login') }}.
+The server only accepts tokens created for that action (see App\Enum\CaptchaAction).
+
 `data-live-ignore` (with a stable id) is required: most forms are rendered inside Live
 Components, and a re-render would otherwise remove the Turnstile iframe and its
 `cf-turnstile-response` input, posting the form without a CAPTCHA token.
@@ -20,7 +24,7 @@ Components, and a re-render would otherwise remove the Turnstile iframe and its
                 provider: provider,
                 siteKey: siteKey,
                 fieldId: fieldId,
-                action: captchaAction|default('login'),
+                action: captchaAction,
             }) }}>
         {{ form_widget(field) }}
 

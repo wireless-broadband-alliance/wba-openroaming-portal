@@ -29,10 +29,18 @@ readonly class Recaptcha3Validator
     }
 
     /**
+     * @param string|null $expectedAction   When set, the action echoed back by the provider must match it exactly
+     * @param string|null $expectedHostname When set, the hostname the token was solved on must match it
+     *
      * @return array{success: bool, error?: string}
      */
-    public function validate(string $token, ?string $clientIp = null, ?string $secretKey = null): array
-    {
+    public function validate(
+        string $token,
+        ?string $clientIp = null,
+        ?string $secretKey = null,
+        ?string $expectedAction = null,
+        ?string $expectedHostname = null,
+    ): array {
         if ($token === 'openroaming' && $this->kernel->getEnvironment() === 'dev') {
             return ['success' => true];
         }
@@ -68,7 +76,11 @@ readonly class Recaptcha3Validator
             $success = $responseData['success'] ?? false;
             $score = (float)($responseData['score'] ?? 0.0);
 
-            if ($success && $score >= self::MIN_SCORE) {
+            if (
+                $success
+                && $score >= self::MIN_SCORE
+                && $this->matchesExpected($responseData, $expectedAction, $expectedHostname, $clientIp)
+            ) {
                 return ['success' => true];
             }
 
@@ -126,6 +138,45 @@ readonly class Recaptcha3Validator
                 'error' => $this->translator->trans('credentialCheckFailed', [], 'Recaptcha3Validator'),
             ];
         }
+    }
+
+    /**
+     * Rejects a valid token that was created for another action or on another hostname.
+     *
+     * @param array<string, mixed> $responseData siteverify response
+     */
+    private function matchesExpected(
+        array $responseData,
+        ?string $expectedAction,
+        ?string $expectedHostname,
+        ?string $clientIp,
+    ): bool {
+        $action = $responseData['action'] ?? null;
+        if ($expectedAction !== null && $action !== $expectedAction) {
+            $this->logger->warning('CAPTCHA token action mismatch', [
+                'expected' => $expectedAction,
+                'received' => $action,
+                'client_ip' => $clientIp,
+            ]);
+
+            return false;
+        }
+
+        $hostname = $responseData['hostname'] ?? null;
+        if (
+            $expectedHostname !== null
+            && (!is_string($hostname) || strcasecmp($hostname, $expectedHostname) !== 0)
+        ) {
+            $this->logger->warning('CAPTCHA token hostname mismatch', [
+                'expected' => $expectedHostname,
+                'received' => $hostname,
+                'client_ip' => $clientIp,
+            ]);
+
+            return false;
+        }
+
+        return true;
     }
 
     private function getSecretFromDatabase(): string

@@ -6,6 +6,7 @@ use App\DTO\LoginChoiceDTO;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\CaptchaAction;
 use App\Enum\CaptchaProviderEnum;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\FirewallType;
@@ -765,7 +766,7 @@ class SecurityController extends AbstractController
             return false;
         }
 
-        return $this->captchaValidator->validate($token, $request->getClientIp())['success'];
+        return $this->captchaValidator->validate($token, $request->getClientIp(), CaptchaAction::MAGIC_LINK)['success'];
     }
 
     #[Route(path: '/dashboard/logout', name: 'app_dashboard_logout')]

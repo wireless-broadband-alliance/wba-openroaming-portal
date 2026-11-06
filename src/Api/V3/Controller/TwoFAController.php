@@ -6,6 +6,7 @@ use App\Api\V3\BaseResponse;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\ApiVersion;
+use App\Enum\CaptchaAction;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
@@ -17,7 +18,6 @@ use App\Service\TwoFAService;
 use App\Service\UserStatusChecker;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Psr\Cache\InvalidArgumentException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Exception\JsonException;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -73,6 +73,7 @@ class TwoFAController extends AbstractController
             $captchaError = $this->captchaValidator->validateApiPayload(
                 $data,
                 $request->getClientIp(),
+                CaptchaAction::API_TWO_FA,
                 ApiVersion::API_V3
             )) instanceof BaseResponse
         ) {
@@ -112,15 +113,18 @@ class TwoFAController extends AbstractController
             return $statusCheckerResponse->toResponse();
         }
 
-        // Enrolment only. If a second factor is already active, replacing it here would let anyone who
-        // knows the password take over 2FA (e.g. overwrite the TOTP secret) without proving the
-        // current factor. Changing or removing an active method must go through the disable flow first.
+        // Enrolment only. If a second factor is already active, replacing it here
+        // would let anyone who knows the password take over 2FA (e.g. overwrite the
+        // TOTP secret) without proving the current factor. Changing or removing an
+        // active method must go through the disable flow first.
         if ($user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value) {
             return new BaseResponse(
                 409,
                 null,
-                'Two-factor authentication is already enabled for this account. Disable it before selecting a new method.'
-            )->toResponse();
+                'Two-factor authentication is already enabled for this account. '
+                . 'Disable it before enrolling a new method.'
+            )
+                ->toResponse();
         }
 
         // Generate TOTP secret
@@ -176,10 +180,6 @@ class TwoFAController extends AbstractController
         )->toResponse();
     }
 
-    /**
-     * @throws InvalidArgumentException
-     * @throws \JsonException
-     */
     #[Route(
         '/twoFA/validate',
         name: 'api_v3_twoFA_validate',
@@ -244,14 +244,16 @@ class TwoFAController extends AbstractController
             return $statusCheckerResponse->toResponse();
         }
 
-        // Same rule as twoFAEnable(): this endpoint only confirms a new enrolment, it never switches an
-        // already active method (that would bypass the current second factor).
+        // Same rule as twoFAEnable(): this endpoint only confirms a new enrolment, it never
+        // switches an already active method (that would bypass the current second factor).
         if ($user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value) {
             return new BaseResponse(
                 409,
                 null,
-                'Two-factor authentication is already enabled for this account. Disable it before selecting a new method.'
-            )->toResponse();
+                'Two-factor authentication is already enabled for this account. '
+                . 'Disable it before enrolling a new method.'
+            )
+                ->toResponse();
         }
 
         // Email/SMS: codes are stored as Argon2id hashes, so they must be verified through the service

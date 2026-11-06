@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Twig;
 
+use App\Enum\CaptchaAction;
 use App\Enum\CaptchaProviderEnum;
 use App\Service\Captcha\CaptchaValidator;
 use Symfony\Component\Form\FormView;
@@ -25,8 +26,12 @@ class CaptchaExtension
      * @throws RuntimeError
      * @throws LoaderError
      */
+    /**
+     * Forms using CaptchaType carry their own action. Forms with a plain hidden captcha field (LoginType,
+     * rendered by Live Components) must pass it: {{ render_captcha(form, 'login') }}.
+     */
     #[AsTwigFunction(name: 'render_captcha', needsEnvironment: true, isSafe: ['html'])]
-    public function renderCaptcha(Environment $twig, mixed $formOrField): string
+    public function renderCaptcha(Environment $twig, mixed $formOrField, ?string $action = null): string
     {
         if (!$formOrField instanceof FormView) {
             return '';
@@ -54,11 +59,21 @@ class CaptchaExtension
             return '';
         }
 
+        $captchaAction = $captchaField->vars['captcha_action'] ?? $action;
+        if (!is_string($captchaAction)) {
+            throw new \LogicException(
+                'render_captcha() needs a CAPTCHA action: use CaptchaType with "captcha_action", '
+                . 'or pass it as the second argument.'
+            );
+        }
+
         return $twig->render('shared/_captcha_widget.html.twig', [
             'field' => $captchaField,
             'provider' => $provider,
             'siteKey' => $siteKey,
             'fieldId' => $captchaField->vars['id'],
+            // from() throws on a typo, instead of silently creating tokens the server will reject
+            'captchaAction' => CaptchaAction::from($captchaAction)->value,
         ]);
     }
 }

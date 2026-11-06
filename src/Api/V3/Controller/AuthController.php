@@ -9,6 +9,7 @@ use App\Controller\MicrosoftController;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
+use App\Enum\CaptchaAction;
 use App\Enum\AnalyticalEventType;
 use App\Enum\ApiVersion;
 use App\Enum\EventMetadataKeysType;
@@ -95,6 +96,7 @@ class AuthController extends AbstractController
             $captchaError = $this->captchaValidator->validateApiPayload(
                 $data,
                 $request->getClientIp(),
+                CaptchaAction::API_LOGIN,
                 ApiVersion::API_V3
             )) instanceof BaseResponse
         ) {
