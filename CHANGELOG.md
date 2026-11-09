@@ -41,6 +41,29 @@
       }
       ```
 
+- **RADIUS Realm Length Limited to 23 Characters**: The RADIUS realm (`RADIUS_REALM_NAME`) is part of every RADIUS
+  username (`<random prefix>@<realm>`, 32 characters at most), so it can no longer be longer than 23 characters. This
+  leaves room for a random prefix of at least 8 characters.
+  - The **RADIUS settings** page and the **FreeRADIUS certificate domain** step of the certificate wizard (which also
+    saves the domain as the realm) now reject longer values with a validation error.
+  - If the realm saved in the database is empty or longer than 23 characters, no new profile is issued:
+    - API v3/v4 `/config/profile/android` and `/config/profile/ios` return **500** with
+      `The RADIUS realm is misconfigured. Please contact the portal administrator.`
+    - The landing page profile downloads (Android, iOS and Windows) show an error and redirect to the landing page.
+
+### Security Fixes
+
+- **RADIUS Password Length No Longer Depends on the Realm**: The RADIUS password of a new profile was generated with
+  the same length as the username prefix (`32 - (realm length + 1)`), so a longer realm produced a weaker password: a
+  26-character realm gave a 5-character password, and a realm of 31 characters or more gave an **empty password** and
+  the same username (`@realm`) for every user.
+  - Passwords are now always a random 32-character string, independent of the realm.
+  - The username prefix is checked separately, and a realm that cannot fit the username format is rejected (see
+    above) instead of creating a broken or shared account.
+  - Credential generation now lives in a single service (`RadiusCredentialGenerator`), shared by the API v3, API v4
+    and landing page profile controllers, replacing three copies of the same code.
+  - Profiles that already exist keep their current credentials until they are revoked or expire.
+
 ### Action Required & Deployment Steps
 
 - **Database Migrations & Turnstile Settings Import**: Executing the database migration sets up the required settings
@@ -51,6 +74,10 @@
     php bin/console doctrine:migrations:migrate
     php bin/console import:turnstileSettings
     ```
+
+- **Check the RADIUS Realm Length**: On the admin dashboard, open the RADIUS settings and confirm that the realm is 23
+  characters or fewer.
+
 
 ### Improvements & Features
 
@@ -66,6 +93,8 @@
 - **Environment Turnstile Settings Importer (`import:turnstileSettings`)**: Added a CLI command (
   `php bin/console import:turnstileSettings`) to read `TURNSTILE_KEY` and `TURNSTILE_SECRET` from environment variables,
   encrypt them at rest via `EncryptionService`, and persist or update them in the `Setting` table.
+- **Profile Endpoint Documentation (API v3 & v4)**: The `/config/profile/android` and `/config/profile/ios` docs now
+  describe the RADIUS username format, the fixed password length and the new 500 response for a misconfigured realm.
 
 ### Bug Fixes
 
