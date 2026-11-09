@@ -4,9 +4,9 @@ return [
     'api_v3_twoFA_validate' => [
         'routePrefix' => '/api/v3/twoFA/validate',
         'section' => 'TwoFactor',
-        'description' => 'This endpoint validates a 2FA code (email, SMS, or TOTP). 
-    The client must send a valid JWT Bearer token in the Authorization header, 
-    along with the 2FA type and confirmation code in the request body. 
+        'description' => 'This endpoint validates a 2FA code (email, SMS, or TOTP).
+    The client must send a valid JWT Bearer token in the Authorization header,
+    along with the 2FA type and confirmation code in the request body.
     If the code is valid, 2FA is enabled for that method.
     This endpoint only confirms a first enrolment: if the account already has 2FA enabled it returns 409,
     and the active method must be disabled before selecting a new one.
@@ -64,7 +64,7 @@ return [
             'password' => 'user-password-example',
             'turnstile_token' => 'valid_test_token',
         ],
-        'description' => 'Enables Two-Factor Authentication (2FA) for the authenticated user. 
+        'description' => 'Enables Two-Factor Authentication (2FA) for the authenticated user.
         Supports ("totp", "email", "sms"). Requires a valid JWT Bearer token.
         Only for first enrolment: if the account already has 2FA enabled, the request is rejected with 409
         and no new secret or code is generated. Calling it again before validating (2FA still disabled)
@@ -223,8 +223,8 @@ The client must send the current valid JWT in the request body as "current_token
             'turnstile_token' => 'valid_test_token',
             'twoFACode' => '02YZR88R'
         ],
-        'description' => 'This endpoint authenticates a user using their UUID, password, 
-        and a CAPTCHA token. Platform can require the authentication with Two-Factor, 
+        'description' => 'This endpoint authenticates a user using their UUID, password,
+        and a CAPTCHA token. Platform can require the authentication with Two-Factor,
         the twoFACode parameter will be asked based on the TWO_FACTOR_AUTH_STATUS setting.
         When the setting LOGIN_WITH_UUID_ONLY is enabled:
         The authentication process does not require a password. Instead, a success message is returned
@@ -297,10 +297,10 @@ The client must send the current valid JWT in the request body as "current_token
                 'SAMLResponse' => 'samlResponseExample'
             ],
         ],
-        'description' => 'This endpoint authenticates a user using their SAML response. 
-                If the user is not found in the database, a new user will be created based on the SAML assertion. 
-                The response includes user details along with a JWT token if authentication is successful. 
-                Also if the platform requires authentication with Two-Factor, the twoFACode parameter will 
+        'description' => 'This endpoint authenticates a user using their SAML response.
+                If the user is not found in the database, a new user will be created based on the SAML assertion.
+                The response includes user details along with a JWT token if authentication is successful.
+                Also if the platform requires authentication with Two-Factor, the twoFACode parameter will
                 be asked based on the TWO_FACTOR_AUTH_STATUS setting.',
         'responses' => [
             200 => [
@@ -357,9 +357,9 @@ The client must send the current valid JWT in the request body as "current_token
             'code' => '4/0AdKgLCxjQ74mKAg9vs_f7PuO99DR',
             'twoFACode' => '02YZR88R'
         ],
-        'description' => 'This endpoint authenticates a user using their Google account. 
+        'description' => 'This endpoint authenticates a user using their Google account.
                 A valid Google OAuth authorization code is required. If the user is successfully authenticated,
-                 user details and a JWT token will be returned. Also if the platform requires authentication with 
+                 user details and a JWT token will be returned. Also if the platform requires authentication with
                  Two-Factor, the twoFACode parameter will be asked based on the TWO_FACTOR_AUTH_STATUS setting.',
         'responses' => [
             200 => [
@@ -415,9 +415,9 @@ The client must send the current valid JWT in the request body as "current_token
             'code' => '0.AQk6Lf2I2XGhQkWlU8gBp0KmxeNn2KTcbsJh.8Qt3OeYCB4sQ2FHo',
             'twoFACode' => '02YZR88R'
         ],
-        'description' => 'This endpoint authenticates a user using their Microsoft account. 
-                A valid Microsoft OAuth authorization code is required. If the user is successfully authenticated, 
-                user details and a JWT token will be returned. Also if the platform requires authentication with 
+        'description' => 'This endpoint authenticates a user using their Microsoft account.
+                A valid Microsoft OAuth authorization code is required. If the user is successfully authenticated,
+                user details and a JWT token will be returned. Also if the platform requires authentication with
                 Two-Factor, the twoFACode parameter will be asked based on the TWO_FACTOR_AUTH_STATUS setting.',
         'responses' => [
             200 => [
@@ -493,7 +493,7 @@ The client must send the current valid JWT in the request body as "current_token
     'api_v3_config_settings' => [
         'routePrefix' => '/api/v3/config',
         'section' => 'Config',
-        'description' => 'This endpoint returns public values from the Setting entity and environment 
+        'description' => 'This endpoint returns public values from the Setting entity and environment
                 variables categorized by platform and provider.',
         'requestBody' => [],
         'responses' => [
@@ -597,9 +597,13 @@ The client must send the current valid JWT in the request body as "current_token
         'requestBody' => [
             'public_key' => '-----BEGIN PUBLIC KEY-----\\n<RSA_PUBLIC_KEY>\\n-----END PUBLIC KEY-----'
         ],
-        'description' => 'This endpoint retrieves the profile configuration for Android, including 
+        'description' => 'This endpoint retrieves the profile configuration for Android, including
                 a user\'s radius profile data, encrypted password, and other relevant settings for the Android
-                 application. The account must be verified, not banned and without a pending
+                 application. A new RADIUS profile gets a username in the format
+                 "<random prefix>@<RADIUS_REALM_NAME>" (32 characters at most) and a random 32 character
+                 password, independent of the realm. If the RADIUS_REALM_NAME setting is empty or longer than
+                 23 characters, no profile is issued and the request fails with 500.
+                 The account must be verified, not banned and without a pending
                  forgot-password request.',
         'isProtected' => true,
         'responses' => [
@@ -609,7 +613,7 @@ The client must send the current valid JWT in the request body as "current_token
                               "success": true,
                               "data": {
                                 "config_android": {
-                                  "radiusUsername": "user123",
+                                  "radiusUsername": "a1B2c3D4e5F6g7H8i9J0@example.com",
                                   "radiusPassword": "encrypted_password_here",
                                   "friendlyName": "My Android Profile",
                                   "fqdn": "example.com",
@@ -641,7 +645,8 @@ The client must send the current valid JWT in the request body as "current_token
                 'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action.'
             ],
             500 => [
-                'Failed to encrypt the password',
+                'The RADIUS realm is misconfigured. Please contact the portal administrator.',
+                'Failed to encrypt the password.',
                 'Encryption succeeded but no encrypted data was returned.'
             ]
         ]
@@ -654,6 +659,10 @@ The client must send the current valid JWT in the request body as "current_token
         ],
         'description' => 'This endpoint retrieves the profile configuration for iOS, including a user\'s radius
                  profile data, encrypted password, and other relevant settings for the iOS application.
+                 A new RADIUS profile gets a username in the format "<random prefix>@<RADIUS_REALM_NAME>"
+                 (32 characters at most) and a random 32 character password, independent of the realm.
+                 If the RADIUS_REALM_NAME setting is empty or longer than 23 characters, no profile is issued
+                 and the request fails with 500.
                  The account must be verified, not banned and without a pending forgot-password request.',
         'isProtected' => true,
         'responses' => [
@@ -668,7 +677,7 @@ The client must send the current valid JWT in the request body as "current_token
                                 "domainName": "example.com",
                                 "EAPClientConfiguration": {
                                   "acceptEAPTypes": 21,
-                                  "radiusUsername": "user123",
+                                  "radiusUsername": "a1B2c3D4e5F6g7H8i9J0@example.com",
                                   "radiusPassword": "encrypted_password_here",
                                   "outerIdentity": "anonymous@example.com",
                                   "TTLSInnerAuthentication": "MSCHAPv2"
@@ -699,7 +708,8 @@ The client must send the current valid JWT in the request body as "current_token
                 'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action.'
             ],
             500 => [
-                'Failed to encrypt the password',
+                'The RADIUS realm is misconfigured. Please contact the portal administrator.',
+                'Failed to encrypt the password.',
                 'Encryption succeeded but no encrypted data was returned.'
             ]
         ]
@@ -760,9 +770,9 @@ response to prevent user enumeration. A registration email is sent to newly crea
             'email' => 'test@example.com',
             'turnstile_token' => 'valid_test_token'
         ],
-        'description' => 'This endpoint triggers a password reset for a local auth account. 
-                The user must provide their email and a CAPTCHA validation token. The endpoint verifies if the user 
-                has an external auth with "PortalAccount" and "EMAIL" providerId, then proceeds with the password 
+        'description' => 'This endpoint triggers a password reset for a local auth account.
+                The user must provide their email and a CAPTCHA validation token. The endpoint verifies if the user
+                has an external auth with "PortalAccount" and "EMAIL" providerId, then proceeds with the password
                 reset if the conditions are met.',
         'responses' => [
             200 => [
@@ -842,11 +852,11 @@ returns a generic successful response to prevent user enumeration.',
             'phone_number' => '1234567890',
             'turnstile_token' => 'valid_test_token'
         ],
-        'description' => 'This endpoint sends an SMS with a new temporary password if the user 
-                has a valid PortalAccount and has not exceeded SMS request limits. Limits come from the 
-                SMS_TIME_INTERVAL_BETWEEN_REQUESTS (cooldown), SMS_ATTEMPTS_NUMBER and 
-                SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS settings and are shared with the web forgot-password flow. 
-                A request inside the cooldown returns the generic success message without sending anything; 
+        'description' => 'This endpoint sends an SMS with a new temporary password if the user
+                has a valid PortalAccount and has not exceeded SMS request limits. Limits come from the
+                SMS_TIME_INTERVAL_BETWEEN_REQUESTS (cooldown), SMS_ATTEMPTS_NUMBER and
+                SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS settings and are shared with the web forgot-password flow.
+                A request inside the cooldown returns the generic success message without sending anything;
                 a request over the attempts limit returns 429.',
         'responses' => [
             200 => [
@@ -882,10 +892,10 @@ returns a generic successful response to prevent user enumeration.',
         'section' => 'Config',
         'requestBody' => [
             'success' => true,
-            'data' => '<html><body><h1>Turnstile Configuration</h1><p>This is the required HTML 
+            'data' => '<html><body><h1>Turnstile Configuration</h1><p>This is the required HTML
 configuration for the Android App.</p></body></html>'
         ],
-        'description' => 'This endpoint serves the public HTML configuration required for the Android 
+        'description' => 'This endpoint serves the public HTML configuration required for the Android
                 App to integrate with the Turnstile feature.',
         'responses' => [
             200 => [
@@ -909,10 +919,10 @@ configuration for the Android App.</p></body></html>'
         'section' => 'Config',
         'requestBody' => [
             'success' => true,
-            'data' => '<html><body><h1>Turnstile Configuration</h1><p>This is the required HTML 
+            'data' => '<html><body><h1>Turnstile Configuration</h1><p>This is the required HTML
 configuration for the IOS App.</p></body></html>'
         ],
-        'description' => 'This endpoint serves the public HTML configuration required for the IOS 
+        'description' => 'This endpoint serves the public HTML configuration required for the IOS
                 App to integrate with the Turnstile feature.',
         'responses' => [
             200 => [
@@ -949,9 +959,9 @@ configuration for the IOS App.</p></body></html>'
             ],
 
         ],
-        'description' => 'This endpoint deletes the currently authenticated user account. 
-                Depending on the authentication method, the request body may require a password (Portal Account), 
-                a SAMLResponse (SAML), or an authorization code (Google/Microsoft). 
+        'description' => 'This endpoint deletes the currently authenticated user account.
+                Depending on the authentication method, the request body may require a password (Portal Account),
+                a SAMLResponse (SAML), or an authorization code (Google/Microsoft).
                 The request verifies the provided authentication details before performing the account deletion.',
         'isProtected' => true,
         'responses' => [

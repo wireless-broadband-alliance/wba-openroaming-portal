@@ -55,6 +55,17 @@ $alreadyEnabled2FA = 'Two-factor authentication is already enabled for this acco
 
 $accountStatusNote = 'The account must be verified, not banned and without a pending forgot-password request.';
 
+/**
+ * How the profile endpoints build RADIUS credentials (App\Service\RadiusCredentialGenerator):
+ * 32 is the maximum username length, 23 the longest realm that still leaves room for an 8 character prefix.
+ */
+$radiusCredentialsNote = 'A new RADIUS profile gets a username in the format "<random prefix>@<RADIUS_REALM_NAME>" '
+    . '(32 characters at most) and a random 32 character password, independent of the realm. '
+    . 'If the RADIUS_REALM_NAME setting is empty or longer than 23 characters, no profile is issued and the '
+    . 'request fails with 500.';
+
+$radiusRealmError = 'The RADIUS realm is misconfigured. Please contact the portal administrator.';
+
 $serverErrors = [
     'An error occurred: Generic server-side error.',
     'JWT key files are missing. Please ensure both private and public keys exist.',
@@ -549,6 +560,7 @@ return [
         'section' => 'Config',
         'description' => 'This endpoint retrieves the profile configuration for Android, including '
             . 'a user\'s radius profile data, encrypted password, and other relevant settings for the Android application. '
+            . $radiusCredentialsNote . ' '
             . $accountStatusNote,
         'isProtected' => true,
         // Double quotes on purpose: the partial runs json_encode, so real newlines are displayed as \n.
@@ -562,7 +574,7 @@ return [
                         "success": true,
                         "data": {
                             "config_android": {
-                                "radiusUsername": "user123",
+                                "radiusUsername": "a1B2c3D4e5F6g7H8i9J0@example.com",
                                 "radiusPassword": "encrypted_password_here",
                                 "friendlyName": "My Android Profile",
                                 "fqdn": "example.com",
@@ -588,7 +600,8 @@ return [
                 'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action.',
             ],
             500 => [
-                'Failed to encrypt the password',
+                $radiusRealmError,
+                'Failed to encrypt the password.',
                 'Encryption succeeded but no encrypted data was returned.',
             ],
         ],
@@ -598,6 +611,7 @@ return [
         'section' => 'Config',
         'description' => 'This endpoint retrieves the profile configuration for iOS, including a user\'s radius '
             . 'profile data, encrypted password, and other relevant settings for the iOS application. '
+            . $radiusCredentialsNote . ' '
             . $accountStatusNote,
         'isProtected' => true,
         'requestBody' => [
@@ -615,7 +629,7 @@ return [
                             "domainName": "example.com",
                             "EAPClientConfiguration": {
                                 "acceptEAPTypes": 21,
-                                "radiusUsername": "user123",
+                                "radiusUsername": "a1B2c3D4e5F6g7H8i9J0@example.com",
                                 "radiusPassword": "encrypted_password_here",
                                 "outerIdentity": "anonymous@example.com",
                                 "TTLSInnerAuthentication": "MSCHAPv2"
@@ -640,7 +654,8 @@ return [
                 'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action.',
             ],
             500 => [
-                'Failed to encrypt the password',
+                $radiusRealmError,
+                'Failed to encrypt the password.',
                 'Encryption succeeded but no encrypted data was returned.',
             ],
         ],
