@@ -380,8 +380,8 @@ class ProfileController extends AbstractController
 
         $data = [
             'payloadIdentifier' => 'com.apple.wifi.managed.' . $this->getSettingValueRaw(
-                    SettingName::PAYLOAD_IDENTIFIER->value
-                ) . '-2',
+                SettingName::PAYLOAD_IDENTIFIER->value
+            ) . '-2',
             'payloadType' => 'com.apple.wifi.managed',
             'payloadUUID' => $this->getSettingValueRaw(SettingName::PAYLOAD_IDENTIFIER->value) . '-1',
             'domainName' => $this->getSettingValueRaw(SettingName::DOMAIN_NAME->value),

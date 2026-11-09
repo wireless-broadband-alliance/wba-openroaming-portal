@@ -6,9 +6,9 @@ use App\Api\V3\BaseResponse;
 use App\DTO\Api\UserSMSRegistrationDTO;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
-use App\Enum\CaptchaAction;
 use App\Enum\AnalyticalEventType;
 use App\Enum\ApiVersion;
+use App\Enum\CaptchaAction;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\ForgotPasswordEnum;
 use App\Enum\SettingName;
@@ -18,7 +18,6 @@ use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\Captcha\CaptchaValidator;
 use App\Service\EventActions;
-use App\Service\PasswordGenerator;
 use App\Service\PasswordResetAttemptGuard;
 use App\Service\SendSMS;
 use DateTime;
@@ -52,7 +51,6 @@ class RegistrationSMSController extends AbstractController
         private readonly CaptchaValidator $captchaValidator,
         private readonly ValidatorInterface $validator,
         private readonly PhoneNumberUtil $phoneNumberUtil,
-        private readonly PasswordGenerator $passwordGenerator,
         private readonly PasswordResetAttemptGuard $passwordResetAttemptGuard,
     ) {
     }
