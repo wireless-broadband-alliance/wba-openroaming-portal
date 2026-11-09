@@ -842,8 +842,9 @@ returns a generic successful response to prevent user enumeration.',
             'phone_number' => '1234567890',
             'turnstile_token' => 'valid_test_token'
         ],
-        'description' => 'This endpoint sends an SMS with a new temporary password if the user 
-                has a valid PortalAccount and has not exceeded SMS request limits. Limits come from the 
+        'description' => 'This endpoint generates and sends a single-use verification code (OTP) via SMS 
+                if the user has a valid PortalAccount and has not exceeded SMS request limits. It does NOT modify 
+                or invalidate the user password until the challenge is confirmed. Limits come from the 
                 SMS_TIME_INTERVAL_BETWEEN_REQUESTS (cooldown), SMS_ATTEMPTS_NUMBER and 
                 SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS settings and are shared with the web forgot-password flow. 
                 A request inside the cooldown returns the generic success message without sending anything; 
@@ -854,7 +855,7 @@ returns a generic successful response to prevent user enumeration.',
                     '{
                                       "success": true,
                                       "data": {
-                                        "success": "If the phone number exists, we have sent a new code to: Country Code: 351 National Number: 925544896."
+                                        "success": "If the phone number exists, we have sent a verification code to: +3511234567890. You have 3 attempt(s) left."
                                       }
                                     }',
                     false,
@@ -876,6 +877,39 @@ returns a generic successful response to prevent user enumeration.',
             ]
         ]
 
+    ],
+    'api_v3_auth_sms_reset_confirm' => [
+        'routePrefix' => '/api/v3/auth/sms/reset/confirm',
+        'section' => 'Auth',
+        'requestBody' => [
+            'country_code' => 'PT',
+            'phone_number' => '1234567890',
+            'code' => '123456'
+        ],
+        'description' => 'Verifies the single-use SMS verification code (OTP) sent to the user. 
+                Upon successful challenge verification, a new strong password is generated and committed for the user.',
+        'responses' => [
+            200 => [
+                json_decode(
+                    '{
+                                      "success": true,
+                                      "data": {
+                                        "success": "Password updated successfully.",
+                                        "new_password": "generatedPasswordString"
+                                      }
+                                    }',
+                    false,
+                    512,
+                    JSON_THROW_ON_ERROR
+                )
+            ],
+            400 => [
+                'Invalid JSON format',
+                'Invalid data: Missing required fields.',
+                'Invalid phone number format or country code.',
+                'Invalid or expired verification code.'
+            ]
+        ]
     ],
     'api_v3_turnstile_html_android' => [
         'routePrefix' => '/api/v3/turnstile/android',

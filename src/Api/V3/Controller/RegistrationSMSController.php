@@ -345,8 +345,7 @@ class RegistrationSMSController extends AbstractController
 
             if ($hasValidPortalAccount) {
                 try {
-                    // Cooldown + attempts limit, checked and recorded atomically per user (shared with the web
-                    // forgot-password flow). Nothing below runs unless the attempt was accepted and saved.
+                    // Cooldown + attempts limit, checked and recorded atomically per user
                     $attempt = $this->passwordResetAttemptGuard->tryRegisterAttempt(
                         $user,
                         true,
@@ -365,7 +364,7 @@ class RegistrationSMSController extends AbstractController
                             )->toResponse();
                         }
 
-                        // Cooldown: protect against spam and RGPD policies - simulate success without actual resend
+                        // Cooldown: simulate success without actual resend
                         return new BaseResponse(200, [
                             'success' => sprintf(
                                 'If the phone number exists, a new code has been sent to %s.',
@@ -374,17 +373,20 @@ class RegistrationSMSController extends AbstractController
                         ])->toResponse();
                     }
 
-                    // Only generate/hash the new password once the attempt has been accepted
-                    $randomPassword = $this->passwordGenerator->generate();
-                    $user->setPassword($this->userPasswordHasher->hashPassword($user, $randomPassword));
-                    $user->setForgotPasswordRequest(true);
+                    // Generate a single-use verification code challenge (OTP)
+                    $verificationCode = (string)random_int(100000, 999999);
+                    $user->setTwoFAcode($verificationCode);
+                    $user->setTwoFAcodeIsActive(true);
+                    $user->setTwoFAcodeGeneratedAt(new DateTime());
+
+                    // DO NOT mutate existing password or set forgotPasswordRequest at this stage
                     $this->entityManager->flush();
 
-                    // Send SMS
-                    $message = "Your account password is: " . $randomPassword;
+                    // Send verification code via SMS
+                    $message = sprintf('Your password reset verification code is: %s', $verificationCode);
                     $result = $this->sendSMSService->sendSmsNoValidation($user, $message);
 
-                    // Log reset event
+                    // Log reset request event
                     $eventMetadata = [
                         EventMetadataKeysType::IP->value => $request->getClientIp(),
                         EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
@@ -401,7 +403,7 @@ class RegistrationSMSController extends AbstractController
                     if ($result !== '' && $result !== '0') {
                         return new BaseResponse(200, [
                             'success' => sprintf(
-                                'If the phone number exists, we have sent a new code to: %s. '
+                                'If the phone number exists, we have sent a verification code to: %s. '
                                 . 'You have %d attempt(s) left.',
                                 $user->getUuid(),
                                 $attempt[PasswordResetAttemptGuard::ATTEMPTS_LEFT]
@@ -423,5 +425,82 @@ class RegistrationSMSController extends AbstractController
             200,
             sprintf('If the phone number exists, we have sent you a new code to: %s', $dataRequest['phone_number']),
         )->toResponse();
+    }
+
+    /**
+     * Verify the SMS challenge code and only then update the user's password.
+     *
+     * @throws Exception
+     */
+    #[Route('/auth/sms/reset/confirm', name: 'api_v3_auth_sms_reset_confirm', methods: ['POST'])]
+    public function smsResetConfirm(
+        Request $request
+    ): JsonResponse {
+        try {
+            $dataRequest = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException) {
+            return new BaseResponse(400, null, 'Invalid JSON format')->toResponse();
+        }
+
+        $errors = [];
+        if (empty($dataRequest['country_code'])) {
+            $errors[] = 'country_code';
+        }
+        if (empty($dataRequest['phone_number'])) {
+            $errors[] = 'phone_number';
+        }
+        if (empty($dataRequest['code'])) {
+            $errors[] = 'code';
+        }
+        if ($errors !== []) {
+            return new BaseResponse(
+                400,
+                ['missing_fields' => $errors],
+                'Invalid data: Missing required fields.'
+            )->toResponse();
+        }
+
+        // Validate phone number format
+        try {
+            $parsedPhoneNumber = $this->phoneNumberUtil->parse(
+                $dataRequest['phone_number'],
+                strtoupper((string)$dataRequest['country_code'])
+            );
+            if (!$this->phoneNumberUtil->isValidNumber($parsedPhoneNumber)) {
+                return new BaseResponse(400, null, 'Invalid phone number format.')->toResponse();
+            }
+        } catch (NumberParseException) {
+            return new BaseResponse(400, null, 'Invalid phone number format or country code.')->toResponse();
+        }
+
+        $formattedPhoneNumber = $this->phoneNumberUtil->format(
+            $parsedPhoneNumber,
+            PhoneNumberFormat::E164
+        );
+        $user = $this->userRepository->findOneBy(['uuid' => $formattedPhoneNumber]);
+
+        if (!$user || $user->getBannedAt()) {
+            return new BaseResponse(400, null, 'Invalid request or verification code.')->toResponse();
+        }
+
+        // Validate active verification code
+        if (
+            !$user->getTwoFAcodeIsActive() ||
+            $user->getTwoFAcode() !== (string)$dataRequest['code']
+        ) {
+            return new BaseResponse(400, null, 'Invalid or expired verification code.')->toResponse();
+        }
+
+        // Generate strong random replacement password and update account state after successful verification
+        $randomPassword = $this->passwordGenerator->generate();
+        $user->setPassword($this->userPasswordHasher->hashPassword($user, $randomPassword));
+        $user->setTwoFAcodeIsActive(false);
+        $user->setForgotPasswordRequest(false);
+        $this->entityManager->flush();
+
+        return new BaseResponse(200, [
+            'success' => 'Password updated successfully.',
+            'new_password' => $randomPassword,
+        ])->toResponse();
     }
 }
