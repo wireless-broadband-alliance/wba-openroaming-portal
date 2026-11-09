@@ -345,8 +345,7 @@ class RegistrationSMSController extends AbstractController
 
             if ($hasValidPortalAccount) {
                 try {
-                    // Cooldown + attempts limit, checked and recorded atomically per user (shared with the web
-                    // forgot-password flow). Nothing below runs unless the attempt was accepted and saved.
+                    // Cooldown + attempts limit, checked and recorded atomically per user
                     $attempt = $this->passwordResetAttemptGuard->tryRegisterAttempt(
                         $user,
                         true,
@@ -365,7 +364,7 @@ class RegistrationSMSController extends AbstractController
                             )->toResponse();
                         }
 
-                        // Cooldown: protect against spam and RGPD policies - simulate success without actual resend
+                        // Cooldown: simulate success without actual resend
                         return new BaseResponse(200, [
                             'success' => sprintf(
                                 'If the phone number exists, a new code has been sent to %s.',
@@ -374,17 +373,20 @@ class RegistrationSMSController extends AbstractController
                         ])->toResponse();
                     }
 
-                    // Only generate/hash the new password once the attempt has been accepted
-                    $randomPassword = $this->passwordGenerator->generate();
-                    $user->setPassword($this->userPasswordHasher->hashPassword($user, $randomPassword));
-                    $user->setForgotPasswordRequest(true);
+                    // Generate a single-use verification code challenge (OTP)
+                    $verificationCode = (string)random_int(100000, 999999);
+                    $user->setTwoFAcode($verificationCode);
+                    $user->setTwoFAcodeIsActive(true);
+                    $user->setTwoFAcodeGeneratedAt(new DateTime());
+
+                    // DO NOT mutate existing password or set forgotPasswordRequest at this stage
                     $this->entityManager->flush();
 
-                    // Send SMS
-                    $message = "Your account password is: " . $randomPassword;
+                    // Send verification code via SMS
+                    $message = sprintf('Your password reset verification code is: %s', $verificationCode);
                     $result = $this->sendSMSService->sendSmsNoValidation($user, $message);
 
-                    // Log reset event
+                    // Log reset request event
                     $eventMetadata = [
                         EventMetadataKeysType::IP->value => $request->getClientIp(),
                         EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
@@ -401,7 +403,7 @@ class RegistrationSMSController extends AbstractController
                     if ($result !== '' && $result !== '0') {
                         return new BaseResponse(200, [
                             'success' => sprintf(
-                                'If the phone number exists, we have sent a new code to: %s. '
+                                'If the phone number exists, we have sent a verification code to: %s. '
                                 . 'You have %d attempt(s) left.',
                                 $user->getUuid(),
                                 $attempt[PasswordResetAttemptGuard::ATTEMPTS_LEFT]

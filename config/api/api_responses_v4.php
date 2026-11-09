@@ -785,8 +785,9 @@ return [
     'api_v4_auth_sms_reset' => [
         'routePrefix' => '/api/v4/auth/sms/reset',
         'section' => 'Auth',
-        'description' => 'This endpoint sends an SMS with a new temporary password if the user '
-            . 'has a valid PortalAccount and has not exceeded SMS request limits. '
+        'description' => 'This endpoint generates and sends a single-use verification code (OTP) via SMS '
+            . 'if the user has a valid PortalAccount and has not exceeded request limits. '
+            . 'It does NOT modify or invalidate the user password until the challenge is confirmed. '
             . 'Limits come from the SMS_TIME_INTERVAL_BETWEEN_REQUESTS (cooldown), SMS_ATTEMPTS_NUMBER and '
             . 'SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS settings and are shared with the web forgot-password flow. '
             . 'A request inside the cooldown returns the generic success message without sending anything; '
@@ -804,7 +805,7 @@ return [
                     '{
                         "success": true,
                         "data": {
-                            "success": "If the phone number exists, we have sent a new code to: Country Code: 351 National Number: 925544896."
+                            "success": "If the phone number exists, we have sent a verification code to: +3511234567890. You have 3 attempt(s) left."
                         }
                     }'
                 ),
@@ -820,6 +821,36 @@ return [
             ],
             500 => [
                 'An unexpected error occurred while processing the request',
+            ],
+        ],
+    ],
+    'api_v4_auth_sms_reset_confirm' => [
+        'routePrefix' => '/api/v4/auth/sms/reset/confirm',
+        'section' => 'Auth',
+        'description' => 'Verifies the single-use SMS verification code (OTP) sent to the user. '
+            . 'Upon successful challenge verification, a new strong password is generated and committed for the user.',
+        'requestBody' => [
+            'country_code' => 'PT',
+            'phone_number' => '1234567890',
+            'code' => '123456',
+        ],
+        'responses' => [
+            200 => [
+                'default' => $json(
+                    '{
+                        "success": true,
+                        "data": {
+                            "success": "Password updated successfully.",
+                            "new_password": "generatedPasswordString"
+                        }
+                    }'
+                ),
+            ],
+            400 => [
+                'Invalid JSON format',
+                'Invalid data: Missing required fields.',
+                'Invalid phone number format or country code.',
+                'Invalid or expired verification code.',
             ],
         ],
     ],

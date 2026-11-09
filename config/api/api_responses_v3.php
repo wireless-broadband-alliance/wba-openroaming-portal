@@ -852,11 +852,12 @@ returns a generic successful response to prevent user enumeration.',
             'phone_number' => '1234567890',
             'turnstile_token' => 'valid_test_token'
         ],
-        'description' => 'This endpoint sends an SMS with a new temporary password if the user
-                has a valid PortalAccount and has not exceeded SMS request limits. Limits come from the
-                SMS_TIME_INTERVAL_BETWEEN_REQUESTS (cooldown), SMS_ATTEMPTS_NUMBER and
-                SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS settings and are shared with the web forgot-password flow.
-                A request inside the cooldown returns the generic success message without sending anything;
+        'description' => 'This endpoint generates and sends a single-use verification code (OTP) via SMS 
+                if the user has a valid PortalAccount and has not exceeded SMS request limits. It does NOT modify 
+                or invalidate the user password until the challenge is confirmed. Limits come from the 
+                SMS_TIME_INTERVAL_BETWEEN_REQUESTS (cooldown), SMS_ATTEMPTS_NUMBER and 
+                SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS settings and are shared with the web forgot-password flow. 
+                A request inside the cooldown returns the generic success message without sending anything; 
                 a request over the attempts limit returns 429.',
         'responses' => [
             200 => [
@@ -864,7 +865,7 @@ returns a generic successful response to prevent user enumeration.',
                     '{
                                       "success": true,
                                       "data": {
-                                        "success": "If the phone number exists, we have sent a new code to: Country Code: 351 National Number: 925544896."
+                                        "success": "If the phone number exists, we have sent a verification code to: +3511234567890. You have 3 attempt(s) left."
                                       }
                                     }',
                     false,
