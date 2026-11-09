@@ -9,8 +9,10 @@ use App\Entity\UserRadiusProfile;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\SettingName;
+use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserRadiusProfileStatus;
 use App\Exception\EncryptionException;
+use App\Exception\InvalidRadiusRealmException;
 use App\RadiusDb\Entity\RadiusUser;
 use App\RadiusDb\Repository\RadiusUserRepository;
 use App\Repository\SettingRepository;
@@ -20,6 +22,8 @@ use App\Service\EncryptionService;
 use App\Service\EventActions;
 use App\Service\ExpirationProfileService;
 use App\Service\JWTTokenGenerator;
+use App\Service\ProfileManager;
+use App\Service\RadiusCredentialGenerator;
 use App\Service\RsaEncryptionService;
 use App\Service\UserStatusChecker;
 use App\Twig\CertificateProcessExtension;
@@ -48,6 +52,8 @@ class ProfileController extends AbstractController
         private readonly UserStatusChecker $userStatusChecker,
         private readonly CertificateProcessExtension $certificateProcessExtension,
         private readonly EncryptionService $encryptionService,
+        private readonly ProfileManager $profileManager,
+        private readonly RadiusCredentialGenerator $radiusCredentialGenerator,
     ) {
     }
 
@@ -112,17 +118,37 @@ class ProfileController extends AbstractController
             ['user' => $currentUser, 'status' => UserRadiusProfileStatus::ACTIVE->value]
         );
 
+        // Never hand out an overdue profile, even if the cron has not revoked it yet
+        if ($radiusProfile?->getValidUntil() !== null && $radiusProfile->getValidUntil() < new DateTime()) {
+            // true keeps the user account enabled, only the profile is revoked
+            $this->profileManager->disableProfiles(
+                $currentUser,
+                UserRadiusProfileRevokeReason::PROFILE_EXPIRED->value,
+                true
+            );
+            $radiusProfile = null;
+        }
+
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $currentUser]);
 
         if (!$radiusProfile) {
             $radiusProfile = new UserRadiusProfile();
 
-            $androidLimit = 32;
-            $realmSize = strlen($this->getSettingValueRaw(SettingName::RADIUS_REALM_NAME->value)) + 1;
-            $username = $this->generateToken($androidLimit - $realmSize) . "@" . $this->getSettingValueRaw(
-                SettingName::RADIUS_REALM_NAME->value
-            );
-            $plainToken = $this->generateToken($androidLimit - $realmSize);
+            // Never issue a profile from a realm that cannot build a valid username: it would give every
+            // user the same username ("@realm") and an empty password
+            try {
+                $credentials = $this->radiusCredentialGenerator->generate(
+                    $this->getSettingValueRaw(SettingName::RADIUS_REALM_NAME->value)
+                );
+            } catch (InvalidRadiusRealmException) {
+                return new BaseResponse(
+                    500,
+                    null,
+                    'The RADIUS realm is misconfigured. Please contact the portal administrator.'
+                )->toResponse();
+            }
+            $username = $credentials['username'];
+            $plainToken = $credentials['password'];
             $encryptedToken = $this->encryptionService->encrypt($plainToken);
 
             $radiusProfile->setUser($currentUser);
@@ -269,17 +295,37 @@ class ProfileController extends AbstractController
             ['user' => $currentUser, 'status' => UserRadiusProfileStatus::ACTIVE->value]
         );
 
+        // Never hand out an overdue profile, even if the cron has not revoked it yet
+        if ($radiusProfile?->getValidUntil() !== null && $radiusProfile->getValidUntil() < new DateTime()) {
+            // true keeps the user account enabled, only the profile is revoked
+            $this->profileManager->disableProfiles(
+                $currentUser,
+                UserRadiusProfileRevokeReason::PROFILE_EXPIRED->value,
+                true
+            );
+            $radiusProfile = null;
+        }
+
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $currentUser]);
 
         if (!$radiusProfile) {
             $radiusProfile = new UserRadiusProfile();
 
-            $androidLimit = 32;
-            $realmSize = strlen($this->getSettingValueRaw(SettingName::RADIUS_REALM_NAME->value)) + 1;
-            $username = $this->generateToken($androidLimit - $realmSize) . "@" . $this->getSettingValueRaw(
-                SettingName::RADIUS_REALM_NAME->value
-            );
-            $plainToken = $this->generateToken($androidLimit - $realmSize);
+            // Never issue a profile from a realm that cannot build a valid username: it would give every
+            // user the same username ("@realm") and an empty password
+            try {
+                $credentials = $this->radiusCredentialGenerator->generate(
+                    $this->getSettingValueRaw(SettingName::RADIUS_REALM_NAME->value)
+                );
+            } catch (InvalidRadiusRealmException) {
+                return new BaseResponse(
+                    500,
+                    null,
+                    'The RADIUS realm is misconfigured. Please contact the portal administrator.'
+                )->toResponse();
+            }
+            $username = $credentials['username'];
+            $plainToken = $credentials['password'];
             $encryptedToken = $this->encryptionService->encrypt($plainToken);
 
             $radiusProfile->setUser($currentUser);
@@ -334,8 +380,8 @@ class ProfileController extends AbstractController
 
         $data = [
             'payloadIdentifier' => 'com.apple.wifi.managed.' . $this->getSettingValueRaw(
-                SettingName::PAYLOAD_IDENTIFIER->value
-            ) . '-2',
+                    SettingName::PAYLOAD_IDENTIFIER->value
+                ) . '-2',
             'payloadType' => 'com.apple.wifi.managed',
             'payloadUUID' => $this->getSettingValueRaw(SettingName::PAYLOAD_IDENTIFIER->value) . '-1',
             'domainName' => $this->getSettingValueRaw(SettingName::DOMAIN_NAME->value),
@@ -383,19 +429,5 @@ class ProfileController extends AbstractController
     {
         $setting = $this->settingRepository->findOneBy(['name' => $settingName]);
         return $setting ? $setting->getValue() : '';
-    }
-
-    /**
-     * @throws RandomException
-     */
-    private function generateToken(int $length = 16): string
-    {
-        $stringSpace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $pieces = [];
-        $max = mb_strlen($stringSpace, '8bit') - 1;
-        for ($i = 0; $i < $length; ++$i) {
-            $pieces[] = $stringSpace[random_int(0, $max)];
-        }
-        return implode('', $pieces);
     }
 }

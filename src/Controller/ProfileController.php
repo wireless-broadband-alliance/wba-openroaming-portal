@@ -10,8 +10,10 @@ use App\Enum\EventMetadataKeysType;
 use App\Enum\OperationMode;
 use App\Enum\OSType;
 use App\Enum\SettingName;
+use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserRadiusProfileStatus;
 use App\Exception\EncryptionException;
+use App\Exception\InvalidRadiusRealmException;
 use App\RadiusDb\Entity\RadiusUser;
 use App\RadiusDb\Repository\RadiusUserRepository;
 use App\Repository\SettingRepository;
@@ -21,6 +23,8 @@ use App\Service\CertificateProcessCheckerService;
 use App\Service\EncryptionService;
 use App\Service\EventActions;
 use App\Service\ExpirationProfileService;
+use App\Service\ProfileManager;
+use App\Service\RadiusCredentialGenerator;
 use App\Service\TwoFAService;
 use App\Service\UserAgentOsDetector;
 use App\Twig\CertificateProcessExtension;
@@ -60,6 +64,8 @@ class ProfileController extends AbstractController
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly UserAgentOsDetector $userAgentOsDetector,
         private readonly EncryptionService $encryptionService,
+        private readonly ProfileManager $profileManager,
+        private readonly RadiusCredentialGenerator $radiusCredentialGenerator,
     ) {
     }
 
@@ -96,23 +102,12 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
+        $radiusUser = $this->getRadiusUserFor($user);
+        if (!$radiusUser instanceof RadiusUser) {
+            return $this->redirectToRoute('app_landing');
+        }
 
-        $radiusUser = $this->createOrUpdateRadiusUser(
-            $user,
-            $this->radiusUserRepository,
-            $this->radiusProfileRepository,
-            $this->settingRepository->findOneBy(['name' => SettingName::RADIUS_REALM_NAME->value])->getValue()
-        );
-
-        $expirationDate = $this->expirationProfileService->calculateExpiration(
-            $userExternalAuth->getProvider(),
-            $userExternalAuth->getProviderId(),
-            new UserRadiusProfile()->setIssuedAt(
-                new DateTime()
-            ), // Pass a new DateTime if the user does not have a profile with the account
-            '../signing-keys/cert.pem'
-        );
+        $validUntil = $this->getProfileValidUntil($user);
 
         $profile = file_get_contents('../profile_templates/android/profile.xml');
         if ($profile === false) {
@@ -136,7 +131,7 @@ class ProfileController extends AbstractController
                         SettingName::RADIUS_TLS_NAME->value
                 ])->getValue(),
                 (string)$this->settingRepository->findOneBy(['name' => SettingName::DISPLAY_NAME->value])->getValue(),
-                $expirationDate['limitTime']->format('Y-m-d')
+                $validUntil->format('Y-m-d')
             ],
             $profile
         );
@@ -188,6 +183,7 @@ class ProfileController extends AbstractController
 
     /**
      * @throws RandomException
+     * @throws Exception
      */
     #[Route('/profile/ios.mobileconfig', name: 'profile_ios')]
     #[IsGranted("ROLE_USER")]
@@ -219,23 +215,12 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
+        $radiusUser = $this->getRadiusUserFor($user);
+        if (!$radiusUser instanceof RadiusUser) {
+            return $this->redirectToRoute('app_landing');
+        }
 
-        $radiusUser = $this->createOrUpdateRadiusUser(
-            $user,
-            $this->radiusUserRepository,
-            $this->radiusProfileRepository,
-            $this->settingRepository->findOneBy(['name' => SettingName::RADIUS_REALM_NAME->value])->getValue()
-        );
-
-        $expirationDate = $this->expirationProfileService->calculateExpiration(
-            $userExternalAuth->getProvider(),
-            $userExternalAuth->getProviderId(),
-            new UserRadiusProfile()->setIssuedAt(
-                new DateTime()
-            ), // Pass a new DateTime if the user does not have a profile with the account
-            '../signing-keys/cert.pem'
-        );
+        $validUntil = $this->getProfileValidUntil($user);
 
         $profile = file_get_contents('../profile_templates/iphone_templates/template.xml');
         if ($profile === false) {
@@ -264,7 +249,7 @@ class ProfileController extends AbstractController
             $this->settingRepository->findOneBy([
                 'name' => SettingName::PROFILES_ENCRYPTION_TYPE_IOS_ONLY->value
             ])->getValue(),
-            $expirationDate['limitTime']->format('Y-m-d\TH:i:s\Z'),
+            $validUntil->format('Y-m-d\TH:i:s\Z'),
         ], $profile);
 
         //iOS Specific
@@ -400,12 +385,10 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        $radiusUser = $this->createOrUpdateRadiusUser(
-            $user,
-            $this->radiusUserRepository,
-            $this->radiusProfileRepository,
-            $this->settingRepository->findOneBy(['name' => SettingName::RADIUS_REALM_NAME->value])->getValue()
-        );
+        $radiusUser = $this->getRadiusUserFor($user);
+        if (!$radiusUser instanceof RadiusUser) {
+            return $this->redirectToRoute('app_landing');
+        }
 
         $templateFile = $isWindows10
             ? '../profile_templates/windows/template.xml'
@@ -583,20 +566,30 @@ class ProfileController extends AbstractController
     }
 
     /**
+     * Returns the user's RADIUS account, or null with an error flash when the configured realm cannot build a
+     * valid RADIUS username (the caller then redirects instead of handing out a broken profile).
      *
-     * @param int $length
-     * @return string
-     * @throws RandomException
+     * @throws Exception
      */
-    private function generateToken($length = 16)
+    private function getRadiusUserFor(User $user): ?RadiusUser
     {
-        $stringSpace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $pieces = [];
-        $max = mb_strlen($stringSpace, '8bit') - 1;
-        for ($i = 0; $i < $length; ++$i) {
-            $pieces[] = $stringSpace[random_int(0, $max)];
+        try {
+            return $this->createOrUpdateRadiusUser(
+                $user,
+                $this->radiusUserRepository,
+                $this->radiusProfileRepository,
+                (string)$this->settingRepository->findOneBy(
+                    ['name' => SettingName::RADIUS_REALM_NAME->value]
+                )?->getValue()
+            );
+        } catch (InvalidRadiusRealmException) {
+            $this->addFlash(
+                'error',
+                $this->translator->trans('radiusRealmMisconfigured', [], 'controllers')
+            );
+
+            return null;
         }
-        return implode('', $pieces);
     }
 
     /**
@@ -632,15 +625,25 @@ class ProfileController extends AbstractController
             ['user' => $user, 'status' => UserRadiusProfileStatus::ACTIVE->value]
         );
 
+        // Never hand out an overdue profile, even if the cron has not revoked it yet
+        if ($radiusProfile?->getValidUntil() !== null && $radiusProfile->getValidUntil() < new DateTime()) {
+            // true keeps the user account enabled, only the profile is revoked
+            $this->profileManager->disableProfiles(
+                $user,
+                UserRadiusProfileRevokeReason::PROFILE_EXPIRED->value,
+                true
+            );
+            $radiusProfile = null;
+        }
+
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
 
-        $androidLimit = 32;
-        $realmSize = strlen($realmName) + 1;
-
         if (!$radiusProfile) {
-            // No active profile exists — create a fresh one (handles new users AND expired/revoked users)
-            $username = $this->generateToken($androidLimit - $realmSize) . "@" . $realmName;
-            $plainToken = $this->generateToken($androidLimit - $realmSize);
+            // No active profile exists — create a fresh one (handles new users AND expired/revoked users).
+            // Throws InvalidRadiusRealmException before anything is saved if the realm cannot build a username.
+            $credentials = $this->radiusCredentialGenerator->generate($realmName);
+            $username = $credentials['username'];
+            $plainToken = $credentials['password'];
             $encryptedToken = $this->encryptionService->encrypt($plainToken);
 
             $radiusProfile = new UserRadiusProfile();
@@ -689,6 +692,33 @@ class ProfileController extends AbstractController
         }
 
         return $radiusUser;
+    }
+
+    /**
+     * Returns the stored expiration of the user's active profile, so the downloaded file matches the database.
+     *
+     * @throws Exception
+     */
+    private function getProfileValidUntil(User $user): DateTimeInterface
+    {
+        $radiusProfile = $this->radiusProfileRepository->findOneBy(
+            ['user' => $user, 'status' => UserRadiusProfileStatus::ACTIVE->value]
+        );
+
+        $validUntil = $radiusProfile->getValidUntil();
+        if ($validUntil !== null) {
+            return $validUntil;
+        }
+
+        // Legacy rows have no stored date, so fall back to the profile's own issue date
+        $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
+
+        return $this->expirationProfileService->calculateExpiration(
+            $userExternalAuth->getProvider(),
+            $userExternalAuth->getProviderId(),
+            $radiusProfile,
+            '../signing-keys/cert.pem'
+        )['limitTime'];
     }
 
     /**

@@ -250,3 +250,4 @@ captcha:
   saveError: "Ocorreu um erro ao guardar as definições de CAPTCHA."
 captchaProviderResetSuccessfully: "As definições foram repostas com sucesso."
 invalidCaptchaCredentials: "As credenciais do CAPTCHA são inválidas ou foram rejeitadas pelo provedor."
+radiusRealmMisconfigured: 'Não foi possível criar o seu perfil porque as definições RADIUS do portal estão mal configuradas. Contacte o suporte.'

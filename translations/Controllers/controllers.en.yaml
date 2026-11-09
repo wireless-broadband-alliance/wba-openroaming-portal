@@ -252,3 +252,4 @@ captcha:
   saveError: "An error occurred while saving CAPTCHA settings."
 captchaProviderResetSuccessfully: "Settings have been reset successfully."
 invalidCaptchaCredentials: "The provided CAPTCHA credentials are invalid or were rejected by the provider."
+radiusRealmMisconfigured: 'Your profile could not be created because the portal RADIUS settings are misconfigured. Please contact support.'

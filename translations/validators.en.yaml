@@ -126,3 +126,4 @@ securityTxtExpiresMaxOneYear: 'The expiration date cannot be more than 1 year in
 invalidSha1HashFormat: 'Invalid SHA-1 hash format. Must be 20 space-separated hexadecimal byte pairs (e.g., CA BD 2A...).'
 invalidSenderId: 'Invalid sender ID. Use up to 11 characters for an alphanumeric sender, or up to 16 digits for a numeric sender.'
 keyMustBeDecrypted: 'Invalid key format. Please check the entered value.'
+radiusRealmTooLong: 'The RADIUS realm cannot be longer than {{ limit }} characters, so that every RADIUS username fits the 32 character limit.'
