@@ -69,11 +69,11 @@ class RegistrationLocalController extends AbstractController
     public function localRegister(
         Request $request,
     ): JsonResponse {
-        $TraditionalRegistrationEnabled = $this->settingRepository->findOneBy([
-            'name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value
+        $registrationEnabled = $this->settingRepository->findOneBy([
+            'name' => SettingName::AUTH_METHOD_REGISTER_ENABLED->value
         ]);
 
-        if (!$TraditionalRegistrationEnabled || $TraditionalRegistrationEnabled->getValue() === 'false') {
+        if (!$registrationEnabled || $registrationEnabled->getValue() === 'false') {
             return new BaseResponse(
                 400,
                 null,
