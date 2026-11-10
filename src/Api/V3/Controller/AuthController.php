@@ -145,8 +145,14 @@ class AuthController extends AbstractController
             return $statusCheckerResponse->toResponse();
         }
 
-        // Check if the email is valid
-        if (!$this->userStatusChecker->isValidEmail($user->getEmail())) {
+        // Check the email domain against the blacklist, except for phone number accounts
+        // (UserExternalAuth "Portal Account" / "Phone Number"): they have no email, so no domain to check
+        $isPhoneNumberAccount =
+            $this->userStatusChecker->portalAccountType($user) === UserProvider::PHONE_NUMBER->value;
+        if (
+            !$isPhoneNumberAccount &&
+            !$this->userStatusChecker->isValidEmail((string)$user->getEmail())
+        ) {
             return new BaseResponse(
                 403,
                 null,
