@@ -827,8 +827,12 @@ return [
     'api_v4_auth_sms_reset_confirm' => [
         'routePrefix' => '/api/v4/auth/sms/reset/confirm',
         'section' => 'Auth',
-        'description' => 'Verifies the single-use SMS verification code (OTP) sent to the user. '
-            . 'Upon successful challenge verification, a new strong password is generated and committed for the user.',
+        'description' => 'Verifies the single-use SMS verification code (OTP) sent to the user by /api/v4/auth/sms/reset. '
+            . 'Upon successful challenge verification, a new strong password is generated and committed for the user. '
+            . 'The code expires after the TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME setting (in seconds) and is invalidated '
+            . 'after 5 wrong attempts; in both cases a new code must be requested with /api/v4/auth/sms/reset. '
+            . 'Every failure (unknown number, wrong, expired or invalidated code) returns the same error, '
+            . 'so the response does not reveal whether the account exists.',
         'requestBody' => [
             'country_code' => 'PT',
             'phone_number' => '1234567890',
@@ -849,6 +853,7 @@ return [
             400 => [
                 'Invalid JSON format',
                 'Invalid data: Missing required fields.',
+                'Invalid phone number format.',
                 'Invalid phone number format or country code.',
                 'Invalid or expired verification code.',
             ],

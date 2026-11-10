@@ -6,21 +6,24 @@ use App\Api\V4\BaseResponse;
 use App\DTO\Api\UserSMSRegistrationDTO;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
-use App\Enum\CaptchaAction;
 use App\Enum\AnalyticalEventType;
+use App\Enum\CaptchaAction;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\ForgotPasswordEnum;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
+use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\Captcha\CaptchaValidator;
 use App\Service\EventActions;
+use App\Service\HashArgon2idService;
 use App\Service\PasswordGenerator;
 use App\Service\PasswordResetAttemptGuard;
 use App\Service\SendSMS;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
@@ -31,6 +34,7 @@ use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -40,6 +44,13 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 
 class RegistrationSMSController extends AbstractController
 {
+    /** Wrong codes allowed per SMS reset code before it is invalidated */
+    private const int MAX_CONFIRM_ATTEMPTS = 5;
+
+    private const int LOCK_TTL_SECONDS = 30;
+
+    private const string INVALID_CODE_MESSAGE = 'Invalid or expired verification code.';
+
     public function __construct(
         private readonly UserRepository $userRepository,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
@@ -53,6 +64,9 @@ class RegistrationSMSController extends AbstractController
         private readonly PhoneNumberUtil $phoneNumberUtil,
         private readonly PasswordGenerator $passwordGenerator,
         private readonly PasswordResetAttemptGuard $passwordResetAttemptGuard,
+        private readonly EventRepository $eventRepository,
+        private readonly HashArgon2idService $hashArgon2idService,
+        private readonly LockFactory $lockFactory,
     ) {
     }
 
@@ -477,28 +491,105 @@ class RegistrationSMSController extends AbstractController
         );
         $user = $this->userRepository->findOneBy(['uuid' => $formattedPhoneNumber]);
 
+        // Same answer for every failure (unknown number, banned, wrong, expired or locked code), so the response
+        // never reveals whether an account exists or why the code was refused
+        $invalidCode = new BaseResponse(400, null, self::INVALID_CODE_MESSAGE)->toResponse();
+
         if (!$user || $user->getBannedAt()) {
-            return new BaseResponse(400, null, 'Invalid request or verification code.')->toResponse();
+            return $invalidCode;
         }
 
-        // Validate active verification code
-        if (
-            !$user->getTwoFAcodeIsActive() ||
-            $user->getTwoFAcode() !== (string)$dataRequest['code']
-        ) {
-            return new BaseResponse(400, null, 'Invalid or expired verification code.')->toResponse();
-        }
+        // Serialise confirmations per user, so parallel guesses cannot all slip in under the attempts limit
+        $lock = $this->lockFactory->createLock(
+            sprintf('password-reset-confirm-%d', (int)$user->getId()),
+            self::LOCK_TTL_SECONDS
+        );
+        $lock->acquire(true);
 
-        // Generate strong random replacement password and update account state after successful verification
-        $randomPassword = $this->passwordGenerator->generate();
-        $user->setPassword($this->userPasswordHasher->hashPassword($user, $randomPassword));
+        try {
+            $storedCode = $user->getTwoFAcode();
+            $generatedAt = $user->getTwoFAcodeGeneratedAt();
+
+            if (!$user->getTwoFAcodeIsActive() || $storedCode === null || !$generatedAt instanceof DateTimeInterface) {
+                return $invalidCode;
+            }
+
+            // The code expires after TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME seconds, like the other 2FA codes
+            if ($this->isCodeExpired($generatedAt)) {
+                $this->invalidateCode($user);
+
+                return $invalidCode;
+            }
+
+            // Wrong guesses are counted per code (only since it was generated), so a new /reset starts a new count
+            $failedAttempts = count(
+                $this->eventRepository->findLastEvents(
+                    $user,
+                    AnalyticalEventType::USER_ACCOUNT_PASSWORD_RESET_API_CONFIRM_FAILED->value,
+                    DateTime::createFromInterface($generatedAt)
+                )
+            );
+
+            if ($failedAttempts >= self::MAX_CONFIRM_ATTEMPTS) {
+                $this->invalidateCode($user);
+
+                return $invalidCode;
+            }
+
+            // The code is stored as an Argon2id hash (HashedStringType): compare with password_verify, which is
+            // also constant-time
+            if (!$this->hashArgon2idService->verifyHash((string)$dataRequest['code'], $storedCode)) {
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::USER_ACCOUNT_PASSWORD_RESET_API_CONFIRM_FAILED->value,
+                    new DateTime(),
+                    [
+                        EventMetadataKeysType::IP->value => $request->getClientIp(),
+                        EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                        EventMetadataKeysType::UUID->value => $user->getUuid(),
+                    ]
+                );
+
+                // That was the last allowed guess: burn the code, the user has to request a new one
+                if ($failedAttempts + 1 >= self::MAX_CONFIRM_ATTEMPTS) {
+                    $this->invalidateCode($user);
+                }
+
+                return $invalidCode;
+            }
+
+            // Generate strong random replacement password and update account state after successful verification
+            $randomPassword = $this->passwordGenerator->generate();
+            $user->setPassword($this->userPasswordHasher->hashPassword($user, $randomPassword));
+            $user->setForgotPasswordRequest(false);
+            $this->invalidateCode($user);
+
+            return new BaseResponse(200, [
+                'success' => 'Password updated successfully.',
+                'new_password' => $randomPassword,
+            ])->toResponse();
+        } finally {
+            $lock->release();
+        }
+    }
+
+    private function isCodeExpired(DateTimeInterface $generatedAt): bool
+    {
+        $expirationSeconds = (int)$this->settingRepository->findOneBy(
+            ['name' => SettingName::TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME->value]
+        )?->getValue();
+
+        return new DateTime()->getTimestamp() - $generatedAt->getTimestamp() >= $expirationSeconds;
+    }
+
+    /**
+     * Makes the current code unusable (used, expired or too many wrong guesses).
+     */
+    private function invalidateCode(User $user): void
+    {
         $user->setTwoFAcodeIsActive(false);
-        $user->setForgotPasswordRequest(false);
+        $user->setTwoFAcode(null);
+        $user->setTwoFAcodeGeneratedAt(null);
         $this->entityManager->flush();
-
-        return new BaseResponse(200, [
-            'success' => 'Password updated successfully.',
-            'new_password' => $randomPassword,
-        ])->toResponse();
     }
 }

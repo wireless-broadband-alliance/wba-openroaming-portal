@@ -9,9 +9,9 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\ForgotPasswordEnum;
 use App\Enum\SettingName;
 use App\Repository\EventRepository;
-use DateInterval;
 use DateMalformedStringException;
 use DateTime;
+use RuntimeException;
 
 use function Symfony\Component\Clock\now;
 
@@ -33,8 +33,6 @@ readonly class ForgotPasswordService
      */
     public function userCanResetPassword(User $user, bool $isSMS = false): array
     {
-        /** @var array<string, array{value: string, description: string}> $data */
-        $data = $this->getSettings->getSettings();
         if ($isSMS) {
             $eventType = AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST->value;
             $timeToResetAttemptsType = SettingName::SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS->value;
@@ -46,6 +44,12 @@ readonly class ForgotPasswordService
             $timeBetweenRequestsType = SettingName::EMAIL_TIME_INTERVAL_BETWEEN_REQUESTS->value;
             $attemptsNumberType = SettingName::EMAIL_ATTEMPTS_NUMBER->value;
         }
+
+        // getSettings() returns an empty array on /api routes, so read only the limits we need straight from the
+        // Setting table: this service is shared by the web forgot-password flow and the API reset endpoints
+        $data = $this->getRequiredSettings(
+            [$timeToResetAttemptsType, $timeBetweenRequestsType, $attemptsNumberType]
+        );
         $event = $this->eventRepository->findLatestRequestAttemptEvent($user, $eventType);
         if ($event instanceof Event) {
             $limitTimeToReset = new DateTime();
@@ -86,5 +90,28 @@ readonly class ForgotPasswordService
             ForgotPasswordEnum::MESSAGE_TYPE->value => ForgotPasswordEnum::SUCCESS->value,
             ForgotPasswordEnum::TIME_LEFT->value => 0,
         ];
+    }
+
+    /**
+     * Reads the given settings directly from the database, whatever the current route is.
+     *
+     * @param string[] $names
+     *
+     * @return array<string, array{value: string}>
+     *
+     * @throws RuntimeException when one of the settings is missing from the database
+     */
+    public function getRequiredSettings(array $names): array
+    {
+        $data = $this->getSettings->getSpecificSettings($names);
+
+        $missing = array_diff($names, array_keys($data));
+        if ($missing !== []) {
+            throw new RuntimeException(
+                'Missing required password reset settings: ' . implode(', ', $missing)
+            );
+        }
+
+        return $data;
     }
 }

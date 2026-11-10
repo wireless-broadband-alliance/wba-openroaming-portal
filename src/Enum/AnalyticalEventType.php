@@ -62,6 +62,7 @@ enum AnalyticalEventType: string
     case GET_USER_API = 'GET_USER_API';
     case USER_ACCOUNT_DELETION_API = 'USER_ACCOUNT_DELETION_API';
     case USER_ACCOUNT_PASSWORD_RESET_API = 'USER_ACCOUNT_PASSWORD_RESET_API';
+    case USER_ACCOUNT_PASSWORD_RESET_API_CONFIRM_FAILED = 'USER_ACCOUNT_PASSWORD_RESET_API_CONFIRM_FAILED';
     case USER_REVOKE_PROFILES = 'USER_REVOKE_PROFILES';
     case ADMIN_REVOKE_PROFILES = 'ADMIN_REVOKE_PROFILES';
     case CONFIG_PROFILE_ANDROID = 'CONFIG_PROFILE_ANDROID';
@@ -248,6 +249,7 @@ enum AnalyticalEventType: string
             self::GET_USER_API => 'API Get User',
             self::USER_ACCOUNT_DELETION_API => 'API Account Deletion',
             self::USER_ACCOUNT_PASSWORD_RESET_API => 'API Password Reset',
+            self::USER_ACCOUNT_PASSWORD_RESET_API_CONFIRM_FAILED => 'API Password Reset: Wrong Code',
             self::CONFIG_PROFILE_ANDROID => 'Android Profile Downloaded',
             self::CONFIG_PROFILE_IOS => 'iOS Profile Downloaded',
 

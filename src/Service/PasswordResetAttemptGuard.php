@@ -40,7 +40,6 @@ final readonly class PasswordResetAttemptGuard
         private LockFactory $lockFactory,
         private ForgotPasswordService $forgotPasswordService,
         private EventRepository $eventRepository,
-        private GetSettings $getSettings,
     ) {
     }
 
@@ -111,15 +110,15 @@ final readonly class PasswordResetAttemptGuard
      */
     private function window(bool $isSms): array
     {
-        /** @var array<string, array{value: string, description: string}> $data */
-        $data = $this->getSettings->getSettings();
-
         $resetAfter = $isSms
             ? SettingName::SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS->value
             : SettingName::EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS->value;
         $attemptsNumber = $isSms
             ? SettingName::SMS_ATTEMPTS_NUMBER->value
             : SettingName::EMAIL_ATTEMPTS_NUMBER->value;
+
+        // Not GetSettings::getSettings(): it returns an empty array on /api routes, where this guard runs
+        $data = $this->forgotPasswordService->getRequiredSettings([$resetAfter, $attemptsNumber]);
 
         $windowStart = new DateTime();
         $windowStart->modify('-' . (int)$data[$resetAfter]['value'] . ' minutes');
