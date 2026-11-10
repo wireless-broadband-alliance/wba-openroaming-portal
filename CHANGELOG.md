@@ -41,6 +41,11 @@
       }
       ```
 
+- **SMS Password Reset Is a Two-Step Flow in API v4**: API v3 sent a new temporary password straight by SMS. In API v4,
+  `/api/v4/auth/sms/reset` does not change the password: it only sends a single-use 6-digit verification code by SMS,
+  and the password is changed only after that code is confirmed on the new `/api/v4/auth/sms/reset/confirm` endpoint
+  (see **Improvements & Features**). Apps migrating their SMS reset to v4 must add the confirmation step.
+
 - **RADIUS Realm Length Limited to 23 Characters**: The RADIUS realm (`RADIUS_REALM_NAME`) is part of every RADIUS
   username (`<random prefix>@<realm>`, 32 characters at most), so it can no longer be longer than 23 characters. This
   leaves room for a random prefix of at least 8 characters.
@@ -78,6 +83,9 @@
 - **Check the RADIUS Realm Length**: On the admin dashboard, open the RADIUS settings and confirm that the realm is 23
   characters or fewer.
 
+- **Review the SMS Settings**: The API v4 SMS reset confirmation now uses the values on **User Authentication > SMS >
+  Configuration**. Check that **Time Interval To Reset Attempts** (how long a reset code stays valid, in minutes) and
+  **Number of Attempts** (how many wrong codes are allowed) suit your users.
 
 ### Improvements & Features
 
@@ -86,6 +94,20 @@
   password reset, SMS registration/reset, and 2FA enablement) now dynamically accept tokens matching the active
   provider (`turnstile_token` or `recaptcha_token`), requiring no token when the provider is set to `OFF`. Complete
   request bodies, provider behaviors, and response schemas are fully documented.
+- **New SMS Password Reset Confirmation Endpoint (`POST /api/v4/auth/sms/reset/confirm`)**: Confirms the verification
+  code sent by `/api/v4/auth/sms/reset` and, when it is valid, sets a new random password and returns it in
+  `new_password`.
+  - Request body: `country_code`, `phone_number` and `code`.
+  - The code is single-use and is checked against its stored Argon2id hash.
+  - The limits come from the dashboard SMS settings page, the same values the web forgot-password flow uses:
+    - the code stays valid for **Time Interval To Reset Attempts** (`SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS`, minutes);
+    - after **Number of Attempts** (`SMS_ATTEMPTS_NUMBER`) wrong codes, the code is invalidated and a new one must be
+      requested with `/api/v4/auth/sms/reset`.
+  - Wrong codes are logged as `USER_ACCOUNT_PASSWORD_RESET_API_CONFIRM_FAILED` events (shown as "API Password Reset:
+    Wrong Code" in the activity logs) and are counted per code, under a per-user lock, so parallel requests cannot go
+    over the limit.
+  - Every failure (unknown number, banned account, wrong, expired or invalidated code) returns the same
+    `400 Invalid or expired verification code.`, so the response does not reveal whether an account exists.
 - **Installation Wizard CAPTCHA Integration**: Fully integrated CAPTCHA provider configuration into the initial project
   setup and installation wizard flow.
 - **Dynamic CAPTCHA Provider API**: Reworked system configuration endpoints and base API routes to dynamically report
@@ -98,6 +120,11 @@
 
 ### Bug Fixes
 
+- **API SMS Password Reset Returned HTTP 500**: `/api/v3/auth/sms/reset` and `/api/v4/auth/sms/reset` failed with
+  `Warning: Undefined array key "SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS"`. The reset limits were read through
+  `GetSettings::getSettings()`, which returns no settings on `/api` routes. `ForgotPasswordService` and
+  `PasswordResetAttemptGuard` now read only the settings they need directly from the database, so the same limits work
+  on the web and on the API. A missing setting now raises a clear error naming it.
 - **Phone Number Login Always Returned "Bad credentials"**: Since phone numbers are encrypted at rest (1.15.0) with a
   random IV, the same number never produces the same stored value, so lookups by `phoneNumber` could never match a
   user. Phone-number users are now looked up by their `uuid` (E.164 format, e.g. `+351912345678`) in:
