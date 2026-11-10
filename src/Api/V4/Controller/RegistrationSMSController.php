@@ -10,6 +10,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\CaptchaAction;
 use App\Enum\EventMetadataKeysType;
 use App\Enum\ForgotPasswordEnum;
+use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Repository\EventRepository;
@@ -80,6 +81,18 @@ class RegistrationSMSController extends AbstractController
     public function smsRegister(
         Request $request
     ): JsonResponse {
+        $SMSRegistrationEnabled = $this->settingRepository->findOneBy([
+            'name' => SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value
+        ]);
+
+        if (!$SMSRegistrationEnabled || $SMSRegistrationEnabled->getValue() === 'false') {
+            return new BaseResponse(
+                400,
+                null,
+                'SMS registration is disabled by the administration.'
+            )->toResponse();
+        }
+
         try {
             $data = json_decode(
                 $request->getContent(),

@@ -73,6 +73,17 @@ class RegistrationLocalController extends AbstractController
     public function localRegister(
         Request $request,
     ): JsonResponse {
+        $TraditionalRegistrationEnabled = $this->settingRepository->findOneBy([
+            'name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value
+        ]);
+
+        if (!$TraditionalRegistrationEnabled || $TraditionalRegistrationEnabled->getValue() === 'false') {
+            return new BaseResponse(
+                400,
+                null,
+                'Email registration is disabled by the administration.'
+            )->toResponse();
+        }
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException) {
