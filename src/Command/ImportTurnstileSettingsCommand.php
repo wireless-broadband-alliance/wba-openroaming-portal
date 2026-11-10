@@ -2,8 +2,11 @@
 
 namespace App\Command;
 
+use App\Entity\InstallationProgress;
 use App\Entity\Setting;
+use App\Enum\CaptchaProviderEnum;
 use App\Enum\SettingName;
+use App\Repository\InstallationProgressRepository;
 use App\Repository\SettingRepository;
 use App\Service\EncryptionService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -24,6 +27,7 @@ class ImportTurnstileSettingsCommand extends Command
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly SettingRepository $settingRepository,
+        private readonly InstallationProgressRepository $installationProgressRepository,
         private readonly EncryptionService $encryptionService,
         #[Autowire(env: 'default::TURNSTILE_KEY')]
         private readonly ?string $turnstileKey = null,
@@ -69,6 +73,27 @@ class ImportTurnstileSettingsCommand extends Command
 
         if ($updatedCount > 0) {
             $this->entityManager->flush();
+        }
+
+        $keySetting = $this->settingRepository->findOneBy(['name' => SettingName::TURNSTILE_KEY->value]);
+        $secretSetting = $this->settingRepository->findOneBy(['name' => SettingName::TURNSTILE_SECRET->value]);
+
+        $isInstallationComplete = $keySetting !== null
+            && !empty($keySetting->getValue())
+            && $secretSetting !== null
+            && !empty($secretSetting->getValue());
+
+        if ($isInstallationComplete) {
+            $installation = $this->installationProgressRepository->getLastCompleted();
+            if ($installation instanceof InstallationProgress) {
+                $installation->setCaptchaProvider(CaptchaProviderEnum::TURNSTILE);
+
+                $this->entityManager->persist($installation);
+                $this->entityManager->flush();
+            }
+        }
+
+        if ($updatedCount > 0 || $isInstallationComplete) {
             $io->success(
                 sprintf('Successfully encrypted and synced %d Turnstile setting(s) to the database.', $updatedCount)
             );
