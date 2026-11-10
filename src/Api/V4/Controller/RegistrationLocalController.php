@@ -4,16 +4,13 @@ namespace App\Api\V4\Controller;
 
 use App\Api\V4\BaseResponse;
 use App\DTO\Api\UserEmailRegistrationDTO;
-use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\CaptchaAction;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
-use App\Enum\PlatformMode;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
-use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
@@ -21,10 +18,9 @@ use App\Service\Captcha\CaptchaValidator;
 use App\Service\EmailGenerator;
 use App\Service\EventActions;
 use App\Service\HashArgon2idService;
+use App\Service\PasswordResetAttemptGuard;
 use App\Service\UserStatusChecker;
-use DateInterval;
 use DateTime;
-use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
@@ -46,7 +42,6 @@ class RegistrationLocalController extends AbstractController
     public function __construct(
         private readonly UserRepository $userRepository,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
-        private readonly EventRepository $eventRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly EventActions $eventActions,
         private readonly SettingRepository $settingRepository,
@@ -55,7 +50,8 @@ class RegistrationLocalController extends AbstractController
         private readonly EmailGenerator $emailGenerator,
         private readonly ValidatorInterface $validator,
         private readonly UserStatusChecker $userStatusChecker,
-        private readonly HashArgon2idService $hashArgon2idService
+        private readonly HashArgon2idService $hashArgon2idService,
+        private readonly PasswordResetAttemptGuard $passwordResetAttemptGuard,
     ) {
     }
 
@@ -283,48 +279,17 @@ class RegistrationLocalController extends AbstractController
             }
 
             if ($hasValidPortalAccount) {
-                $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
+                // Same atomic check-and-record as the web forgot-password pages and the SMS reset (cooldown +
+                // attempts limit, shared counter): the attempt is saved under a row lock on the user, and nothing
+                // below runs unless it was accepted
+                $attempt = $this->passwordResetAttemptGuard->tryRegisterAttempt(
                     $user,
-                    AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value
+                    false,
+                    $request->getClientIp(),
+                    $request->headers->get('User-Agent')
                 );
-                $emailTimerResend = $this->settingRepository->findOneBy(
-                    ['name' => SettingName::EMAIL_TIMER_RESEND->value]
-                )->getValue();
-                $minInterval = new DateInterval('PT' . $emailTimerResend . 'M');
-                $currentTime = new DateTime();
-                $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata() : [];
-                $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
-                    ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
-                    : null;
 
-                // Check if enough time has passed since the last password reset request
-                if (
-                    !$latestEvent instanceof Event ||
-                    ($lastVerificationCodeTime
-                        instanceof DateTime &&
-                        $lastVerificationCodeTime->add(
-                            $minInterval
-                        ) < $currentTime)
-                ) {
-                    if (!$latestEvent instanceof Event) {
-                        $latestEvent = new Event();
-                        $latestEvent->setUser($user);
-                        $latestEvent->setEventDatetime(new DateTime());
-                        $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value);
-                        $latestEventMetadata = [
-                            EventMetadataKeysType::PLATFORM->value => PlatformMode::LIVE->value,
-                            EventMetadataKeysType::IP->value => $request->getClientIp(),
-                            EventMetadataKeysType::UUID->value => $user->getUuid(),
-                        ];
-                    }
-
-                    $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(
-                        DateTimeInterface::ATOM
-                    );
-                    $latestEvent->setEventMetadata($latestEventMetadata);
-
-                    $this->eventRepository->save($latestEvent, true);
-
+                if ($attempt[PasswordResetAttemptGuard::ALLOWED]) {
                     // Generate a plain-text verification code for the email link
                     $rawTwoFaCode = bin2hex(random_bytes(16)); // e.g. "a3f890b2e14c76d..."
                     $hashedCode = $this->hashArgon2idService->hash($rawTwoFaCode);

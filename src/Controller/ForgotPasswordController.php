@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\DTO\NewPasswordAccountDTO;
-use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\EventMetadataKeysType;
@@ -17,22 +16,19 @@ use App\Form\ForgotPasswordEmailType;
 use App\Form\ForgotPasswordSMSType;
 use App\Form\NewPasswordAccountType;
 use App\Form\ResetPasswordSMSConfirmationType;
-use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EmailGenerator;
 use App\Service\EncryptionService;
 use App\Service\EventActions;
-use App\Service\ForgotPasswordService;
 use App\Service\GetSettings;
 use App\Service\HashArgon2idService;
 use App\Service\MagicLinkService;
+use App\Service\PasswordResetAttemptGuard;
 use App\Service\PasswordResetRequestHandler;
 use App\Service\SendSMS;
-use DateInterval;
 use DateTime;
-use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use libphonenumber\PhoneNumber;
@@ -60,7 +56,6 @@ class ForgotPasswordController extends AbstractController
         private readonly UserRepository $userRepository,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly GetSettings $getSettings,
-        private readonly EventRepository $eventRepository,
         private readonly EventActions $eventActions,
         private readonly SendSMS $sendSMS,
         private readonly SettingRepository $settingRepository,
@@ -71,7 +66,7 @@ class ForgotPasswordController extends AbstractController
         private readonly MagicLinkService $magicLinkService,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
         private readonly RateLimiterFactoryInterface $verifyAccountLimiter,
-        private readonly ForgotPasswordService $forgotPasswordService,
+        private readonly PasswordResetAttemptGuard $passwordResetAttemptGuard,
         private readonly EncryptionService $encryptionService,
         private readonly HashArgon2idService $hashArgon2idService
     ) {
@@ -159,28 +154,20 @@ class ForgotPasswordController extends AbstractController
             }
 
             if ($hasValidPortalAccount) {
-                $attemptsVerification = $this->forgotPasswordService->userCanResetPassword($user);
-                if ($attemptsVerification[ForgotPasswordEnum::SUCCESS->value]) {
-                    $latestEvent = new Event();
-                    $latestEvent->setUser($user);
-                    $latestEvent->setEventDatetime(new DateTime());
-                    $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value);
-                    $latestEventMetadata = [
-                        EventMetadataKeysType::PLATFORM->value => PlatformMode::LIVE->value,
-                        EventMetadataKeysType::IP->value => $request->getClientIp(),
-                        EventMetadataKeysType::UUID->value => $user->getUuid(),
-                    ];
-                    $currentTime = new DateTime();
-                    $latestEventMetadata['lastVerificationCodeTime'] =
-                        $currentTime->format(DateTimeInterface::ATOM);
-                    $latestEvent->setEventMetadata($latestEventMetadata);
-
+                // Same atomic check-and-record as the API reset endpoints: the limits are checked and the attempt
+                // is saved under a row lock on the user, and nothing below runs unless it was accepted
+                $attempt = $this->passwordResetAttemptGuard->tryRegisterAttempt(
+                    $user,
+                    false,
+                    $request->getClientIp(),
+                    $request->headers->get('User-Agent')
+                );
+                if ($attempt[PasswordResetAttemptGuard::ALLOWED]) {
                     $rawCode = (string)random_int(100000, 999999);
                     $user->setTwoFAcode($rawCode);
                     $user->setTwoFACodeGeneratedAt(new DateTime());
                     $user->setTwoFAcodeIsActive(true);
 
-                    $this->entityManager->persist($latestEvent);
                     $this->entityManager->persist($user);
                     $this->entityManager->flush();
 
@@ -195,9 +182,9 @@ class ForgotPasswordController extends AbstractController
                     $this->addFlash('success', $message);
                 } else {
                     // Inform the user to wait before trying again
-                    $timeLeft = $attemptsVerification[ForgotPasswordEnum::TIME_LEFT->value];
+                    $timeLeft = $attempt[PasswordResetAttemptGuard::TIME_LEFT];
                     if (
-                        $attemptsVerification[ForgotPasswordEnum::MESSAGE_TYPE->value] ===
+                        $attempt[PasswordResetAttemptGuard::REASON] ===
                         ForgotPasswordEnum::ATTEMPTS_EXCEEDED->value
                     ) {
                         $minutes = ($timeLeft->days * 24 * 60)
@@ -212,7 +199,7 @@ class ForgotPasswordController extends AbstractController
                             )
                         );
                     } elseif (
-                        $attemptsVerification[ForgotPasswordEnum::MESSAGE_TYPE->value] ===
+                        $attempt[PasswordResetAttemptGuard::REASON] ===
                         ForgotPasswordEnum::TIME_BETWEEN_REQUESTS->value
                     ) {
                         $seconds = ($timeLeft->days * 24 * 3600)
@@ -298,47 +285,19 @@ class ForgotPasswordController extends AbstractController
                 ])
                 : null;
             if ($user) {
-                $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
+                // Same atomic check-and-record as the API reset endpoints (cooldown + attempts limit, shared
+                // counter): the attempt is saved under a row lock on the user before any code is generated or sent
+                $attempt = $this->passwordResetAttemptGuard->tryRegisterAttempt(
                     $user,
-                    AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST->value
+                    true,
+                    $request->getClientIp(),
+                    $request->headers->get('User-Agent')
                 );
-                // Retrieve the SMS resend interval from the settings
-                $smsResendInterval = $data[SettingName::SMS_TIMER_RESEND->value]['value'];
-                $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
-                $currentTime = new DateTime();
-                // Check if the user has not exceeded the attempt limit
-                $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata() : [];
-                $verificationAttempts = $latestEventMetadata['verificationAttempts'] ?? 0;
-                // Check if enough time has passed since the last attempt
-                $attemptsVerification = $this->forgotPasswordService->userCanResetPassword($user, true);
-                if (
-                    $attemptsVerification[ForgotPasswordEnum::SUCCESS->value]
-                ) {
-                    // Increment the attempt count
-                    $attempts = $verificationAttempts + 1;
-
-                    // Save event with attempt count and current time
-                    $latestEvent = new Event();
-                    $latestEvent->setUser($user);
-                    $latestEvent->setEventDatetime(new DateTime());
-                    $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST->value);
-                    $latestEventMetadata = [
-                        EventMetadataKeysType::PLATFORM->value => PlatformMode::LIVE->value,
-                        EventMetadataKeysType::IP->value => $request->getClientIp(),
-                        EventMetadataKeysType::UUID->value => $user->getUuid(),
-                    ];
-
-                    $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(
-                        DateTimeInterface::ATOM
-                    );
-                    $latestEventMetadata['verificationAttempts'] = $attempts;
-                    $latestEvent->setEventMetadata($latestEventMetadata);
-
+                if ($attempt[PasswordResetAttemptGuard::ALLOWED]) {
                     $rawCode = (string)random_int(100000, 999999);
                     $user->setTwoFAcode($rawCode);
                     $user->setTwoFACodeGeneratedAt(new DateTime());
                     $user->setTwoFAcodeIsActive(true);
-                    $this->eventRepository->save($latestEvent, true);
 
                     $this->entityManager->persist($user);
                     $this->entityManager->flush();
@@ -364,9 +323,9 @@ class ForgotPasswordController extends AbstractController
                     return $this->redirectToRoute('app_site_forgot_password_code');
                 }
                 // Inform the user to wait before trying again
-                $timeLeft = $attemptsVerification[ForgotPasswordEnum::TIME_LEFT->value];
+                $timeLeft = $attempt[PasswordResetAttemptGuard::TIME_LEFT];
                 if (
-                    $attemptsVerification[ForgotPasswordEnum::MESSAGE_TYPE->value] ===
+                    $attempt[PasswordResetAttemptGuard::REASON] ===
                     ForgotPasswordEnum::ATTEMPTS_EXCEEDED->value
                 ) {
                     $minutes = ($timeLeft->days * 24 * 60)
@@ -381,7 +340,7 @@ class ForgotPasswordController extends AbstractController
                         )
                     );
                 } elseif (
-                    $attemptsVerification[ForgotPasswordEnum::MESSAGE_TYPE->value] ===
+                    $attempt[PasswordResetAttemptGuard::REASON] ===
                     ForgotPasswordEnum::TIME_BETWEEN_REQUESTS->value
                 ) {
                     $seconds = ($timeLeft->days * 24 * 3600)
@@ -397,7 +356,7 @@ class ForgotPasswordController extends AbstractController
                         )
                     );
                 } else {
-                    $timeToResetAttempts = $data[SettingName::EMAIL_TIME_INTERVAL_TO_RESET_ATTEMPTS->value]['value'];
+                    $timeToResetAttempts = $data[SettingName::SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS->value]['value'];
                     $this->addFlash(
                         'error',
                         $this->translator->trans(

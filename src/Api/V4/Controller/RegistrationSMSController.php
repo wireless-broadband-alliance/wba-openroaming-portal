@@ -25,6 +25,7 @@ use App\Service\PasswordResetAttemptGuard;
 use App\Service\SendSMS;
 use DateTime;
 use DateTimeInterface;
+use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
@@ -35,7 +36,6 @@ use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -45,9 +45,6 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 
 class RegistrationSMSController extends AbstractController
 {
-    /** Technical timeout of the per-user confirmation lock, not a portal setting */
-    private const int LOCK_TTL_SECONDS = 30;
-
     private const string INVALID_CODE_MESSAGE = 'Invalid or expired verification code.';
 
     public function __construct(
@@ -65,7 +62,6 @@ class RegistrationSMSController extends AbstractController
         private readonly PasswordResetAttemptGuard $passwordResetAttemptGuard,
         private readonly EventRepository $eventRepository,
         private readonly HashArgon2idService $hashArgon2idService,
-        private readonly LockFactory $lockFactory,
     ) {
     }
 
@@ -510,83 +506,95 @@ class RegistrationSMSController extends AbstractController
             return $invalidCode;
         }
 
-        // Serialise confirmations per user, so parallel guesses cannot all slip in under the attempts limit
-        $lock = $this->lockFactory->createLock(
-            sprintf('password-reset-confirm-%d', (int)$user->getId()),
-            self::LOCK_TTL_SECONDS
+        // Serialise confirmations per user with a database row lock (SELECT ... FOR UPDATE), held until the
+        // transaction commits: parallel guesses, from any web container, cannot all slip in under the attempts
+        // limit. The refresh also reloads the code fields, in case a concurrent request has just invalidated them.
+        $response = $this->entityManager->wrapInTransaction(
+            fn(): JsonResponse => $this->confirmLockedCode($user, $request, (string)$dataRequest['code'])
         );
-        $lock->acquire(true);
 
-        try {
-            $storedCode = $user->getTwoFAcode();
-            $generatedAt = $user->getTwoFAcodeGeneratedAt();
+        /** @var JsonResponse $response */
+        return $response;
+    }
 
-            if (!$user->getTwoFAcodeIsActive() || $storedCode === null || !$generatedAt instanceof DateTimeInterface) {
-                return $invalidCode;
-            }
+    /**
+     * Must only run inside the transaction of smsResetConfirm(); takes the row lock on the user first.
+     *
+     * @throws Exception
+     */
+    private function confirmLockedCode(User $user, Request $request, string $code): JsonResponse
+    {
+        $this->entityManager->refresh($user, LockMode::PESSIMISTIC_WRITE);
 
-            // Limits come from the dashboard SMS settings page (User Authentication > SMS > Configuration):
-            // "Time Interval To Reset Attempts" (minutes) is how long the code stays valid and
-            // "Number of Attempts" is how many wrong codes are allowed before it is invalidated
-            $codeValidityMinutes = $this->getSmsSettingValue(SettingName::SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS);
-            $maxConfirmAttempts = $this->getSmsSettingValue(SettingName::SMS_ATTEMPTS_NUMBER);
+        // Same answer for every failure, see smsResetConfirm()
+        $invalidCode = new BaseResponse(400, null, self::INVALID_CODE_MESSAGE)->toResponse();
 
-            if ($this->isCodeExpired($generatedAt, $codeValidityMinutes)) {
-                $this->invalidateCode($user);
+        $storedCode = $user->getTwoFAcode();
+        $generatedAt = $user->getTwoFAcodeGeneratedAt();
 
-                return $invalidCode;
-            }
+        if (!$user->getTwoFAcodeIsActive() || $storedCode === null || !$generatedAt instanceof DateTimeInterface) {
+            return $invalidCode;
+        }
 
-            // Wrong guesses are counted per code (only since it was generated), so a new /reset starts a new count
-            $failedAttempts = count(
-                $this->eventRepository->findLastEvents(
-                    $user,
-                    AnalyticalEventType::USER_ACCOUNT_PASSWORD_RESET_API_CONFIRM_FAILED->value,
-                    DateTime::createFromInterface($generatedAt)
-                )
-            );
+        // Limits come from the dashboard SMS settings page (User Authentication > SMS > Configuration):
+        // "Time Interval To Reset Attempts" (minutes) is how long the code stays valid and
+        // "Number of Attempts" is how many wrong codes are allowed before it is invalidated
+        $codeValidityMinutes = $this->getSmsSettingValue(SettingName::SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS);
+        $maxConfirmAttempts = $this->getSmsSettingValue(SettingName::SMS_ATTEMPTS_NUMBER);
 
-            if ($failedAttempts >= $maxConfirmAttempts) {
-                $this->invalidateCode($user);
-
-                return $invalidCode;
-            }
-
-            // The code is stored as an Argon2id hash (HashedStringType): compare with password_verify, which is
-            // also constant-time
-            if (!$this->hashArgon2idService->verifyHash((string)$dataRequest['code'], $storedCode)) {
-                $this->eventActions->saveEvent(
-                    $user,
-                    AnalyticalEventType::USER_ACCOUNT_PASSWORD_RESET_API_CONFIRM_FAILED->value,
-                    new DateTime(),
-                    [
-                        EventMetadataKeysType::IP->value => $request->getClientIp(),
-                        EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
-                        EventMetadataKeysType::UUID->value => $user->getUuid(),
-                    ]
-                );
-
-                // That was the last allowed guess: burn the code, the user has to request a new one
-                if ($failedAttempts + 1 >= $maxConfirmAttempts) {
-                    $this->invalidateCode($user);
-                }
-
-                return $invalidCode;
-            }
-
-            // Generate strong random replacement password and update account state after successful verification
-            $randomPassword = $this->passwordGenerator->generate();
-            $user->setPassword($this->userPasswordHasher->hashPassword($user, $randomPassword));
-            $user->setForgotPasswordRequest(false);
+        if ($this->isCodeExpired($generatedAt, $codeValidityMinutes)) {
             $this->invalidateCode($user);
 
-            return new BaseResponse(200, [
-                'success' => 'Password updated successfully.',
-                'new_password' => $randomPassword,
-            ])->toResponse();
-        } finally {
-            $lock->release();
+            return $invalidCode;
         }
+
+        // Wrong guesses are counted per code (only since it was generated), so a new /reset starts a new count
+        $failedAttempts = count(
+            $this->eventRepository->findLastEvents(
+                $user,
+                AnalyticalEventType::USER_ACCOUNT_PASSWORD_RESET_API_CONFIRM_FAILED->value,
+                DateTime::createFromInterface($generatedAt)
+            )
+        );
+
+        if ($failedAttempts >= $maxConfirmAttempts) {
+            $this->invalidateCode($user);
+
+            return $invalidCode;
+        }
+
+        // The code is stored as an Argon2id hash (HashedStringType): compare with password_verify, which is
+        // also constant-time
+        if (!$this->hashArgon2idService->verifyHash($code, $storedCode)) {
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::USER_ACCOUNT_PASSWORD_RESET_API_CONFIRM_FAILED->value,
+                new DateTime(),
+                [
+                    EventMetadataKeysType::IP->value => $request->getClientIp(),
+                    EventMetadataKeysType::USER_AGENT->value => $request->headers->get('User-Agent'),
+                    EventMetadataKeysType::UUID->value => $user->getUuid(),
+                ]
+            );
+
+            // That was the last allowed guess: burn the code, the user has to request a new one
+            if ($failedAttempts + 1 >= $maxConfirmAttempts) {
+                $this->invalidateCode($user);
+            }
+
+            return $invalidCode;
+        }
+
+        // Generate strong random replacement password and update account state after successful verification
+        $randomPassword = $this->passwordGenerator->generate();
+        $user->setPassword($this->userPasswordHasher->hashPassword($user, $randomPassword));
+        $user->setForgotPasswordRequest(false);
+        $this->invalidateCode($user);
+
+        return new BaseResponse(200, [
+            'success' => 'Password updated successfully.',
+            'new_password' => $randomPassword,
+        ])->toResponse();
     }
 
     private function isCodeExpired(DateTimeInterface $generatedAt, int $validityMinutes): bool

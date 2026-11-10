@@ -13,31 +13,33 @@ use App\Enum\SettingName;
 use App\Repository\EventRepository;
 use DateTime;
 use DateTimeInterface;
-use Symfony\Component\Lock\LockFactory;
+use Doctrine\DBAL\LockMode;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
- * Enforces the password reset limits (cooldown between requests + max attempts per window) and records
- * the attempt in one atomic step per user.
+ * The single check-and-record operation for every password reset channel: the web forgot-password pages
+ * (email and SMS) and the API v3/v4 reset endpoints (/auth/local/reset and /auth/sms/reset). No reset
+ * channel may check the limits or write a reset attempt event on its own.
  *
- * Uses the same settings and the same event type as the web forgot-password flow
- * (ForgotPasswordService::userCanResetPassword), so the web and the API share one counter: switching
- * channel does not reset the limit.
+ * It enforces the limits (cooldown between requests + max attempts per window) with the same settings and
+ * the same event types as ForgotPasswordService::userCanResetPassword, so every channel shares one counter:
+ * switching channel does not reset the limit.
  *
- * The check and the insert of the attempt event run under a per-user lock, so concurrent requests are
- * serialised: the second one sees the event written by the first and is rejected by the cooldown.
- * The lock store comes from LOCK_DSN (flock by default, which is per host; a portal running several web
- * containers needs a shared store such as Redis or the database for this to hold across containers).
+ * Atomicity: the check and the insert of the attempt event run in one database transaction that first takes
+ * a row lock on the user (SELECT ... FOR UPDATE). Every channel and every web container uses the same
+ * database, so concurrent requests for the same user are serialised by the database itself, whatever the
+ * deployment (one or several web containers) and without depending on a shared lock store: the second
+ * request waits for the first to commit, then sees its event and is refused by the cooldown.
  */
 final readonly class PasswordResetAttemptGuard
 {
     public const string ALLOWED = 'allowed';
     public const string REASON = 'reason';
     public const string ATTEMPTS_LEFT = 'attemptsLeft';
-
-    private const int LOCK_TTL_SECONDS = 30;
+    public const string TIME_LEFT = 'timeLeft';
 
     public function __construct(
-        private LockFactory $lockFactory,
+        private EntityManagerInterface $entityManager,
         private ForgotPasswordService $forgotPasswordService,
         private EventRepository $eventRepository,
     ) {
@@ -47,61 +49,75 @@ final readonly class PasswordResetAttemptGuard
      * Checks the limits and, when the request is allowed, records the attempt before returning.
      * Callers must only change the password / send the SMS or email when "allowed" is true.
      *
-     * @return array{allowed: bool, reason: string, attemptsLeft: int}
+     * "timeLeft" is how long the user has to wait when the request is refused (a DateInterval from
+     * ForgotPasswordService), or 0 when it is allowed.
+     *
+     * @return array{allowed: bool, reason: string, attemptsLeft: int, timeLeft: mixed}
+     */
+    public function tryRegisterAttempt(User $user, bool $isSms, ?string $clientIp, ?string $userAgent): array
+    {
+        $result = $this->entityManager->wrapInTransaction(
+            function () use ($user, $isSms, $clientIp, $userAgent): array {
+                // Row lock on the user, held until the transaction commits: a concurrent reset for the same
+                // user, from any channel or container, blocks here until this one has written its event
+                $this->entityManager->lock($user, LockMode::PESSIMISTIC_WRITE);
+
+                return $this->checkAndRecord($user, $isSms, $clientIp, $userAgent);
+            }
+        );
+
+        /** @var array{allowed: bool, reason: string, attemptsLeft: int, timeLeft: mixed} $result */
+        return $result;
+    }
+
+    /**
+     * Must only run inside the locked transaction of tryRegisterAttempt().
+     *
+     * @return array{allowed: bool, reason: string, attemptsLeft: int, timeLeft: mixed}
      *
      * @throws \DateMalformedStringException
      */
-    public function tryRegisterAttempt(User $user, bool $isSms, ?string $clientIp, ?string $userAgent): array
+    private function checkAndRecord(User $user, bool $isSms, ?string $clientIp, ?string $userAgent): array
     {
         $eventType = $isSms
             ? AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST->value
             : AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value;
 
-        $lock = $this->lockFactory->createLock(
-            sprintf('password-reset-%s-%d', $isSms ? 'sms' : 'email', (int)$user->getId()),
-            self::LOCK_TTL_SECONDS
-        );
+        $check = $this->forgotPasswordService->userCanResetPassword($user, $isSms);
 
-        // Blocking: a concurrent request for the same user waits here instead of passing the check too
-        $lock->acquire(true);
-
-        try {
-            $check = $this->forgotPasswordService->userCanResetPassword($user, $isSms);
-
-            if (!$check[ForgotPasswordEnum::SUCCESS->value]) {
-                return [
-                    self::ALLOWED => false,
-                    self::REASON => $check[ForgotPasswordEnum::MESSAGE_TYPE->value],
-                    self::ATTEMPTS_LEFT => 0,
-                ];
-            }
-
-            [$windowStart, $maxAttempts] = $this->window($isSms);
-            $previousAttempts = count($this->eventRepository->findLastEvents($user, $eventType, $windowStart));
-            $now = new DateTime();
-
-            // Timestamp and counter are written together, in the same event, before any side effect
-            $event = new Event();
-            $event->setUser($user);
-            $event->setEventDatetime($now);
-            $event->setEventName($eventType);
-            $event->setEventMetadata([
-                EventMetadataKeysType::IP->value => $clientIp,
-                EventMetadataKeysType::USER_AGENT->value => $userAgent,
-                EventMetadataKeysType::UUID->value => $user->getUuid(),
-                'lastVerificationCodeTime' => $now->format(DateTimeInterface::ATOM),
-                'verificationAttempts' => $previousAttempts + 1,
-            ]);
-            $this->eventRepository->save($event, true);
-
+        if (!$check[ForgotPasswordEnum::SUCCESS->value]) {
             return [
-                self::ALLOWED => true,
-                self::REASON => ForgotPasswordEnum::SUCCESS->value,
-                self::ATTEMPTS_LEFT => max(0, $maxAttempts - ($previousAttempts + 1)),
+                self::ALLOWED => false,
+                self::REASON => $check[ForgotPasswordEnum::MESSAGE_TYPE->value],
+                self::ATTEMPTS_LEFT => 0,
+                self::TIME_LEFT => $check[ForgotPasswordEnum::TIME_LEFT->value],
             ];
-        } finally {
-            $lock->release();
         }
+
+        [$windowStart, $maxAttempts] = $this->window($isSms);
+        $previousAttempts = count($this->eventRepository->findLastEvents($user, $eventType, $windowStart));
+        $now = new DateTime();
+
+        // Timestamp and counter are written together, in the same event, before any side effect
+        $event = new Event();
+        $event->setUser($user);
+        $event->setEventDatetime($now);
+        $event->setEventName($eventType);
+        $event->setEventMetadata([
+            EventMetadataKeysType::IP->value => $clientIp,
+            EventMetadataKeysType::USER_AGENT->value => $userAgent,
+            EventMetadataKeysType::UUID->value => $user->getUuid(),
+            'lastVerificationCodeTime' => $now->format(DateTimeInterface::ATOM),
+            'verificationAttempts' => $previousAttempts + 1,
+        ]);
+        $this->eventRepository->save($event, true);
+
+        return [
+            self::ALLOWED => true,
+            self::REASON => ForgotPasswordEnum::SUCCESS->value,
+            self::ATTEMPTS_LEFT => max(0, $maxAttempts - ($previousAttempts + 1)),
+            self::TIME_LEFT => 0,
+        ];
     }
 
     /**
@@ -117,7 +133,7 @@ final readonly class PasswordResetAttemptGuard
             ? SettingName::SMS_ATTEMPTS_NUMBER->value
             : SettingName::EMAIL_ATTEMPTS_NUMBER->value;
 
-        // Not GetSettings::getSettings(): it returns an empty array on /api routes, where this guard runs
+        // Not GetSettings::getSettings(): it returns an empty array on /api routes, where this guard also runs
         $data = $this->forgotPasswordService->getRequiredSettings([$resetAfter, $attemptsNumber]);
 
         $windowStart = new DateTime();
