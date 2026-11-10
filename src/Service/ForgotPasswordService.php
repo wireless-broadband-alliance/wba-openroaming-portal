@@ -9,6 +9,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\ForgotPasswordEnum;
 use App\Enum\SettingName;
 use App\Repository\EventRepository;
+use DateInterval;
 use DateMalformedStringException;
 use DateTime;
 use RuntimeException;
