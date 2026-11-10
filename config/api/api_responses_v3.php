@@ -828,7 +828,7 @@ returns a generic successful response to prevent user enumeration.',
                 )
             ],
             400 => [
-                'SMS registration is disabled.',
+                'SMS registration is disabled by the administration.',
                 'Invalid JSON format',
                 'Invalid data.',
                 'CAPTCHA validation failed',
