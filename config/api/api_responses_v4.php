@@ -767,6 +767,7 @@ return [
                 ),
             ],
             400 => [
+                'SMS registration is disabled.',
                 'Invalid JSON format',
                 'Invalid data.',
                 'CAPTCHA validation failed',
