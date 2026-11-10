@@ -6,6 +6,7 @@ namespace App\DTO;
 
 use App\Enum\CaptchaProviderEnum;
 use App\Enum\SettingName;
+use App\Exception\EncryptionException;
 use App\Service\EncryptionService;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -56,6 +57,7 @@ class CaptchaDTO
 
     /**
      * @param array<string, array{value: string|null, description?: string}> $data
+     * @throws EncryptionException
      */
     public function __construct(
         array $data = [],
@@ -87,11 +89,12 @@ class CaptchaDTO
      * Map the DTO back to an array for SettingsService, encrypting sensitive keys.
      *
      * @return array<string, array{value: string|null}>
+     * @throws EncryptionException
      */
     public function toArray(): array
     {
         $encrypt = function (?string $value): ?string {
-            if ($value === null || trim($value) === '' || $this->encryptionService === null) {
+            if ($this->encryptionService === null || $value === null || trim($value) === '') {
                 return $value;
             }
 
