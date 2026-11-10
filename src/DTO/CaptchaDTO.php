@@ -68,7 +68,7 @@ class CaptchaDTO
         }
 
         $decrypt = static function (?string $value) use ($encryptionService): ?string {
-            if ($value === null || $encryptionService === null) {
+            if ($value === null || !$encryptionService instanceof EncryptionService) {
                 return $value;
             }
 
@@ -91,7 +91,7 @@ class CaptchaDTO
     public function toArray(): array
     {
         $encrypt = function (?string $value): ?string {
-            if ($value === null || trim($value) === '' || $this->encryptionService === null) {
+            if ($value === null || trim($value) === '' || !$this->encryptionService instanceof EncryptionService) {
                 return $value;
             }
 
