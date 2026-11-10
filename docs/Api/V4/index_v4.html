@@ -1148,9 +1148,11 @@
                   (TURNSTILE, RECAPTCHA3 or OFF) decides which token is required: send turnstile_token when it is
                   TURNSTILE or recaptcha_token when it is RECAPTCHA3; no token is needed when it is OFF. A token for a
                   different provider than the active one is ignored and the request fails with "CAPTCHA validation
-                  failed". The platform can require authentication with Two-Factor: the twoFACode parameter will be
-                  asked based on the TWO_FACTOR_AUTH_STATUS setting. When the setting LOGIN_WITH_UUID_ONLY is enabled,
-                  the authentication process does not require a password. Instead, a success message is returned and the
+                  failed". With RECAPTCHA3 the token must be created with the action "api_login"
+                  (grecaptcha.execute(siteKey, {action: "api_login"})); a token created for another action is rejected.
+                  The platform can require authentication with Two-Factor: the twoFACode parameter will be asked based
+                  on the TWO_FACTOR_AUTH_STATUS setting. When the setting LOGIN_WITH_UUID_ONLY is enabled, the
+                  authentication process does not require a password. Instead, a success message is returned and the
                   platform will send a login link via email or phone number.
                 </div>
 
@@ -2387,7 +2389,7 @@
                       <pre data-clipboard-target="code"
                            class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": false,
-    "error": "Your email domain is not allowed to use this platform!"
+    "error": "our email domain is not allowed to use this platform!"
 }
     </pre>
                     </div>
@@ -3136,10 +3138,11 @@
                   CAPTCHA validation. The CAPTCHA_PROVIDER setting (TURNSTILE, RECAPTCHA3 or OFF) decides which token is
                   required: send turnstile_token when it is TURNSTILE or recaptcha_token when it is RECAPTCHA3; no token
                   is needed when it is OFF. A token for a different provider than the active one is ignored and the
-                  request fails with "CAPTCHA validation failed". The email address and password are validated before
-                  the user account is created. If the email address is already registered, the endpoint returns a
-                  generic successful response to prevent user enumeration. A registration email is sent to newly created
-                  users.
+                  request fails with "CAPTCHA validation failed". With RECAPTCHA3 the token must be created with the
+                  action "api_register" (grecaptcha.execute(siteKey, {action: "api_register"})); a token created for
+                  another action is rejected. The email address and password are validated before the user account is
+                  created. If the email address is already registered, the endpoint returns a generic successful
+                  response to prevent user enumeration. A registration email is sent to newly created users.
                 </div>
 
 
@@ -3498,9 +3501,11 @@
                   and the CAPTCHA token for the active provider. The CAPTCHA_PROVIDER setting (TURNSTILE, RECAPTCHA3 or
                   OFF) decides which token is required: send turnstile_token when it is TURNSTILE or recaptcha_token
                   when it is RECAPTCHA3; no token is needed when it is OFF. A token for a different provider than the
-                  active one is ignored and the request fails with "CAPTCHA validation failed". The endpoint verifies if
-                  the user has an external auth with "PortalAccount" and "EMAIL" providerId, then proceeds with the
-                  password reset if the conditions are met.
+                  active one is ignored and the request fails with "CAPTCHA validation failed". With RECAPTCHA3 the
+                  token must be created with the action "api_reset_email" (grecaptcha.execute(siteKey, {action:
+                  "api_reset_email"})); a token created for another action is rejected. The endpoint verifies if the
+                  user has an external auth with "PortalAccount" and "EMAIL" providerId, then proceeds with the password
+                  reset if the conditions are met.
                 </div>
 
 
@@ -3681,7 +3686,9 @@
                   CAPTCHA_PROVIDER setting (TURNSTILE, RECAPTCHA3 or OFF) decides which token is required: send
                   turnstile_token when it is TURNSTILE or recaptcha_token when it is RECAPTCHA3; no token is needed when
                   it is OFF. A token for a different provider than the active one is ignored and the request fails with
-                  "CAPTCHA validation failed". A verification code is generated and sent to the registered phone number.
+                  "CAPTCHA validation failed". With RECAPTCHA3 the token must be created with the action
+                  "api_register_sms" (grecaptcha.execute(siteKey, {action: "api_register_sms"})); a token created for
+                  another action is rejected. A verification code is generated and sent to the registered phone number.
                   The SMS contains only the verification code: the chosen password is never sent back. If the phone
                   number is already registered, the endpoint returns a generic successful response to prevent user
                   enumeration.
@@ -4016,15 +4023,18 @@
               <div id="resp-1-9" class="hidden px-6 py-4 bg-white border-t border-gray-100 space-y-6">
 
                 <div class="text-sm text-gray-600 italic">
-                  This endpoint sends an SMS with a new temporary password if the user has a valid PortalAccount and has
-                  not exceeded SMS request limits. Limits come from the SMS_TIME_INTERVAL_BETWEEN_REQUESTS (cooldown),
+                  This endpoint generates and sends a single-use verification code (OTP) via SMS if the user has a valid
+                  PortalAccount and has not exceeded request limits. It does NOT modify or invalidate the user password
+                  until the challenge is confirmed. Limits come from the SMS_TIME_INTERVAL_BETWEEN_REQUESTS (cooldown),
                   SMS_ATTEMPTS_NUMBER and SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS settings and are shared with the web
                   forgot-password flow. A request inside the cooldown returns the generic success message without
-                  sending anything; a request over the attempts limit returns 429.The CAPTCHA_PROVIDER setting
+                  sending anything; a request over the attempts limit returns 429. The CAPTCHA_PROVIDER setting
                   (TURNSTILE, RECAPTCHA3 or OFF) decides which token is required: send turnstile_token when it is
                   TURNSTILE or recaptcha_token when it is RECAPTCHA3; no token is needed when it is OFF. A token for a
                   different provider than the active one is ignored and the request fails with "CAPTCHA validation
-                  failed".
+                  failed". With RECAPTCHA3 the token must be created with the action "api_reset_sms"
+                  (grecaptcha.execute(siteKey, {action: "api_reset_sms"})); a token created for another action is
+                  rejected.
                 </div>
 
 
@@ -4066,7 +4076,7 @@
                            class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": true,
     "data": {
-        "success": "If the phone number exists, we have sent a new code to: Country Code: 351 National Number: 925544896."
+        "success": "If the phone number exists, we have sent a verification code to: +3511234567890. You have 3 attempt(s) left."
     }
 }
     </pre>
@@ -4236,6 +4246,212 @@
                            class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": false,
     "message": "An unexpected error occurred while processing the request"
+}
+    </pre>
+                    </div>
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
+            <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+              <button type="button"
+                      class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
+                      onclick="document.getElementById('resp-1-10').classList.toggle('hidden')">
+                <div class="flex items-center gap-4">
+                                                                <span
+                                                                  class="text-xs font-semibold px-2 py-1 rounded bg-blue-100 text-blue-700">
+                                    POST
+                                </span>
+                  <code class="text-sm text-gray-900 font-mono">/api/v4/auth/sms/reset/confirm</code>
+                </div>
+                <svg viewBox="0 0 32 32" fill="currentColor" class="w-5 h-5 text-gray-500" aria-hidden="true">
+                  <path
+                    d="M8.037 11.166L14.5 22.36c.825 1.43 2.175 1.43 3 0l6.463-11.195c.826-1.43.15-2.598-1.5-2.598H9.537c-1.65 0-2.326 1.17-1.5 2.6z"></path>
+                </svg>
+              </button>
+
+              <div id="resp-1-10" class="hidden px-6 py-4 bg-white border-t border-gray-100 space-y-6">
+
+                <div class="text-sm text-gray-600 italic">
+                  Verifies the single-use SMS verification code (OTP) sent to the user by /api/v4/auth/sms/reset. Upon
+                  successful challenge verification, a new strong password is generated and committed for the user. The
+                  code stays valid for SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS minutes and is invalidated after
+                  SMS_ATTEMPTS_NUMBER wrong attempts (both on the dashboard SMS settings page); in both cases a new code
+                  must be requested with /api/v4/auth/sms/reset. Every failure (unknown number, wrong, expired or
+                  invalidated code) returns the same error, so the response does not reveal whether the account exists.
+                </div>
+
+
+                <div>
+                  <p class="text-sm font-semibold text-blue-600 mb-2">Request Body</p>
+                  <div
+                    class="bg-gray-100 text-gray-800 rounded-lg p-4 text-sm font-mono overflow-x-auto border border-gray-200">
+                                            <pre>{
+    "country_code": "PT",
+    "phone_number": "1234567890",
+    "code": "123456"
+}</pre>
+                  </div>
+                </div>
+
+                <div>
+                  <p class="text-sm font-semibold mb-2
+                                                    text-green-600
+                                            ">
+                    HTTP 200
+                  </p>
+
+
+                  <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                    <div data-controller="clipboard" class="relative group max-w-full">
+                      <button type="button"
+                              class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                              title="copy_command.title" aria-label="copy_command.aria_label"
+                              data-action="click-&gt;clipboard#copyToClipboard">
+                        <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                          <path fill-rule="evenodd"
+                                d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                        </svg>
+                      </button>
+
+
+                      <pre data-clipboard-target="code"
+                           class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": true,
+    "data": {
+        "success": "Password updated successfully.",
+        "new_password": "generatedPasswordString"
+    }
+}
+    </pre>
+                    </div>
+
+                  </div>
+
+                </div>
+                <div>
+                  <p class="text-sm font-semibold mb-2
+                                                    text-red-600
+                                            ">
+                    HTTP 400
+                  </p>
+
+
+                  <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                    <div data-controller="clipboard" class="relative group max-w-full">
+                      <button type="button"
+                              class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                              title="copy_command.title" aria-label="copy_command.aria_label"
+                              data-action="click-&gt;clipboard#copyToClipboard">
+                        <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                          <path fill-rule="evenodd"
+                                d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                        </svg>
+                      </button>
+
+
+                      <pre data-clipboard-target="code"
+                           class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": "Invalid JSON format"
+}
+    </pre>
+                    </div>
+
+                  </div>
+
+
+                  <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                    <div data-controller="clipboard" class="relative group max-w-full">
+                      <button type="button"
+                              class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                              title="copy_command.title" aria-label="copy_command.aria_label"
+                              data-action="click-&gt;clipboard#copyToClipboard">
+                        <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                          <path fill-rule="evenodd"
+                                d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                        </svg>
+                      </button>
+
+
+                      <pre data-clipboard-target="code"
+                           class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": "Invalid data: Missing required fields."
+}
+    </pre>
+                    </div>
+
+                  </div>
+
+
+                  <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                    <div data-controller="clipboard" class="relative group max-w-full">
+                      <button type="button"
+                              class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                              title="copy_command.title" aria-label="copy_command.aria_label"
+                              data-action="click-&gt;clipboard#copyToClipboard">
+                        <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                          <path fill-rule="evenodd"
+                                d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                        </svg>
+                      </button>
+
+
+                      <pre data-clipboard-target="code"
+                           class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": "Invalid phone number format."
+}
+    </pre>
+                    </div>
+
+                  </div>
+
+
+                  <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                    <div data-controller="clipboard" class="relative group max-w-full">
+                      <button type="button"
+                              class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                              title="copy_command.title" aria-label="copy_command.aria_label"
+                              data-action="click-&gt;clipboard#copyToClipboard">
+                        <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                          <path fill-rule="evenodd"
+                                d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                        </svg>
+                      </button>
+
+
+                      <pre data-clipboard-target="code"
+                           class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": "Invalid phone number format or country code."
+}
+    </pre>
+                    </div>
+
+                  </div>
+
+
+                  <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                    <div data-controller="clipboard" class="relative group max-w-full">
+                      <button type="button"
+                              class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                              title="copy_command.title" aria-label="copy_command.aria_label"
+                              data-action="click-&gt;clipboard#copyToClipboard">
+                        <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                          <path fill-rule="evenodd"
+                                d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                        </svg>
+                      </button>
+
+
+                      <pre data-clipboard-target="code"
+                           class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": "Invalid or expired verification code."
 }
     </pre>
                     </div>
@@ -4466,7 +4682,10 @@
 
                 <div class="text-sm text-gray-600 italic">
                   This endpoint retrieves the profile configuration for Android, including a user's radius profile data,
-                  encrypted password, and other relevant settings for the Android application. The account must be
+                  encrypted password, and other relevant settings for the Android application. A new RADIUS profile gets
+                  a username in the format "&lt;random prefix&gt;@&lt;RADIUS_REALM_NAME&gt;" (32 characters at most) and
+                  a random 32 character password, independent of the realm. If the RADIUS_REALM_NAME setting is empty or
+                  longer than 23 characters, no profile is issued and the request fails with 500. The account must be
                   verified, not banned and without a pending forgot-password request.
                 </div>
 
@@ -4516,7 +4735,7 @@
     "success": true,
     "data": {
         "config_android": {
-            "radiusUsername": "user123",
+            "radiusUsername": "a1B2c3D4e5F6g7H8i9J0@example.com",
             "radiusPassword": "encrypted_password_here",
             "friendlyName": "My Android Profile",
             "fqdn": "example.com",
@@ -4728,7 +4947,31 @@
                       <pre data-clipboard-target="code"
                            class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": false,
-    "message": "Failed to encrypt the password"
+    "message": "The RADIUS realm is misconfigured. Please contact the portal administrator."
+}
+    </pre>
+                    </div>
+
+                  </div>
+
+
+                  <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                    <div data-controller="clipboard" class="relative group max-w-full">
+                      <button type="button"
+                              class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                              title="copy_command.title" aria-label="copy_command.aria_label"
+                              data-action="click-&gt;clipboard#copyToClipboard">
+                        <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                          <path fill-rule="evenodd"
+                                d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                        </svg>
+                      </button>
+
+
+                      <pre data-clipboard-target="code"
+                           class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "message": "Failed to encrypt the password."
 }
     </pre>
                     </div>
@@ -4787,8 +5030,11 @@
 
                 <div class="text-sm text-gray-600 italic">
                   This endpoint retrieves the profile configuration for iOS, including a user's radius profile data,
-                  encrypted password, and other relevant settings for the iOS application. The account must be verified,
-                  not banned and without a pending forgot-password request.
+                  encrypted password, and other relevant settings for the iOS application. A new RADIUS profile gets a
+                  username in the format "&lt;random prefix&gt;@&lt;RADIUS_REALM_NAME&gt;" (32 characters at most) and a
+                  random 32 character password, independent of the realm. If the RADIUS_REALM_NAME setting is empty or
+                  longer than 23 characters, no profile is issued and the request fails with 500. The account must be
+                  verified, not banned and without a pending forgot-password request.
                 </div>
 
                 <div
@@ -4842,7 +5088,7 @@
         "domainName": "example.com",
         "EAPClientConfiguration": {
             "acceptEAPTypes": 21,
-            "radiusUsername": "user123",
+            "radiusUsername": "a1B2c3D4e5F6g7H8i9J0@example.com",
             "radiusPassword": "encrypted_password_here",
             "outerIdentity": "anonymous@example.com",
             "TTLSInnerAuthentication": "MSCHAPv2"
@@ -5053,7 +5299,31 @@
                       <pre data-clipboard-target="code"
                            class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": false,
-    "message": "Failed to encrypt the password"
+    "message": "The RADIUS realm is misconfigured. Please contact the portal administrator."
+}
+    </pre>
+                    </div>
+
+                  </div>
+
+
+                  <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                    <div data-controller="clipboard" class="relative group max-w-full">
+                      <button type="button"
+                              class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                              title="copy_command.title" aria-label="copy_command.aria_label"
+                              data-action="click-&gt;clipboard#copyToClipboard">
+                        <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                          <path fill-rule="evenodd"
+                                d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                        </svg>
+                      </button>
+
+
+                      <pre data-clipboard-target="code"
+                           class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "message": "Failed to encrypt the password."
 }
     </pre>
                     </div>
@@ -5308,7 +5578,8 @@
                   (TURNSTILE, RECAPTCHA3 or OFF) decides which token is required: send turnstile_token when it is
                   TURNSTILE or recaptcha_token when it is RECAPTCHA3; no token is needed when it is OFF. A token for a
                   different provider than the active one is ignored and the request fails with "CAPTCHA validation
-                  failed".
+                  failed". With RECAPTCHA3 the token must be created with the action "api_two_fa"
+                  (grecaptcha.execute(siteKey, {action: "api_two_fa"})); a token created for another action is rejected.
                 </div>
 
                 <div
@@ -7251,8 +7522,5 @@
   Version 1.16.0
 </div>
 
-
 </body>
-<iframe id="jam-coms-9fa7746b-1f86-4694-a6db-bc3181832724" src="./index_v4_files/icom.html"
-        style="display: none; width: 0px; height: 0px;"></iframe>
 </html>

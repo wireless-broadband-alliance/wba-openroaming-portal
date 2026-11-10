@@ -4065,8 +4065,9 @@
               <div id="resp-1-9" class="hidden px-6 py-4 bg-white border-t border-gray-100 space-y-6">
 
                 <div class="text-sm text-gray-600 italic">
-                  This endpoint sends an SMS with a new temporary password if the user
-                  has a valid PortalAccount and has not exceeded SMS request limits. Limits come from the
+                  This endpoint generates and sends a single-use verification code (OTP) via SMS
+                  if the user has a valid PortalAccount and has not exceeded SMS request limits. It does NOT modify
+                  or invalidate the user password until the challenge is confirmed. Limits come from the
                   SMS_TIME_INTERVAL_BETWEEN_REQUESTS (cooldown), SMS_ATTEMPTS_NUMBER and
                   SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS settings and are shared with the web forgot-password flow.
                   A request inside the cooldown returns the generic success message without sending anything;
@@ -4111,7 +4112,7 @@
                            class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": true,
     "data": {
-        "success": "If the phone number exists, we have sent a new code to: Country Code: 351 National Number: 925544896."
+        "success": "If the phone number exists, we have sent a verification code to: +3511234567890. You have 3 attempt(s) left."
     }
 }
     </pre>
@@ -4505,7 +4506,11 @@
                 <div class="text-sm text-gray-600 italic">
                   This endpoint retrieves the profile configuration for Android, including
                   a user's radius profile data, encrypted password, and other relevant settings for the Android
-                  application. The account must be verified, not banned and without a pending
+                  application. A new RADIUS profile gets a username in the format
+                  "&lt;random prefix&gt;@&lt;RADIUS_REALM_NAME&gt;" (32 characters at most) and a random 32 character
+                  password, independent of the realm. If the RADIUS_REALM_NAME setting is empty or longer than
+                  23 characters, no profile is issued and the request fails with 500.
+                  The account must be verified, not banned and without a pending
                   forgot-password request.
                                 </div>
 
@@ -4555,7 +4560,7 @@
     "success": true,
     "data": {
         "config_android": {
-            "radiusUsername": "user123",
+            "radiusUsername": "a1B2c3D4e5F6g7H8i9J0@example.com",
             "radiusPassword": "encrypted_password_here",
             "friendlyName": "My Android Profile",
             "fqdn": "example.com",
@@ -4767,7 +4772,31 @@
                       <pre data-clipboard-target="code"
                            class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": false,
-    "message": "Failed to encrypt the password"
+    "message": "The RADIUS realm is misconfigured. Please contact the portal administrator."
+}
+    </pre>
+                    </div>
+
+                  </div>
+
+
+                  <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                    <div data-controller="clipboard" class="relative group max-w-full">
+                      <button type="button"
+                              class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                              title="copy_command.title" aria-label="copy_command.aria_label"
+                              data-action="click-&gt;clipboard#copyToClipboard">
+                        <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                          <path fill-rule="evenodd"
+                                d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                        </svg>
+                      </button>
+
+
+                      <pre data-clipboard-target="code"
+                           class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "message": "Failed to encrypt the password."
 }
     </pre>
                     </div>
@@ -4827,6 +4856,10 @@
                 <div class="text-sm text-gray-600 italic">
                                     This endpoint retrieves the profile configuration for iOS, including a user's radius
                   profile data, encrypted password, and other relevant settings for the iOS application.
+                  A new RADIUS profile gets a username in the format "&lt;random prefix&gt;@&lt;RADIUS_REALM_NAME&gt;"
+                  (32 characters at most) and a random 32 character password, independent of the realm.
+                  If the RADIUS_REALM_NAME setting is empty or longer than 23 characters, no profile is issued
+                  and the request fails with 500.
                   The account must be verified, not banned and without a pending forgot-password request.
                                 </div>
 
@@ -4881,7 +4914,7 @@
         "domainName": "example.com",
         "EAPClientConfiguration": {
             "acceptEAPTypes": 21,
-            "radiusUsername": "user123",
+            "radiusUsername": "a1B2c3D4e5F6g7H8i9J0@example.com",
             "radiusPassword": "encrypted_password_here",
             "outerIdentity": "anonymous@example.com",
             "TTLSInnerAuthentication": "MSCHAPv2"
@@ -5092,7 +5125,31 @@
                       <pre data-clipboard-target="code"
                            class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": false,
-    "message": "Failed to encrypt the password"
+    "message": "The RADIUS realm is misconfigured. Please contact the portal administrator."
+}
+    </pre>
+                    </div>
+
+                  </div>
+
+
+                  <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                    <div data-controller="clipboard" class="relative group max-w-full">
+                      <button type="button"
+                              class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                              title="copy_command.title" aria-label="copy_command.aria_label"
+                              data-action="click-&gt;clipboard#copyToClipboard">
+                        <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                          <path fill-rule="evenodd"
+                                d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                        </svg>
+                      </button>
+
+
+                      <pre data-clipboard-target="code"
+                           class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "message": "Failed to encrypt the password."
 }
     </pre>
                     </div>
@@ -5156,7 +5213,7 @@
                     class="bg-gray-100 text-gray-800 rounded-lg p-4 text-sm font-mono overflow-x-auto border border-gray-200">
                                             <pre>{
     "success": true,
-    "data": "&lt;html&gt;&lt;body&gt;&lt;h1&gt;Turnstile Configuration&lt;\/h1&gt;&lt;p&gt;This is the required HTML \nconfiguration for the Android App.&lt;\/p&gt;&lt;\/body&gt;&lt;\/html&gt;"
+    "data": "&lt;html&gt;&lt;body&gt;&lt;h1&gt;Turnstile Configuration&lt;\/h1&gt;&lt;p&gt;This is the required HTML\nconfiguration for the Android App.&lt;\/p&gt;&lt;\/body&gt;&lt;\/html&gt;"
 }</pre>
                   </div>
                 </div>
@@ -5257,7 +5314,7 @@
                     class="bg-gray-100 text-gray-800 rounded-lg p-4 text-sm font-mono overflow-x-auto border border-gray-200">
                                             <pre>{
     "success": true,
-    "data": "&lt;html&gt;&lt;body&gt;&lt;h1&gt;Turnstile Configuration&lt;\/h1&gt;&lt;p&gt;This is the required HTML \nconfiguration for the IOS App.&lt;\/p&gt;&lt;\/body&gt;&lt;\/html&gt;"
+    "data": "&lt;html&gt;&lt;body&gt;&lt;h1&gt;Turnstile Configuration&lt;\/h1&gt;&lt;p&gt;This is the required HTML\nconfiguration for the IOS App.&lt;\/p&gt;&lt;\/body&gt;&lt;\/html&gt;"
 }</pre>
                   </div>
                 </div>
@@ -7284,6 +7341,4 @@
 </div>
 
 </body>
-<iframe id="jam-coms-c056f4fb-4ca0-413f-9f5d-1c0900e4f796" src="./index_v3_files/icom.html"
-        style="display: none; width: 0px; height: 0px;"></iframe>
 </html>
