@@ -12,6 +12,7 @@ use App\Enum\EventMetadataKeysType;
 use App\Form\CaptchaStepType;
 use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\Captcha\CaptchaValidator;
+use App\Service\EncryptionService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\SettingsService;
@@ -32,6 +33,7 @@ class CaptchaProviderController extends AbstractController
         private readonly SettingsService $settingsService,
         private readonly EventActions $eventActions,
         private readonly CaptchaValidator $captchaValidator,
+        private readonly EncryptionService $encryptionService,
     ) {
     }
 
@@ -47,7 +49,7 @@ class CaptchaProviderController extends AbstractController
         $canWrite = $this->isGranted(UserAuthenticationVoter::CAPTCHA_PROVIDER_WRITE);
 
         // Initialize DTO from settings
-        $dto = new CaptchaDTO($data);
+        $dto = new CaptchaDTO($data, $this->encryptionService);
 
         // Create form bound to DTO
         $form = $this->createForm(CaptchaStepType::class, $dto, ['disabled' => !$canWrite, 'allow_off' => true]);

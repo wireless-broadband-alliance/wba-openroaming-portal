@@ -6,6 +6,7 @@ namespace App\DTO;
 
 use App\Enum\CaptchaProviderEnum;
 use App\Enum\SettingName;
+use App\Service\EncryptionService;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class CaptchaDTO
@@ -54,27 +55,35 @@ class CaptchaDTO
     public ?string $recaptcha3Secret = null;
 
     /**
-     * Initialize DTO from settings array.
-     *
      * @param array<string, array{value: string|null, description?: string}> $data
      */
-    public function __construct(array $data = [])
-    {
+    public function __construct(
+        array $data = [],
+        ?EncryptionService $encryptionService = null
+    ) {
         $rawProvider = $data[SettingName::CAPTCHA_PROVIDER->value]['value'] ?? null;
 
         if (\is_string($rawProvider)) {
             $this->provider = CaptchaProviderEnum::tryFrom($rawProvider);
         }
 
-        $this->turnstileKey = $data[SettingName::TURNSTILE_KEY->value]['value'] ?? null;
-        $this->turnstileSecret = $data[SettingName::TURNSTILE_SECRET->value]['value'] ?? null;
-        $this->recaptcha3Key = $data[SettingName::RECAPTCHA3_KEY->value]['value'] ?? null;
-        $this->recaptcha3Secret = $data[SettingName::RECAPTCHA3_SECRET->value]['value'] ?? null;
+        $decrypt = static function (?string $value) use ($encryptionService): ?string {
+            if ($value === null || $encryptionService === null) {
+                return $value;
+            }
+
+            return $encryptionService->isEncrypted($value)
+                ? $encryptionService->decrypt($value)
+                : $value;
+        };
+
+        $this->turnstileKey = $decrypt($data[SettingName::TURNSTILE_KEY->value]['value'] ?? null);
+        $this->turnstileSecret = $decrypt($data[SettingName::TURNSTILE_SECRET->value]['value'] ?? null);
+        $this->recaptcha3Key = $decrypt($data[SettingName::RECAPTCHA3_KEY->value]['value'] ?? null);
+        $this->recaptcha3Secret = $decrypt($data[SettingName::RECAPTCHA3_SECRET->value]['value'] ?? null);
     }
 
     /**
-     * Map the DTO back to an array for SettingsService.
-     *
      * @return array<string, array{value: string|null}>
      */
     public function toArray(): array
