@@ -56,7 +56,8 @@ final readonly class PasswordResetAttemptGuard
      */
     public function tryRegisterAttempt(User $user, bool $isSms, ?string $clientIp, ?string $userAgent): array
     {
-        $result = $this->entityManager->wrapInTransaction(
+        /** @var array{allowed: bool, reason: string, attemptsLeft: int, timeLeft: mixed} $result */
+        return $this->entityManager->wrapInTransaction(
             function () use ($user, $isSms, $clientIp, $userAgent): array {
                 // Row lock on the user, held until the transaction commits: a concurrent reset for the same
                 // user, from any channel or container, blocks here until this one has written its event
@@ -65,9 +66,6 @@ final readonly class PasswordResetAttemptGuard
                 return $this->checkAndRecord($user, $isSms, $clientIp, $userAgent);
             }
         );
-
-        /** @var array{allowed: bool, reason: string, attemptsLeft: int, timeLeft: mixed} $result */
-        return $result;
     }
 
     /**

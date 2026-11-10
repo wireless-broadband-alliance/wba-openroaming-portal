@@ -313,6 +313,7 @@ class ForgotPasswordController extends AbstractController
                         'messageSentWithAttemptsLeft',
                         [
                             '%uuid%' => $user->getUuid(),
+                            '%attempts%' => $attempt[PasswordResetAttemptGuard::ATTEMPTS_LEFT],
                         ],
                         'controllers'
                     );
