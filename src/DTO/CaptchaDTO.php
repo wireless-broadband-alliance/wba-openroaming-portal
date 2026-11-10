@@ -59,7 +59,7 @@ class CaptchaDTO
      */
     public function __construct(
         array $data = [],
-        ?EncryptionService $encryptionService = null
+        private readonly ?EncryptionService $encryptionService = null
     ) {
         $rawProvider = $data[SettingName::CAPTCHA_PROVIDER->value]['value'] ?? null;
 
@@ -84,16 +84,28 @@ class CaptchaDTO
     }
 
     /**
+     * Map the DTO back to an array for SettingsService, encrypting sensitive keys.
+     *
      * @return array<string, array{value: string|null}>
      */
     public function toArray(): array
     {
+        $encrypt = function (?string $value): ?string {
+            if ($value === null || trim($value) === '' || $this->encryptionService === null) {
+                return $value;
+            }
+
+            return $this->encryptionService->isEncrypted($value)
+                ? $value
+                : $this->encryptionService->encrypt($value);
+        };
+
         return [
             SettingName::CAPTCHA_PROVIDER->value => ['value' => $this->provider?->value],
-            SettingName::TURNSTILE_KEY->value => ['value' => $this->turnstileKey],
-            SettingName::TURNSTILE_SECRET->value => ['value' => $this->turnstileSecret],
-            SettingName::RECAPTCHA3_KEY->value => ['value' => $this->recaptcha3Key],
-            SettingName::RECAPTCHA3_SECRET->value => ['value' => $this->recaptcha3Secret],
+            SettingName::TURNSTILE_KEY->value => ['value' => $encrypt($this->turnstileKey)],
+            SettingName::TURNSTILE_SECRET->value => ['value' => $encrypt($this->turnstileSecret)],
+            SettingName::RECAPTCHA3_KEY->value => ['value' => $encrypt($this->recaptcha3Key)],
+            SettingName::RECAPTCHA3_SECRET->value => ['value' => $encrypt($this->recaptcha3Secret)],
         ];
     }
 }
