@@ -829,8 +829,9 @@ return [
         'section' => 'Auth',
         'description' => 'Verifies the single-use SMS verification code (OTP) sent to the user by /api/v4/auth/sms/reset. '
             . 'Upon successful challenge verification, a new strong password is generated and committed for the user. '
-            . 'The code expires after the TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME setting (in seconds) and is invalidated '
-            . 'after 5 wrong attempts; in both cases a new code must be requested with /api/v4/auth/sms/reset. '
+            . 'The code stays valid for SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS minutes and is invalidated after '
+            . 'SMS_ATTEMPTS_NUMBER wrong attempts (both on the dashboard SMS settings page); in both cases a new '
+            . 'code must be requested with /api/v4/auth/sms/reset. '
             . 'Every failure (unknown number, wrong, expired or invalidated code) returns the same error, '
             . 'so the response does not reveal whether the account exists.',
         'requestBody' => [

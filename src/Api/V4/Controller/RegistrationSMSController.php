@@ -44,9 +44,7 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 
 class RegistrationSMSController extends AbstractController
 {
-    /** Wrong codes allowed per SMS reset code before it is invalidated */
-    private const int MAX_CONFIRM_ATTEMPTS = 5;
-
+    /** Technical timeout of the per-user confirmation lock, not a portal setting */
     private const int LOCK_TTL_SECONDS = 30;
 
     private const string INVALID_CODE_MESSAGE = 'Invalid or expired verification code.';
@@ -514,8 +512,13 @@ class RegistrationSMSController extends AbstractController
                 return $invalidCode;
             }
 
-            // The code expires after TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME seconds, like the other 2FA codes
-            if ($this->isCodeExpired($generatedAt)) {
+            // Limits come from the dashboard SMS settings page (User Authentication > SMS > Configuration):
+            // "Time Interval To Reset Attempts" (minutes) is how long the code stays valid and
+            // "Number of Attempts" is how many wrong codes are allowed before it is invalidated
+            $codeValidityMinutes = $this->getSmsSettingValue(SettingName::SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS);
+            $maxConfirmAttempts = $this->getSmsSettingValue(SettingName::SMS_ATTEMPTS_NUMBER);
+
+            if ($this->isCodeExpired($generatedAt, $codeValidityMinutes)) {
                 $this->invalidateCode($user);
 
                 return $invalidCode;
@@ -530,7 +533,7 @@ class RegistrationSMSController extends AbstractController
                 )
             );
 
-            if ($failedAttempts >= self::MAX_CONFIRM_ATTEMPTS) {
+            if ($failedAttempts >= $maxConfirmAttempts) {
                 $this->invalidateCode($user);
 
                 return $invalidCode;
@@ -551,7 +554,7 @@ class RegistrationSMSController extends AbstractController
                 );
 
                 // That was the last allowed guess: burn the code, the user has to request a new one
-                if ($failedAttempts + 1 >= self::MAX_CONFIRM_ATTEMPTS) {
+                if ($failedAttempts + 1 >= $maxConfirmAttempts) {
                     $this->invalidateCode($user);
                 }
 
@@ -573,13 +576,18 @@ class RegistrationSMSController extends AbstractController
         }
     }
 
-    private function isCodeExpired(DateTimeInterface $generatedAt): bool
+    private function isCodeExpired(DateTimeInterface $generatedAt, int $validityMinutes): bool
     {
-        $expirationSeconds = (int)$this->settingRepository->findOneBy(
-            ['name' => SettingName::TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME->value]
-        )?->getValue();
+        return new DateTime()->getTimestamp() - $generatedAt->getTimestamp() >= $validityMinutes * 60;
+    }
 
-        return new DateTime()->getTimestamp() - $generatedAt->getTimestamp() >= $expirationSeconds;
+    /**
+     * Reads an integer setting from the dashboard SMS settings page. A missing setting reads as 0, which makes
+     * every code count as expired or out of attempts, so the endpoint fails closed instead of allowing anything.
+     */
+    private function getSmsSettingValue(SettingName $setting): int
+    {
+        return (int)$this->settingRepository->findOneBy(['name' => $setting->value])?->getValue();
     }
 
     /**
