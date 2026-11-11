@@ -12,27 +12,39 @@ essentialCookiesText: 'Estes cookies são essenciais para o funcionamento adequa
 dataSafetyText: 'Os seus dados estão seguros connosco. Saiba mais na nossa'
 
 controlledBy: 'Controlado por'
+cookieName: 'Cookie'
+duration: 'Duração'
 privacyPolicy: 'Política de Privacidade'
 manageableCookiesTitle: 'Cookies Gerenciáveis'
 manageableCookiesDescription: 'Estes cookies ajudam-nos a compreender como prefere usar a nossa plataforma.'
 sessionCookie:
-    title: 'Cookie de Sessão (PHPSESSID)'
+    title: 'Cookie de Sessão'
     description: 'Este cookie é essencial para manter o estado da sessão do utilizador durante a duração da mesma. Permite que a plataforma funcione corretamente e garante uma experiência de utilizador estável.'
+    duration: 'Até o navegador ser fechado'
 csrfToken:
     title: 'Token CSRF'
     description: 'Protege contra ataques de falsificação de pedidos entre sites (CSRF), garantindo que formulários e pedidos sejam enviados a partir de fontes confiáveis.'
-samlSessionCookie:
-    title: 'Cookie de Sessão SAML'
-    description: 'Usado para gerir a autenticação e o estado da sessão durante interações de Single Sign-On (SSO) com um fornecedor de identidade SAML. Garante um login seguro e perfeito entre serviços conectados.'
-jwtAuthenticationCookie:
-    title: 'Cookie de Autenticação JWT'
-    description: 'Armazena um JSON Web Token (JWT) para a autenticação do utilizador, permitindo acesso seguro a recursos protegidos durante a sessão do utilizador. Garante que a identidade do utilizador é verificada ao longo da sessão.'
+    duration: 'Até o formulário ser enviado ou o navegador ser fechado'
+consentCookie:
+    title: 'Consentimento de Cookies'
+    description: 'Guarda as suas escolhas de cookies, para que este aviso não volte a aparecer e as suas preferências sejam respeitadas.'
+    duration: '1 ano'
+samlReauthCookie:
+    title: 'Eliminação de Conta SAML'
+    description: 'Usado apenas quando uma conta criada com SAML é eliminada, para confirmar a sua identidade depois de iniciar sessão novamente no seu fornecedor de identidade.'
+    duration: '1 minuto'
+recaptchaCookie:
+    title: 'Google reCAPTCHA'
+    description: 'Definido pelo Google reCAPTCHA v3 para distinguir pessoas de bots, protegendo os formulários de login, registo e recuperação de palavra-passe contra spam e abuso.'
+    duration: 'Até 6 meses (definido pela Google)'
 turnstileCookie:
-    title: 'Cookie de Segurança Turnstile'
-    description: 'Garante a segurança da plataforma ao prevenir interações de spam e bots.'
+    title: 'Cloudflare Turnstile'
+    description: 'Cookies de segurança que a Cloudflare pode definir enquanto o Turnstile verifica que não é um bot, protegendo os formulários de login, registo e recuperação de palavra-passe contra spam e abuso.'
+    duration: 'Curta duração (definido pela Cloudflare)'
 rememberMeCookie:
     title: 'Lembra-te de mim'
     description: 'Guarda a sessão do utilizador se a conta estiver previamente ativa.'
+    duration: '7 dias'
 locationCookie:
     title: "Cookies de Localização"
     description: "Permite-nos obter a sua localização aproximada através do navegador para centrar o mapa automaticamente na sua região e melhorar a sua experiência."

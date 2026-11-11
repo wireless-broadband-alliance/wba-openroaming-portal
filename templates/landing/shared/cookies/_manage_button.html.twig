@@ -1,0 +1,10 @@
+{# Reopens the preferences modal once the consent bar is gone (shown/hidden by cookie_controller.js) #}
+<div class="flex flex-row items-center gap-4 my-2 w-full" data-cookie-target="manageButton">
+    <div class="flex items-center gap-2 ml-auto">
+        <span class="text-sm text-[#707070]">{{ 'manage'|trans({}, '_cookie_banner') }}</span>
+        <button id="modalManageCookies" type="button" data-action="cookie#showModal"
+                class="flex items-center duration-300 cursor-pointer rounded-full text-[#707070] focus:animate-spin-slow focus:bg-[#7DB928] focus:text-white hover:shadow-lg p-2.5 relative z-0">
+            <twig:ux:icon name="wba:cookie" class="stroke-current"/>
+        </button>
+    </div>
+</div>

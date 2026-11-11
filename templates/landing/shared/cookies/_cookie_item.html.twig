@@ -1,0 +1,58 @@
+{#
+One declared cookie in the cookie preferences modal.
+
+Parameters:
+  - key              translation prefix in the `_cookie_banner` domain; reads `<key>.title`,
+                     `<key>.description` and `<key>.duration`
+  - names            the real cookie name(s), exactly as they appear in the browser
+  - controllerLabel  (optional) who sets the cookie; defaults to this portal's host
+  - controllerUrl    (optional) link for the controller; defaults to the landing page
+  - privacyUrl       (optional) privacy policy link; defaults to this portal's privacy policy
+  - external         (optional) true for third-party links, opened in a new tab
+  - scope            (optional) consent scope for a manageable cookie; renders a toggle bound to
+                     `data-scope`, read by assets/controllers/cookie_controller.js
+#}
+{% set controllerLabel = controllerLabel ?? app.request.getHost() %}
+{% set controllerUrl = controllerUrl ?? absolute_url(path('app_landing')) %}
+{% set privacyUrl = privacyUrl ?? path('app_privacy_policy') %}
+{% set external = external ?? false %}
+{% set scope = scope ?? null %}
+
+<li>
+    <div class="flex justify-between items-center gap-4">
+        <div>
+            <strong>{{ (key ~ '.title')|trans({}, '_cookie_banner') }}</strong> -
+            {{ (key ~ '.description')|trans({}, '_cookie_banner') }}
+            <br>
+            {{ 'cookieName'|trans({}, '_cookie_banner') }}:
+            <code class="text-xs bg-gray-100 rounded px-1">{{ names }}</code>
+            <br>
+            {{ 'duration'|trans({}, '_cookie_banner') }}:
+            {{ (key ~ '.duration')|trans({}, '_cookie_banner') }}
+            <br>
+            {{ 'controlledBy'|trans({}, '_cookie_banner') }}:
+            <a class="underline text-primary font-semibold"
+               href="{{ controllerUrl }}"
+               {% if external %}target="_blank" rel="noopener noreferrer"{% endif %}>
+                {{ controllerLabel }}
+            </a>
+            <p>
+                <a href="{{ privacyUrl }}"
+                   class="underline text-primary"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                    {{ 'privacyPolicy'|trans({}, '_cookie_banner') }}
+                </a>
+            </p>
+        </div>
+
+        {% if scope %}
+            <div>
+                <label class="inline-flex items-center cursor-pointer">
+                    <input type="checkbox" class="sr-only peer" data-scope="{{ scope }}">
+                    <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
+                </label>
+            </div>
+        {% endif %}
+    </div>
+</li>

@@ -14,11 +14,21 @@ use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 
-class CaptchaExtension
+readonly class CaptchaExtension
 {
     public function __construct(
-        private readonly CaptchaValidator $captchaValidator
+        private CaptchaValidator $captchaValidator
     ) {
+    }
+
+    /**
+     * Active CAPTCHA provider (TURNSTILE, RECAPTCHA3, OFF, or INVALID when misconfigured).
+     * Used by templates that depend on the provider, such as the cookie declaration.
+     */
+    #[AsTwigFunction(name: 'captcha_provider')]
+    public function captchaProvider(): string
+    {
+        return $this->captchaValidator->getActiveProvider();
     }
 
     /**
