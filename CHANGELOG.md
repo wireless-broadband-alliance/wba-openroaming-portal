@@ -56,6 +56,15 @@
       `The RADIUS realm is misconfigured. Please contact the portal administrator.`
     - The landing page profile downloads (Android, iOS and Windows) show an error and redirect to the landing page.
 
+- **Check the Nginx Configuration for Google reCAPTCHA**: After updating to this release, open
+  `service-config/nginx/sites/openroaming.conf` (or `service-config/nginx/sites-ssl/openroaming-ssl.conf` if you use
+  `docker-compose-ssl.yml`) and make sure the `Content-Security-Policy` line includes the Google domains:
+  - `https://www.google.com https://www.gstatic.com` in `script-src` and `script-src-elem`;
+  - `https://www.google.com` in `connect-src` and `frame-src`.
+
+  This file is mounted from the host into the container. If the Google domains are missing, reCAPTCHA v3 does not load and the
+  login page shows `The security check could not be loaded.`
+
 ### Security Fixes
 
 - **RADIUS Password Length No Longer Depends on the Realm**: The RADIUS password of a new profile was generated with
