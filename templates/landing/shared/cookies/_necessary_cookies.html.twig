@@ -52,7 +52,7 @@ translations (title, description and duration) in every language.
     </p>
     <ul class="text-sm space-y-4">
         {% for cookie in necessaryCookies %}
-            {{ include('landing/shared/cookies/_cookie_item.html.twig', cookie, with_context = false) }}
+            {{ include('landing/shared/cookies/_cookie_item.html.twig', cookie, with_context: false) }}
         {% endfor %}
     </ul>
 </div>
