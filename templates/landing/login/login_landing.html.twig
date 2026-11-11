@@ -123,16 +123,8 @@
             </div>
         {% endif %}
 
-        {# Turnstile Checker #}
-        {% if form.security is defined %}
-            <div class="ml-3 mt-5">
-                {{ form_label(form.security) }}
-                {{ form_widget(form.security) }}
-                <div class="text-red-500">
-                    {{ form_errors(form.security) }}
-                </div>
-            </div>
-        {% endif %}
+        {# CAPTCHA Verification Partial #}
+        {{ render_captcha(form, 'login') }}
 
         <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
         <div class="my-[32px] flex justify-center gap-4">

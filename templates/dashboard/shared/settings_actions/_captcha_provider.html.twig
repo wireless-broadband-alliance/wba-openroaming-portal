@@ -1,0 +1,187 @@
+<twig:CaptchaStepForm :form="form" :captchaDTO="formDTO" :allowOff="true">
+    {% set captchaOffVal = constant('App\\Enum\\CaptchaProviderEnum::OFF').value %}
+    {% set turnstileValue = constant('App\\Enum\\CaptchaProviderEnum::TURNSTILE').value %}
+    {% set recaptcha3Value = constant('App\\Enum\\CaptchaProviderEnum::RECAPTCHA3').value %}
+    {% set selectedProvider = form.provider.vars.value.value|default(form.provider.vars.value) %}
+
+    {{ form_start(form, {attr: {autocomplete: 'off'}}) }}
+    {{ form_widget(form._token) }}
+
+    <div class="grid gap-4 grid-cols-1 p-2" {{ stimulus_controller('radio-card') }}>
+
+        {# ================= CAPTCHA PROVIDER SELECTION ================= #}
+        <div class="transition bg-white rounded-md p-6 w-full" {{ stimulus_controller('radio card') }}>
+            <div class="flex flex-row justify-between">
+                <div class="text-base font-medium text-center break-normal md:break-all">
+                    <h1 class="text-lg md:text-xl whitespace-nowrap">{{ 'captchaProvider'|trans({}, '_header_admin') }}</h1>
+                </div>
+                <label class="flex items-center bg-opacity-40">
+                    <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+                </label>
+            </div>
+
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: 'captchaProviderDescription'|trans({}, 'captcha')}) }}
+
+            <div class="flex flex-col items-center space-y-2 mt-5" data-controller="radio">
+                {# Option: OFF (Rendered conditionally if allowed) #}
+                {% if allowOff|default(true) %}
+                    <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4 cursor-pointer">
+                        Off
+                        <input type="radio"
+                               name="{{ form.provider.vars.full_name }}"
+                               value="{{ captchaOffVal }}"
+                               class="radio-input hidden"
+                                {{ selectedProvider == captchaOffVal ? 'checked' : '' }}
+                                {% if form.provider.vars.disabled %} disabled="disabled" {% endif %}
+                                {{ stimulus_action('radio', 'toggle') }}>
+                        <div class="custom-radio pr-3 pt-1.5 {{ selectedProvider == captchaOffVal ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10" fill="none">
+                                <path fill-rule="evenodd" clip-rule="evenodd"
+                                      d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                      fill="#210124"/>
+                            </svg>
+                        </div>
+                    </label>
+                {% endif %}
+
+                {# Option: TURNSTILE #}
+                <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4 cursor-pointer">
+                    Cloudflare Turnstile
+                    <input type="radio"
+                           name="{{ form.provider.vars.full_name }}"
+                           value="{{ turnstileValue }}"
+                           class="radio-input hidden"
+                            {{ selectedProvider == turnstileValue ? 'checked' : '' }}
+                            {% if form.provider.vars.disabled %} disabled="disabled" {% endif %}
+                            {{ stimulus_action('radio', 'toggle') }}>
+                    <div class="custom-radio pr-3 pt-1.5 {{ selectedProvider == turnstileValue ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10" fill="none">
+                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                  d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                  fill="#210124"/>
+                        </svg>
+                    </div>
+                </label>
+
+                {# Option: RECAPTCHA3 #}
+                <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4 cursor-pointer">
+                    Google reCAPTCHA v3
+                    <input type="radio"
+                           name="{{ form.provider.vars.full_name }}"
+                           value="{{ recaptcha3Value }}"
+                           class="radio-input hidden"
+                            {{ selectedProvider == recaptcha3Value ? 'checked' : '' }}
+                            {% if form.provider.vars.disabled %} disabled="disabled" {% endif %}
+                            {{ stimulus_action('radio', 'toggle') }}>
+                    <div class="custom-radio pr-3 pt-1.5 {{ selectedProvider == recaptcha3Value ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10" fill="none">
+                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                  d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                  fill="#210124"/>
+                        </svg>
+                    </div>
+                </label>
+            </div>
+
+            <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+                {{ form_errors(form.provider) }}
+            </div>
+
+            {# Prevent duplicated rendering of the provider field #}
+            {% do form.provider.setRendered() %}
+        </div>
+
+        {# ================= PROVIDER CONFIGURATION CARD ================= #}
+        <div class="transition bg-white rounded-md p-6 w-full {{ selectedProvider == captchaOffVal ? 'hidden' : '' }}">
+
+            {# CLOUDFLARE TURNSTILE FIELDS #}
+            <div class="{{ selectedProvider != turnstileValue ? 'hidden' : '' }}" {{ stimulus_controller('card') }}>
+                <div class="flex flex-row justify-between">
+                    <div class="text-base font-medium text-center break-normal md:break-all">
+                        <h1 class="text-lg md:text-xl whitespace-nowrap">{{ 'turnstileLabel'|trans({}, 'captcha') }}</h1>
+                    </div>
+                    <label class="flex items-center bg-opacity-40">
+                        <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                             src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+                    </label>
+                </div>
+
+                {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: 'turnstileHelpInfo'|trans({}, 'captcha')}) }}
+
+                <div class="space-y-4 mt-5">
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 block mb-1">
+                            {{ 'turnstileSiteKeyLabel'|trans({}, 'captcha') }}
+                        </label>
+                        {{ form_widget(form.turnstileKey, {attr: {class: 'form-widget', placeholder: '0x4AAAAAAA...'}}) }}
+                        <div class="mt-1 text-red-500 text-sm">{{ form_errors(form.turnstileKey) }}</div>
+                    </div>
+
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 block mb-1">
+                            {{ 'turnstileSecretKeyLabel'|trans({}, 'captcha') }}
+                        </label>
+                        {{ form_widget(form.turnstileSecret, {attr: {class: 'form-widget', placeholder: '0x4AAAAAAA...'}}) }}
+                        <div class="mt-1 text-red-500 text-sm">{{ form_errors(form.turnstileSecret) }}</div>
+                    </div>
+                </div>
+            </div>
+
+            {# GOOGLE RECAPTCHA V3 FIELDS #}
+            <div class="{{ selectedProvider != recaptcha3Value ? 'hidden' : '' }}" {{ stimulus_controller('card') }}>
+                <div class="flex flex-row justify-between">
+                    <div class="text-base font-medium text-center break-normal md:break-all">
+                        <h1 class="text-lg md:text-xl whitespace-nowrap">{{ 'recaptcha3Label'|trans({}, 'captcha') }}</h1>
+                    </div>
+                    <label class="flex items-center bg-opacity-40">
+                        <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                             src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+                    </label>
+                </div>
+
+                {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: 'recaptcha3HelpInfo'|trans({}, 'captcha')}) }}
+
+                <div class="space-y-4 mt-5">
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 block mb-1">
+                            {{ 'recaptcha3SiteKeyLabel'|trans({}, 'captcha') }}
+                        </label>
+                        {{ form_widget(form.recaptcha3Key, {attr: {class: 'form-widget', placeholder: '6Ld...'}}) }}
+                        <div class="mt-1 text-red-500 text-sm">{{ form_errors(form.recaptcha3Key) }}</div>
+                    </div>
+
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 block mb-1">
+                            {{ 'recaptcha3SecretKeyLabel'|trans({}, 'captcha') }}
+                        </label>
+                        {{ form_widget(form.recaptcha3Secret, {attr: {class: 'form-widget', placeholder: '6Ld...'}}) }}
+                        <div class="mt-1 text-red-500 text-sm">{{ form_errors(form.recaptcha3Secret) }}</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {# Footer #}
+    <div class="mt-8 divider-solid"></div>
+
+    {# Form Actions conditional rendering based on voter write permission #}
+    {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::CAPTCHA_PROVIDER_WRITE')) %}
+        <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
+            <a href="{{ path('app_dashboard_regenerate_code_admin', {type: constant('App\\Enum\\SettingType::CAPTCHA_PROVIDER').value}) }}"
+               data-confirm="{{ 'resetMessage'|trans({}, 'settings_actions_general')|e('html_attr') }}"
+               class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
+                {{ 'reset'|trans({}, 'settings_actions_general') }}
+            </a>
+            <button type="submit" class="btn-primary"
+                    onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general') }}')">
+                {{ 'saveChanges'|trans({}, 'settings_actions_general') }}
+            </button>
+        </div>
+    {% endif %}
+
+    {{ form_rest(form) }}
+    {{ form_end(form, {render_rest: false}) }}
+</twig:CaptchaStepForm>

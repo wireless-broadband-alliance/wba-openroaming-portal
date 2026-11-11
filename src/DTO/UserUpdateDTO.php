@@ -72,6 +72,7 @@ class UserUpdateDTO
     public PermissionLevel $map = PermissionLevel::NONE;
     public PermissionLevel $installation = PermissionLevel::NONE;
     public PermissionLevel $securityTxt = PermissionLevel::NONE;
+    public PermissionLevel $captchaProvider = PermissionLevel::NONE;
 
     public function __construct(?User $user = null)
     {
@@ -183,5 +184,6 @@ class UserUpdateDTO
         'map' => 'MAP',
         'installation' => 'INSTALLATION',
         'securityTxt' => 'SECURITY_TXT',
+        'captchaProvider' => 'CAPTCHA_PROVIDER',
     ];
 }

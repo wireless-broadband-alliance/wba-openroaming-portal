@@ -13,8 +13,6 @@ parameters:
     app.export_users: '%env(bool:EXPORT_USERS)%'
     app.export_freeradius_statistics: '%env(bool:EXPORT_FREERADIUS_STATISTICS)%'
     app.pgp_public_key: '%env(bool:ENABLE_DELETE_USERS_UI)%'
-    app.turnstile_key: '%env(TURNSTILE_KEY)%'
-    app.turnstile_secret: '%env(TURNSTILE_SECRET)%'
     app.google_client_id: '%env(GOOGLE_CLIENT_ID)%'
     app.microsoft_client_id: '%env(MICROSOFT_CLIENT_ID)%'
     app.sentry_dsn: '%env(SENTRY_DSN)%'
@@ -67,14 +65,9 @@ services:
     App\EventListener\LocaleListener:
         tags:
             - { name: kernel.event_listener, event: kernel.request, priority: 20 }
-    PixelOpen\CloudflareTurnstileBundle\Http\CloudflareTurnstileHttpClient:
-        alias: 'turnstile.http_client'
     App\Service\JWTTokenGenerator:
         arguments:
             $parameterBag: '@parameter_bag'
-    App\EventListener\JWTExceptionListener:
-        tags:
-            - { name: kernel.event_subscriber }
     App\Service\UserStatusChecker: ~
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

@@ -1,2 +1,3 @@
 enterCode: 'You should enter a code.'
 confirmDeletingYourAccount: 'You must confirm that you understand deleting your account is permanent and cannot be undone.'
+enterPassword: 'Enter your password'

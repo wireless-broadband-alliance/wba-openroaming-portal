@@ -32,7 +32,7 @@ class AutoDeletePasswordType extends AbstractType
                 'visible_label' => null,
                 'required' => true,
                 'attr' => [
-                    'placeholder' => $this->translator->trans('EnterPassword', [], 'LoginFormType'),
+                    'placeholder' => $this->translator->trans('enterPassword', [], 'AutoDeleteType'),
                     'data-live-ignore' => 'true',
                 ],
             ])

@@ -1,0 +1,5 @@
+tokenEmpty: 'O token do CAPTCHA Turnstile está vazio. Por favor, conclua a verificação de segurança.'
+secretNotConfigured: 'A chave secreta do Turnstile não está configurada nas definições.'
+validationFailed: 'A validação do CAPTCHA Turnstile falhou. Por favor, tente novamente.'
+invalidSecretKey: 'Chave secreta do Turnstile inválida.'
+credentialCheckFailed: 'Não foi possível verificar as credenciais do Turnstile devido a um erro de ligação.'

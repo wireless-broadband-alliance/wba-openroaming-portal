@@ -1,0 +1,22 @@
+{# Consent bar shown until the visitor accepts, rejects or saves preferences (removed by cookie_controller.js) #}
+<div {{ stimulus_target('cookie', 'bannerWrapper') }} class="flex items-center justify-center relative">
+    <section
+            class="w-full p-5 mt-8 bg-slate-200 duration-100 rounded hover:shadow z-10 flex flex-col justify-between">
+        <div class="md:flex items-center justify-between text-center md:text-left text-xs mb-4">
+            <div class="md:flex-1">
+                {{ 'text'|trans({}, '_cookie_banner') }}
+            </div>
+        </div>
+        <div class="flex flex-col md:flex-row justify-center md:space-x-4 space-x-0 space-y-4 md:space-y-0">
+            <button class="py-1 px-2 btn-primary text-sm" data-action="cookie#acceptCookies">
+                {{ 'accept'|trans({}, '_cookie_banner') }}
+            </button>
+            <button class="py-1 px-2 btn-logout text-sm" data-action="cookie#rejectCookies">
+                {{ 'reject'|trans({}, '_cookie_banner') }}
+            </button>
+            <button class="py-1 px-2 btn-secondary text-sm" data-action="cookie#showModal">
+                {{ 'settings'|trans({}, '_cookie_banner') }}
+            </button>
+        </div>
+    </section>
+</div>

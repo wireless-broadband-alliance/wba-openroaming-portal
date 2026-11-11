@@ -14,29 +14,30 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com/">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
-    <link href="./index_v3_files/css2" rel="stylesheet">
+  <link href="./index_v3_files/css2" rel="stylesheet">
 
   <link rel="preconnect" href="https://fonts.googleapis.com/">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
-    <link href="./index_v3_files/css2(1)" rel="stylesheet">
+  <link href="./index_v3_files/css2(1)" rel="stylesheet">
 
-  <link rel="stylesheet" href="./index_v3_files/app-ekPxwQ0.css">
+  <link rel="stylesheet" href="./index_v3_files/app-cQLbrCV.css">
 
 
-  <link rel="stylesheet" href="./index_v3_files/app-ekPxwQ0.css">
+  <link rel="stylesheet" href="./index_v3_files/app-cQLbrCV.css">
+  <link rel="stylesheet" href="./index_v3_files/leaflet.min-YqA-lmN.css">
   <link rel="stylesheet" href="./index_v3_files/tom-select.default-kJuSzGY.css">
   <link rel="stylesheet" href="./index_v3_files/live.min-WRZuO3t.css">
   <link rel="stylesheet" href="./index_v3_files/quill.snow-DYvVjm1.css">
   <script type="importmap">
     {
     "imports": {
-        "app": "/assets/app-g-Y3fDI.js",
+        "app": "/assets/app-8zJq9S_.js",
         "/assets/bootstrap.js": "/assets/bootstrap-O6U5lCo.js",
         "/assets/styles/app.css": "data:application/javascript,",
-        "chart.js": "/assets/vendor/chart.js/chart.js.index-XJ2ZKmA.js",
+        "leaflet/dist/leaflet.min.css": "data:application/javascript,",
         "@symfony/stimulus-bundle": "/assets/@symfony/stimulus-bundle/loader-IOzBDLu.js",
         "@hotwired/stimulus": "/assets/vendor/@hotwired/stimulus/stimulus.index-ryewcoo.js",
-        "/assets/@symfony/stimulus-bundle/controllers.js": "/assets/@symfony/stimulus-bundle/controllers-FDm6rXE.js",
+        "/assets/@symfony/stimulus-bundle/controllers.js": "/assets/@symfony/stimulus-bundle/controllers-j2QAmXP.js",
         "/assets/@symfony/ux-autocomplete/controller.js": "/assets/@symfony/ux-autocomplete/controller-FEEd2HP.js",
         "tom-select/dist/css/tom-select.default.css": "data:application/javascript,",
         "/assets/@symfony/ux-chartjs/controller.js": "/assets/@symfony/ux-chartjs/controller-Gcnh5ai.js",
@@ -46,6 +47,7 @@
         "/assets/controllers/domain-blacklist_controller.js": "/assets/controllers/domain-blacklist_controller-i5M_ppu.js",
         "/assets/controllers/nav_controller.js": "/assets/controllers/nav_controller-8sdU2Cn.js",
         "/assets/controllers/freeradius-statistics_controller.js": "/assets/controllers/freeradius-statistics_controller-XjYQbcs.js",
+        "/assets/controllers/details-outside-click_controller.js": "/assets/controllers/details-outside-click_controller-ZhafQRx.js",
         "/assets/controllers/toggle-pages_controller.js": "/assets/controllers/toggle-pages_controller-5WJRq6x.js",
         "/assets/controllers/cert_selection_freeradius_controller.js": "/assets/controllers/cert_selection_freeradius_controller-jiof_pE.js",
         "/assets/controllers/api-version_controller.js": "/assets/controllers/api-version_controller-P5TesHG.js",
@@ -57,14 +59,15 @@
         "/assets/controllers/clipboard_controller.js": "/assets/controllers/clipboard_controller-JCBRqne.js",
         "/assets/controllers/radio_controller.js": "/assets/controllers/radio_controller-VtJpb7z.js",
         "/assets/controllers/sms-provider-test_controller.js": "/assets/controllers/sms-provider-test_controller-464DiIp.js",
-        "/assets/controllers/network-map-polygons_controller.js": "/assets/controllers/network-map-polygons_controller-8J-sEmY.js",
-        "/assets/controllers/nav-submenu_controller.js": "/assets/controllers/nav-submenu_controller-ELf3EDE.js",
+        "/assets/controllers/network-map-polygons_controller.js": "/assets/controllers/network-map-polygons_controller-q9zu8_Q.js",
+        "/assets/controllers/nav-submenu_controller.js": "/assets/controllers/nav-submenu_controller-WpPavbe.js",
         "/assets/controllers/dropdown_controller.js": "/assets/controllers/dropdown_controller-jHcPM0g.js",
         "/assets/controllers/fields_controller.js": "/assets/controllers/fields_controller-7qeGCPr.js",
         "/assets/controllers/map_geolocation_controller.js": "/assets/controllers/map_geolocation_controller-mEQUePb.js",
         "/assets/controllers/native-geolocation_controller.js": "/assets/controllers/native-geolocation_controller-L6p-1B0.js",
         "/assets/controllers/update-url_controller.js": "/assets/controllers/update-url_controller-dXQ6eBw.js",
         "/assets/controllers/alert_controller.js": "/assets/controllers/alert_controller-NyDD7vx.js",
+        "/assets/controllers/captcha_controller.js": "/assets/controllers/captcha_controller-Wx8ZT62.js",
         "/assets/controllers/cookie_controller.js": "/assets/controllers/cookie_controller-dINfhIR.js",
         "/assets/controllers/certificate-limit_controller.js": "/assets/controllers/certificate-limit_controller-FEKjh1n.js",
         "/assets/controllers/quill_controller.js": "/assets/controllers/quill_controller-gYW4T2n.js",
@@ -75,26 +78,29 @@
         "/assets/controllers/custom-map-picker_controller.js": "/assets/controllers/custom-map-picker_controller-73LbdX4.js",
         "/assets/controllers/certificates-content_controller.js": "/assets/controllers/certificates-content_controller-Ik2L9gO.js",
         "/assets/controllers/test-certificates_controller.js": "/assets/controllers/test-certificates_controller-BgK3_mH.js",
-        "/assets/controllers/nav-dropdown_controller.js": "/assets/controllers/nav-dropdown_controller-2qYViwC.js",
-        "/assets/controllers/img_controller.js": "/assets/controllers/img_controller-U7pNd9y.js",
+        "/assets/controllers/nav-dropdown_controller.js": "/assets/controllers/nav-dropdown_controller-v9Uv0ik.js",
+        "/assets/controllers/prevent_leave_controller.js": "/assets/controllers/prevent_leave_controller-S0EXtL8.js",
+        "/assets/controllers/img_controller.js": "/assets/controllers/img_controller-EBIq7-c.js",
         "/assets/controllers/card_controller.js": "/assets/controllers/card_controller-Zu8ZpZk.js",
         "/assets/controllers/coverage-map-style_controller.js": "/assets/controllers/coverage-map-style_controller-R-VKp_F.js",
         "/assets/controllers/autocomplete_controller.js": "/assets/controllers/autocomplete_controller-O8_0Aga.js",
-        "/assets/controllers/date-filter_controller.js": "/assets/controllers/date-filter_controller-I02r5Uw.js",
+        "/assets/controllers/date-filter_controller.js": "/assets/controllers/date-filter_controller-lNuL7xW.js",
         "/assets/controllers/toggle-password_controller.js": "/assets/controllers/toggle-password_controller-A-bUyh9.js",
         "/assets/controllers/copy-url_controller.js": "/assets/controllers/copy-url_controller-IRxp_0x.js",
         "/assets/controllers/date-filter-live_controller.js": "/assets/controllers/date-filter-live_controller-ejXyZ6c.js",
-        "/assets/controllers/statistics_controller.js": "/assets/controllers/statistics_controller-Tq81KI3.js",
-        "/assets/controllers/terms-widget_controller.js": "/assets/controllers/terms-widget_controller-8MP_cEw.js",
+        "/assets/controllers/statistics_controller.js": "/assets/controllers/statistics_controller-6Eh4bE0.js",
+        "/assets/controllers/terms-widget_controller.js": "/assets/controllers/terms-widget_controller-Z9IwqcQ.js",
         "/assets/controllers/command-visibility_controller.js": "/assets/controllers/command-visibility_controller-NwX_2nh.js",
         "/assets/controllers/radio-msg_controller.js": "/assets/controllers/radio-msg_controller-oJjje4X.js",
-        "/assets/controllers/visibility_controller.js": "/assets/controllers/visibility_controller-CAPWf7_.js",
-        "/assets/controllers/widget_controller.js": "/assets/controllers/widget_controller-BxLWx37.js",
+        "/assets/controllers/visibility_controller.js": "/assets/controllers/visibility_controller-mbf8Poz.js",
+        "/assets/controllers/widget_controller.js": "/assets/controllers/widget_controller-R_-DG_a.js",
         "/assets/controllers/print_controller.js": "/assets/controllers/print_controller-AIDLrkc.js",
         "/assets/controllers/remove_controller.js": "/assets/controllers/remove_controller-DrPItZK.js",
         "/assets/controllers/radio-card_controller.js": "/assets/controllers/radio-card_controller-dxFSa9a.js",
         "/assets/controllers/os-tabs_controller.js": "/assets/controllers/os-tabs_controller-avQwCFb.js",
+        "/assets/controllers/date-picker-security-txt_controller.js": "/assets/controllers/date-picker-security-txt_controller-W_4U8fr.js",
         "tom-select": "/assets/vendor/tom-select/tom-select.index-jpggcVr.js",
+        "chart.js": "/assets/vendor/chart.js/chart.js.index-XJ2ZKmA.js",
         "leaflet": "/assets/vendor/leaflet/leaflet.index-ee34P3g.js",
         "quill": "/assets/vendor/quill/quill.index-BiaZdNc.js",
         "quill/dist/quill.snow.css": "data:application/javascript,",
@@ -103,30 +109,172 @@
         "fast-diff": "/assets/vendor/fast-diff/fast-diff.index-qO6xNfP.js",
         "lodash.clonedeep": "/assets/vendor/lodash.clonedeep/lodash.clonedeep.index-QJ9Vucv.js",
         "lodash.isequal": "/assets/vendor/lodash.isequal/lodash.isequal.index-UiGqKnx.js",
-        "/assets/@symfony/ux-leaflet-map/map_controller.js": "/assets/@symfony/ux-leaflet-map/map_controller-8eexC8X.js",
+        "/assets/@symfony/ux-leaflet-map/map_controller.js": "/assets/@symfony/ux-leaflet-map/map_controller-uNnB9EZ.js",
         "/assets/controllers/csrf_protection_controller.js": "/assets/controllers/csrf_protection_controller-u0j3Hgg.js",
         "@symfony/ux-live-component": "/assets/@symfony/ux-live-component/live_controller-L12cPdP.js",
         "tw-elements": "/assets/lib/tw-elements.umd.min-2I-UwhV.js",
-        "tw-elements/css/tw-elements.min.css": "data:application/javascript,document.head.appendChild(Object.assign(document.createElement('link'),{rel:'stylesheet',href:'/assets/lib/tw-elements.min-AkqPASz.css'}))",
-        "@symfony/ux-leaflet-map": "/assets/@symfony/ux-leaflet-map/map_controller-8eexC8X.js",
+        "tw-elements/css/tw-elements.min.css": "data:application/javascript,document.head.appendChild(Object.assign(document.createElement(`link`),{rel:`stylesheet`,href:`/assets/lib/tw-elements.min-AkqPASz.css`}))",
+        "@symfony/ux-leaflet-map": "/assets/@symfony/ux-leaflet-map/map_controller-uNnB9EZ.js",
         "@orchidjs/sifter": "/assets/vendor/@orchidjs/sifter/sifter.index-dBmLgbU.js",
-        "@orchidjs/unicode-variants": "/assets/vendor/@orchidjs/unicode-variants/unicode-variants.index-r1umWCL.js",
-        "tom-select/dist/css/tom-select.default.min.css": "data:application/javascript,document.head.appendChild(Object.assign(document.createElement('link'),{rel:'stylesheet',href:'/assets/vendor/tom-select/dist/css/tom-select.default.min-wLi1e_D.css'}))",
-        "tom-select/dist/css/tom-select.bootstrap4.css": "data:application/javascript,document.head.appendChild(Object.assign(document.createElement('link'),{rel:'stylesheet',href:'/assets/vendor/tom-select/dist/css/tom-select.bootstrap4-FSRevBM.css'}))",
-        "tom-select/dist/css/tom-select.bootstrap5.css": "data:application/javascript,document.head.appendChild(Object.assign(document.createElement('link'),{rel:'stylesheet',href:'/assets/vendor/tom-select/dist/css/tom-select.bootstrap5-jTM0nYn.css'}))",
+        "tom-select/dist/css/tom-select.default.min.css": "data:application/javascript,document.head.appendChild(Object.assign(document.createElement(`link`),{rel:`stylesheet`,href:`/assets/vendor/tom-select/dist/css/tom-select.default.min-wLi1e_D.css`}))",
+        "tom-select/dist/css/tom-select.bootstrap4.css": "data:application/javascript,document.head.appendChild(Object.assign(document.createElement(`link`),{rel:`stylesheet`,href:`/assets/vendor/tom-select/dist/css/tom-select.bootstrap4-FSRevBM.css`}))",
+        "tom-select/dist/css/tom-select.bootstrap5.css": "data:application/javascript,document.head.appendChild(Object.assign(document.createElement(`link`),{rel:`stylesheet`,href:`/assets/vendor/tom-select/dist/css/tom-select.bootstrap5-jTM0nYn.css`}))",
         "lodash-es": "/assets/vendor/lodash-es/lodash-es.index-DdloyDr.js",
         "eventemitter3": "/assets/vendor/eventemitter3/eventemitter3.index-fLeKV-3.js",
-        "quill/dist/quill.bubble.css": "data:application/javascript,document.head.appendChild(Object.assign(document.createElement('link'),{rel:'stylesheet',href:'/assets/vendor/quill/dist/quill.bubble-arsPET0.css'}))",
+        "quill/dist/quill.bubble.css": "data:application/javascript,document.head.appendChild(Object.assign(document.createElement(`link`),{rel:`stylesheet`,href:`/assets/vendor/quill/dist/quill.bubble-arsPET0.css`}))",
         "quill-table-better": "/assets/vendor/quill-table-better/quill-table-better.index-owbMVIC.js",
-        "quill-table-better/dist/quill-table-better.css": "data:application/javascript,document.head.appendChild(Object.assign(document.createElement('link'),{rel:'stylesheet',href:'/assets/vendor/quill-table-better/dist/quill-table-better-N1-NkPE.css'}))",
-        "axios": "/assets/vendor/axios/axios.index-2dhSyHx.js",
+        "quill-table-better/dist/quill-table-better.css": "data:application/javascript,document.head.appendChild(Object.assign(document.createElement(`link`),{rel:`stylesheet`,href:`/assets/vendor/quill-table-better/dist/quill-table-better-N1-NkPE.css`}))",
         "quill2-emoji": "/assets/vendor/quill2-emoji/quill2-emoji.index-N9jLoM9.js",
-        "quill2-emoji/dist/style.css": "data:application/javascript,document.head.appendChild(Object.assign(document.createElement('link'),{rel:'stylesheet',href:'/assets/vendor/quill2-emoji/dist/style-4u45qe4.css'}))",
-        "quill-resize-image": "/assets/vendor/quill-resize-image/quill-resize-image.index-yJ0k19B.js",
+        "quill2-emoji/dist/style.css": "data:application/javascript,document.head.appendChild(Object.assign(document.createElement(`link`),{rel:`stylesheet`,href:`/assets/vendor/quill2-emoji/dist/style-4u45qe4.css`}))",
         "quill-toggle-fullscreen-button": "/assets/vendor/quill-toggle-fullscreen-button/quill-toggle-fullscreen-button.index-J0BPUAE.js",
         "quill-html-edit-button": "/assets/vendor/quill-html-edit-button/quill-html-edit-button.index-u2g6gEW.js",
         "@kurkle/color": "/assets/vendor/@kurkle/color/color.index-RHcEx-r.js",
-        "leaflet/dist/leaflet.min.css": "data:application/javascript,document.head.appendChild(Object.assign(document.createElement('link'),{rel:'stylesheet',href:'/assets/vendor/leaflet/dist/leaflet.min-YqA-lmN.css'}))"
+        "@turf/turf": "/assets/vendor/@turf/turf/turf.index-Pr1Xvvs.js",
+        "leaflet.markercluster": "/assets/vendor/leaflet.markercluster/leaflet.markercluster.index-Q33CBAc.js",
+        "@turf/along": "/assets/vendor/@turf/along/along.index-Catt5oy.js",
+        "@turf/angle": "/assets/vendor/@turf/angle/angle.index-AQxpU6j.js",
+        "@turf/area": "/assets/vendor/@turf/area/area.index-J2V-qws.js",
+        "@turf/bbox": "/assets/vendor/@turf/bbox/bbox.index-77saF3i.js",
+        "@turf/bbox-clip": "/assets/vendor/@turf/bbox-clip/bbox-clip.index-6q-zTe8.js",
+        "@turf/bbox-polygon": "/assets/vendor/@turf/bbox-polygon/bbox-polygon.index-8tnS48L.js",
+        "@turf/bearing": "/assets/vendor/@turf/bearing/bearing.index-5vZq048.js",
+        "@turf/bezier-spline": "/assets/vendor/@turf/bezier-spline/bezier-spline.index-CDMr_9k.js",
+        "@turf/boolean-clockwise": "/assets/vendor/@turf/boolean-clockwise/boolean-clockwise.index-pXZzRCR.js",
+        "@turf/boolean-concave": "/assets/vendor/@turf/boolean-concave/boolean-concave.index-rEGCp6F.js",
+        "@turf/boolean-contains": "/assets/vendor/@turf/boolean-contains/boolean-contains.index-7bdXmcM.js",
+        "@turf/boolean-crosses": "/assets/vendor/@turf/boolean-crosses/boolean-crosses.index-2GuQJlX.js",
+        "@turf/boolean-disjoint": "/assets/vendor/@turf/boolean-disjoint/boolean-disjoint.index-bkqZMkQ.js",
+        "@turf/boolean-equal": "/assets/vendor/@turf/boolean-equal/boolean-equal.index-ZgcspV3.js",
+        "@turf/boolean-intersects": "/assets/vendor/@turf/boolean-intersects/boolean-intersects.index-UB089EE.js",
+        "@turf/boolean-overlap": "/assets/vendor/@turf/boolean-overlap/boolean-overlap.index-44fGrlE.js",
+        "@turf/boolean-parallel": "/assets/vendor/@turf/boolean-parallel/boolean-parallel.index-wZ9b1UJ.js",
+        "@turf/boolean-point-in-polygon": "/assets/vendor/@turf/boolean-point-in-polygon/boolean-point-in-polygon.index-fy5PWFZ.js",
+        "@turf/boolean-point-on-line": "/assets/vendor/@turf/boolean-point-on-line/boolean-point-on-line.index-cBTmpQU.js",
+        "@turf/boolean-touches": "/assets/vendor/@turf/boolean-touches/boolean-touches.index-gLoGM-j.js",
+        "@turf/boolean-valid": "/assets/vendor/@turf/boolean-valid/boolean-valid.index-qTBRwYR.js",
+        "@turf/boolean-within": "/assets/vendor/@turf/boolean-within/boolean-within.index-ho-fIlM.js",
+        "@turf/buffer": "/assets/vendor/@turf/buffer/buffer.index-xiilq_l.js",
+        "@turf/center": "/assets/vendor/@turf/center/center.index-b3gcl_L.js",
+        "@turf/center-mean": "/assets/vendor/@turf/center-mean/center-mean.index-Zh5DG1o.js",
+        "@turf/center-median": "/assets/vendor/@turf/center-median/center-median.index-EGNXDOZ.js",
+        "@turf/center-of-mass": "/assets/vendor/@turf/center-of-mass/center-of-mass.index-6S9PfCS.js",
+        "@turf/centroid": "/assets/vendor/@turf/centroid/centroid.index-bUpL7Mb.js",
+        "@turf/circle": "/assets/vendor/@turf/circle/circle.index-AhWdcLk.js",
+        "@turf/clean-coords": "/assets/vendor/@turf/clean-coords/clean-coords.index-nQwlvdI.js",
+        "@turf/clone": "/assets/vendor/@turf/clone/clone.index-VnRJHJv.js",
+        "@turf/clusters": "/assets/vendor/@turf/clusters/clusters.index-Wx5iFP6.js",
+        "@turf/clusters-dbscan": "/assets/vendor/@turf/clusters-dbscan/clusters-dbscan.index---Ai7FJ.js",
+        "@turf/clusters-kmeans": "/assets/vendor/@turf/clusters-kmeans/clusters-kmeans.index-pM8RJqf.js",
+        "@turf/collect": "/assets/vendor/@turf/collect/collect.index-4FDEiYG.js",
+        "@turf/combine": "/assets/vendor/@turf/combine/combine.index-QWwrlr6.js",
+        "@turf/concave": "/assets/vendor/@turf/concave/concave.index-rd6UfBV.js",
+        "@turf/convex": "/assets/vendor/@turf/convex/convex.index-m9qtWTN.js",
+        "@turf/destination": "/assets/vendor/@turf/destination/destination.index-76ueYwu.js",
+        "@turf/difference": "/assets/vendor/@turf/difference/difference.index-8ByKTvS.js",
+        "@turf/dissolve": "/assets/vendor/@turf/dissolve/dissolve.index-bykEdEA.js",
+        "@turf/distance": "/assets/vendor/@turf/distance/distance.index-krpXyDf.js",
+        "@turf/distance-weight": "/assets/vendor/@turf/distance-weight/distance-weight.index-QbLFmBk.js",
+        "@turf/ellipse": "/assets/vendor/@turf/ellipse/ellipse.index-i8XQ2eQ.js",
+        "@turf/envelope": "/assets/vendor/@turf/envelope/envelope.index-EiGroBF.js",
+        "@turf/explode": "/assets/vendor/@turf/explode/explode.index-DDSO5zx.js",
+        "@turf/flatten": "/assets/vendor/@turf/flatten/flatten.index-0DDghT8.js",
+        "@turf/flip": "/assets/vendor/@turf/flip/flip.index-Q8YGUbm.js",
+        "@turf/geojson-rbush": "/assets/vendor/@turf/geojson-rbush/geojson-rbush.index-1TP8q0k.js",
+        "@turf/great-circle": "/assets/vendor/@turf/great-circle/great-circle.index-rflQgEP.js",
+        "@turf/helpers": "/assets/vendor/@turf/helpers/helpers.index-e-zrQsr.js",
+        "@turf/hex-grid": "/assets/vendor/@turf/hex-grid/hex-grid.index-BtTmavl.js",
+        "@turf/interpolate": "/assets/vendor/@turf/interpolate/interpolate.index-sPOed6O.js",
+        "@turf/intersect": "/assets/vendor/@turf/intersect/intersect.index-oJEJjFw.js",
+        "@turf/invariant": "/assets/vendor/@turf/invariant/invariant.index-rTdESEt.js",
+        "@turf/isobands": "/assets/vendor/@turf/isobands/isobands.index-bFULU5T.js",
+        "@turf/isolines": "/assets/vendor/@turf/isolines/isolines.index-XcW9Vaq.js",
+        "@turf/kinks": "/assets/vendor/@turf/kinks/kinks.index-Qxl1LmC.js",
+        "@turf/length": "/assets/vendor/@turf/length/length.index-5AYFbRr.js",
+        "@turf/line-arc": "/assets/vendor/@turf/line-arc/line-arc.index-aU5e3iG.js",
+        "@turf/line-chunk": "/assets/vendor/@turf/line-chunk/line-chunk.index-8yEuUwr.js",
+        "@turf/line-intersect": "/assets/vendor/@turf/line-intersect/line-intersect.index-daniq37.js",
+        "@turf/line-offset": "/assets/vendor/@turf/line-offset/line-offset.index-Y_VMnUU.js",
+        "@turf/line-overlap": "/assets/vendor/@turf/line-overlap/line-overlap.index-bze-6YI.js",
+        "@turf/line-segment": "/assets/vendor/@turf/line-segment/line-segment.index-R3SIQQl.js",
+        "@turf/line-slice": "/assets/vendor/@turf/line-slice/line-slice.index-TuxHHq5.js",
+        "@turf/line-slice-along": "/assets/vendor/@turf/line-slice-along/line-slice-along.index-igRQcIo.js",
+        "@turf/line-split": "/assets/vendor/@turf/line-split/line-split.index-qDpf3PR.js",
+        "@turf/line-to-polygon": "/assets/vendor/@turf/line-to-polygon/line-to-polygon.index-KHx1Yjw.js",
+        "@turf/mask": "/assets/vendor/@turf/mask/mask.index-iEgjhn1.js",
+        "@turf/meta": "/assets/vendor/@turf/meta/meta.index-HQMuaPM.js",
+        "@turf/midpoint": "/assets/vendor/@turf/midpoint/midpoint.index-7xMwRSv.js",
+        "@turf/moran-index": "/assets/vendor/@turf/moran-index/moran-index.index-zziFsmR.js",
+        "@turf/nearest-neighbor-analysis": "/assets/vendor/@turf/nearest-neighbor-analysis/nearest-neighbor-analysis.index-Zct1ltx.js",
+        "@turf/nearest-point": "/assets/vendor/@turf/nearest-point/nearest-point.index-2PIjdK5.js",
+        "@turf/nearest-point-on-line": "/assets/vendor/@turf/nearest-point-on-line/nearest-point-on-line.index-dsoUy9f.js",
+        "@turf/nearest-point-to-line": "/assets/vendor/@turf/nearest-point-to-line/nearest-point-to-line.index-4NDm9q_.js",
+        "@turf/planepoint": "/assets/vendor/@turf/planepoint/planepoint.index-cttXL18.js",
+        "@turf/point-grid": "/assets/vendor/@turf/point-grid/point-grid.index-xoLdy_F.js",
+        "@turf/point-on-feature": "/assets/vendor/@turf/point-on-feature/point-on-feature.index-sVAxSQo.js",
+        "@turf/points-within-polygon": "/assets/vendor/@turf/points-within-polygon/points-within-polygon.index-qwKI3WH.js",
+        "@turf/point-to-line-distance": "/assets/vendor/@turf/point-to-line-distance/point-to-line-distance.index-qmYI8Rs.js",
+        "@turf/point-to-polygon-distance": "/assets/vendor/@turf/point-to-polygon-distance/point-to-polygon-distance.index-7J5NbuG.js",
+        "@turf/polygonize": "/assets/vendor/@turf/polygonize/polygonize.index-K5FuYKN.js",
+        "@turf/polygon-smooth": "/assets/vendor/@turf/polygon-smooth/polygon-smooth.index-rKZeZYh.js",
+        "@turf/polygon-tangents": "/assets/vendor/@turf/polygon-tangents/polygon-tangents.index-cuYbUod.js",
+        "@turf/polygon-to-line": "/assets/vendor/@turf/polygon-to-line/polygon-to-line.index-Jy7Uk6D.js",
+        "@turf/projection": "/assets/vendor/@turf/projection/projection.index-3FgncUs.js",
+        "@turf/quadrat-analysis": "/assets/vendor/@turf/quadrat-analysis/quadrat-analysis.index-fQllJSM.js",
+        "@turf/random": "/assets/vendor/@turf/random/random.index-IuDQNIe.js",
+        "@turf/rectangle-grid": "/assets/vendor/@turf/rectangle-grid/rectangle-grid.index-x6u2CiJ.js",
+        "@turf/rewind": "/assets/vendor/@turf/rewind/rewind.index-qpDngGt.js",
+        "@turf/rhumb-bearing": "/assets/vendor/@turf/rhumb-bearing/rhumb-bearing.index-sF_vTGp.js",
+        "@turf/rhumb-destination": "/assets/vendor/@turf/rhumb-destination/rhumb-destination.index-QX-FaM-.js",
+        "@turf/rhumb-distance": "/assets/vendor/@turf/rhumb-distance/rhumb-distance.index-5sGhwwQ.js",
+        "@turf/sample": "/assets/vendor/@turf/sample/sample.index-7esyyZM.js",
+        "@turf/sector": "/assets/vendor/@turf/sector/sector.index-7a1tCjJ.js",
+        "@turf/shortest-path": "/assets/vendor/@turf/shortest-path/shortest-path.index-cMPXxHD.js",
+        "@turf/simplify": "/assets/vendor/@turf/simplify/simplify.index-Dc4M71q.js",
+        "@turf/square": "/assets/vendor/@turf/square/square.index-sy_X5fh.js",
+        "@turf/square-grid": "/assets/vendor/@turf/square-grid/square-grid.index-fHbK8n0.js",
+        "@turf/standard-deviational-ellipse": "/assets/vendor/@turf/standard-deviational-ellipse/standard-deviational-ellipse.index-Ek2skEz.js",
+        "@turf/tag": "/assets/vendor/@turf/tag/tag.index-LJFe2mr.js",
+        "@turf/tesselate": "/assets/vendor/@turf/tesselate/tesselate.index-4yQWMTl.js",
+        "@turf/tin": "/assets/vendor/@turf/tin/tin.index-rSXq11p.js",
+        "@turf/transform-rotate": "/assets/vendor/@turf/transform-rotate/transform-rotate.index-9sSm_ky.js",
+        "@turf/transform-scale": "/assets/vendor/@turf/transform-scale/transform-scale.index-z08ITde.js",
+        "@turf/transform-translate": "/assets/vendor/@turf/transform-translate/transform-translate.index-wxlLnvs.js",
+        "@turf/triangle-grid": "/assets/vendor/@turf/triangle-grid/triangle-grid.index-xUx9hoZ.js",
+        "@turf/truncate": "/assets/vendor/@turf/truncate/truncate.index-yIeaKii.js",
+        "@turf/union": "/assets/vendor/@turf/union/union.index-4W2_93v.js",
+        "@turf/unkink-polygon": "/assets/vendor/@turf/unkink-polygon/unkink-polygon.index-3otRTp_.js",
+        "@turf/voronoi": "/assets/vendor/@turf/voronoi/voronoi.index-EBB6Pth.js",
+        "@turf/directional-mean": "/assets/vendor/@turf/directional-mean/directional-mean.index-NulyKBr.js",
+        "leaflet.markercluster/dist/MarkerCluster.min.css": "data:application/javascript,document.head.appendChild(Object.assign(document.createElement(`link`),{rel:`stylesheet`,href:`/assets/vendor/leaflet.markercluster/dist/MarkerCluster.min-YWk9Xqo.css`}))",
+        "geojson-equality-ts": "/assets/vendor/geojson-equality-ts/geojson-equality-ts.index-qA5cf0b.js",
+        "point-in-polygon-hao": "/assets/vendor/point-in-polygon-hao/point-in-polygon-hao.index-Qo4QraJ.js",
+        "@turf/jsts": "/assets/vendor/@turf/jsts/jsts.index-1_AXJUR.js",
+        "d3-geo": "/assets/vendor/d3-geo/d3-geo.index-ul6PWd0.js",
+        "rbush": "/assets/vendor/rbush/rbush.index-UYtIftz.js",
+        "skmeans": "/assets/vendor/skmeans/skmeans.index-RYK9k9n.js",
+        "topojson-client": "/assets/vendor/topojson-client/topojson-client.index-yWEUxsY.js",
+        "topojson-server": "/assets/vendor/topojson-server/topojson-server.index-Z_3KteP.js",
+        "concaveman": "/assets/vendor/concaveman/concaveman.index-2FUe_0M.js",
+        "polyclip-ts": "/assets/vendor/polyclip-ts/polyclip-ts.index-tYa4GX3.js",
+        "arc": "/assets/vendor/arc/arc.index-fXw2FSm.js",
+        "tinyqueue": "/assets/vendor/tinyqueue/tinyqueue.index-EcDKIBB.js",
+        "robust-predicates": "/assets/vendor/robust-predicates/robust-predicates.index-S-z1WQo.js",
+        "fast-deep-equal": "/assets/vendor/fast-deep-equal/fast-deep-equal.index-ra5Ildg.js",
+        "earcut": "/assets/vendor/earcut/earcut.index-SuNWYWv.js",
+        "d3-voronoi": "/assets/vendor/d3-voronoi/d3-voronoi.index-uFEo4lK.js",
+        "d3-array": "/assets/vendor/d3-array/d3-array.index-_v1gbW6.js",
+        "quickselect": "/assets/vendor/quickselect/quickselect.index-uEwdXi0.js",
+        "point-in-polygon": "/assets/vendor/point-in-polygon/point-in-polygon.index-AFE5ZUr.js",
+        "robust-predicates/umd/orient2d.min.js": "/assets/vendor/robust-predicates/umd/orient2d.min-aOj9TJL.js",
+        "bignumber.js": "/assets/vendor/bignumber.js/bignumber.js.index-3OtO_z2.js",
+        "splaytree-ts": "/assets/vendor/splaytree-ts/splaytree-ts.index-99pUAeh.js",
+        "internmap": "/assets/vendor/internmap/internmap.index-esqc7UW.js",
+        "leaflet.markercluster/dist/MarkerCluster.css": "data:application/javascript,document.head.appendChild(Object.assign(document.createElement(`link`),{rel:`stylesheet`,href:`/assets/vendor/leaflet.markercluster/dist/MarkerCluster-Nkqd6zX.css`}))",
+        "leaflet.markercluster/dist/MarkerCluster.Default.css": "data:application/javascript,document.head.appendChild(Object.assign(document.createElement(`link`),{rel:`stylesheet`,href:`/assets/vendor/leaflet.markercluster/dist/MarkerCluster.Default-BHq6_u7.css`}))",
+        "leaflet/dist/leaflet.css": "data:application/javascript,document.head.appendChild(Object.assign(document.createElement(`link`),{rel:`stylesheet`,href:`/assets/vendor/leaflet/dist/leaflet-pOIMrv4.css`}))",
+        "@orchidjs/unicode-variants": "/assets/vendor/@orchidjs/unicode-variants/unicode-variants.index-q9Od8gP.js",
+        "quill-resize-image": "/assets/vendor/quill-resize-image/quill-resize-image.index-kAL_jj3.js",
+        "axios": "/assets/vendor/axios/axios.index-1DAGjH5.js"
     }
 }
   </script>
@@ -140,12 +288,11 @@
       document.head.appendChild(script);
     })();
   </script>
-  <link rel="modulepreload" href="http:///assets/app-g-Y3fDI.js">
+  <link rel="modulepreload" href="http:///assets/app-8zJq9S_.js">
   <link rel="modulepreload" href="http:///assets/bootstrap-O6U5lCo.js">
-  <link rel="modulepreload" href="http:///assets/vendor/chart.js/chart.js.index-XJ2ZKmA.js">
   <link rel="modulepreload" href="http:///assets/@symfony/stimulus-bundle/loader-IOzBDLu.js">
   <link rel="modulepreload" href="http:///assets/vendor/@hotwired/stimulus/stimulus.index-ryewcoo.js">
-  <link rel="modulepreload" href="http:///assets/@symfony/stimulus-bundle/controllers-FDm6rXE.js">
+  <link rel="modulepreload" href="http:///assets/@symfony/stimulus-bundle/controllers-j2QAmXP.js">
   <link rel="modulepreload" href="http:///assets/@symfony/ux-autocomplete/controller-FEEd2HP.js">
   <link rel="modulepreload" href="http:///assets/@symfony/ux-chartjs/controller-Gcnh5ai.js">
   <link rel="modulepreload" href="http:///assets/@symfony/ux-live-component/live_controller-L12cPdP.js">
@@ -153,6 +300,7 @@
   <link rel="modulepreload" href="http:///assets/controllers/domain-blacklist_controller-i5M_ppu.js">
   <link rel="modulepreload" href="http:///assets/controllers/nav_controller-8sdU2Cn.js">
   <link rel="modulepreload" href="http:///assets/controllers/freeradius-statistics_controller-XjYQbcs.js">
+  <link rel="modulepreload" href="http:///assets/controllers/details-outside-click_controller-ZhafQRx.js">
   <link rel="modulepreload" href="http:///assets/controllers/toggle-pages_controller-5WJRq6x.js">
   <link rel="modulepreload" href="http:///assets/controllers/cert_selection_freeradius_controller-jiof_pE.js">
   <link rel="modulepreload" href="http:///assets/controllers/api-version_controller-P5TesHG.js">
@@ -164,14 +312,15 @@
   <link rel="modulepreload" href="http:///assets/controllers/clipboard_controller-JCBRqne.js">
   <link rel="modulepreload" href="http:///assets/controllers/radio_controller-VtJpb7z.js">
   <link rel="modulepreload" href="http:///assets/controllers/sms-provider-test_controller-464DiIp.js">
-  <link rel="modulepreload" href="http:///assets/controllers/network-map-polygons_controller-8J-sEmY.js">
-  <link rel="modulepreload" href="http:///assets/controllers/nav-submenu_controller-ELf3EDE.js">
+  <link rel="modulepreload" href="http:///assets/controllers/network-map-polygons_controller-q9zu8_Q.js">
+  <link rel="modulepreload" href="http:///assets/controllers/nav-submenu_controller-WpPavbe.js">
   <link rel="modulepreload" href="http:///assets/controllers/dropdown_controller-jHcPM0g.js">
   <link rel="modulepreload" href="http:///assets/controllers/fields_controller-7qeGCPr.js">
   <link rel="modulepreload" href="http:///assets/controllers/map_geolocation_controller-mEQUePb.js">
   <link rel="modulepreload" href="http:///assets/controllers/native-geolocation_controller-L6p-1B0.js">
   <link rel="modulepreload" href="http:///assets/controllers/update-url_controller-dXQ6eBw.js">
   <link rel="modulepreload" href="http:///assets/controllers/alert_controller-NyDD7vx.js">
+  <link rel="modulepreload" href="http:///assets/controllers/captcha_controller-Wx8ZT62.js">
   <link rel="modulepreload" href="http:///assets/controllers/cookie_controller-dINfhIR.js">
   <link rel="modulepreload" href="http:///assets/controllers/certificate-limit_controller-FEKjh1n.js">
   <link rel="modulepreload" href="http:///assets/controllers/quill_controller-gYW4T2n.js">
@@ -182,26 +331,29 @@
   <link rel="modulepreload" href="http:///assets/controllers/custom-map-picker_controller-73LbdX4.js">
   <link rel="modulepreload" href="http:///assets/controllers/certificates-content_controller-Ik2L9gO.js">
   <link rel="modulepreload" href="http:///assets/controllers/test-certificates_controller-BgK3_mH.js">
-  <link rel="modulepreload" href="http:///assets/controllers/nav-dropdown_controller-2qYViwC.js">
-  <link rel="modulepreload" href="http:///assets/controllers/img_controller-U7pNd9y.js">
+  <link rel="modulepreload" href="http:///assets/controllers/nav-dropdown_controller-v9Uv0ik.js">
+  <link rel="modulepreload" href="http:///assets/controllers/prevent_leave_controller-S0EXtL8.js">
+  <link rel="modulepreload" href="http:///assets/controllers/img_controller-EBIq7-c.js">
   <link rel="modulepreload" href="http:///assets/controllers/card_controller-Zu8ZpZk.js">
   <link rel="modulepreload" href="http:///assets/controllers/coverage-map-style_controller-R-VKp_F.js">
   <link rel="modulepreload" href="http:///assets/controllers/autocomplete_controller-O8_0Aga.js">
-  <link rel="modulepreload" href="http:///assets/controllers/date-filter_controller-I02r5Uw.js">
+  <link rel="modulepreload" href="http:///assets/controllers/date-filter_controller-lNuL7xW.js">
   <link rel="modulepreload" href="http:///assets/controllers/toggle-password_controller-A-bUyh9.js">
   <link rel="modulepreload" href="http:///assets/controllers/copy-url_controller-IRxp_0x.js">
   <link rel="modulepreload" href="http:///assets/controllers/date-filter-live_controller-ejXyZ6c.js">
-  <link rel="modulepreload" href="http:///assets/controllers/statistics_controller-Tq81KI3.js">
-  <link rel="modulepreload" href="http:///assets/controllers/terms-widget_controller-8MP_cEw.js">
+  <link rel="modulepreload" href="http:///assets/controllers/statistics_controller-6Eh4bE0.js">
+  <link rel="modulepreload" href="http:///assets/controllers/terms-widget_controller-Z9IwqcQ.js">
   <link rel="modulepreload" href="http:///assets/controllers/command-visibility_controller-NwX_2nh.js">
   <link rel="modulepreload" href="http:///assets/controllers/radio-msg_controller-oJjje4X.js">
-  <link rel="modulepreload" href="http:///assets/controllers/visibility_controller-CAPWf7_.js">
-  <link rel="modulepreload" href="http:///assets/controllers/widget_controller-BxLWx37.js">
+  <link rel="modulepreload" href="http:///assets/controllers/visibility_controller-mbf8Poz.js">
+  <link rel="modulepreload" href="http:///assets/controllers/widget_controller-R_-DG_a.js">
   <link rel="modulepreload" href="http:///assets/controllers/print_controller-AIDLrkc.js">
   <link rel="modulepreload" href="http:///assets/controllers/remove_controller-DrPItZK.js">
   <link rel="modulepreload" href="http:///assets/controllers/radio-card_controller-dxFSa9a.js">
   <link rel="modulepreload" href="http:///assets/controllers/os-tabs_controller-avQwCFb.js">
+  <link rel="modulepreload" href="http:///assets/controllers/date-picker-security-txt_controller-W_4U8fr.js">
   <link rel="modulepreload" href="http:///assets/vendor/tom-select/tom-select.index-jpggcVr.js">
+  <link rel="modulepreload" href="http:///assets/vendor/chart.js/chart.js.index-XJ2ZKmA.js">
   <link rel="modulepreload" href="http:///assets/vendor/leaflet/leaflet.index-ee34P3g.js">
   <link rel="modulepreload" href="http:///assets/vendor/quill/quill.index-BiaZdNc.js">
   <link rel="modulepreload" href="http:///assets/vendor/parchment/parchment.index-V4CD_ub.js">
@@ -923,7 +1075,8 @@
   <div class="flex flex-col items-center mb-8">
     <img class="w-96 h-[58px] object-scale-down" src="./index_v3_files/WBA_Logo.png" alt="Logo">
     <div class="flex flex-col items-center space-y-4 mt-10">
-      <h1 class="text-4xl font-extrabold text-indigo-700 mb-2">OpenRoaming Portal - API V3 Documentation</h1>
+      <h1 class="text-4xl font-extrabold text-indigo-700 mb-2">OpenRoaming Portal - API V3
+        Documentation</h1>
       <p class="text-center max-w-2xl text-gray-600 text-lg">
         Explore our RESTful API version 3 with detailed endpoints and response messages for easy integration.
       </p>
@@ -943,27 +1096,36 @@
           class="hidden absolute right-0 top-full mt-1 border border-gray-300 rounded-lg w-full max-h-48 overflow-auto bg-white z-10 shadow-lg">
 
         <li data-api-version-target="item">
+          <a href="http:///api/v4" class="block px-4 py-2 hover:bg-blue-100 text-gray-700
+                          ">
+            API V4
+          </a>
+        </li>
+        <li data-api-version-target="item">
           <a href="http:///api/v3" class="block px-4 py-2 hover:bg-blue-100 text-gray-700
                                                        font-semibold text-indigo-700 bg-indigo-100
                           ">
             API V3
           </a>
         </li>
-        <li data-api-version-target="item">
-          <a href="http:///api/v2" class="block px-4 py-2 hover:bg-blue-100 text-gray-700
-                          ">
-            API V2
-          </a>
-        </li>
-        <li data-api-version-target="item">
-          <a href="http:///api/v1" class="block px-4 py-2 hover:bg-blue-100 text-gray-700
-                          ">
-            API V1
-          </a>
-        </li>
             </ul>
     </div>
 
+  </div>
+
+  <div
+    class="flex items-center p-4 border-l-4 gap-2 border-yellow-500 bg-yellow-50 text-yellow-800 text-sm rounded-md mb-4">
+    <svg viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 fill-current" aria-hidden="true">
+      <path fill-rule="evenodd"
+            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012-0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+            clip-rule="evenodd"></path>
+    </svg>
+    <span>This version of the API has been deprecated and is no longer supported. Please upgrade to the latest version for continued access and security updates.
+                <br>
+            Click
+                <a href="http:///api/v4" class="font-bold underline text-primary">here</a>
+                to switch to api v4 documentation
+            </span>
   </div>
 
   <section class="mb-16">
@@ -980,7 +1142,7 @@
             <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
               <button type="button"
                       class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
-                      onclick="document.getElementById(&#39;resp-1-1&#39;).classList.toggle(&#39;hidden&#39;)">
+                      onclick="document.getElementById('resp-1-1').classList.toggle('hidden')">
                 <div class="flex items-center gap-4">
                                                                 <span class="text-xs font-semibold px-2 py-1 rounded bg-blue-100 text-blue-700">
                                     POST
@@ -1464,7 +1626,7 @@
             <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
               <button type="button"
                       class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
-                      onclick="document.getElementById(&#39;resp-1-2&#39;).classList.toggle(&#39;hidden&#39;)">
+                      onclick="document.getElementById('resp-1-2').classList.toggle('hidden')">
                 <div class="flex items-center gap-4">
                                                                 <span class="text-xs font-semibold px-2 py-1 rounded bg-blue-100 text-blue-700">
                                     POST
@@ -1898,7 +2060,7 @@
             <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
               <button type="button"
                       class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
-                      onclick="document.getElementById(&#39;resp-1-3&#39;).classList.toggle(&#39;hidden&#39;)">
+                      onclick="document.getElementById('resp-1-3').classList.toggle('hidden')">
                 <div class="flex items-center gap-4">
                                                                 <span class="text-xs font-semibold px-2 py-1 rounded bg-blue-100 text-blue-700">
                                     POST
@@ -2235,7 +2397,7 @@
                       <pre data-clipboard-target="code"
                            class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": false,
-    "error": "our email domain is not allowed to use this platform!"
+    "error": "Your email domain is not allowed to use this platform!"
 }
     </pre>
                     </div>
@@ -2304,7 +2466,7 @@
             <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
               <button type="button"
                       class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
-                      onclick="document.getElementById(&#39;resp-1-4&#39;).classList.toggle(&#39;hidden&#39;)">
+                      onclick="document.getElementById('resp-1-4').classList.toggle('hidden')">
                 <div class="flex items-center gap-4">
                                                                 <span class="text-xs font-semibold px-2 py-1 rounded bg-blue-100 text-blue-700">
                                     POST
@@ -2710,7 +2872,7 @@
             <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
               <button type="button"
                       class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
-                      onclick="document.getElementById(&#39;resp-1-5&#39;).classList.toggle(&#39;hidden&#39;)">
+                      onclick="document.getElementById('resp-1-5').classList.toggle('hidden')">
                 <div class="flex items-center gap-4">
                   <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-yellow-600 fill-none stroke-current"
                        aria-hidden="true">
@@ -2962,7 +3124,7 @@
             <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
               <button type="button"
                       class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
-                      onclick="document.getElementById(&#39;resp-1-6&#39;).classList.toggle(&#39;hidden&#39;)">
+                      onclick="document.getElementById('resp-1-6').classList.toggle('hidden')">
                 <div class="flex items-center gap-4">
                                                                 <span class="text-xs font-semibold px-2 py-1 rounded bg-blue-100 text-blue-700">
                                     POST
@@ -2978,7 +3140,7 @@
               <div id="resp-1-6" class="hidden px-6 py-4 bg-white border-t border-gray-100 space-y-6">
 
                 <div class="text-sm text-gray-600 italic">
-                  This endpoint registers a new user using their email address and password.
+                                    This endpoint registers a new user using their email address and password.
                   The request is protected by CAPTCHA validation when Turnstile is enabled.
                   The email address and password are validated before the user account is created.
                   If the email address is already registered, the endpoint returns a generic successful
@@ -3351,7 +3513,7 @@
             <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
               <button type="button"
                       class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
-                      onclick="document.getElementById(&#39;resp-1-7&#39;).classList.toggle(&#39;hidden&#39;)">
+                      onclick="document.getElementById('resp-1-7').classList.toggle('hidden')">
                 <div class="flex items-center gap-4">
                                                                 <span class="text-xs font-semibold px-2 py-1 rounded bg-blue-100 text-blue-700">
                                     POST
@@ -3528,7 +3690,7 @@
             <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
               <button type="button"
                       class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
-                      onclick="document.getElementById(&#39;resp-1-8&#39;).classList.toggle(&#39;hidden&#39;)">
+                      onclick="document.getElementById('resp-1-8').classList.toggle('hidden')">
                 <div class="flex items-center gap-4">
                                                                 <span class="text-xs font-semibold px-2 py-1 rounded bg-blue-100 text-blue-700">
                                     POST
@@ -3544,10 +3706,11 @@
               <div id="resp-1-8" class="hidden px-6 py-4 bg-white border-t border-gray-100 space-y-6">
 
                 <div class="text-sm text-gray-600 italic">
-                  This endpoint registers a new user using their phone number and password.
+                                    This endpoint registers a new user using their phone number and password.
                   The phone number is validated using the provided country code and the request is protected
                   by CAPTCHA validation when Turnstile is enabled. A verification code is generated and sent
-                  to the registered phone number. If the phone number is already registered, the endpoint
+                  to the registered phone number. The SMS contains only the verification code: the chosen
+                  password is never sent back. If the phone number is already registered, the endpoint
                   returns a generic successful response to prevent user enumeration.
                                 </div>
 
@@ -3607,6 +3770,30 @@
                                             ">
                     HTTP 400
                   </p>
+
+
+                  <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                    <div data-controller="clipboard" class="relative group max-w-full">
+                      <button type="button"
+                              class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                              title="copy_command.title" aria-label="copy_command.aria_label"
+                              data-action="click-&gt;clipboard#copyToClipboard">
+                        <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                          <path fill-rule="evenodd"
+                                d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                        </svg>
+                      </button>
+
+
+                      <pre data-clipboard-target="code"
+                           class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": "SMS registration is disabled by the administration."
+}
+    </pre>
+                    </div>
+
+                  </div>
 
 
                   <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
@@ -3856,13 +4043,37 @@
 
                   </div>
 
+
+                  <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                    <div data-controller="clipboard" class="relative group max-w-full">
+                      <button type="button"
+                              class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                              title="copy_command.title" aria-label="copy_command.aria_label"
+                              data-action="click-&gt;clipboard#copyToClipboard">
+                        <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                          <path fill-rule="evenodd"
+                                d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                        </svg>
+                      </button>
+
+
+                      <pre data-clipboard-target="code"
+                           class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "message": "User registered but SMS could not be sent."
+}
+    </pre>
+                    </div>
+
+                  </div>
+
                 </div>
               </div>
             </div>
             <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
               <button type="button"
                       class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
-                      onclick="document.getElementById(&#39;resp-1-9&#39;).classList.toggle(&#39;hidden&#39;)">
+                      onclick="document.getElementById('resp-1-9').classList.toggle('hidden')">
                 <div class="flex items-center gap-4">
                                                                 <span class="text-xs font-semibold px-2 py-1 rounded bg-blue-100 text-blue-700">
                                     POST
@@ -3878,9 +4089,13 @@
               <div id="resp-1-9" class="hidden px-6 py-4 bg-white border-t border-gray-100 space-y-6">
 
                 <div class="text-sm text-gray-600 italic">
-                  This endpoint sends an SMS with a new password and verification code if the user
-                  has a valid PortalAccount and has not exceeded SMS request limits. The endpoint also enforces the
-                  time interval between requests and limits the number of attempts allowed.
+                  This endpoint generates and sends a single-use verification code (OTP) via SMS
+                  if the user has a valid PortalAccount and has not exceeded SMS request limits. It does NOT modify
+                  or invalidate the user password until the challenge is confirmed. Limits come from the
+                  SMS_TIME_INTERVAL_BETWEEN_REQUESTS (cooldown), SMS_ATTEMPTS_NUMBER and
+                  SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS settings and are shared with the web forgot-password flow.
+                  A request inside the cooldown returns the generic success message without sending anything;
+                  a request over the attempts limit returns 429.
                                 </div>
 
 
@@ -3921,7 +4136,7 @@
                            class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": true,
     "data": {
-        "success": "If the phone number exists, we have sent a new code to: Country Code: 351 National Number: 925544896."
+        "success": "If the phone number exists, we have sent a verification code to: +3511234567890. You have 3 attempt(s) left."
     }
 }
     </pre>
@@ -4038,6 +4253,38 @@
                   <p class="text-sm font-semibold mb-2
                                                     text-red-600
                                             ">
+                    HTTP 429
+                  </p>
+
+
+                  <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                    <div data-controller="clipboard" class="relative group max-w-full">
+                      <button type="button"
+                              class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                              title="copy_command.title" aria-label="copy_command.aria_label"
+                              data-action="click-&gt;clipboard#copyToClipboard">
+                        <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                          <path fill-rule="evenodd"
+                                d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                        </svg>
+                      </button>
+
+
+                      <pre data-clipboard-target="code"
+                           class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": "You\u2019ve exceeded the maximum number of attempts to regenerate. Please contact support."
+}
+    </pre>
+                    </div>
+
+                  </div>
+
+                </div>
+                <div>
+                  <p class="text-sm font-semibold mb-2
+                                                    text-red-600
+                                            ">
                     HTTP 500
                   </p>
 
@@ -4079,7 +4326,7 @@
             <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
               <button type="button"
                       class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
-                      onclick="document.getElementById(&#39;resp-2-1&#39;).classList.toggle(&#39;hidden&#39;)">
+                      onclick="document.getElementById('resp-2-1').classList.toggle('hidden')">
                 <div class="flex items-center gap-4">
                                                                 <span class="text-xs font-semibold px-2 py-1 rounded bg-green-100 text-green-700">
                                     GET
@@ -4169,7 +4416,7 @@
             <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
               <button type="button"
                       class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
-                      onclick="document.getElementById(&#39;resp-2-2&#39;).classList.toggle(&#39;hidden&#39;)">
+                      onclick="document.getElementById('resp-2-2').classList.toggle('hidden')">
                 <div class="flex items-center gap-4">
                                                                 <span class="text-xs font-semibold px-2 py-1 rounded bg-green-100 text-green-700">
                                     GET
@@ -4260,7 +4507,7 @@
             <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
               <button type="button"
                       class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
-                      onclick="document.getElementById(&#39;resp-2-3&#39;).classList.toggle(&#39;hidden&#39;)">
+                      onclick="document.getElementById('resp-2-3').classList.toggle('hidden')">
                 <div class="flex items-center gap-4">
                   <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-yellow-600 fill-none stroke-current"
                        aria-hidden="true">
@@ -4283,7 +4530,12 @@
                 <div class="text-sm text-gray-600 italic">
                   This endpoint retrieves the profile configuration for Android, including
                   a user's radius profile data, encrypted password, and other relevant settings for the Android
-                  application.
+                  application. A new RADIUS profile gets a username in the format
+                  "&lt;random prefix&gt;@&lt;RADIUS_REALM_NAME&gt;" (32 characters at most) and a random 32 character
+                  password, independent of the realm. If the RADIUS_REALM_NAME setting is empty or longer than
+                  23 characters, no profile is issued and the request fails with 500.
+                  The account must be verified, not banned and without a pending
+                  forgot-password request.
                                 </div>
 
                 <div
@@ -4332,7 +4584,7 @@
     "success": true,
     "data": {
         "config_android": {
-            "radiusUsername": "user123",
+            "radiusUsername": "a1B2c3D4e5F6g7H8i9J0@example.com",
             "radiusPassword": "encrypted_password_here",
             "friendlyName": "My Android Profile",
             "fqdn": "example.com",
@@ -4415,6 +4667,30 @@
 
                   </div>
 
+
+                  <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                    <div data-controller="clipboard" class="relative group max-w-full">
+                      <button type="button"
+                              class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                              title="copy_command.title" aria-label="copy_command.aria_label"
+                              data-action="click-&gt;clipboard#copyToClipboard">
+                        <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                          <path fill-rule="evenodd"
+                                d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                        </svg>
+                      </button>
+
+
+                      <pre data-clipboard-target="code"
+                           class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": "User account is not verified."
+}
+    </pre>
+                    </div>
+
+                  </div>
+
                 </div>
                 <div>
                   <p class="text-sm font-semibold mb-2
@@ -4447,6 +4723,54 @@
 
                   </div>
 
+
+                  <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                    <div data-controller="clipboard" class="relative group max-w-full">
+                      <button type="button"
+                              class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                              title="copy_command.title" aria-label="copy_command.aria_label"
+                              data-action="click-&gt;clipboard#copyToClipboard">
+                        <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                          <path fill-rule="evenodd"
+                                d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                        </svg>
+                      </button>
+
+
+                      <pre data-clipboard-target="code"
+                           class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": "User account is banned from the system."
+}
+    </pre>
+                    </div>
+
+                  </div>
+
+
+                  <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                    <div data-controller="clipboard" class="relative group max-w-full">
+                      <button type="button"
+                              class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                              title="copy_command.title" aria-label="copy_command.aria_label"
+                              data-action="click-&gt;clipboard#copyToClipboard">
+                        <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                          <path fill-rule="evenodd"
+                                d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                        </svg>
+                      </button>
+
+
+                      <pre data-clipboard-target="code"
+                           class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": "Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action."
+}
+    </pre>
+                    </div>
+
+                  </div>
+
                 </div>
                 <div>
                   <p class="text-sm font-semibold mb-2
@@ -4472,7 +4796,31 @@
                       <pre data-clipboard-target="code"
                            class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": false,
-    "message": "Failed to encrypt the password"
+    "message": "The RADIUS realm is misconfigured. Please contact the portal administrator."
+}
+    </pre>
+                    </div>
+
+                  </div>
+
+
+                  <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                    <div data-controller="clipboard" class="relative group max-w-full">
+                      <button type="button"
+                              class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                              title="copy_command.title" aria-label="copy_command.aria_label"
+                              data-action="click-&gt;clipboard#copyToClipboard">
+                        <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                          <path fill-rule="evenodd"
+                                d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                        </svg>
+                      </button>
+
+
+                      <pre data-clipboard-target="code"
+                           class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "message": "Failed to encrypt the password."
 }
     </pre>
                     </div>
@@ -4509,7 +4857,7 @@
             <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
               <button type="button"
                       class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
-                      onclick="document.getElementById(&#39;resp-2-4&#39;).classList.toggle(&#39;hidden&#39;)">
+                      onclick="document.getElementById('resp-2-4').classList.toggle('hidden')">
                 <div class="flex items-center gap-4">
                   <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-yellow-600 fill-none stroke-current"
                        aria-hidden="true">
@@ -4532,6 +4880,11 @@
                 <div class="text-sm text-gray-600 italic">
                                     This endpoint retrieves the profile configuration for iOS, including a user's radius
                   profile data, encrypted password, and other relevant settings for the iOS application.
+                  A new RADIUS profile gets a username in the format "&lt;random prefix&gt;@&lt;RADIUS_REALM_NAME&gt;"
+                  (32 characters at most) and a random 32 character password, independent of the realm.
+                  If the RADIUS_REALM_NAME setting is empty or longer than 23 characters, no profile is issued
+                  and the request fails with 500.
+                  The account must be verified, not banned and without a pending forgot-password request.
                                 </div>
 
                 <div
@@ -4585,7 +4938,7 @@
         "domainName": "example.com",
         "EAPClientConfiguration": {
             "acceptEAPTypes": 21,
-            "radiusUsername": "user123",
+            "radiusUsername": "a1B2c3D4e5F6g7H8i9J0@example.com",
             "radiusPassword": "encrypted_password_here",
             "outerIdentity": "anonymous@example.com",
             "TTLSInnerAuthentication": "MSCHAPv2"
@@ -4667,6 +5020,30 @@
 
                   </div>
 
+
+                  <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                    <div data-controller="clipboard" class="relative group max-w-full">
+                      <button type="button"
+                              class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                              title="copy_command.title" aria-label="copy_command.aria_label"
+                              data-action="click-&gt;clipboard#copyToClipboard">
+                        <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                          <path fill-rule="evenodd"
+                                d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                        </svg>
+                      </button>
+
+
+                      <pre data-clipboard-target="code"
+                           class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": "User account is not verified."
+}
+    </pre>
+                    </div>
+
+                  </div>
+
                 </div>
                 <div>
                   <p class="text-sm font-semibold mb-2
@@ -4699,6 +5076,54 @@
 
                   </div>
 
+
+                  <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                    <div data-controller="clipboard" class="relative group max-w-full">
+                      <button type="button"
+                              class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                              title="copy_command.title" aria-label="copy_command.aria_label"
+                              data-action="click-&gt;clipboard#copyToClipboard">
+                        <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                          <path fill-rule="evenodd"
+                                d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                        </svg>
+                      </button>
+
+
+                      <pre data-clipboard-target="code"
+                           class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": "User account is banned from the system."
+}
+    </pre>
+                    </div>
+
+                  </div>
+
+
+                  <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                    <div data-controller="clipboard" class="relative group max-w-full">
+                      <button type="button"
+                              class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                              title="copy_command.title" aria-label="copy_command.aria_label"
+                              data-action="click-&gt;clipboard#copyToClipboard">
+                        <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                          <path fill-rule="evenodd"
+                                d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                        </svg>
+                      </button>
+
+
+                      <pre data-clipboard-target="code"
+                           class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": "Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action."
+}
+    </pre>
+                    </div>
+
+                  </div>
+
                 </div>
                 <div>
                   <p class="text-sm font-semibold mb-2
@@ -4724,7 +5149,31 @@
                       <pre data-clipboard-target="code"
                            class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": false,
-    "message": "Failed to encrypt the password"
+    "message": "The RADIUS realm is misconfigured. Please contact the portal administrator."
+}
+    </pre>
+                    </div>
+
+                  </div>
+
+
+                  <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                    <div data-controller="clipboard" class="relative group max-w-full">
+                      <button type="button"
+                              class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                              title="copy_command.title" aria-label="copy_command.aria_label"
+                              data-action="click-&gt;clipboard#copyToClipboard">
+                        <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                          <path fill-rule="evenodd"
+                                d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                        </svg>
+                      </button>
+
+
+                      <pre data-clipboard-target="code"
+                           class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "message": "Failed to encrypt the password."
 }
     </pre>
                     </div>
@@ -4761,7 +5210,7 @@
             <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
               <button type="button"
                       class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
-                      onclick="document.getElementById(&#39;resp-2-5&#39;).classList.toggle(&#39;hidden&#39;)">
+                      onclick="document.getElementById('resp-2-5').classList.toggle('hidden')">
                 <div class="flex items-center gap-4">
                                                                 <span class="text-xs font-semibold px-2 py-1 rounded bg-green-100 text-green-700">
                                     GET
@@ -4788,7 +5237,7 @@
                     class="bg-gray-100 text-gray-800 rounded-lg p-4 text-sm font-mono overflow-x-auto border border-gray-200">
                                             <pre>{
     "success": true,
-    "data": "&lt;html&gt;&lt;body&gt;&lt;h1&gt;Turnstile Configuration&lt;\/h1&gt;&lt;p&gt;This is the required HTML \nconfiguration for the Android App.&lt;\/p&gt;&lt;\/body&gt;&lt;\/html&gt;"
+    "data": "&lt;html&gt;&lt;body&gt;&lt;h1&gt;Turnstile Configuration&lt;\/h1&gt;&lt;p&gt;This is the required HTML\nconfiguration for the Android App.&lt;\/p&gt;&lt;\/body&gt;&lt;\/html&gt;"
 }</pre>
                   </div>
                 </div>
@@ -4862,7 +5311,7 @@
             <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
               <button type="button"
                       class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
-                      onclick="document.getElementById(&#39;resp-2-6&#39;).classList.toggle(&#39;hidden&#39;)">
+                      onclick="document.getElementById('resp-2-6').classList.toggle('hidden')">
                 <div class="flex items-center gap-4">
                                                                 <span class="text-xs font-semibold px-2 py-1 rounded bg-green-100 text-green-700">
                                     GET
@@ -4889,7 +5338,7 @@
                     class="bg-gray-100 text-gray-800 rounded-lg p-4 text-sm font-mono overflow-x-auto border border-gray-200">
                                             <pre>{
     "success": true,
-    "data": "&lt;html&gt;&lt;body&gt;&lt;h1&gt;Turnstile Configuration&lt;\/h1&gt;&lt;p&gt;This is the required HTML \nconfiguration for the IOS App.&lt;\/p&gt;&lt;\/body&gt;&lt;\/html&gt;"
+    "data": "&lt;html&gt;&lt;body&gt;&lt;h1&gt;Turnstile Configuration&lt;\/h1&gt;&lt;p&gt;This is the required HTML\nconfiguration for the IOS App.&lt;\/p&gt;&lt;\/body&gt;&lt;\/html&gt;"
 }</pre>
                   </div>
                 </div>
@@ -4971,7 +5420,7 @@
             <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
               <button type="button"
                       class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
-                      onclick="document.getElementById(&#39;resp-3-1&#39;).classList.toggle(&#39;hidden&#39;)">
+                      onclick="document.getElementById('resp-3-1').classList.toggle('hidden')">
                 <div class="flex items-center gap-4">
                                                                 <span class="text-xs font-semibold px-2 py-1 rounded bg-blue-100 text-blue-700">
                                     POST
@@ -4989,6 +5438,9 @@
                 <div class="text-sm text-gray-600 italic">
                   Enables Two-Factor Authentication (2FA) for the authenticated user.
                   Supports ("totp", "email", "sms"). Requires a valid JWT Bearer token.
+                  Only for first enrolment: if the account already has 2FA enabled, the request is rejected with 409
+                  and no new secret or code is generated. Calling it again before validating (2FA still disabled)
+                  replaces the pending TOTP secret.
                                 </div>
 
 
@@ -5265,6 +5717,68 @@
                   <p class="text-sm font-semibold mb-2
                                                     text-red-600
                                             ">
+                    HTTP 409
+                  </p>
+
+                  <p class="text-sm text-gray-700 mb-2 italic">Two-factor authentication is already enabled for this
+                    account.</p>
+
+
+                  <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                    <div data-controller="clipboard" class="relative group max-w-full">
+                      <button type="button"
+                              class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                              title="copy_command.title" aria-label="copy_command.aria_label"
+                              data-action="click-&gt;clipboard#copyToClipboard">
+                        <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                          <path fill-rule="evenodd"
+                                d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                        </svg>
+                      </button>
+
+
+                      <pre data-clipboard-target="code"
+                           class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": "Two-factor authentication is already enabled for this account."
+}
+    </pre>
+                    </div>
+
+                  </div>
+
+
+                  <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                    <div data-controller="clipboard" class="relative group max-w-full">
+                      <button type="button"
+                              class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                              title="copy_command.title" aria-label="copy_command.aria_label"
+                              data-action="click-&gt;clipboard#copyToClipboard">
+                        <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                          <path fill-rule="evenodd"
+                                d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                        </svg>
+                      </button>
+
+
+                      <pre data-clipboard-target="code"
+                           class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": {
+        "success": false,
+        "error": "Two-factor authentication is already enabled for this account. Disable it before selecting a new method."
+    }
+}
+    </pre>
+                    </div>
+
+                  </div>
+
+                </div>
+                <div>
+                  <p class="text-sm font-semibold mb-2
+                                                    text-red-600
+                                            ">
                     HTTP 500
                   </p>
 
@@ -5328,7 +5842,7 @@
             <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
               <button type="button"
                       class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
-                      onclick="document.getElementById(&#39;resp-3-2&#39;).classList.toggle(&#39;hidden&#39;)">
+                      onclick="document.getElementById('resp-3-2').classList.toggle('hidden')">
                 <div class="flex items-center gap-4">
                   <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-yellow-600 fill-none stroke-current"
                        aria-hidden="true">
@@ -5353,6 +5867,9 @@
                   The client must send a valid JWT Bearer token in the Authorization header,
                   along with the 2FA type and confirmation code in the request body.
                   If the code is valid, 2FA is enabled for that method.
+                  This endpoint only confirms a first enrolment: if the account already has 2FA enabled it returns 409,
+                  and the active method must be disabled before selecting a new one.
+                  Email and SMS codes expire after the configured TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME.
                                 </div>
 
                 <div
@@ -5372,7 +5889,7 @@
                                             <pre>{
     "uuid": "user-uuid-example",
     "password": "user-password-example",
-    "type": "email or sms or topt",
+    "type": "email or sms or totp",
     "code": "123456"
 }</pre>
                   </div>
@@ -5460,7 +5977,31 @@
                       <pre data-clipboard-target="code"
                            class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": false,
-    "error": "Missing required body fields"
+    "error": "Invalid data: Missing required fields."
+}
+    </pre>
+                    </div>
+
+                  </div>
+
+
+                  <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                    <div data-controller="clipboard" class="relative group max-w-full">
+                      <button type="button"
+                              class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                              title="copy_command.title" aria-label="copy_command.aria_label"
+                              data-action="click-&gt;clipboard#copyToClipboard">
+                        <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                          <path fill-rule="evenodd"
+                                d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                        </svg>
+                      </button>
+
+
+                      <pre data-clipboard-target="code"
+                           class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": "Invalid data: type must be one of totp, email or sms."
 }
     </pre>
                     </div>
@@ -5493,6 +6034,30 @@
                            class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": false,
     "error": "JWT Token is invalid!"
+}
+    </pre>
+                    </div>
+
+                  </div>
+
+
+                  <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                    <div data-controller="clipboard" class="relative group max-w-full">
+                      <button type="button"
+                              class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                              title="copy_command.title" aria-label="copy_command.aria_label"
+                              data-action="click-&gt;clipboard#copyToClipboard">
+                        <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                          <path fill-rule="evenodd"
+                                d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                        </svg>
+                      </button>
+
+
+                      <pre data-clipboard-target="code"
+                           class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": "Invalid credentials"
 }
     </pre>
                     </div>
@@ -5632,6 +6197,38 @@
                   <p class="text-sm font-semibold mb-2
                                                     text-red-600
                                             ">
+                    HTTP 409
+                  </p>
+
+
+                  <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                    <div data-controller="clipboard" class="relative group max-w-full">
+                      <button type="button"
+                              class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                              title="copy_command.title" aria-label="copy_command.aria_label"
+                              data-action="click-&gt;clipboard#copyToClipboard">
+                        <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                          <path fill-rule="evenodd"
+                                d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                        </svg>
+                      </button>
+
+
+                      <pre data-clipboard-target="code"
+                           class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": "Two-factor authentication is already enabled for this account. Disable it before selecting a new method."
+}
+    </pre>
+                    </div>
+
+                  </div>
+
+                </div>
+                <div>
+                  <p class="text-sm font-semibold mb-2
+                                                    text-red-600
+                                            ">
                     HTTP 500
                   </p>
 
@@ -5673,7 +6270,7 @@
             <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
               <button type="button"
                       class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
-                      onclick="document.getElementById(&#39;resp-4-1&#39;).classList.toggle(&#39;hidden&#39;)">
+                      onclick="document.getElementById('resp-4-1').classList.toggle('hidden')">
                 <div class="flex items-center gap-4">
                   <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-yellow-600 fill-none stroke-current"
                        aria-hidden="true">
@@ -5923,7 +6520,7 @@
             <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
               <button type="button"
                       class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
-                      onclick="document.getElementById(&#39;resp-4-2&#39;).classList.toggle(&#39;hidden&#39;)">
+                      onclick="document.getElementById('resp-4-2').classList.toggle('hidden')">
                 <div class="flex items-center gap-4">
                   <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-yellow-600 fill-none stroke-current"
                        aria-hidden="true">
@@ -5976,24 +6573,84 @@
 
                 <div class="mt-6">
                   <p class="text-sm font-semibold text-blue-600 mb-2">Request Body</p>
-                  <div
-                    class="bg-gray-100 text-gray-800 rounded-lg p-4 text-sm font-mono overflow-x-auto border border-gray-200 my-2">
-                                                    <pre>{
+
+                  <div data-controller="tabs" data-tabs-active-class="border-indigo-600 text-indigo-700 bg-white"
+                       data-tabs-inactive-class="border-transparent text-gray-500 hover:text-gray-700 bg-gray-50">
+
+                    <div role="tablist" class="flex flex-wrap gap-1 border-b border-gray-200">
+                      <button type="button" role="tab" aria-selected="false"
+                              class="-mb-px rounded-t-md border-b-2 px-3 py-2 text-xs font-mono font-medium"
+                              data-tabs-target="tab" data-action="tabs#select" data-tabs-index-param="0">
+                        Portal Account
+                      </button>
+                      <button type="button" role="tab" aria-selected="false"
+                              class="-mb-px rounded-t-md border-b-2 px-3 py-2 text-xs font-mono font-medium"
+                              data-tabs-target="tab" data-action="tabs#select" data-tabs-index-param="1">
+                        Google Account
+                      </button>
+                      <button type="button" role="tab" aria-selected="false"
+                              class="-mb-px rounded-t-md border-b-2 px-3 py-2 text-xs font-mono font-medium"
+                              data-tabs-target="tab" data-action="tabs#select" data-tabs-index-param="2">
+                        Microsoft Account
+                      </button>
+                    </div>
+
+                    <div role="tabpanel" data-tabs-target="panel">
+                      <div class="relative" data-controller="clipboard">
+                        <button type="button"
+                                class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                                title="copy_command.title" aria-label="copy_command.aria_label"
+                                data-action="click-&gt;clipboard#copyToClipboard">
+                          <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                            <path fill-rule="evenodd"
+                                  d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                          </svg>
+                        </button>
+
+                        <pre id="req-4-2-0" data-clipboard-target="code"
+                             class="bg-gray-100 text-gray-800 rounded-b-lg p-4 pt-12 text-sm font-mono overflow-x-auto border border-gray-200">{
     "password": "user-password-example"
 }</pre>
-                  </div>
-                  <div
-                    class="bg-gray-100 text-gray-800 rounded-lg p-4 text-sm font-mono overflow-x-auto border border-gray-200 my-2">
-                                                    <pre>{
+                      </div>
+                    </div>
+                    <div role="tabpanel" data-tabs-target="panel" hidden="">
+                      <div class="relative" data-controller="clipboard">
+                        <button type="button"
+                                class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                                title="copy_command.title" aria-label="copy_command.aria_label"
+                                data-action="click-&gt;clipboard#copyToClipboard">
+                          <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                            <path fill-rule="evenodd"
+                                  d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                          </svg>
+                        </button>
+
+                        <pre id="req-4-2-1" data-clipboard-target="code"
+                             class="bg-gray-100 text-gray-800 rounded-b-lg p-4 pt-12 text-sm font-mono overflow-x-auto border border-gray-200">{
     "code": "googleCodeExample"
 }</pre>
-                  </div>
-                  <div
-                    class="bg-gray-100 text-gray-800 rounded-lg p-4 text-sm font-mono overflow-x-auto border border-gray-200 my-2">
-                                                    <pre>{
+                      </div>
+                    </div>
+                    <div role="tabpanel" data-tabs-target="panel" hidden="">
+                      <div class="relative" data-controller="clipboard">
+                        <button type="button"
+                                class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                                title="copy_command.title" aria-label="copy_command.aria_label"
+                                data-action="click-&gt;clipboard#copyToClipboard">
+                          <svg viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-white" aria-hidden="true">
+                            <path fill-rule="evenodd"
+                                  d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path>
+                          </svg>
+                        </button>
+
+                        <pre id="req-4-2-2" data-clipboard-target="code"
+                             class="bg-gray-100 text-gray-800 rounded-b-lg p-4 pt-12 text-sm font-mono overflow-x-auto border border-gray-200">{
     "code": "microsoftCodeExample"
 }</pre>
+                      </div>
+                    </div>
                   </div>
+
                 </div>
 
 
@@ -6495,7 +7152,7 @@
         <div class="border border-gray-300 rounded-xl shadow-sm overflow-hidden">
           <button type="button"
                   class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
-                  onclick="document.getElementById(&#39;common-1&#39;).classList.toggle(&#39;hidden&#39;)">
+                  onclick="document.getElementById('common-1').classList.toggle('hidden')">
             <div class="flex items-center space-x-4">
               <span class="text-sm font-medium text-indigo-700">HTTP 400</span>
             </div>
@@ -6571,7 +7228,7 @@
         <div class="border border-gray-300 rounded-xl shadow-sm overflow-hidden">
           <button type="button"
                   class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
-                  onclick="document.getElementById(&#39;common-2&#39;).classList.toggle(&#39;hidden&#39;)">
+                  onclick="document.getElementById('common-2').classList.toggle('hidden')">
             <div class="flex items-center space-x-4">
               <span class="text-sm font-medium text-indigo-700">HTTP 401</span>
             </div>
@@ -6627,7 +7284,7 @@
         <div class="border border-gray-300 rounded-xl shadow-sm overflow-hidden">
           <button type="button"
                   class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
-                  onclick="document.getElementById(&#39;common-3&#39;).classList.toggle(&#39;hidden&#39;)">
+                  onclick="document.getElementById('common-3').classList.toggle('hidden')">
             <div class="flex items-center space-x-4">
               <span class="text-sm font-medium text-indigo-700">HTTP 403</span>
             </div>
@@ -6663,7 +7320,7 @@
         <div class="border border-gray-300 rounded-xl shadow-sm overflow-hidden">
           <button type="button"
                   class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
-                  onclick="document.getElementById(&#39;common-4&#39;).classList.toggle(&#39;hidden&#39;)">
+                  onclick="document.getElementById('common-4').classList.toggle('hidden')">
             <div class="flex items-center space-x-4">
               <span class="text-sm font-medium text-indigo-700">HTTP 500</span>
             </div>
@@ -6701,10 +7358,11 @@
     </div>
   </section>
 
+
 </div>
 <div class="fixed bottom-4 left-4 p-2 bg-gray-200/50 backdrop-blur-md rounded-lg text-sm text-gray-700 hidden xl:block cursor-default z-50">
-  Version 1.13.1
-  <span class="text-gray-700">(CRA-issues)</span>
+  Version 1.16.0
 </div>
+
 </body>
 </html>

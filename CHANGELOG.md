@@ -1,3 +1,153 @@
+## Release V1.16.0
+
+### Breaking Changes & API v3 Deprecation Notice
+
+- **API v3 Deprecation & API v4 Transition**: API v3 is now officially deprecated due to structural breaking changes in
+  the base configuration response required for multi-provider CAPTCHA support (`TURNSTILE`, `RECAPTCHA3`, and `OFF`).
+  All client integrations and mobile applications are encouraged to migrate to **API v4** (`/api/v4`).
+  - **Base Configuration Payload Overhaul (`/config`)**:
+    - Removed legacy boolean flag `platform.TURNSTILE_CHECKER` in favor of dynamic enum `platform.CAPTCHA_PROVIDER` (
+      `TURNSTILE`, `RECAPTCHA3`, or `OFF`).
+    - Replaced fixed `turnstile` object block with dynamic provider keys that strictly reflect the active CAPTCHA
+      provider (e.g., returning a `recaptcha3` object with `RECAPTCHA3_KEY` when `CAPTCHA_PROVIDER` is set to
+      `RECAPTCHA3`).
+  - **Payload Structure Comparison**:
+    - *Legacy API v3 Config Response*:
+      ```json
+      {
+        "success": true,
+        "data": {
+          "platform": {
+            "TURNSTILE_CHECKER": true
+          },
+          "turnstile": {
+            "TURNSTILE_KEY": "0x4AAAAAAAbU9Fvdl8WH6GRk"
+          }
+        }
+      }
+      ```
+    - *New API v4 Config Response*:
+      ```json
+      {
+        "success": true,
+        "data": {
+          "platform": {
+            "CAPTCHA_PROVIDER": "RECAPTCHA3"
+          },
+          "recaptcha3": {
+            "RECAPTCHA3_KEY": "6LfJmOstAAAAAD274T05Q_1HRdEd8KuX3ETgmPJm"
+          }
+        }
+      }
+      ```
+
+- **SMS Password Reset Is a Two-Step Flow in API v4**: API v3 sent a new temporary password straight by SMS. In API v4,
+  `/api/v4/auth/sms/reset` does not change the password: it only sends a single-use 6-digit verification code by SMS,
+  and the password is changed only after that code is confirmed on the new `/api/v4/auth/sms/reset/confirm` endpoint
+  (see **Improvements & Features**). Apps migrating their SMS reset to v4 must add the confirmation step.
+
+- **RADIUS Realm Length Limited to 23 Characters**: The RADIUS realm (`RADIUS_REALM_NAME`) is part of every RADIUS
+  username (`<random prefix>@<realm>`, 32 characters at most), so it can no longer be longer than 23 characters. This
+  leaves room for a random prefix of at least 8 characters.
+  - The **RADIUS settings** page and the **FreeRADIUS certificate domain** step of the certificate wizard (which also
+    saves the domain as the realm) now reject longer values with a validation error.
+  - If the realm saved in the database is empty or longer than 23 characters, no new profile is issued:
+    - API v3/v4 `/config/profile/android` and `/config/profile/ios` return **500** with
+      `The RADIUS realm is misconfigured. Please contact the portal administrator.`
+    - The landing page profile downloads (Android, iOS and Windows) show an error and redirect to the landing page.
+
+- **Check the Nginx Configuration for Google reCAPTCHA**: After updating to this release, open
+  `service-config/nginx/sites/openroaming.conf` (or `service-config/nginx/sites-ssl/openroaming-ssl.conf` if you use
+  `docker-compose-ssl.yml`) and make sure the `Content-Security-Policy` line includes the Google domains:
+  - `https://www.google.com https://www.gstatic.com` in `script-src` and `script-src-elem`;
+  - `https://www.google.com` in `connect-src` and `frame-src`.
+
+  This file is mounted from the host into the container. If the Google domains are missing, reCAPTCHA v3 does not load and the
+  login page shows `The security check could not be loaded.`
+
+### Security Fixes
+
+- **RADIUS Password Length No Longer Depends on the Realm**: The RADIUS password of a new profile was generated with
+  the same length as the username prefix (`32 - (realm length + 1)`), so a longer realm produced a weaker password: a
+  26-character realm gave a 5-character password, and a realm of 31 characters or more gave an **empty password** and
+  the same username (`@realm`) for every user.
+  - Passwords are now always a random 32-character string, independent of the realm.
+  - The username prefix is checked separately, and a realm that cannot fit the username format is rejected (see
+    above) instead of creating a broken or shared account.
+  - Credential generation now lives in a single service (`RadiusCredentialGenerator`), shared by the API v3, API v4
+    and landing page profile controllers, replacing three copies of the same code.
+  - Profiles that already exist keep their current credentials until they are revoked or expire.
+
+### Action Required & Deployment Steps
+
+- **Database Migrations & Turnstile Settings Import**: Executing the database migration sets up the required settings
+  structures. You must run the new Turnstile settings import command afterward to encrypt and sync existing `.env` keys
+  into the database.
+  - Run the migrations and import command with:
+    ```bash
+    php bin/console doctrine:migrations:migrate
+    php bin/console import:turnstileSettings
+    ```
+
+- **Check the RADIUS Realm Length**: On the admin dashboard, open the RADIUS settings and confirm that the realm is 23
+  characters or fewer.
+
+- **Review the SMS Settings**: The API v4 SMS reset confirmation now uses the values on **User Authentication > SMS >
+  Configuration**. Check that **Time Interval To Reset Attempts** (how long a reset code stays valid, in minutes) and
+  **Number of Attempts** (how many wrong codes are allowed) suit your users.
+
+### Improvements & Features
+
+- **API v4 Implementation & Documentation**: Released API v4 (`/api/v4`) as the new primary API version, updating the
+  main `/api` documentation endpoint to redirect to v4 by default. All CAPTCHA-protected endpoints (login, registration,
+  password reset, SMS registration/reset, and 2FA enablement) now dynamically accept tokens matching the active
+  provider (`turnstile_token` or `recaptcha_token`), requiring no token when the provider is set to `OFF`. Complete
+  request bodies, provider behaviors, and response schemas are fully documented.
+- **New SMS Password Reset Confirmation Endpoint (`POST /api/v4/auth/sms/reset/confirm`)**: Confirms the verification
+  code sent by `/api/v4/auth/sms/reset` and, when it is valid, sets a new random password and returns it in
+  `new_password`.
+  - Request body: `country_code`, `phone_number` and `code`.
+  - The code is single-use and is checked against its stored Argon2id hash.
+  - The limits come from the dashboard SMS settings page, the same values the web forgot-password flow uses:
+    - the code stays valid for **Time Interval To Reset Attempts** (`SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS`, minutes);
+    - after **Number of Attempts** (`SMS_ATTEMPTS_NUMBER`) wrong codes, the code is invalidated and a new one must be
+      requested with `/api/v4/auth/sms/reset`.
+  - Wrong codes are logged as `USER_ACCOUNT_PASSWORD_RESET_API_CONFIRM_FAILED` events (shown as "API Password Reset:
+    Wrong Code" in the activity logs) and are counted per code, under a per-user lock, so parallel requests cannot go
+    over the limit.
+  - Every failure (unknown number, banned account, wrong, expired or invalidated code) returns the same
+    `400 Invalid or expired verification code.`, so the response does not reveal whether an account exists.
+- **Installation Wizard CAPTCHA Integration**: Fully integrated CAPTCHA provider configuration into the initial project
+  setup and installation wizard flow.
+- **Dynamic CAPTCHA Provider API**: Reworked system configuration endpoints and base API routes to dynamically report
+  and query the currently active CAPTCHA provider (`TURNSTILE`, `RECAPTCHA3`, or `OFF`).
+- **Environment Turnstile Settings Importer (`import:turnstileSettings`)**: Added a CLI command (
+  `php bin/console import:turnstileSettings`) to read `TURNSTILE_KEY` and `TURNSTILE_SECRET` from environment variables,
+  encrypt them at rest via `EncryptionService`, and persist or update them in the `Setting` table.
+- **Profile Endpoint Documentation (API v3 & v4)**: The `/config/profile/android` and `/config/profile/ios` docs now
+  describe the RADIUS username format, the fixed password length and the new 500 response for a misconfigured realm.
+
+### Bug Fixes
+
+- **API SMS Password Reset Returned HTTP 500**: `/api/v3/auth/sms/reset` and `/api/v4/auth/sms/reset` failed with
+  `Warning: Undefined array key "SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS"`. The reset limits were read through
+  `GetSettings::getSettings()`, which returns no settings on `/api` routes. `ForgotPasswordService` and
+  `PasswordResetAttemptGuard` now read only the settings they need directly from the database, so the same limits work
+  on the web and on the API. A missing setting now raises a clear error naming it.
+- **Phone Number Login Always Returned "Bad credentials"**: Since phone numbers are encrypted at rest (1.15.0) with a
+  random IV, the same number never produces the same stored value, so lookups by `phoneNumber` could never match a
+  user. Phone-number users are now looked up by their `uuid` (E.164 format, e.g. `+351912345678`) in:
+  - Landing page login (`LandingAuthenticator`);
+  - Admin dashboard login (`DashboardAuthenticator`);
+  - Forgot password by SMS (`ForgotPasswordController`).
+- **SMS Registration Skipped Account Verification**: Registering a new account by phone number in a browser session
+  where another verified account had previously logged in (without logging out) reused that account's verification
+  flag, sending the new, unverified user straight to the profile download page. Previous session flags are now cleared
+  on registration, and the user is redirected directly to the verification code page (`/login/confirmation`) instead of
+  going through the landing page, which also avoids sending a second verification code.
+- **Duplicate Phone Number Check on Registration**: Removed the duplicate-account check by `phoneNumber` in SMS
+  registration, which could never match after the encryption change; the existing check by `uuid` covers this case.
+
 ## Release v1.15.2
 
 - **FreeRADIUS certificate upload:** valid, publicly trusted certificates
@@ -28,6 +178,7 @@ No migrations or one-time commands are needed for this release.
     ```
 
 No migrations or one-time commands are needed for this release.
+
 
 ## Release v1.15.0
 

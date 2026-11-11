@@ -112,16 +112,8 @@
             {{ form_row(form.formID) }}
         </div>
 
-        {# Turnstile Checker #}
-        {% if form.security is defined %}
-            <div class="ml-3 mt-5">
-                {{ form_label(form.security) }}
-                {{ form_widget(form.security) }}
-                <div class="text-red-500">
-                    {{ form_errors(form.security) }}
-                </div>
-            </div>
-        {% endif %}
+        {# CAPTCHA Verification Partial #}
+        {{ render_captcha(form, 'magic_link') }}
 
         <div class="my-[32px] flex justify-center gap-4">
             <button type="submit" class="w-[220px] btn-primary">{{ 'btn.sendLink'|trans({}, 'login_landing') }}</button>

@@ -82,6 +82,7 @@ class UserAddDTO
     public PermissionLevel $map = PermissionLevel::NONE;
     public PermissionLevel $installation = PermissionLevel::NONE;
     public PermissionLevel $securityTxt = PermissionLevel::NONE;
+    public PermissionLevel $captchaProvider = PermissionLevel::NONE;
 
     /**
      * Returns AdminPermissionsType strings based on selected levels
@@ -111,6 +112,7 @@ class UserAddDTO
             'map' => 'MAP',
             'installation' => 'INSTALLATION',
             'securityTxt' => 'SECURITY_TXT',
+            'captchaProvider' => 'CAPTCHA_PROVIDER',
         ];
 
         $permissions = [];

@@ -128,7 +128,7 @@ unableSendLoginLink: 'We were unable to send the login link or verification code
 loginVerificationCodeSent: 'We have sent a login verification code to your phone number. Please check your SMS messages to continue.'
 loginSuccessfully: 'Login successfully'
 invalidLogin: 'Your login link is invalid or has expired. Please request a new login link to continue.'
-passwordSentSMS: 'A new account password has been sent to your phone number via SMS.'
+passwordSentSMS: 'A new account password has been sent via SMS.'
 passwordNotSentSMS: 'We were unable to send the new password to your phone number. Please try again.'
 domainBlacklistConfigurationAppliedSuccessfully: 'New Domain Blacklist configuration have been applied successfully.'
 addedNewUser: 'User "%uuid%" was created successfully.'
@@ -247,3 +247,9 @@ securityTxt:
   saveError: "An error occurred while saving the Security.txt configuration."
   formError: "Please correct the errors in the form before proceeding."
 securityTxtSettingsResetSuccessfully: "Settings have been reset successfully."
+captcha:
+  saveSuccess: "CAPTCHA settings saved successfully."
+  saveError: "An error occurred while saving CAPTCHA settings."
+captchaProviderResetSuccessfully: "Settings have been reset successfully."
+invalidCaptchaCredentials: "The provided CAPTCHA credentials are invalid or were rejected by the provider."
+radiusRealmMisconfigured: 'Your profile could not be created because the portal RADIUS settings are misconfigured. Please contact support.'

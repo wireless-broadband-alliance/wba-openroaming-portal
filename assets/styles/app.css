@@ -1,6 +1,5 @@
 @import "../vendor/leaflet.markercluster/dist/MarkerCluster.Default.css";
 @import "../vendor/leaflet.markercluster/dist/MarkerCluster.css";
-@import "../vendor/leaflet/dist/leaflet.css";
 
 @tailwind base;
 @tailwind components;
@@ -593,4 +592,18 @@
 
 .custom-standalone-cluster {
     display: flex !important;
+}
+
+.sf-minitoolbar,
+[id^="sfMiniToolbar"],
+.sf-toolbar-toggle-button {
+    left: 0 !important;
+    right: auto !important;
+}
+
+.sf-toolbarreset,
+[id^="sfToolbarMain"] {
+    right: 300px !important;
+    padding-left: 35px !important;
+    max-width: calc(100vw - 300px) !important;
 }

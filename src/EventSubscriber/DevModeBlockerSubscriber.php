@@ -2,12 +2,12 @@
 
 namespace App\EventSubscriber;
 
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelInterface;
 
-class DevModeBlockerSubscriber implements EventSubscriberInterface
+class DevModeBlockerSubscriber
 {
     /** @var string[] */
     private array $approvedDomains = [
@@ -17,18 +17,10 @@ class DevModeBlockerSubscriber implements EventSubscriberInterface
         'qa.openroamingconnect.org',
         //'*.domain.com',
     ];
-
     public function __construct(private readonly KernelInterface $kernel)
     {
     }
-
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            'kernel.request' => ['onKernelRequest', 100],
-        ];
-    }
-
+    #[AsEventListener(event: 'kernel.request', priority: 100)]
     public function onKernelRequest(RequestEvent $event): void
     {
         if (!$event->isMainRequest()) {
@@ -57,7 +49,6 @@ class DevModeBlockerSubscriber implements EventSubscriberInterface
             $event->setResponse($response);
         }
     }
-
     private function isHostAllowed(string $host): bool
     {
         foreach ($this->approvedDomains as $pattern) {

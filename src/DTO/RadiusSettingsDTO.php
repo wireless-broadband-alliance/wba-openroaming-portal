@@ -3,8 +3,9 @@
 namespace App\DTO;
 
 use App\Enum\SettingName;
-use Symfony\Component\Validator\Constraints as Assert;
+use App\Service\RadiusCredentialGenerator;
 use App\Validator\Constraints as CustomAssert;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class RadiusSettingsDTO
 {
@@ -12,6 +13,8 @@ class RadiusSettingsDTO
     public ?string $displayName = null;
 
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    // The realm is part of every RADIUS username ("<prefix>@<realm>"), so it must leave room for the prefix
+    #[Assert\Length(max: RadiusCredentialGenerator::MAX_REALM_LENGTH, maxMessage: 'radiusRealmTooLong')]
     #[CustomAssert\ValidDomain]
     public ?string $radiusRealmName = null;
 

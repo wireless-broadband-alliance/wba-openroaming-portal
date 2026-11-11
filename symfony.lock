@@ -53,8 +53,8 @@
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",
-            "version": "3.7",
-            "ref": "22bf81c4b6beb7c8258f08ab92f4007306880a18"
+            "version": "3.1",
+            "ref": "1d01ec03c6ecbd67c3375c5478c9a423ae5d6a33"
         },
         "files": [
             "config/packages/doctrine_migrations.yaml",
@@ -134,18 +134,6 @@
             "bin/phpunit",
             "phpunit.xml.dist",
             "tests/bootstrap.php"
-        ]
-    },
-    "pixelopen/cloudflare-turnstile-bundle": {
-        "version": "0.3",
-        "recipe": {
-            "repo": "github.com/symfony/recipes-contrib",
-            "branch": "main",
-            "version": "0.1",
-            "ref": "6173b9aff0056dd99ca70a2caa940cc7bcac0b4b"
-        },
-        "files": [
-            "config/packages/pixel_open_cloudflare_turnstile.yaml"
         ]
     },
     "sentry/sentry-symfony": {
@@ -564,12 +552,12 @@
         ]
     },
     "vincentlanglet/twig-cs-fixer": {
-        "version": "3.5",
+        "version": "3.14",
         "recipe": {
             "repo": "github.com/symfony/recipes-contrib",
             "branch": "main",
             "version": "3.0",
-            "ref": "d42582ae1bce86fd43491d6264c738b0867f8ffe"
+            "ref": "0a2d420aa6554f632804a3f21624e16314fe8588"
         }
     }
 }

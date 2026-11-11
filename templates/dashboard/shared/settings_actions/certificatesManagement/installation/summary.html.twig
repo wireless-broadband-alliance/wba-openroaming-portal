@@ -17,8 +17,8 @@
 
     <div class="my-[25px] divider"></div>
 
-    {# --- Summary Cards Grid (Updated for 4 cards) --- #}
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+    {# --- Summary Cards Grid --- #}
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
 
         {# ================= OPENROAMING DB CARD ================= #}
         <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-4 flex flex-col justify-between">
@@ -102,6 +102,48 @@
             </div>
         </div>
 
+        {# ================= CAPTCHA CARD ================= #}
+        <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-4 flex flex-col justify-between">
+            <div>
+                <div class="border-b border-slate-100 pb-4 mb-4">
+                    <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <twig:ux:icon name="wba:captcha" class="w-5 h-5 text-slate-600 fill-none stroke-current" />
+                        {{ 'captchaProviderLabel'|trans({}, 'captcha') }}
+                    </h2>
+                </div>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
+                            {{ 'selectProvider'|trans({}, 'captcha') }}
+                        </label>
+                        <div class="text-sm text-slate-800 bg-slate-50 rounded-lg px-3 py-2 border border-slate-200/60 truncate">
+                            {{ captcha.providerLabel|default('-') }}
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
+                            {{ captcha.siteKeyLabel }}
+                        </label>
+                        <div class="text-sm font-mono text-slate-800 bg-slate-50 rounded-lg px-3 py-2 border border-slate-200/60 truncate"
+                             title="{{ captcha.siteKey|default('-') }}">
+                            {{ captcha.siteKey|default('-') }}
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
+                            {{ captcha.secretLabel }}
+                        </label>
+                        <div class="text-sm font-mono text-slate-800 bg-slate-50 rounded-lg px-3 py-2 border border-slate-200/60 truncate">
+                            {{ captcha.secretMasked|default('-') }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         {# ================= SECURITY.TXT CARD ================= #}
         <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-4 flex flex-col justify-between">
             <div>
@@ -176,32 +218,6 @@
                         </label>
                         <div class="text-sm font-mono text-slate-800 bg-slate-50 rounded-lg px-3 py-2 border border-slate-200/60 truncate">
                             {{ Installation.trustedProxies|default('-') }}
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
-                            {{ 'turnstileKey'|trans({}, 'summary') }}
-                        </label>
-                        <div class="text-sm font-mono text-slate-800 bg-slate-50 rounded-lg px-3 py-2 border border-slate-200/60 truncate">
-                            {{ Installation.turnstileKey|default('-') }}
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
-                            {{ 'turnstileSecret'|trans({}, 'summary') }}
-                        </label>
-                        <div class="text-sm font-mono text-slate-800 bg-slate-50 rounded-lg px-3 py-2 border border-slate-200/60 truncate">
-                            {% if Installation.turnstileSecret is defined and Installation.turnstileSecret is not empty %}
-                                {% if Installation.turnstileSecret|length > 4 %}
-                                    ••••••••{{ Installation.turnstileSecret|slice(-4) }}
-                                {% else %}
-                                    {{ Installation.turnstileSecret }}
-                                {% endif %}
-                            {% else %}
-                                -
-                            {% endif %}
                         </div>
                     </div>
                 </div>

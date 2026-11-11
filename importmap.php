@@ -57,9 +57,6 @@ return [
         'version' => '2.6.2',
         'type' => 'css',
     ],
-    'chart.js' => [
-        'version' => '4.5.1',
-    ],
     'lodash-es' => [
         'version' => '4.18.1',
     ],
@@ -113,7 +110,7 @@ return [
         'version' => '3.0.0',
     ],
     '@kurkle/color' => [
-        'version' => '0.4.0',
+        'version' => '0.3.4',
     ],
     'leaflet' => [
         'version' => '1.9.4',
@@ -558,10 +555,13 @@ return [
     '@orchidjs/unicode-variants' => [
         'version' => '1.2.2',
     ],
-    'axios' => [
-        'version' => '1.20.0',
-    ],
     'quill-resize-image' => [
         'version' => '1.0.12',
+    ],
+    'chart.js' => [
+        'version' => '4.6.1',
+    ],
+    'axios' => [
+        'version' => '1.21.0',
     ],
 ];

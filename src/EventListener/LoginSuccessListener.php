@@ -11,12 +11,13 @@ use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use App\Service\EventActions;
 use DateTime;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Security\Http\SecurityEvents;
 
-readonly class LoginSuccessListener implements EventSubscriberInterface
+readonly class LoginSuccessListener
 {
     public function __construct(
         private EventActions $eventActions,
@@ -25,13 +26,7 @@ readonly class LoginSuccessListener implements EventSubscriberInterface
     ) {
     }
 
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            SecurityEvents::INTERACTIVE_LOGIN => 'onLoginSuccess',
-        ];
-    }
-
+    #[AsEventListener(event: SecurityEvents::INTERACTIVE_LOGIN)]
     public function onLoginSuccess(InteractiveLoginEvent $event): void
     {
         $user = $event->getAuthenticationToken()->getUser();

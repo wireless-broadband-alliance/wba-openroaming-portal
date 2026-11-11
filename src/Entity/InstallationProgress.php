@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\CaptchaProviderEnum;
 use App\Enum\ProcessStatusType;
 use App\Repository\InstallationProgressRepository;
 use Doctrine\DBAL\Types\Types;
@@ -29,11 +30,20 @@ class InstallationProgress
     #[ORM\Column(type: Types::JSON, nullable: true)]
     private ?array $trustedProxies = null;
 
+    #[ORM\Column(length: 255, nullable: true, enumType: CaptchaProviderEnum::class)]
+    private ?CaptchaProviderEnum $captchaProvider = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $turnstileKey = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $turnstileSecret = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $recaptcha3Key = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $recaptcha3Secret = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $jwtPassphrase = null;
@@ -118,6 +128,19 @@ class InstallationProgress
     public function setTrustedProxies(?array $trustedProxies): static
     {
         $this->trustedProxies = $trustedProxies;
+
+        return $this;
+    }
+
+    public function getCaptchaProvider(): ?CaptchaProviderEnum
+    {
+        return $this->captchaProvider;
+    }
+
+    public function setCaptchaProvider(?CaptchaProviderEnum $captchaProvider): static
+    {
+        $this->captchaProvider = $captchaProvider;
+
         return $this;
     }
 
@@ -141,6 +164,30 @@ class InstallationProgress
     public function setTurnstileSecret(?string $turnstileSecret): static
     {
         $this->turnstileSecret = $turnstileSecret;
+
+        return $this;
+    }
+
+    public function getRecaptcha3Key(): ?string
+    {
+        return $this->recaptcha3Key;
+    }
+
+    public function setRecaptcha3Key(?string $recaptcha3Key): static
+    {
+        $this->recaptcha3Key = $recaptcha3Key;
+
+        return $this;
+    }
+
+    public function getRecaptcha3Secret(): ?string
+    {
+        return $this->recaptcha3Secret;
+    }
+
+    public function setRecaptcha3Secret(?string $recaptcha3Secret): static
+    {
+        $this->recaptcha3Secret = $recaptcha3Secret;
 
         return $this;
     }

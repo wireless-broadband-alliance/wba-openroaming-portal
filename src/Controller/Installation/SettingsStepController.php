@@ -14,7 +14,6 @@ use App\Enum\SettingsConfigType;
 use App\Exception\EncryptionException;
 use App\Form\SettingsType;
 use App\Security\Voter\UserAuthenticationVoter;
-use App\Service\CaptchaValidator;
 use App\Service\DatabaseConnectionService;
 use App\Service\EncryptionService;
 use App\Service\EventActions;
@@ -48,7 +47,6 @@ class SettingsStepController extends AbstractController
         private readonly TranslatorInterface $translator,
         private readonly InstallationService $installationService,
         private readonly EntityManagerInterface $entityManager,
-        private readonly CaptchaValidator $captchaValidator,
         private readonly KernelInterface $kernel,
         private readonly EncryptionService $encryptionService,
         private readonly InstallationFlow $installationFlow,
@@ -72,10 +70,10 @@ class SettingsStepController extends AbstractController
 
         $computedStep = $this->installationService->getStep($lastInstallation);
 
-        // Redirect away if the active step is NOT Settings
         $redirect = $this->installationFlow->redirectIfStep(
             $computedStep,
             InstallationStep::DATABASE,
+            InstallationStep::CAPTCHA,
             InstallationStep::SECURITY_TXT,
             InstallationStep::ADMIN,
             InstallationStep::COMMAND,
@@ -92,28 +90,9 @@ class SettingsStepController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Validate Turnstile only if a secret has actually been entered
-            if (!empty($settingsDTO->turnstileSecret)) {
-                $captchaValidation = $this->captchaValidator->validateCredentials($settingsDTO->turnstileSecret);
-
-                if (!($captchaValidation['success'])) {
-                    $this->addFlash(
-                        'error',
-                        $this->translator->trans('captchaValidationFailed', [], 'controllers')
-                    );
-                    return $this->installationFlow->redirectTo(InstallationStep::SETTINGS);
-                }
-            }
-
             $lastInstallation->setUpdatedAt(new DateTime());
             $lastInstallation->setIsSettingsCompleted(true);
             $lastInstallation->setTrustedProxies($settingsDTO->trustedProxies);
-            $lastInstallation->setTurnstileKey(
-                $this->encryptionService->encrypt($settingsDTO->turnstileKey ?? '')
-            );
-            $lastInstallation->setTurnstileSecret(
-                $this->encryptionService->encrypt($settingsDTO->turnstileSecret ?? '')
-            );
 
             if ($settingsDTO->jwtPassphraseEnable && !empty($settingsDTO->jwtPassphrase)) {
                 $lastInstallation->setJwtPassphrase(
@@ -129,20 +108,6 @@ class SettingsStepController extends AbstractController
                 $this->databaseConnectionService->writeDatabaseUrlToEnv(
                     implode(',', $settingsDTO->trustedProxies),
                     SettingsConfigType::TRUSTED_PROXIES->value
-                );
-            }
-
-            if (!empty($settingsDTO->turnstileKey)) {
-                $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                    $settingsDTO->turnstileKey,
-                    SettingsConfigType::TURNSTILE_KEY->value
-                );
-            }
-
-            if (!empty($settingsDTO->turnstileSecret)) {
-                $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                    $settingsDTO->turnstileSecret,
-                    SettingsConfigType::TURNSTILE_SECRET->value
                 );
             }
 
@@ -225,8 +190,7 @@ class SettingsStepController extends AbstractController
                     );
                 }
 
-                // Move to SECURITY_TXT step in the wizard
-                return $this->installationFlow->redirectTo(InstallationStep::SECURITY_TXT);
+                return $this->installationFlow->redirectTo(InstallationStep::CAPTCHA);
             } catch (Exception) {
                 $this->addFlash(
                     'error',
@@ -243,11 +207,6 @@ class SettingsStepController extends AbstractController
                 'form' => $form->createView(),
                 'formDTO' => $settingsDTO,
                 'stages' => $this->installationService->getStepperStatus($computedStep, $lastInstallation),
-                'message' => $this->translator->trans(
-                    'canSkipThisPage',
-                    [],
-                    'controllers'
-                ),
             ]
         );
     }

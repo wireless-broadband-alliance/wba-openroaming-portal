@@ -56,6 +56,7 @@ pgp_public_key/*
 
 
 ###> vincentlanglet/twig-cs-fixer ###
+/.twig-cs-fixer.php
 /.twig-cs-fixer.cache
 ###< vincentlanglet/twig-cs-fixer ###
 

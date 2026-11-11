@@ -203,6 +203,13 @@ class AdminSettingsResetController extends AbstractController
                 'event' => AnalyticalEventType::SETTING_TERMS_RESET_REQUEST->value,
                 'route' => 'admin_dashboard_settings_security_txt',
             ],
+            SettingType::CAPTCHA_PROVIDER => [
+                'voter' => UserAuthenticationVoter::CAPTCHA_PROVIDER_WRITE,
+                'command' => 'reset:captchaSettings',
+                'flash' => 'captchaProviderResetSuccessfully',
+                'event' => AnalyticalEventType::CAPTCHA_PROVIDER_REQUEST->value,
+                'route' => 'admin_dashboard_settings_captcha_provider',
+            ],
         };
     }
 
@@ -237,6 +244,7 @@ class AdminSettingsResetController extends AbstractController
                 SettingType::SCHEDULE->value,
                 SettingType::RETURN_APPS->value,
                 SettingType::SECURITY_TXT->value,
+                SettingType::CAPTCHA_PROVIDER->value,
             ], true)
         ) {
             $lastResend = $this->eventRepository->findLatest2FACodeAttemptEvent(

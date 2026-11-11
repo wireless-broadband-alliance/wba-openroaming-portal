@@ -3,10 +3,11 @@
 namespace App\Api\V3\Controller;
 
 use App\Api\V3\BaseResponse;
-use App\Enum\OperationMode;
+use App\Enum\CaptchaProviderEnum;
 use App\Enum\SettingName;
 use App\Enum\TextInputType;
 use App\Repository\SettingRepository;
+use App\Service\EncryptionService;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -16,12 +17,14 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Throwable;
 
 class ConfigController extends AbstractController
 {
     public function __construct(
         private readonly SettingRepository $settingRepository,
         private readonly ParameterBagInterface $parameterBag,
+        private readonly EncryptionService $encryptionService,
     ) {
     }
 
@@ -44,14 +47,15 @@ class ConfigController extends AbstractController
      */
     private function getSettings(): array
     {
+        $captchaProvider = $this->getSettingValueRaw(SettingName::CAPTCHA_PROVIDER->value);
+        $isTurnstile = $captchaProvider === CaptchaProviderEnum::TURNSTILE->value;
+
         $data['platform'] = [
             SettingName::PLATFORM_MODE->value => $this->getSettingValueRaw(SettingName::PLATFORM_MODE->value),
             SettingName::USER_VERIFICATION->value => $this->getSettingValueConverted(
                 SettingName::USER_VERIFICATION->value
             ),
-            SettingName::TURNSTILE_CHECKER->value => $this->getSettingValueConverted(
-                SettingName::TURNSTILE_CHECKER->value
-            ),
+            'TURNSTILE_CHECKER' => $isTurnstile,
             SettingName::CONTACT_EMAIL->value => $this->getSettingValueRaw(SettingName::CONTACT_EMAIL->value),
             SettingName::TOS->value => $this->resolveTosValue(),
             SettingName::PRIVACY_POLICY->value => $this->resolvePrivacyPolicyValue(),
@@ -78,16 +82,18 @@ class ConfigController extends AbstractController
             ),
             SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value => $this->getSettingValueConverted(
                 SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value
-            )
+            ),
         ];
 
-        if (
-            array_key_exists('TURNSTILE_KEY', $_ENV) && $this->getSettingValueRaw(
-                SettingName::TURNSTILE_CHECKER->value
-            ) === OperationMode::ON->value
-        ) {
+        if ($isTurnstile) {
+            $turnstileKey = $this->getDecryptedSettingValue(SettingName::TURNSTILE_KEY->value);
+            if ($turnstileKey === '' && $this->parameterBag->has('app.turnstile_key')) {
+                $key = $this->parameterBag->get('app.turnstile_key');
+                $turnstileKey = \is_string($key) ? $key : '';
+            }
+
             $data['turnstile'] = [
-                'TURNSTILE_KEY' => $this->parameterBag->get('app.turnstile_key')
+                'TURNSTILE_KEY' => $turnstileKey,
             ];
         }
 
@@ -129,12 +135,30 @@ class ConfigController extends AbstractController
     private function getSettingValueRaw(string $settingName): string
     {
         $setting = $this->settingRepository->findOneBy(['name' => $settingName]);
+
         return $setting ? $setting->getValue() : '';
+    }
+
+    private function getDecryptedSettingValue(string $settingName): string
+    {
+        $setting = $this->settingRepository->findOneBy(['name' => $settingName]);
+        $value = $setting?->getValue();
+
+        if ($value === null || $value === '') {
+            return '';
+        }
+
+        try {
+            return $this->encryptionService->decrypt($value);
+        } catch (Throwable) {
+            return $value;
+        }
     }
 
     private function getSettingValueConverted(string $settingName): bool
     {
         $setting = $this->settingRepository->findOneBy(['name' => $settingName]);
+
         return $setting && $this->convertToBoolean($setting->getValue());
     }
 
@@ -148,6 +172,7 @@ class ConfigController extends AbstractController
         if (in_array(strtoupper($value), $falseValues, true)) {
             return false;
         }
+
         return (bool)$value;
     }
 

@@ -5,6 +5,9 @@ step:
   settings:
     title: "Application Settings"
     description: "Configure the main application settings and required parameters."
+  captcha:
+    title: "CAPTCHA Configuration"
+    description: "Configure human verification protection for login and registration forms."
   security_txt:
     title: "Security.txt Configuration"
     description: "Configure the security contact details and expiration settings."
@@ -12,9 +15,9 @@ step:
     title: "Admin Credentials"
     description: "Create the administrator account used to access the management panel."
   summary:
-    title: 'Summary'
-    description: 'Review all configured settings before completing the installation.'
+    title: "Summary"
+    description: "Review all configured settings before completing the installation."
 confirm_abort: "Are you sure you want to abort the installation?"
 abort: "Abort Installation"
 installer_info: "Follow the steps to complete the system installation."
-leave: 'Leave Process Configuration'
+leave: "Leave Process Configuration"

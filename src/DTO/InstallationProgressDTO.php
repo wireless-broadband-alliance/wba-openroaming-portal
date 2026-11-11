@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\DTO;
 
+use App\Enum\CaptchaProviderEnum;
 use App\Enum\ProcessStatusType;
 
 class InstallationProgressDTO
@@ -28,9 +29,15 @@ class InstallationProgressDTO
 
     public ?string $trustedProxies = null;
 
+    public ?string $captchaProvider = CaptchaProviderEnum::OFF->value;
+
     public ?string $turnstileKey = null;
 
     public ?string $turnstileSecret = null;
+
+    public ?string $recaptcha3Key = null;
+
+    public ?string $recaptcha3Secret = null;
 
     public ?string $emailAdmin = null;
 

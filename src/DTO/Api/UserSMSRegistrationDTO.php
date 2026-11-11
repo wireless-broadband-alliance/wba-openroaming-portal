@@ -36,5 +36,5 @@ class UserSMSRegistrationDTO
     #[Assert\Length(max: 100)]
     public ?string $lastName = null;
 
-    public ?string $turnstileToken = null;
+    public ?string $captchaToken = null;
 }

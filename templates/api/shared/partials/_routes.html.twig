@@ -60,9 +60,11 @@
                                 'api_v1_user_account_deletion',
                                 'api_v2_user_account_deletion',
                                 'api_v3_user_account_deletion',
+                                'api_v4_user_account_deletion',
                                 'api_v1_auth_saml',
                                 'api_v2_auth_saml',
                                 'api_v3_auth_saml',
+                                'api_v4_auth_saml',
                             ] %}
                                 {% set samlTitle = constant('App\\Enum\\UserProvider::SAML').value %}
                                 {% set samlRequest = route.requestBody[samlTitle] ?? null %}
@@ -86,13 +88,10 @@
                                 {% if route.requestBody is defined and route.requestBody|length > 1 %}
                                     <div class="mt-6">
                                         <p class="text-sm font-semibold text-blue-600 mb-2">Request Body</p>
-                                        {% for title, request in route.requestBody %}
-                                            {% if title != samlTitle %}
-                                                <div class="bg-gray-100 text-gray-800 rounded-lg p-4 text-sm font-mono overflow-x-auto border border-gray-200 my-2">
-                                                    <pre>{{ request|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
-                                                </div>
-                                            {% endif %}
-                                        {% endfor %}
+                                        {{ include('api/shared/partials/_request_body.html.twig', {
+                                            body: route.requestBody|filter((v, k) => k != samlTitle),
+                                            uid: loop.parent.loop.index ~ '-' ~ loop.index,
+                                        }) }}
                                     </div>
                                 {% endif %}
 

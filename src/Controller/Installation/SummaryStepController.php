@@ -2,8 +2,10 @@
 
 namespace App\Controller\Installation;
 
+use App\DTO\InstallationProgressDTO;
 use App\Entity\InstallationProgress;
 use App\Enum\AdminRoleType;
+use App\Enum\CaptchaProviderEnum;
 use App\Enum\InstallationStep;
 use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
@@ -20,6 +22,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
 #[IsGranted(UserAuthenticationVoter::INSTALLATION_WRITE)]
@@ -31,7 +34,8 @@ class SummaryStepController extends AbstractController
         private readonly InstallationService $installationService,
         private readonly InstallationFlow $installationFlow,
         private readonly CertificateSetupProcessRepository $certProcessRepository,
-        private readonly EntityManagerInterface $entityManager
+        private readonly EntityManagerInterface $entityManager,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -57,6 +61,7 @@ class SummaryStepController extends AbstractController
             $computedStep,
             InstallationStep::DATABASE,
             InstallationStep::SETTINGS,
+            InstallationStep::CAPTCHA,
             InstallationStep::SECURITY_TXT,
             InstallationStep::ADMIN,
             InstallationStep::COMMAND,
@@ -69,11 +74,14 @@ class SummaryStepController extends AbstractController
                 'status' => ProcessStatusType::COMPLETED,
             ]) !== null;
 
+        $installationDto = $this->installationService->fillDto($lastInstallation);
+
         return $this->render(
             'dashboard/shared/settings_actions/certificatesManagement/installation/summary.html.twig',
             [
                 'data' => $this->getSettings->getSettings(),
-                'Installation' => $this->installationService->fillDto($lastInstallation),
+                'Installation' => $installationDto,
+                'captcha' => $this->buildCaptchaSummary($installationDto),
                 'stages' => $this->installationService->getStepperStatus($computedStep, $lastInstallation),
                 'hasCompletedCertProcess' => $hasCompletedCertProcess,
             ]
@@ -114,5 +122,58 @@ class SummaryStepController extends AbstractController
         }
 
         return $this->redirectToRoute('admin_page');
+    }
+
+    /**
+     * Resolves the CAPTCHA summary for the ACTIVE provider only.
+     * The secret is masked here, so the raw value never reaches the template.
+     *
+     * @return array{
+     *     providerLabel: ?string,
+     *     siteKeyLabel: string,
+     *     siteKey: ?string,
+     *     secretLabel: string,
+     *     secretMasked: ?string
+     * }
+     */
+    private function buildCaptchaSummary(InstallationProgressDTO $dto): array
+    {
+        $provider = CaptchaProviderEnum::tryFrom((string)$dto->captchaProvider);
+
+        [$siteKey, $secret, $siteKeyLabelKey, $secretLabelKey] = match ($provider) {
+            CaptchaProviderEnum::RECAPTCHA3 => [
+                $dto->recaptcha3Key,
+                $dto->recaptcha3Secret,
+                'recaptcha3SiteKeyLabel',
+                'recaptcha3SecretKeyLabel',
+            ],
+            default => [
+                $provider === CaptchaProviderEnum::TURNSTILE ? $dto->turnstileKey : null,
+                $provider === CaptchaProviderEnum::TURNSTILE ? $dto->turnstileSecret : null,
+                'turnstileSiteKeyLabel',
+                'turnstileSecretKeyLabel',
+            ],
+        };
+
+        return [
+            'providerLabel' => $provider instanceof CaptchaProviderEnum
+                ? $this->translator->trans('captcha.provider.' . strtolower($provider->name), [], 'CaptchaStepType')
+                : null,
+            'siteKeyLabel' => $this->translator->trans($siteKeyLabelKey, [], 'captcha'),
+            'siteKey' => $siteKey !== null && $siteKey !== '' ? $siteKey : null,
+            'secretLabel' => $this->translator->trans($secretLabelKey, [], 'captcha'),
+            'secretMasked' => $this->maskSecret($secret),
+        ];
+    }
+
+    private function maskSecret(?string $secret): ?string
+    {
+        if ($secret === null || $secret === '') {
+            return null;
+        }
+
+        return mb_strlen($secret) > 4
+            ? '••••••••' . mb_substr($secret, -4)
+            : '••••••••';
     }
 }

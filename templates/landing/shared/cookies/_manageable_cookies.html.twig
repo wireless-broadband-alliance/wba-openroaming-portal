@@ -1,0 +1,20 @@
+{#
+Optional cookies the visitor can turn on or off. Each `scope` must exist in
+assets/controllers/cookie_controller.js (cookieScopes) and be checked server side
+(e.g. LandingAuthenticator / DashboardAuthenticator read `rememberMe` from cookie_preferences).
+#}
+{% set manageableCookies = [
+    {key: 'rememberMeCookie', names: 'REMEMBERME', scope: 'rememberMe'},
+] %}
+
+<div class="flex flex-col space-y-3">
+    <h3 class="font-semibold">{{ 'manageableCookiesTitle'|trans({}, '_cookie_banner') }}</h3>
+    <p class="text-sm">
+        {{ 'manageableCookiesDescription'|trans({}, '_cookie_banner') }}
+    </p>
+    <ul class="text-sm space-y-4">
+        {% for cookie in manageableCookies %}
+            {{ include('landing/shared/cookies/_cookie_item.html.twig', cookie, with_context: false) }}
+        {% endfor %}
+    </ul>
+</div>

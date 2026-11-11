@@ -60,12 +60,8 @@
                 {{ form_errors(registrationFormDemo.email) }}
             </div>
 
-            {# Turnstile Checker #}
-            {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\OperationMode::ON').value %}
-                <div class="ml-3 mt-5">
-                    {{ form_widget(registrationFormDemo.security) }}
-                </div>
-            {% endif %}
+            {# CAPTCHA Verification Partial #}
+            {{ render_captcha(registrationFormDemo) }}
 
             {# Terms Checkbox #}
             <div class="mt-[28px] flex items-center justify-start gap-2">

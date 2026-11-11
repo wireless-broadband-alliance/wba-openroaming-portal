@@ -62,11 +62,11 @@ class SecurityTxtStepController extends AbstractController
             $computedStep,
             InstallationStep::DATABASE,
             InstallationStep::SETTINGS,
+            InstallationStep::CAPTCHA,
             InstallationStep::ADMIN,
             InstallationStep::COMMAND,
             InstallationStep::COMPLETED,
         );
-
         if ($redirect instanceof RedirectResponse) {
             return $redirect;
         }

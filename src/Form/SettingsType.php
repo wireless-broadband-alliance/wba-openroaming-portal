@@ -36,19 +36,7 @@ class SettingsType extends AbstractType
                 'entry_options' => [
                     'attr' => [
                         'placeholder' => $this->translator->trans('trustedProxiesPlaceholder', [], 'SettingsType'),
-                    ]
-                ]
-            ])
-            ->add('turnstileKey', TextType::class, [
-                'required' => false,
-                'attr' => [
-                    'placeholder' => $this->translator->trans('turnstileKeyPlaceholder', [], 'SettingsType'),
-                ],
-            ])
-            ->add('turnstileSecret', TextType::class, [
-                'required' => false,
-                'attr' => [
-                    'placeholder' => $this->translator->trans('turnstileSecretPlaceholder', [], 'SettingsType'),
+                    ],
                 ],
             ])
             ->add('jwtPassphraseEnable', CheckboxType::class, [

@@ -3,17 +3,17 @@
 namespace App\Form;
 
 use App\DTO\LoginChoiceDTO;
-use App\Entity\Setting;
-use App\Enum\OperationMode;
+use App\Enum\CaptchaProviderEnum;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
+use App\Service\Captcha\CaptchaValidator;
 use libphonenumber\PhoneNumberFormat;
 use Misd\PhoneNumberBundle\Form\Type\PhoneNumberType;
-use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -27,6 +27,7 @@ class LoginType extends AbstractType
 {
     public function __construct(
         private readonly SettingRepository $settingRepository,
+        private readonly CaptchaValidator $captchaValidator,
         private readonly TranslatorInterface $translator
     ) {
     }
@@ -43,12 +44,10 @@ class LoginType extends AbstractType
             ? array_map(trim(...), explode(',', $regionsSetting->getValue()))
             : ['PT', 'US', 'GB']; // fallback default
 
-        $turnstileCheckerValue = $this->settingRepository->findOneBy(
-            ['name' => SettingName::TURNSTILE_CHECKER->value]
-        )?->getValue();
         $emailMethod = $this->settingRepository->findOneBy(
             ['name' => SettingName::AUTH_METHOD_REGISTER_ENABLED->value]
         )?->getValue();
+
         $phoneNumberMethod = $this->settingRepository->findOneBy(
             ['name' => SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value]
         )?->getValue();
@@ -71,7 +70,7 @@ class LoginType extends AbstractType
             'required' => false,
             'label' => 'Email',
             'attr' => [
-                'placeholder' => $this->translator->trans('EnterEmail', [], 'LoginFormType'),
+                'placeholder' => $this->translator->trans('enterEmail', [], 'LoginFormType'),
             ],
         ]);
 
@@ -95,7 +94,7 @@ class LoginType extends AbstractType
                 'visible_label' => null,
                 'required' => true,
                 'attr' => [
-                    'placeholder' => $this->translator->trans('EnterPassword', [], 'LoginFormType'),
+                    'placeholder' => $this->translator->trans('enterPassword', [], 'LoginFormType'),
                     'data-live-ignore' => 'true',
                 ],
             ]);
@@ -107,14 +106,15 @@ class LoginType extends AbstractType
             'mapped' => false,
         ]);
 
-        if ($turnstileCheckerValue === OperationMode::ON->value) {
-            $builder->add('security', TurnstileType::class, [
-                'attr' => [
-                    'data-action' => 'contact',
-                    'data-theme' => 'light',
-                    'data-language' => $this->translator->getLocale(),
-                ],
-                'label' => false
+        // Plain hidden field on purpose: do NOT use CaptchaType here.
+        // This form is rendered by Live Components (LoginForm / LoginUUIDForm) that re-submit it on every
+        // re-render, which would consume the single-use token before the real submit.
+        // Server-side verification happens in LandingAuthenticator / DashboardAuthenticator (password login)
+        // and in SecurityController::loginMagic() (magic link).
+        if ($this->captchaValidator->getActiveProvider() !== CaptchaProviderEnum::OFF->value) {
+            $builder->add('captcha', HiddenType::class, [
+                'required' => false,
+                'mapped' => false,
             ]);
         }
     }

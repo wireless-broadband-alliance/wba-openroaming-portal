@@ -2,24 +2,21 @@
 
 namespace App\EventListener;
 
-use App\Enum\SessionStatus;
-use MongoDB\Driver\Session;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use App\Service\UserSessionService;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 
-class LogoutListener implements EventSubscriberInterface
+readonly class LogoutListener
 {
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            LogoutEvent::class => 'onLogout',
-        ];
+    public function __construct(
+        private UserSessionService $userSessionService,
+    ) {
     }
 
+    #[AsEventListener(event: LogoutEvent::class)]
     public function onLogout(LogoutEvent $event): void
     {
         $request = $event->getRequest();
-        $session = $request->getSession();
 
         // Determine the firewall name (context) from the request
         $firewallContext = $request->attributes->get(
@@ -30,17 +27,7 @@ class LogoutListener implements EventSubscriberInterface
             // Extract the actual firewall name (e.g., "landing" from "security.firewall.map.context.landing")
             $firewallName = str_replace('security.firewall.map.context.', '', $firewallContext);
 
-            // Dynamically remove ONLY the 2fa_verified session key for the current firewall
-            $session->remove("2fa_verified_$firewallName");
-            $session->remove(SessionStatus::TWO_FACTOR_CONTEXT->value);
-            $session->remove(SessionStatus::FORGOT_PASSWORD_UUID->value);
-            $session->remove(SessionStatus::VERIFIED->value);
-            $session->remove(SessionStatus::AUTHENTICATED_VIA_UUID_ONLY->value);
-            $session->remove(SessionStatus::SYSTEM_RESET_REQUEST->value);
-            $session->remove(SessionStatus::INSTALLATION_STARTED->value);
-            $session->remove(SessionStatus::CERTIFICATE_STARTED->value);
-            $session->remove(SessionStatus::INSTALLATION_VERIFICATION->value);
-            $session->remove(SessionStatus::CERTIFICATE_VERIFICATION->value);
+            $this->userSessionService->clearAll($firewallName, $request->getSession());
         }
     }
 }

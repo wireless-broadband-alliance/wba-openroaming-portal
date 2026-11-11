@@ -5,12 +5,11 @@ import './bootstrap.js';
  * We recommend including the built version of this JavaScript file
  * (and its CSS file) in your base layout (base.html.twig).
  */
-
 // any CSS you import will output into a single css file (app.css in this case)
 import './styles/app.css';
-
+// Leaflet map styles, imported here (not via @import in app.css) so AssetMapper resolves its images from the package
+import 'leaflet/dist/leaflet.min.css';
 // Used for chart.js graphic on the statistics page
-import { Chart } from 'chart.js';
 
 // Initialization for ES Users
 /*

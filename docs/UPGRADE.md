@@ -7,15 +7,16 @@
 3. [Upgrade Path Matrix](#upgrade-path-matrix)
 4. [Upgrade Checklist](#upgrade-checklist)
 5. [Step-by-Step Procedure](#step-by-step-procedure)
-6. [Release-Specific Notes: Version 1.15.0](#release-specific-notes-version-1150)
-7. [Release-Specific Notes: Version 1.14.2](#release-specific-notes-version-1142)
-8. [Release-Specific Notes: Version 1.14.1](#release-specific-notes-version-1141)
-9. [Release-Specific Notes: Version 1.14.0](#release-specific-notes-version-1140)
-10. [Release-Specific Notes: Version 1.13.0](#release-specific-notes-version-1130)
-11. [Release-Specific Notes: Version 1.8.1](#release-specific-notes-version-181)
-12. [Release-Specific Notes: Version 1.7.x](#release-specific-notes-version-17x)
-13. [Troubleshooting & Rollback](#troubleshooting--rollback)
-14. [Additional Resources](#additional-resources)
+6. [Release-Specific Notes: Version 1.16.0](#release-specific-notes-version-1160)
+7. [Release-Specific Notes: Version 1.15.0](#release-specific-notes-version-1150)
+8. [Release-Specific Notes: Version 1.14.2](#release-specific-notes-version-1142)
+9. [Release-Specific Notes: Version 1.14.1](#release-specific-notes-version-1141)
+10. [Release-Specific Notes: Version 1.14.0](#release-specific-notes-version-1140)
+11. [Release-Specific Notes: Version 1.13.0](#release-specific-notes-version-1130)
+12. [Release-Specific Notes: Version 1.8.1](#release-specific-notes-version-181)
+13. [Release-Specific Notes: Version 1.7.x](#release-specific-notes-version-17x)
+14. [Troubleshooting & Rollback](#troubleshooting--rollback)
+15. [Additional Resources](#additional-resources)
 
 ---
 
@@ -120,6 +121,7 @@ Use this table to determine the exact upgrade steps based on your current versio
 | 1.14.2          | 1.15.0         | First confirm `php bin/console about` shows `Environment prod`: the data is encrypted with the key of the active vault, and `APP_ENV` must never change afterwards. Create the production vault and `ENCRYPTION_KEY` **only if `secrets:list --env=prod` does not list it yet** (`php bin/console secrets:generate-keys --env=prod`, then `secrets:set ENCRYPTION_KEY - --env=prod`). Then run `php bin/console prepare-release:v1150 --dry-run` followed by `php bin/console prepare-release:v1150` **once**: it applies the database migrations, re-encrypts all data with the vault key and encrypts phone numbers. Afterwards remove `APP_SECRET` from `.env`, store a new one in the vault (`secrets:set APP_SECRET --random --env=prod`) and clear the cache. Back up `config/secrets/prod/`. Perform all actions while the portal is **offline or restricted** and with a fresh database backup. See [Release-Specific Notes: Version 1.15.0](#release-specific-notes-version-1150). |
 | 1.15.0          | 1.15.1         | Security patch release — no database migrations or configuration changes required. Updates the PHP runtime to 8.4.27 to pick up upstream security fixes. Pull the new image (`docker compose pull`), restart the containers (`docker compose up -d`), clear the cache and confirm with `docker compose exec web php -v` that the container reports PHP 8.4.27. Do **not** touch the vault or `ENCRYPTION_KEY`. See [CHANGELOG.md](../CHANGELOG.md) for the list of PHP fixes.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | 1.15.1          | 1.15.2         | Patch release — no database migrations or configuration changes required. Fixes the FreeRADIUS certificate upload failing with "Unable to resolve trusted root" when `chain.pem` contains a cross-signed root (e.g. SSL.com TLS RSA Root CA 2022 cross-signed by SecureTrust CA). Pull the new image, restart the containers and clear the cache.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| 1.15.2          | 1.16.0         | Run `php bin/console doctrine:migrations:migrate`. Next, run `php bin/console import:turnstileSettings` to encrypt your existing `TURNSTILE_KEY` / `TURNSTILE_SECRET` from `.env` and store them in the database. Check that the RADIUS realm is **23 characters or fewer** (RADIUS settings page), otherwise no new profiles are issued. **Breaking:** API v3 is deprecated and the `/config` response changed (`platform.TURNSTILE_CHECKER` is replaced by `platform.CAPTCHA_PROVIDER`), and the API v4 SMS password reset is a two-step flow (`/auth/sms/reset` then `/auth/sms/reset/confirm`); migrate clients and mobile apps to `/api/v4` (see [Release-Specific Notes: Version 1.16.0](#release-specific-notes-version-1160)). Perform these actions while the portal is **offline or restricted**.                                                                                                                                                                                 |
 
 ---
 
@@ -128,22 +130,19 @@ Use this table to determine the exact upgrade steps based on your current versio
 Use the following checklist before starting the upgrade process:
 
 * [ ] **Verify System Requirements**
-* Confirm the target environment matches all required dependencies (e.g., PHP, MySQL).
-
+    * Confirm the target environment matches all required dependencies (e.g., PHP, MySQL).
 
 * [ ] **Create Backups**
-* Database
-* Configuration files
-* User data
-
+    * Database
+    * Configuration files
+    * User data
 
 * [ ] **Review Changelog**
-* Read release notes or [CHANGELOG.md](../CHANGELOG.md) for breaking changes or mandatory steps.
-
+    * Read release notes or [CHANGELOG.md](../CHANGELOG.md) for breaking changes or mandatory steps.
 
 * [ ] **Complete Pre-Upgrade Steps**
-* Ensure your current version aligns with the **Upgrade Path Matrix**.
-* Run all pre-upgrade commands for intermediate versions.
+    * Ensure your current version aligns with the **Upgrade Path Matrix**.
+    * Run all pre-upgrade commands for intermediate versions.
 
 ---
 
@@ -175,10 +174,11 @@ docker compose up -d
 
 4. **Run any version-specific commands**
    Check the [Upgrade Path Matrix](#upgrade-path-matrix) for your current version and
-   run any required commands inside the container. Example:
+   run any required commands inside the container. Examples:
 
 ```bash
 docker compose exec web php bin/console doctrine:migrations:migrate
+docker compose exec web php bin/console import:turnstileSettings
 ```
 
 5. **Clear the cache**
@@ -193,6 +193,153 @@ docker compose exec web php bin/console cache:clear
 ```bash
 docker compose logs -f web
 ```
+
+---
+
+## Release-Specific Notes: Version 1.16.0
+
+**Scenario**: Your current version is **1.15.2** (or an earlier 1.15.x), and you want to upgrade to **1.16.0**.
+
+> **Important:** Perform the database migration and the Turnstile settings import below while the portal is
+> **offline or restricted**, and make sure you have a fresh database backup.
+>
+> Complete the [1.15.0 steps](#release-specific-notes-version-1150) (secrets vault and `prepare-release:v1150`) first:
+> `import:turnstileSettings` encrypts the Turnstile keys with the vault `ENCRYPTION_KEY`.
+
+### 1. Breaking Changes to Review Before Upgrading
+
+* **API v3 is deprecated; API v4 (`/api/v4`) is now the primary API.**
+  The base configuration response changed to support multi-provider CAPTCHA (`TURNSTILE`, `RECAPTCHA3`, or `OFF`).
+  The main `/api` documentation endpoint now redirects to v4 by default. All client integrations and mobile
+  applications should migrate to `/api/v4`.
+
+* **Base configuration payload overhaul (`/config`).**
+    * The boolean flag `platform.TURNSTILE_CHECKER` was removed and replaced by the enum `platform.CAPTCHA_PROVIDER`
+      (`TURNSTILE`, `RECAPTCHA3`, or `OFF`).
+    * The fixed `turnstile` object was replaced by a dynamic key that strictly reflects the active provider. For
+      example, when `CAPTCHA_PROVIDER` is `RECAPTCHA3`, the response contains a `recaptcha3` object with
+      `RECAPTCHA3_KEY`.
+
+  *Legacy API v3 config response:*
+  ```json
+  {
+    "success": true,
+    "data": {
+      "platform": {
+        "TURNSTILE_CHECKER": true
+      },
+      "turnstile": {
+        "TURNSTILE_KEY": "0x4AAAAAAAbU9Fvdl8WH6GRk"
+      }
+    }
+  }
+  ```
+
+  *New API v4 config response:*
+  ```json
+  {
+    "success": true,
+    "data": {
+      "platform": {
+        "CAPTCHA_PROVIDER": "RECAPTCHA3"
+      },
+      "recaptcha3": {
+        "RECAPTCHA3_KEY": "6LfJmOstAAAAAD274T05Q_1HRdEd8KuX3ETgmPJm"
+      }
+    }
+  }
+  ```
+
+* **CAPTCHA token fields on protected endpoints (v4).**
+  Login, registration, password reset, SMS registration/reset, and 2FA enablement now accept the token that matches
+  the active provider: `turnstile_token` or `recaptcha_token`. When the provider is `OFF`, no token is required.
+  Complete request bodies, provider behaviors, and response schemas are documented in the API v4 documentation.
+
+* **SMS password reset is a two-step flow in API v4.**
+  API v3 sent a new temporary password straight by SMS. In API v4 the password is only changed after the user confirms
+  the code they received:
+    1. `POST /api/v4/auth/sms/reset` with `country_code`, `phone_number` and the CAPTCHA token sends a single-use
+       6-digit code by SMS. The password is **not** changed yet.
+    2. `POST /api/v4/auth/sms/reset/confirm` with `country_code`, `phone_number` and `code` checks the code and, when
+       it is valid, sets a new random password and returns it in `new_password`.
+
+  Apps that move their SMS reset to v4 must add the second step. Every failure on `/confirm` returns the same
+  `400 Invalid or expired verification code.`; the app should then ask the user to request a new code.
+
+* **RADIUS realm limited to 23 characters.**
+  The realm (`RADIUS_REALM_NAME`) is part of every RADIUS username (`<random prefix>@<realm>`, 32 characters at most).
+  Longer realms are now rejected on the RADIUS settings page and in the certificate wizard, and if the stored realm is
+  empty or too long, no new profile is issued (API `500`, landing page error).
+
+### 2. Required Database Migrations
+
+Run Doctrine migrations to set up the required settings structures:
+
+```bash
+php bin/console doctrine:migrations:migrate
+```
+
+### 3. Required One-Time Action: Import Turnstile Settings
+
+After the migration, run the import command to encrypt and sync your existing `.env` Turnstile keys into the
+database:
+
+```bash
+php bin/console import:turnstileSettings
+```
+
+The command reads `TURNSTILE_KEY` and `TURNSTILE_SECRET` from the environment variables, encrypts them at rest via
+`EncryptionService`, and creates or updates them in the `Setting` table.
+
+> **Important:** Keep `TURNSTILE_KEY` and `TURNSTILE_SECRET` in your `.env` until the command has finished
+> successfully, since it reads them from there.
+
+### 4. Recommended: Review the SMS Settings
+
+The API v4 SMS reset confirmation uses the values on **User Authentication > SMS > Configuration**, the same ones the
+web forgot-password flow uses:
+
+| Setting                             | Used for                                                             |
+|-------------------------------------|----------------------------------------------------------------------|
+| **Time Interval Between Requests**  | Cooldown before `/reset` sends another code                          |
+| **Time Interval To Reset Attempts** | How long a reset code stays valid (minutes), and the attempts window |
+| **Number of Attempts**              | Reset requests allowed per window, and wrong codes allowed per code  |
+
+Check that these values suit your users, for example that the code stays valid long enough for the SMS to arrive.
+
+### 5. Other Improvements in This Release
+
+* **Installation Wizard:** CAPTCHA provider configuration is now fully integrated into the initial setup and
+  installation wizard flow.
+* **Dynamic CAPTCHA provider API:** System configuration endpoints and base API routes now dynamically report and
+  query the currently active CAPTCHA provider (`TURNSTILE`, `RECAPTCHA3`, or `OFF`).
+* **Phone number login fixed:** Since phone numbers are encrypted at rest (1.15.0), phone-number logins always
+  returned "Bad credentials". Phone-number users are now looked up by their `uuid` (E.164 format, e.g.
+  `+351912345678`) on the landing page, the admin dashboard and forgot password by SMS.
+* **API phone number login fixed:** `/api/v3/auth/local` and `/api/v4/auth/local` no longer return HTTP 500 for
+  phone-number accounts. The email domain check now only runs for accounts that are not phone-number accounts.
+* **API SMS reset 500 fixed:** `/api/v3/auth/sms/reset` and `/api/v4/auth/sms/reset` no longer fail with
+  `Undefined array key "SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS"`.
+* **SMS registration verification fixed:** Registering by phone number in a browser session where another verified
+  account was still logged in no longer skips account verification.
+
+### 6. Post-Upgrade Verification
+
+* [ ] The migrations and `import:turnstileSettings` completed without errors.
+* [ ] `GET /api/v4/config` returns `platform.CAPTCHA_PROVIDER` and the matching provider block.
+* [ ] Clients, mobile apps and integrations use `/api/v4` and no longer read `TURNSTILE_CHECKER`.
+* [ ] CAPTCHA-protected flows (login, registration, password reset, SMS registration/reset, 2FA enablement) work with
+  the active provider.
+* [ ] The Turnstile key and secret are stored encrypted in the `Setting` table, not as plaintext.
+* [ ] The RADIUS realm is 23 characters or fewer, and a new profile can be downloaded on Android, iOS and Windows.
+* [ ] Users with a phone number can log in on the landing page and on the API (`/api/v4/auth/local`).
+* [ ] `POST /api/v4/auth/sms/reset` sends a code by SMS, and `POST /api/v4/auth/sms/reset/confirm` with that code
+  returns a `new_password` that can be used to log in.
+* [ ] Confirming with a wrong code more times than **Number of Attempts** invalidates the code (the right code is
+  then refused until a new one is requested).
+
+> **Breaking Changes:**
+> Please always review the [CHANGELOG.md](../CHANGELOG.md) for detailed information.
 
 ---
 
@@ -349,6 +496,18 @@ data.
 * The test environment does not use any vault. PHPUnit gets throwaway `ENCRYPTION_KEY` and `APP_SECRET` values from
   `phpunit.xml.dist`, and the CI jobs get them from `.gitlab-ci.yml`.
 
+  ```bash
+  php bin/console secrets:generate-keys
+  openssl rand -hex 32 | php bin/console secrets:set ENCRYPTION_KEY -
+  php bin/console secrets:set APP_SECRET --random
+  ```
+
+* Data encrypted with one dev vault cannot be read with another. If you regenerate your dev keys, reset your local
+  database (drop, create, migrate and load fixtures), otherwise you get `Unable to decrypt value or authentication tag
+  validation failed`.
+* Tests and CI do not use the vault. `phpunit.xml.dist` defines throwaway `ENCRYPTION_KEY` and `APP_SECRET` values, and
+  the CI jobs that run `composer install` set their own in `.gitlab-ci.yml`.
+
 > **Breaking Changes:**
 > Please always review the [CHANGELOG.md](../CHANGELOG.md) for detailed information.
 
@@ -459,8 +618,9 @@ updates, or configuration changes are required.
 
 * **API v1 and v2 have been permanently removed.**
   As announced in the [Release V1.9.0 deprecation notice](../CHANGELOG.md#api-deprecation-notice), all `/api/v1` and
-  `/api/v2` routes no longer exist. **API v3 is the only supported API version.** Any client or integration still
-  calling `/api/v1` or `/api/v2` must be updated to `/api/v3` **before** upgrading.
+  `/api/v2` routes no longer exist. **API v3 was the only supported API version in this release** (it is deprecated
+  as of 1.16.0 in favor of `/api/v4`). Any client or integration still calling `/api/v1` or `/api/v2` must be updated
+  **before** upgrading.
 
 * **JWT token lifetime reduced (CRA Annex I §1.2).**
   The token TTL for the privileged IAM API dropped from 3600s (1 hour) to **900s (15 minutes)**, and token refresh
@@ -588,7 +748,8 @@ php bin/console clear:expired-user-data --yes
 ### 7. Post-Upgrade Verification
 
 * [ ] The Installation Wizard was completed and the Security.txt configuration is saved.
-* [ ] Integrations authenticate against `/api/v3` and handle the 15-minute JWT lifetime (token refresh).
+* [ ] Integrations authenticate against `/api/v3` (or `/api/v4` from 1.16.0) and handle the 15-minute JWT lifetime
+  (token refresh).
 * [ ] `METRICS_ALLOWED_IPS` only contains the intended monitoring hosts.
 * [ ] The portal connects to both databases (OpenRoaming and FreeRADIUS) with the new TLS settings.
 * [ ] Logins with Google, Microsoft, SAML, 2FA and TOTP still work for existing users.
@@ -697,27 +858,29 @@ After completing the steps above, upgrade to version **1.7.x** following the usu
 
 ## Troubleshooting & Rollback
 
-| Issue                                                                                                                                     | Cause                                                                                                                                                                                                      | Solution                                                                                                                                                                                                                                                               |
-|-------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Errors running migrations                                                                                                                 | Invalid or old `Event` records                                                                                                                                                                             | Run `php bin/console clear:eventEntity` to clean up.                                                                                                                                                                                                                   |
-| Missing JWT keypair                                                                                                                       | Skipped step during 1.4.0                                                                                                                                                                                  | Run `php bin/console lexik:jwt:generate-keypair`.                                                                                                                                                                                                                      |
-| `reset:allocate-providers` missing                                                                                                        | Skipped upgrade to 1.6                                                                                                                                                                                     | Upgrade to 1.6 and then run the command.                                                                                                                                                                                                                               |
-| Schema mismatch                                                                                                                           | Schema updates not applied                                                                                                                                                                                 | Run `php bin/console doctrine:schema:update --force`.                                                                                                                                                                                                                  |
-| Cache issues                                                                                                                              | Stale or old cache files                                                                                                                                                                                   | Run `php bin/console cache:clear`.                                                                                                                                                                                                                                     |
-| Installation Wizard shows up again after 1.14.0                                                                                           | The migration resets `InstallProgress` to `IN_PROGRESS`                                                                                                                                                    | Expected behaviour. Complete the mandatory Security.txt Configuration step in the wizard.                                                                                                                                                                              |
-| API clients get 404 on `/api/v1` or `/api/v2`                                                                                             | API v1 and v2 were removed in 1.14.0                                                                                                                                                                       | Update the integration to `/api/v3`.                                                                                                                                                                                                                                   |
-| API tokens stop working after about 15 minutes                                                                                            | JWT TTL reduced to 900s in 1.14.0                                                                                                                                                                          | Use the token refresh endpoints described in the API documentation.                                                                                                                                                                                                    |
-| Users or admins cannot log in after the encryption                                                                                        | An encryption step failed or ran partially                                                                                                                                                                 | Check the command output, then re-run `php bin/console app:cra:migrate-all --yes` (commands are safe to re-run).                                                                                                                                                       |
-| Installation Wizard steps fail to decrypt after 1.14.0                                                                                    | `InstallationProgress` still holds plaintext values                                                                                                                                                        | Run `php bin/console app:cra:encrypt-installation-progress` (or the full `app:cra:migrate-all --yes` suite).                                                                                                                                                           |
-| `/metrics` returns 403 after 1.14.0                                                                                                       | `METRICS_ALLOWED_IPS` no longer defaults to `0.0.0.0/0`                                                                                                                                                    | Add your monitoring hosts to `METRICS_ALLOWED_IPS` in `.env`.                                                                                                                                                                                                          |
-| Windows Wi-Fi profile import fails with "Unexpected error" ("Erro inesperado")                                                            | Unformatted Root CA SHA-1 thumbprint violating Windows EAPHost schema                                                                                                                                      | Upgrade to 1.14.2+ and re-save certificate settings to ensure the thumbprint is formatted as space-separated byte pairs (e.g., `ca bd 2a 79...`).                                                                                                                      |
-| `Vault preflight failed` when running `prepare-release:v1150`, or `Environment variable not found: ENCRYPTION_KEY`                        | The production vault was not created, `config/secrets/prod/` is not available inside the container, or `ENCRYPTION_KEY` is missing from it                                                                 | Create the vault with `secrets:generate-keys --env=prod` and `secrets:set ENCRYPTION_KEY - --env=prod`, and make sure `config/secrets/prod/` is mounted in the `web` container.                                                                                        |
-| `Unable to decrypt value (wrong secret or corrupted data)` during `app:cra:migrate-to-vault`                                              | The `APP_SECRET` typed at the prompt is not the one that encrypted the data                                                                                                                                | Nothing was changed (the command is all-or-nothing). Use the `APP_SECRET` from the `.env` of the version you are upgrading from and run the command again.                                                                                                             |
-| `Value is not in the v2 format` after upgrading to 1.15.0                                                                                 | Existing data was not migrated yet                                                                                                                                                                         | Run `php bin/console prepare-release:v1150` (it is safe to re-run).                                                                                                                                                                                                    |
-| Everyone is logged out and API tokens stop working after replacing `APP_SECRET`                                                           | `APP_SECRET` signs sessions, remember-me cookies and API token nonces                                                                                                                                      | Expected after rotating `APP_SECRET`. Users sign in again.                                                                                                                                                                                                             |
-| HTTP 500 `Could not convert database value to "encrypted_string" ... Stored value could not be decrypted` on data already in `v2:` format | The active `ENCRYPTION_KEY` is not the one that encrypted the data: the migration ran under another `APP_ENV` (the `dev` vault), the key was set again afterwards, or it gained or lost a trailing newline | Do **not** set a new key or re-run the migration. Run `php bin/console about` to see the active environment, compare `secrets:list --reveal` for `prod`, `dev` and your vault backups, and put the key that wrote the data back into the `prod` vault, byte for byte.  |
-| `Unable to write in the "var/cache/prod" directory`                                                                                       | The cache was created by `root` (a console command run with `-u root`)                                                                                                                                     | `docker compose exec -u root web chown -R www-data:www-data /var/www/openroaming/var`, then run console commands as `www-data`.                                                                                                                                        |
-| FreeRADIUS certificate upload fails with "Unable to resolve trusted root" for a valid, publicly trusted certificate                       | `chain.pem` includes a cross-signed root, so the chain walk follows it to a legacy root that is missing from the trust store or cannot be downloaded                                                       | Upgrade to 1.15.2+. On older versions, upload a `chain.pem` with only the intermediate certificate(s). Check that the container trust store (`/etc/ssl/certs/ca-certificates.crt`) contains the real self-signed root, otherwise update the `ca-certificates` package. |
+| Issue                                                                                                                                     | Cause                                                                                                                                                                                                      | Solution                                                                                                                                                                                                                                                              |
+|-------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Errors running migrations                                                                                                                 | Invalid or old `Event` records                                                                                                                                                                             | Run `php bin/console clear:eventEntity` to clean up.                                                                                                                                                                                                                  |
+| Missing JWT keypair                                                                                                                       | Skipped step during 1.4.0                                                                                                                                                                                  | Run `php bin/console lexik:jwt:generate-keypair`.                                                                                                                                                                                                                     |
+| `reset:allocate-providers` missing                                                                                                        | Skipped upgrade to 1.6                                                                                                                                                                                     | Upgrade to 1.6 and then run the command.                                                                                                                                                                                                                              |
+| Schema mismatch                                                                                                                           | Schema updates not applied                                                                                                                                                                                 | Run `php bin/console doctrine:schema:update --force`.                                                                                                                                                                                                                 |
+| Cache issues                                                                                                                              | Stale or old cache files                                                                                                                                                                                   | Run `php bin/console cache:clear`.                                                                                                                                                                                                                                    |
+| Installation Wizard shows up again after 1.14.0                                                                                           | The migration resets `InstallProgress` to `IN_PROGRESS`                                                                                                                                                    | Expected behaviour. Complete the mandatory Security.txt Configuration step in the wizard.                                                                                                                                                                             |
+| API clients get 404 on `/api/v1` or `/api/v2`                                                                                             | API v1 and v2 were removed in 1.14.0                                                                                                                                                                       | Update the integration to `/api/v4` (`/api/v3` is deprecated since 1.16.0).                                                                                                                                                                                           |
+| API tokens stop working after about 15 minutes                                                                                            | JWT TTL reduced to 900s in 1.14.0                                                                                                                                                                          | Use the token refresh endpoints described in the API documentation.                                                                                                                                                                                                   |
+| Users or admins cannot log in after the encryption                                                                                        | An encryption step failed or ran partially                                                                                                                                                                 | Check the command output, then re-run `php bin/console app:cra:migrate-all --yes` (commands are safe to re-run).                                                                                                                                                      |
+| Installation Wizard steps fail to decrypt after 1.14.0                                                                                    | `InstallationProgress` still holds plaintext values                                                                                                                                                        | Run `php bin/console app:cra:encrypt-installation-progress` (or the full `app:cra:migrate-all --yes` suite).                                                                                                                                                          |
+| `/metrics` returns 403 after 1.14.0                                                                                                       | `METRICS_ALLOWED_IPS` no longer defaults to `0.0.0.0/0`                                                                                                                                                    | Add your monitoring hosts to `METRICS_ALLOWED_IPS` in `.env`.                                                                                                                                                                                                         |
+| Windows Wi-Fi profile import fails with "Unexpected error" ("Erro inesperado")                                                            | Unformatted Root CA SHA-1 thumbprint violating Windows EAPHost schema                                                                                                                                      | Upgrade to 1.14.2+ and re-save certificate settings to ensure the thumbprint is formatted as space-separated byte pairs (e.g., `ca bd 2a 79...`).                                                                                                                     |
+| `Vault preflight failed` when running `prepare-release:v1150`, or `Environment variable not found: ENCRYPTION_KEY`                        | The production vault was not created, `config/secrets/prod/` is not available inside the container, or `ENCRYPTION_KEY` is missing from it                                                                 | Create the vault with `secrets:generate-keys --env=prod` and `secrets:set ENCRYPTION_KEY - --env=prod`, and make sure `config/secrets/prod/` is mounted in the `web` container.                                                                                       |
+| `Unable to decrypt value (wrong secret or corrupted data)` during `app:cra:migrate-to-vault`                                              | The `APP_SECRET` typed at the prompt is not the one that encrypted the data                                                                                                                                | Nothing was changed (the command is all-or-nothing). Use the `APP_SECRET` from the `.env` of the version you are upgrading from and run the command again.                                                                                                            |
+| `Value is not in the v2 format` after upgrading to 1.15.0                                                                                 | Existing data was not migrated yet                                                                                                                                                                         | Run `php bin/console prepare-release:v1150` (it is safe to re-run).                                                                                                                                                                                                   |
+| Everyone is logged out and API tokens stop working after replacing `APP_SECRET`                                                           | `APP_SECRET` signs sessions, remember-me cookies and API token nonces                                                                                                                                      | Expected after rotating `APP_SECRET`. Users sign in again.                                                                                                                                                                                                            |
+| HTTP 500 `Could not convert database value to "encrypted_string" ... Stored value could not be decrypted` on data already in `v2:` format | The active `ENCRYPTION_KEY` is not the one that encrypted the data: the migration ran under another `APP_ENV` (the `dev` vault), the key was set again afterwards, or it gained or lost a trailing newline | Do **not** set a new key or re-run the migration. Run `php bin/console about` to see the active environment, compare `secrets:list --reveal` for `prod`, `dev` and your vault backups, and put the key that wrote the data back into the `prod` vault, byte for byte. |
+| `Unable to write in the "var/cache/prod" directory`                                                                                       | The cache was created by `root` (a console command run with `-u root`)                                                                                                                                     | `docker compose exec -u root web chown -R www-data:www-data /var/www/openroaming/var`, then run console commands as `www-data`.                                                                                                                                       |
+| FreeRADIUS certificate upload fails with "Unable to resolve trusted root" for a valid, publicly trusted certificate                       | `chain.pem` includes a cross-signed root, so the chain walk follows it to a legacy root that is missing from the trust store or cannot be downloaded                                                       | Upgrade to 1.15.2+. On older versions, upload a `chain.pem` with only the intermediate certificate(s).                                                                                                                                                                |
+| No new RADIUS profiles are issued after 1.16.0 (API `500` "The RADIUS realm is misconfigured", or an error on the landing page download)  | The RADIUS realm is empty or longer than 23 characters                                                                                                                                                     | Set a realm of 23 characters or fewer on the RADIUS settings page.                                                                                                                                                                                                    |
+| `/api/v4/auth/sms/reset/confirm` always returns `Invalid or expired verification code.`                                                   | The code expired (**Time Interval To Reset Attempts**), was already used, or was invalidated after **Number of Attempts** wrong codes                                                                      | Request a new code with `/api/v4/auth/sms/reset`. Check the values on **User Authentication > SMS > Configuration**.                                                                                                                                                  |
 
 ### Rollback Procedure
 

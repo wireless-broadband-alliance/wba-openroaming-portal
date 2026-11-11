@@ -4,15 +4,18 @@ return [
     'api_v3_twoFA_validate' => [
         'routePrefix' => '/api/v3/twoFA/validate',
         'section' => 'TwoFactor',
-        'description' => 'This endpoint validates a 2FA code (email, SMS, or TOTP). 
-    The client must send a valid JWT Bearer token in the Authorization header, 
-    along with the 2FA type and confirmation code in the request body. 
-    If the code is valid, 2FA is enabled for that method.',
+        'description' => 'This endpoint validates a 2FA code (email, SMS, or TOTP).
+    The client must send a valid JWT Bearer token in the Authorization header,
+    along with the 2FA type and confirmation code in the request body.
+    If the code is valid, 2FA is enabled for that method.
+    This endpoint only confirms a first enrolment: if the account already has 2FA enabled it returns 409,
+    and the active method must be disabled before selecting a new one.
+    Email and SMS codes expire after the configured TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME.',
         'isProtected' => true,
         'requestBody' => [
             'uuid' => 'user-uuid-example',
             'password' => 'user-password-example',
-            'type' => 'email or sms or topt',
+            'type' => 'email or sms or totp',
             'code' => '123456'
         ],
         'responses' => [
@@ -31,10 +34,12 @@ return [
             ],
             400 => [
                 'Invalid JSON format',
-                'Missing required body fields'
+                'Invalid data: Missing required fields.',
+                'Invalid data: type must be one of totp, email or sms.'
             ],
             401 => [
                 'JWT Token is invalid!',
+                'Invalid credentials',
                 'User account is not verified.'
             ],
             403 => [
@@ -42,6 +47,9 @@ return [
                 'User account is banned from the system.',
                 "Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action.",
                 'Unauthorized - You do not have permission to access this resource'
+            ],
+            409 => [
+                'Two-factor authentication is already enabled for this account. Disable it before selecting a new method.'
             ],
             500 => [
                 'Unexpected server error occurred'
@@ -56,8 +64,11 @@ return [
             'password' => 'user-password-example',
             'turnstile_token' => 'valid_test_token',
         ],
-        'description' => 'Enables Two-Factor Authentication (2FA) for the authenticated user. 
-        Supports ("totp", "email", "sms"). Requires a valid JWT Bearer token.',
+        'description' => 'Enables Two-Factor Authentication (2FA) for the authenticated user.
+        Supports ("totp", "email", "sms"). Requires a valid JWT Bearer token.
+        Only for first enrolment: if the account already has 2FA enabled, the request is rejected with 409
+        and no new secret or code is generated. Calling it again before validating (2FA still disabled)
+        replaces the pending TOTP secret.',
         'responses' => [
             200 => [
                 'totp_example' => json_decode(
@@ -145,6 +156,18 @@ return [
                     ),
                 ],
             ],
+            409 => [
+                'description' => 'Two-factor authentication is already enabled for this account.',
+                'example' => json_decode(
+                    '{
+                    "success": false,
+                    "error": "Two-factor authentication is already enabled for this account. Disable it before selecting a new method."
+                }',
+                    true,
+                    512,
+                    JSON_THROW_ON_ERROR
+                ),
+            ],
             500 => [
                 'description' => 'Internal error while generating 2FA code or TOTP secret.',
                 'examples' => [
@@ -200,8 +223,8 @@ The client must send the current valid JWT in the request body as "current_token
             'turnstile_token' => 'valid_test_token',
             'twoFACode' => '02YZR88R'
         ],
-        'description' => 'This endpoint authenticates a user using their UUID, password, 
-        and a CAPTCHA token. Platform can require the authentication with Two-Factor, 
+        'description' => 'This endpoint authenticates a user using their UUID, password,
+        and a CAPTCHA token. Platform can require the authentication with Two-Factor,
         the twoFACode parameter will be asked based on the TWO_FACTOR_AUTH_STATUS setting.
         When the setting LOGIN_WITH_UUID_ONLY is enabled:
         The authentication process does not require a password. Instead, a success message is returned
@@ -274,10 +297,10 @@ The client must send the current valid JWT in the request body as "current_token
                 'SAMLResponse' => 'samlResponseExample'
             ],
         ],
-        'description' => 'This endpoint authenticates a user using their SAML response. 
-                If the user is not found in the database, a new user will be created based on the SAML assertion. 
-                The response includes user details along with a JWT token if authentication is successful. 
-                Also if the platform requires authentication with Two-Factor, the twoFACode parameter will 
+        'description' => 'This endpoint authenticates a user using their SAML response.
+                If the user is not found in the database, a new user will be created based on the SAML assertion.
+                The response includes user details along with a JWT token if authentication is successful.
+                Also if the platform requires authentication with Two-Factor, the twoFACode parameter will
                 be asked based on the TWO_FACTOR_AUTH_STATUS setting.',
         'responses' => [
             200 => [
@@ -334,9 +357,9 @@ The client must send the current valid JWT in the request body as "current_token
             'code' => '4/0AdKgLCxjQ74mKAg9vs_f7PuO99DR',
             'twoFACode' => '02YZR88R'
         ],
-        'description' => 'This endpoint authenticates a user using their Google account. 
+        'description' => 'This endpoint authenticates a user using their Google account.
                 A valid Google OAuth authorization code is required. If the user is successfully authenticated,
-                 user details and a JWT token will be returned. Also if the platform requires authentication with 
+                 user details and a JWT token will be returned. Also if the platform requires authentication with
                  Two-Factor, the twoFACode parameter will be asked based on the TWO_FACTOR_AUTH_STATUS setting.',
         'responses' => [
             200 => [
@@ -377,7 +400,7 @@ The client must send the current valid JWT in the request body as "current_token
             403 => [
                 'User account is not verified!',
                 'User account is banned from the system!',
-                'our email domain is not allowed to use this platform!',
+                'Your email domain is not allowed to use this platform!',
             ],
             500 => [
                 'An error occurred: Generic server-side error.',
@@ -392,9 +415,9 @@ The client must send the current valid JWT in the request body as "current_token
             'code' => '0.AQk6Lf2I2XGhQkWlU8gBp0KmxeNn2KTcbsJh.8Qt3OeYCB4sQ2FHo',
             'twoFACode' => '02YZR88R'
         ],
-        'description' => 'This endpoint authenticates a user using their Microsoft account. 
-                A valid Microsoft OAuth authorization code is required. If the user is successfully authenticated, 
-                user details and a JWT token will be returned. Also if the platform requires authentication with 
+        'description' => 'This endpoint authenticates a user using their Microsoft account.
+                A valid Microsoft OAuth authorization code is required. If the user is successfully authenticated,
+                user details and a JWT token will be returned. Also if the platform requires authentication with
                 Two-Factor, the twoFACode parameter will be asked based on the TWO_FACTOR_AUTH_STATUS setting.',
         'responses' => [
             200 => [
@@ -470,7 +493,7 @@ The client must send the current valid JWT in the request body as "current_token
     'api_v3_config_settings' => [
         'routePrefix' => '/api/v3/config',
         'section' => 'Config',
-        'description' => 'This endpoint returns public values from the Setting entity and environment 
+        'description' => 'This endpoint returns public values from the Setting entity and environment
                 variables categorized by platform and provider.',
         'requestBody' => [],
         'responses' => [
@@ -574,9 +597,14 @@ The client must send the current valid JWT in the request body as "current_token
         'requestBody' => [
             'public_key' => '-----BEGIN PUBLIC KEY-----\\n<RSA_PUBLIC_KEY>\\n-----END PUBLIC KEY-----'
         ],
-        'description' => 'This endpoint retrieves the profile configuration for Android, including 
+        'description' => 'This endpoint retrieves the profile configuration for Android, including
                 a user\'s radius profile data, encrypted password, and other relevant settings for the Android
-                 application.',
+                 application. A new RADIUS profile gets a username in the format
+                 "<random prefix>@<RADIUS_REALM_NAME>" (32 characters at most) and a random 32 character
+                 password, independent of the realm. If the RADIUS_REALM_NAME setting is empty or longer than
+                 23 characters, no profile is issued and the request fails with 500.
+                 The account must be verified, not banned and without a pending
+                 forgot-password request.',
         'isProtected' => true,
         'responses' => [
             200 => [
@@ -585,7 +613,7 @@ The client must send the current valid JWT in the request body as "current_token
                               "success": true,
                               "data": {
                                 "config_android": {
-                                  "radiusUsername": "user123",
+                                  "radiusUsername": "a1B2c3D4e5F6g7H8i9J0@example.com",
                                   "radiusPassword": "encrypted_password_here",
                                   "friendlyName": "My Android Profile",
                                   "fqdn": "example.com",
@@ -608,13 +636,17 @@ The client must send the current valid JWT in the request body as "current_token
                 'Invalid or missing public key'
             ],
             401 => [
-                'JWT Token is invalid!'
+                'JWT Token is invalid!',
+                'User account is not verified.'
             ],
             403 => [
-                'Unauthorized access!'
+                'Unauthorized access!',
+                'User account is banned from the system.',
+                'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action.'
             ],
             500 => [
-                'Failed to encrypt the password',
+                'The RADIUS realm is misconfigured. Please contact the portal administrator.',
+                'Failed to encrypt the password.',
                 'Encryption succeeded but no encrypted data was returned.'
             ]
         ]
@@ -626,7 +658,12 @@ The client must send the current valid JWT in the request body as "current_token
             'public_key' => '-----BEGIN PUBLIC KEY-----\\n<RSA_PUBLIC_KEY>\\n-----END PUBLIC KEY-----'
         ],
         'description' => 'This endpoint retrieves the profile configuration for iOS, including a user\'s radius
-                 profile data, encrypted password, and other relevant settings for the iOS application.',
+                 profile data, encrypted password, and other relevant settings for the iOS application.
+                 A new RADIUS profile gets a username in the format "<random prefix>@<RADIUS_REALM_NAME>"
+                 (32 characters at most) and a random 32 character password, independent of the realm.
+                 If the RADIUS_REALM_NAME setting is empty or longer than 23 characters, no profile is issued
+                 and the request fails with 500.
+                 The account must be verified, not banned and without a pending forgot-password request.',
         'isProtected' => true,
         'responses' => [
             200 => [
@@ -640,7 +677,7 @@ The client must send the current valid JWT in the request body as "current_token
                                 "domainName": "example.com",
                                 "EAPClientConfiguration": {
                                   "acceptEAPTypes": 21,
-                                  "radiusUsername": "user123",
+                                  "radiusUsername": "a1B2c3D4e5F6g7H8i9J0@example.com",
                                   "radiusPassword": "encrypted_password_here",
                                   "outerIdentity": "anonymous@example.com",
                                   "TTLSInnerAuthentication": "MSCHAPv2"
@@ -662,13 +699,17 @@ The client must send the current valid JWT in the request body as "current_token
                 'Invalid or missing public key',
             ],
             401 => [
-                'JWT Token is invalid!'
+                'JWT Token is invalid!',
+                'User account is not verified.'
             ],
             403 => [
-                'Unauthorized access!'
+                'Unauthorized access!',
+                'User account is banned from the system.',
+                'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action.'
             ],
             500 => [
-                'Failed to encrypt the password',
+                'The RADIUS realm is misconfigured. Please contact the portal administrator.',
+                'Failed to encrypt the password.',
                 'Encryption succeeded but no encrypted data was returned.'
             ]
         ]
@@ -729,9 +770,9 @@ response to prevent user enumeration. A registration email is sent to newly crea
             'email' => 'test@example.com',
             'turnstile_token' => 'valid_test_token'
         ],
-        'description' => 'This endpoint triggers a password reset for a local auth account. 
-                The user must provide their email and a CAPTCHA validation token. The endpoint verifies if the user 
-                has an external auth with "PortalAccount" and "EMAIL" providerId, then proceeds with the password 
+        'description' => 'This endpoint triggers a password reset for a local auth account.
+                The user must provide their email and a CAPTCHA validation token. The endpoint verifies if the user
+                has an external auth with "PortalAccount" and "EMAIL" providerId, then proceeds with the password
                 reset if the conditions are met.',
         'responses' => [
             200 => [
@@ -769,7 +810,8 @@ response to prevent user enumeration. A registration email is sent to newly crea
         'description' => 'This endpoint registers a new user using their phone number and password.
 The phone number is validated using the provided country code and the request is protected
 by CAPTCHA validation when Turnstile is enabled. A verification code is generated and sent
-to the registered phone number. If the phone number is already registered, the endpoint
+to the registered phone number. The SMS contains only the verification code: the chosen
+password is never sent back. If the phone number is already registered, the endpoint
 returns a generic successful response to prevent user enumeration.',
         'responses' => [
             200 => [
@@ -786,6 +828,7 @@ returns a generic successful response to prevent user enumeration.',
                 )
             ],
             400 => [
+                'SMS registration is disabled by the administration.',
                 'Invalid JSON format',
                 'Invalid data.',
                 'CAPTCHA validation failed',
@@ -797,7 +840,8 @@ returns a generic successful response to prevent user enumeration.',
             ],
             500 => [
                 'Missing settings: TURNSTILE_CHECKER not found',
-                'Failed to send SMS'
+                'Failed to send SMS',
+                'User registered but SMS could not be sent.'
             ]
         ]
     ],
@@ -809,16 +853,20 @@ returns a generic successful response to prevent user enumeration.',
             'phone_number' => '1234567890',
             'turnstile_token' => 'valid_test_token'
         ],
-        'description' => 'This endpoint sends an SMS with a new password and verification code if the user 
-                has a valid PortalAccount and has not exceeded SMS request limits. The endpoint also enforces the 
-                time interval between requests and limits the number of attempts allowed.',
+        'description' => 'This endpoint generates and sends a single-use verification code (OTP) via SMS 
+                if the user has a valid PortalAccount and has not exceeded SMS request limits. It does NOT modify 
+                or invalidate the user password until the challenge is confirmed. Limits come from the 
+                SMS_TIME_INTERVAL_BETWEEN_REQUESTS (cooldown), SMS_ATTEMPTS_NUMBER and 
+                SMS_TIME_INTERVAL_TO_RESET_ATTEMPTS settings and are shared with the web forgot-password flow. 
+                A request inside the cooldown returns the generic success message without sending anything; 
+                a request over the attempts limit returns 429.',
         'responses' => [
             200 => [
                 json_decode(
                     '{
                                       "success": true,
                                       "data": {
-                                        "success": "If the phone number exists, we have sent a new code to: Country Code: 351 National Number: 925544896."
+                                        "success": "If the phone number exists, we have sent a verification code to: +3511234567890. You have 3 attempt(s) left."
                                       }
                                     }',
                     false,
@@ -832,6 +880,9 @@ returns a generic successful response to prevent user enumeration.',
                 'Invalid phone number format or country code.',
                 'Invalid JSON format',
             ],
+            429 => [
+                'You’ve exceeded the maximum number of attempts to regenerate. Please contact support.',
+            ],
             500 => [
                 'An unexpected error occurred while processing the request',
             ]
@@ -843,10 +894,10 @@ returns a generic successful response to prevent user enumeration.',
         'section' => 'Config',
         'requestBody' => [
             'success' => true,
-            'data' => '<html><body><h1>Turnstile Configuration</h1><p>This is the required HTML 
+            'data' => '<html><body><h1>Turnstile Configuration</h1><p>This is the required HTML
 configuration for the Android App.</p></body></html>'
         ],
-        'description' => 'This endpoint serves the public HTML configuration required for the Android 
+        'description' => 'This endpoint serves the public HTML configuration required for the Android
                 App to integrate with the Turnstile feature.',
         'responses' => [
             200 => [
@@ -870,10 +921,10 @@ configuration for the Android App.</p></body></html>'
         'section' => 'Config',
         'requestBody' => [
             'success' => true,
-            'data' => '<html><body><h1>Turnstile Configuration</h1><p>This is the required HTML 
+            'data' => '<html><body><h1>Turnstile Configuration</h1><p>This is the required HTML
 configuration for the IOS App.</p></body></html>'
         ],
-        'description' => 'This endpoint serves the public HTML configuration required for the IOS 
+        'description' => 'This endpoint serves the public HTML configuration required for the IOS
                 App to integrate with the Turnstile feature.',
         'responses' => [
             200 => [
@@ -910,9 +961,9 @@ configuration for the IOS App.</p></body></html>'
             ],
 
         ],
-        'description' => 'This endpoint deletes the currently authenticated user account. 
-                Depending on the authentication method, the request body may require a password (Portal Account), 
-                a SAMLResponse (SAML), or an authorization code (Google/Microsoft). 
+        'description' => 'This endpoint deletes the currently authenticated user account.
+                Depending on the authentication method, the request body may require a password (Portal Account),
+                a SAMLResponse (SAML), or an authorization code (Google/Microsoft).
                 The request verifies the provided authentication details before performing the account deletion.',
         'isProtected' => true,
         'responses' => [

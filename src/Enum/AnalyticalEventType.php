@@ -62,6 +62,7 @@ enum AnalyticalEventType: string
     case GET_USER_API = 'GET_USER_API';
     case USER_ACCOUNT_DELETION_API = 'USER_ACCOUNT_DELETION_API';
     case USER_ACCOUNT_PASSWORD_RESET_API = 'USER_ACCOUNT_PASSWORD_RESET_API';
+    case USER_ACCOUNT_PASSWORD_RESET_API_CONFIRM_FAILED = 'USER_ACCOUNT_PASSWORD_RESET_API_CONFIRM_FAILED';
     case USER_REVOKE_PROFILES = 'USER_REVOKE_PROFILES';
     case ADMIN_REVOKE_PROFILES = 'ADMIN_REVOKE_PROFILES';
     case CONFIG_PROFILE_ANDROID = 'CONFIG_PROFILE_ANDROID';
@@ -151,6 +152,7 @@ enum AnalyticalEventType: string
     case SMS_PROVIDER_ACTIVATED = 'SMS_PROVIDER_ACTIVATED';
     case SMS_PROVIDER_DEACTIVATED = 'SMS_PROVIDER_DEACTIVATED';
     case SETTING_SECURITY_TXT_CONF_REQUEST = 'SETTING_SECURITY_TXT_CONF_REQUEST';
+    case CAPTCHA_PROVIDER_REQUEST = 'CAPTCHA_PROVIDER_REQUEST';
 
     public function getLabel(): string
     {
@@ -247,6 +249,7 @@ enum AnalyticalEventType: string
             self::GET_USER_API => 'API Get User',
             self::USER_ACCOUNT_DELETION_API => 'API Account Deletion',
             self::USER_ACCOUNT_PASSWORD_RESET_API => 'API Password Reset',
+            self::USER_ACCOUNT_PASSWORD_RESET_API_CONFIRM_FAILED => 'API Password Reset: Wrong Code',
             self::CONFIG_PROFILE_ANDROID => 'Android Profile Downloaded',
             self::CONFIG_PROFILE_IOS => 'iOS Profile Downloaded',
 
@@ -321,6 +324,7 @@ enum AnalyticalEventType: string
             self::EXPORT_ACTIVITY_LOGS_REQUEST => 'Export Activity Logs Request',
             self::SETTING_MAP_REQUEST => 'Settings Map Request',
             self::SETTING_SECURITY_TXT_CONF_REQUEST => 'Security TxT Configuration Request',
+            self::CAPTCHA_PROVIDER_REQUEST => 'Captcha Provider Request',
         };
     }
 }

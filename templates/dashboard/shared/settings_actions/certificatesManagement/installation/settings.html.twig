@@ -17,26 +17,30 @@
 
     <div class="my-[25px] divider"></div>
 
-    {{ include('shared/_toast.html.twig', {
-        toast_type: 'toast-warning-dashboard',
-        message: message,
-    }) }}
+    {% if message is defined and message %}
+        {{ include('shared/_toast.html.twig', {
+            toast_type: 'toast-warning-dashboard',
+            message: message,
+        }) }}
+    {% endif %}
 
     {{ form_start(form, {attr: {autocomplete: 'off'}}) }}
 
-    <div data-controller="toggle-visibility-card trusted-proxies" class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        {# --- Trusted Proxies Card --- #}
+        {# ================= TRUSTED PROXIES CARD ================= #}
         <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5"
-             data-controller="trusted-proxies">
+             data-controller="trusted-proxies card">
 
-            <div class="flex flex-row justify-between">
-                <h1 class="text-base md:text-lg font-medium whitespace-nowrap">
-                    {{ 'trustedProxiesLabel'|trans({}, 'settings') }}
-                </h1>
+            <div class="border-b border-slate-100 pb-4 flex flex-row justify-between items-start">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900">
+                        {{ 'trustedProxiesLabel'|trans({}, 'settings') }}
+                    </h2>
+                </div>
 
-                <label class="flex items-center bg-opacity-40">
-                    <img class="w-6 cursor-pointer"
+                <label class="flex items-center cursor-pointer pt-1">
+                    <img class="w-5 h-5 opacity-70 hover:opacity-100 transition"
                             {{ stimulus_target('card', 'button') }}
                             {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
                          src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
@@ -47,23 +51,28 @@
                 description: 'trustedProxiesDescription'|trans({}, 'settings'),
             }) }}
 
-            <button type="button"
-                    class="mt-6 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-                    data-action="trusted-proxies#add">
-                {{ 'addProxy'|trans({}, 'settings') }}
-            </button>
+            <div class="flex items-center justify-between">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600">
+                    {{ 'trustedProxiesLabel'|trans({}, 'settings') }}
+                </label>
+                <button type="button"
+                        class="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition"
+                        data-action="trusted-proxies#add">
+                    {{ 'addProxy'|trans({}, 'settings') }}
+                </button>
+            </div>
 
             <div data-trusted-proxies-target="collection" class="space-y-3">
                 {% for proxy in form.trustedProxies %}
-                    <div data-collection-item class="flex items-center space-x-2 mt-5">
+                    <div data-collection-item class="flex items-center space-x-2">
                         <div class="flex-1 flex flex-col">
-                            {{ form_widget(proxy, {attr: {class: 'form-widget'}}) }}
-                            <div class="text-red-500 text-sm mt-1">{{ form_errors(proxy) }}</div>
+                            {{ form_widget(proxy, {attr: {class: 'form-widget', placeholder: '192.168.1.1'}}) }}
+                            <div class="text-red-500 text-xs mt-1">{{ form_errors(proxy) }}</div>
                         </div>
                         <div>
                             <button type="button" class="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
                                     data-action="trusted-proxies#remove">
-                                <twig:ux:icon name="wba:cross-circle-rounded" class="w-6 h-auto fill-current"/>
+                                <twig:ux:icon name="wba:cross-circle-rounded" class="w-5 h-5 fill-current" />
                             </button>
                         </div>
                     </div>
@@ -71,97 +80,48 @@
             </div>
 
             <template data-trusted-proxies-target="template">
-                <div data-collection-item class="flex items-center space-x-2 mt-5">
+                <div data-collection-item class="flex items-center space-x-2">
                     <div class="flex-1 flex flex-col">
-                        {{ form_widget(form.trustedProxies.vars.prototype, {attr: {class: 'form-widget'}}) }}
+                        {{ form_widget(form.trustedProxies.vars.prototype, {attr: {class: 'form-widget', placeholder: '192.168.1.1'}}) }}
                     </div>
                     <div>
                         <button type="button" class="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
                                 data-action="trusted-proxies#remove">
-                            <twig:ux:icon name="wba:cross-circle-rounded" class="w-6 h-auto fill-current"/>
+                            <twig:ux:icon name="wba:cross-circle-rounded" class="w-5 h-5 fill-current" />
                         </button>
                     </div>
                 </div>
             </template>
         </div>
 
-        {# --- Turnstile Key Card --- #}
-        <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5" {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}>
-            <div class="flex flex-row justify-between">
-                <div class="text-base font-medium text-center break-normal md:break-all">
-                    <h1 class="text-base md:text-lg whitespace-nowrap">
-                        {{ 'trustedKeyLabel'|trans({}, 'settings') }}
-                    </h1>
+        {# ================= JWT PASSPHRASE CARD ================= #}
+        <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5"
+             data-controller="toggle-visibility-card card">
+
+            <div class="border-b border-slate-100 pb-4 flex flex-row justify-between items-start">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900">
+                        {{ 'jwtPassphraseEnableLabel'|trans({}, 'settings') }}
+                    </h2>
                 </div>
-                <label class="flex items-center bg-opacity-40">
-                    <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
+
+                <label class="flex items-center cursor-pointer pt-1">
+                    <img class="w-5 h-5 opacity-70 hover:opacity-100 transition"
+                            {{ stimulus_target('card', 'button') }}
                             {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
                          src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
                 </label>
             </div>
 
             {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
-                description: 'trustedKeyDescription'|trans({}, 'settings'),
+                description: 'jwtPassphraseDescription'|trans({}, 'settings'),
             }) }}
 
-            <div class="flex items-center space-x-2 mt-5">
-                {{ form_widget(form.turnstileKey, {
-                    attr: {
-                        class: 'form-widget mt-1 block w-full rounded-md border-gray-200 p-2',
-                        'wire:model.debounce.500ms': 'settingsDTO.turnstileKey',
-                    },
-                }) }}
-            </div>
-
-            <div class="mt-2 text-center text-red-500 text-base">
-                {{ form_errors(form.turnstileKey) }}
-            </div>
-        </div>
-
-        {# --- Turnstile Secret Card --- #}
-        <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5" {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}>
-            <div class="flex flex-row justify-between">
-                <div class="text-base font-medium text-center break-normal md:break-all">
-                    <h1 class="text-base md:text-lg whitespace-nowrap">
-                        {{ 'turnstileSecretLabel'|trans({}, 'settings') }}
-                    </h1>
-                </div>
-                <label class="flex items-center bg-opacity-40">
-                    <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
-                            {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
-                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+            {# Toggle Switch Row #}
+            <div class="flex items-center justify-between">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600">
+                    {{ 'jwtPassphraseEnableLabel'|trans({}, 'settings') }}
                 </label>
-            </div>
-
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
-                description: 'turnstileSecretDescription'|trans({}, 'settings'),
-            }) }}
-
-            <div class="flex items-center space-x-2 mt-5">
-                {{ form_widget(form.turnstileSecret, {
-                    attr: {
-                        class: 'form-widget mt-1 block w-full rounded-md border-gray-200 p-2',
-                        'wire:model.debounce.500ms': 'settingsDTO.turnstileSecret',
-                    },
-                }) }}
-            </div>
-
-            <div class="mt-2 text-center text-red-500 text-base">
-                {{ form_errors(form.turnstileSecret) }}
-            </div>
-        </div>
-
-        {# --- JWT Passphrase Enable Card (Toggle Switch) --- #}
-        <div class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5">
-            <div class="flex flex-row justify-between">
-                <div class="text-base font-medium text-center break-normal md:break-all">
-                    <h1 class="text-base md:text-lg whitespace-nowrap">
-                        {{ 'jwtPassphraseEnableLabel'|trans({}, 'jwt') }}
-                    </h1>
-                </div>
-            </div>
-
-            <div class="flex items-center space-x-2 mt-5">
                 <label class="inline-flex items-center cursor-pointer">
                     {{ form_widget(form.jwtPassphraseEnable, {
                         attr: {
@@ -171,51 +131,37 @@
                             'data-action': 'change->toggle-visibility-card#toggle',
                         },
                     }) }}
-                    <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
+                    <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
                 </label>
             </div>
+            <div class="text-red-500 text-xs mt-1">{{ form_errors(form.jwtPassphraseEnable) }}</div>
 
-            <div class="mt-2 text-center text-red-500 text-base">
-                {{ form_errors(form.jwtPassphraseEnable) }}
-            </div>
-        </div>
+            {# Conditional Passphrase Field #}
+            <div data-toggle-visibility-card-target="card" class="pt-4 border-t border-slate-100 hidden space-y-2">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600">
+                    {{ 'jwtPassphraseLabel'|trans({}, 'settings') }}
+                </label>
 
-        {# --- JWT Passphrase --- #}
-        <div data-toggle-visibility-card-target="card"
-             class="bg-white rounded-xl border border-slate-200/80 shadow-sm p-6 space-y-5 hidden">
-            <div class="flex flex-row justify-between">
-                <div class="text-base font-medium text-center break-normal md:break-all">
-                    <h1 class="text-base md:text-lg whitespace-nowrap">
-                        {{ 'jwtPassphraseLabel'|trans({}, 'jwt') }}
-                    </h1>
-                </div>
-            </div>
-
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
-                description: ''|trans({}, 'jwt'),
-            }) }}
-
-            <div class="flex items-center space-x-2 mt-5">
                 {{ form_widget(form.jwtPassphrase, {
                     attr: {
-                        class: 'form-widget mt-1 block w-full rounded-md border-gray-200 p-2',
+                        class: 'form-widget',
                         'wire:model.debounce.500ms': 'settingsDTO.jwtPassphrase',
+                        placeholder: '••••••••',
                     },
                 }) }}
+                <div class="text-red-500 text-xs mt-1">{{ form_errors(form.jwtPassphrase) }}</div>
             </div>
 
-            <div class="mt-2 text-center text-red-500 text-base">
-                {{ form_errors(form.jwtPassphrase) }}
-            </div>
         </div>
+
     </div>
+
     <div class="mt-8 divider-solid"></div>
 
-    <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
-
-        <button type="submit" class="btn-primary"
+    <div class="mt-6 flex w-full justify-end items-center gap-2">
+        <button type="submit" class="w-[160px] btn-primary"
                 onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'data_base') }}')">
-            {{ 'databaseApplyBtn'|trans({}, 'settings') }}
+            {{ 'settingsApplyBtn'|trans({}, 'settings') }}
         </button>
     </div>
 

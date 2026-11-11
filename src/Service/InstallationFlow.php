@@ -20,6 +20,7 @@ readonly class InstallationFlow
         return match ($step) {
             InstallationStep::DATABASE => 'admin_dashboard_settings_certs_installation',
             InstallationStep::SETTINGS => 'admin_dashboard_settings_certs_installation_settings',
+            InstallationStep::CAPTCHA => 'admin_dashboard_settings_certs_installation_captcha',
             InstallationStep::SECURITY_TXT => 'admin_dashboard_settings_certs_installation_security_txt',
             InstallationStep::ADMIN => 'admin_dashboard_settings_certs_installation_admin',
             InstallationStep::COMMAND => 'admin_dashboard_settings_certs_installation_command',

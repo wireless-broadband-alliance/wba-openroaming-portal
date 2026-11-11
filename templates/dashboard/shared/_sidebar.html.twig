@@ -34,6 +34,7 @@
             'admin_dashboard_settings_certs_management',
             'admin_dashboard_return_apps',
             'admin_dashboard_settings_schedule',
+            'admin_dashboard_settings_captcha_provider',
         ] %}
         {% set smsRoutes = [
             'admin_dashboard_settings_sms',
@@ -151,6 +152,9 @@
 
                         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::RETURN_APPS_MANAGEMENT_READ')) %}
                             {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'returnAppsManagement'|trans({}, '_header_admin'), routes: ['admin_dashboard_return_apps'], icon: 'wba:mobile-arrows'}) }}
+                        {% endif %}
+                        {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::CAPTCHA_PROVIDER_READ')) %}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'captchaProvider'|trans({}, '_header_admin'), routes: ['admin_dashboard_settings_captcha_provider'], icon: 'wba:security-rounded'}) }}
                         {% endif %}
                     </ul>
                 </div>
